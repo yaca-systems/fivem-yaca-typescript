@@ -1,4 +1,4 @@
-import { YaCAClientModule } from "./yaca.client";
+import { YaCAClientModule } from "#client/yaca.client";
 
 on("onClientResourceStart", (resourceName: string) => {
   if (GetCurrentResourceName() !== resourceName) {

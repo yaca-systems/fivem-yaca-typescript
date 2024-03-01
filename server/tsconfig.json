@@ -5,8 +5,16 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "module": "CommonJS",
-    "types": ["@citizenfx/server", "@types/node"],
-    "lib": ["ES2020"]
+    "types": [
+      "@citizenfx/server",
+      "@types/node",
+      "@overextended/ox_lib/server"
+    ],
+    "lib": ["ES2020"],
+    "paths": {
+      "#server/*": ["./*"]
+    },
+    "skipLibCheck": true
   },
   "include": ["./**/*"],
   "exclude": ["**/node_modules", "**/__tests__/*"]

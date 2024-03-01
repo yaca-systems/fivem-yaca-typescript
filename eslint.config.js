@@ -2,13 +2,19 @@
 
 import eslint from "@eslint/js";
 import tsEslint from "typescript-eslint";
-import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+// import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 
 export default tsEslint.config(
   eslint.configs.recommended,
   ...tsEslint.configs.recommended,
-  eslintPluginPrettierRecommended,
+  // eslintPluginPrettierRecommended,
   {
     ignores: ["build"],
+  },
+  {
+    ignores: ["dist"],
+  },
+  {
+    ignores: ["web"],
   },
 );

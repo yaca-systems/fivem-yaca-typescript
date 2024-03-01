@@ -3,27 +3,34 @@
   "version": "1.0.0",
   "type": "module",
   "description": "YACA Voice Integration for FiveM",
+  "platform": "node",
   "scripts": {
     "prepare": "husky",
     "clearbuild": "rimraf ./dist",
     "typecheck": "tsc --noEmit -p client/tsconfig.json && tsc --noEmit -p server/tsconfig.json",
-    "lint": "eslint client server",
+    "lint": "eslint client server --fix",
     "prettier": "prettier --write \"{server,client}/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
-    "build": "npm run clearbuild && npm run typecheck && node build/build-bundle.js",
-    "watch": "npm run clearbuild && cross-env IS_WATCH_MODE=1 node build/build-bundle.js",
+    "build": "npm run clearbuild && npm run typecheck && node build/build-bundle.cjs",
+    "watch": "npm run clearbuild && cross-env IS_WATCH_MODE=1 node build/build-bundle.cjs",
     "ci:typecheck": "tsc --noEmit -p client/tsconfig.json && tsc --noEmit -p server/tsconfig.json",
     "ci:lint": "eslint client server",
     "ci:prettier": "prettier --check \"{server,client}/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
-    "ci:build": "npm run clearbuild && npm run typecheck && node build/build-bundle.js"
+    "ci:build": "npm run clearbuild && npm run typecheck && node build/build-bundle.cjs"
   },
   "author": "MineMalox & LuftigerLuca",
+  "imports": {
+    "#client/*": "./dist/client/*.js",
+    "#server/*": "./dist/server/*.js"
+  },
   "dependencies": {
-    "@citizenfx/client": "2.0.6063-1",
-    "@citizenfx/server": "2.0.6063-1",
+    "@citizenfx/client": "^2.0.7549-1",
+    "@citizenfx/server": "^2.0.7549-1",
     "@overextended/ox_lib": "^3.16.3",
+    "@types/events": "^3.0.3",
     "@types/node": "^20.11.24",
     "cross-env": "^7.0.3",
-    "esbuild": "^0.19.12",
+    "esbuild": "^0.20.1",
+    "events": "^3.3.0",
     "prettier": "3.2.5",
     "rimraf": "^5.0.5"
   },
@@ -40,10 +47,11 @@
   },
   "lint-staged": {
     "*.{mjs,cjs,js,ts}": [
-      "eslint --fix"
+      "eslint --fix --no-warn-ignored",
+      "prettier --write --log-level=warn"
     ],
     "*.{json,yml,yaml,md}": [
-      "prettier --write --log-level=warn \"**/*.{json,yml,yaml,md}\""
+      "prettier --write --log-level=warn"
     ]
   }
 }

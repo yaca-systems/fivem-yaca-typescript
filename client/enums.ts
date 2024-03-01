@@ -7,7 +7,7 @@ enum YacaFilterEnum {
   "PHONE_HISTORICAL" = "PHONE_HISTORICAL",
 }
 
-enum YacaSteroMode {
+enum YacaStereoMode {
   MONO_LEFT = "MONO_LEFT",
   MONO_RIGHT = "MONO_RIGHT",
   STEREO = "STEREO",
@@ -24,4 +24,4 @@ enum CommDeviceMode {
   TRANSCEIVER = 2,
 }
 
-export { YacaFilterEnum, YacaSteroMode, YacaBuildType, CommDeviceMode };
+export { YacaFilterEnum, YacaStereoMode, YacaBuildType, CommDeviceMode };
