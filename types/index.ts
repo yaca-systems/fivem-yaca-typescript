@@ -98,4 +98,12 @@ export interface YacaRadioSettings {
 
 export interface YacaClientConfig {}
 
-export interface YacaServerConfig {}
+export interface YacaServerConfig {
+  maxRadioChannels: number;
+  uniqueServerId: string;
+  ingameChannelId: number;
+  ingameChannelPassword: string;
+  defaultChannelId: number;
+  useWhisper: boolean;
+  excludeChannels: number[];
+}

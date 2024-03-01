@@ -1,5 +1,16 @@
 import esbuild from "esbuild";
-import { readFileSync, writeFileSync } from "fs";
+import {
+  readFileSync,
+  writeFileSync,
+  copyFile,
+  mkdir,
+  existsSync,
+  copyFileSync,
+  mkdirSync,
+  rmdirSync,
+  cpSync,
+} from "fs";
+import { rmSync } from "node:fs";
 
 /** @type {import('esbuild').BuildOptions} */
 const server = {
@@ -40,7 +51,7 @@ writeFileSync(
 
 writeFileSync(
   "fxmanifest.lua",
-  `fx_version 'cerulean'
+  `fx_version 'bodacious'
 game 'gta5'
 
 name '${packageJson.name}'
@@ -55,7 +66,11 @@ dependencies {
     '/onesync',
 }
 
+ui_page 'web/index.html'
+
 files {
+    'web/index.html',
+    'web/script.js',
     'locales/*.json',
 }
 
@@ -66,7 +81,7 @@ server_script 'dist/server.js'
 );
 
 for (const context of ["client", "server"]) {
-  buildCmd({
+  const build = await buildCmd({
     bundle: true,
     entryPoints: [`${context}/index.ts`],
     outfile: `dist/${context}.js`,
@@ -93,9 +108,31 @@ for (const context of ["client", "server"]) {
     ...(context === "client" ? client : server),
   })
     .then((build) => {
-      if (production) return console.log(`Successfully built ${context}`);
+      if (production) {
+        return console.log(`Successfully built ${context}`);
+      }
 
       build.watch();
     })
     .catch(() => process.exit(1));
 }
+
+console.log("Building resource...");
+
+if (existsSync("resource")) {
+  rmSync("resource", { recursive: true });
+}
+
+mkdirSync("resource");
+mkdirSync("resource/dist");
+copyFileSync("dist/client.js", "resource/dist/client.js");
+copyFileSync("dist/server.js", "resource/dist/server.js");
+mkdirSync("resource/web");
+copyFileSync("web/index.html", "resource/web/index.html");
+copyFileSync("web/script.js", "resource/web/script.js");
+cpSync("locales", "resource/locales", { recursive: true });
+cpSync("configs", "resource/configs", { recursive: true });
+copyFileSync("fxmanifest.lua", "resource/fxmanifest.lua");
+copyFileSync("README.md", "resource/README.md");
+
+console.log("Resource built successfully!");

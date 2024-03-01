@@ -3,6 +3,7 @@ import {
   initLocale,
   locale,
   requestAnimDict,
+  getLocales,
 } from "@overextended/ox_lib/client";
 import {
   DataObject,
@@ -69,7 +70,7 @@ export class YaCAClientModule {
 
   rangeInterval: CitizenTimer | null = null;
   monitorInterval: CitizenTimer | null = null;
-  websocket: WebSocket | null = null;
+  websocket: WebSocket;
   noPluginActivated = 0;
   messageDisplayed = false;
   visualVoiceRangeTimeout: CitizenTimer | null = null;
@@ -184,6 +185,7 @@ export class YaCAClientModule {
     this.config = JSON.parse(
       LoadResourceFile(cache.resource, `configs/client.json`),
     );
+    this.websocket = new WebSocket();
 
     this.playerLocalPlugin = {
       canChangeVoiceRange: true,
@@ -357,15 +359,17 @@ export class YaCAClientModule {
   }
 
   registerEvents() {
-    onNet("client:yaca:init", (dataObj: DataObject) => {
+    onNet("client:yaca:init", async (dataObj: DataObject) => {
+      console.log("[YACA-Websocket]: init", JSON.stringify(dataObj));
       if (this.rangeInterval) {
         clearInterval(this.rangeInterval);
         this.rangeInterval = null;
       }
 
-      if (!this.websocket) {
-        this.websocket = new WebSocket();
-        this.websocket.on("message", (msg: string) => {
+      if (!this.websocket.initialized) {
+        this.websocket.initialized = true;
+
+        this.websocket.on("message", (msg: YacaResponse) => {
           this.handleResponse(msg);
         });
         this.websocket.on("error", (reason: string) =>
@@ -384,13 +388,13 @@ export class YaCAClientModule {
 
           console.log("[YACA-Websocket]: connected");
         });
-        this.websocket.start();
-
-        this.monitorInterval = setInterval(
-          this.monitorConnectstate.bind(this),
-          1000,
-        );
+        await this.websocket.start();
       }
+
+      this.monitorInterval = setInterval(
+        this.monitorConnectstate.bind(this),
+        1000,
+      );
 
       if (this.firstConnect) return;
 
@@ -892,8 +896,10 @@ export class YaCAClientModule {
       !dataObj.deChid ||
       !dataObj.ingameName ||
       !dataObj.channelPassword
-    )
+    ) {
+      console.log("[YACA-Websocket]: Error while initializing plugin");
       return this.radarNotification(locale("connect_error") ?? "");
+    }
 
     this.sendWebsocket({
       base: { request_type: "INIT" },
@@ -932,32 +938,28 @@ export class YaCAClientModule {
    * @param {object} msg - The message to be sent.
    */
   sendWebsocket(msg: object) {
+    console.log(
+      "[Voice-Websocket]: Sending message: ",
+      JSON.stringify(msg),
+      this.websocket.readyState,
+    );
     if (!this.websocket)
       return console.error("[Voice-Websocket]: No websocket created");
 
-    if (this.websocket.readyState == 1)
-      this.websocket.send(JSON.stringify(msg));
+    if (this.websocket.readyState == 1) this.websocket.send(msg);
   }
 
   /**
    * Handles messages from the voice plugin.
    *
-   * @param {YacaResponse} payload - The response from the voice plugin.
+   * @param {string} payload - The response from the voice plugin.
    */
-  handleResponse(payload: string) {
+  handleResponse(payload: YacaResponse) {
     if (!payload) return;
 
-    let parsedPayload: YacaResponse;
-    try {
-      parsedPayload = JSON.parse(payload);
-    } catch (e) {
-      console.error("[YaCA-Websocket]: Error while parsing message: ", e);
-      return;
-    }
-
-    if (parsedPayload.code === "OK") {
-      if (parsedPayload.requestType === "JOIN") {
-        emitNet("server:yaca:addPlayer", parseInt(parsedPayload.message));
+    if (payload.code === "OK") {
+      if (payload.requestType === "JOIN") {
+        emitNet("server:yaca:addPlayer", parseInt(payload.message));
 
         if (this.rangeInterval) {
           clearInterval(this.rangeInterval);
@@ -974,19 +976,15 @@ export class YaCAClientModule {
       return;
     }
 
-    if (
-      parsedPayload.code === "TALK_STATE" ||
-      parsedPayload.code === "MUTE_STATE"
-    ) {
-      this.handleTalkState(parsedPayload);
+    if (payload.code === "TALK_STATE" || payload.code === "MUTE_STATE") {
+      this.handleTalkState(payload);
       return;
     }
 
-    const message = locale(parsedPayload.code) ?? "Unknown error!";
-    if (typeof locale(parsedPayload.code) == "undefined")
-      console.log(
-        `[YaCA-Websocket]: Unknown error code: ${parsedPayload.code}`,
-      );
+    const locale = getLocales()[payload.code];
+    const message = locale ?? "Unknown error!";
+    if (typeof locale === "undefined")
+      console.log(`[YaCA-Websocket]: Unknown error code: ${payload.code}`);
     if (message.length < 1) return;
 
     BeginTextCommandThefeedPost("STRING");

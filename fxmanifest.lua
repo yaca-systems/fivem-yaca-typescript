@@ -1,4 +1,4 @@
-fx_version 'cerulean'
+fx_version 'bodacious'
 game 'gta5'
 
 name 'yaca-voice'
@@ -13,7 +13,11 @@ dependencies {
     '/onesync',
 }
 
+ui_page 'web/index.html'
+
 files {
+    'web/index.html',
+    'web/script.js',
     'locales/*.json',
 }
 

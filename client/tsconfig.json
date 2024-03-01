@@ -8,5 +8,5 @@
       "types": ["../types"]
     }
   },
-  "include": ["./", "../types", "../locales/en.json"]
+  "include": ["./", "../types", "../common", "../locales/en.json"]
 }
