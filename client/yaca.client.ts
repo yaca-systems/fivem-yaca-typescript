@@ -12,15 +12,14 @@ import {
   type YacaProtocol,
   type YacaRadioSettings,
   YacaResponse,
-} from "#client/types";
-import {
   CommDeviceMode,
   YacaBuildType,
   YacaFilterEnum,
   YacaStereoMode,
-} from "#client/enums";
-import { calculateDistanceVec3 } from "#client/utils";
-import { WebSocket } from "#client/websocket";
+  type YacaClientConfig,
+} from "types";
+import { calculateDistanceVec3 } from "utils";
+import { WebSocket } from "websocket";
 
 initLocale();
 
@@ -32,7 +31,7 @@ const settings = {
   maxPhoneSpeakerRange: 5,
 };
 
-const lipsyncAnims = {
+const lipsyncAnims: { [key: string]: { name: string; dict: string } } = {
   true: {
     name: "mic_chatter",
     dict: "mp_facial",
@@ -65,15 +64,16 @@ const voiceRangesEnum: { [key: number]: number } = {
 export class YaCAClientModule {
   static instance: YaCAClientModule;
   static allPlayers: Map<number, YacaPlayerData> = new Map();
+  config: YacaClientConfig;
   playerLocalPlugin: YacaLocalPlugin;
 
-  rangeInterval: NodeJS.Timeout | null = null;
-  monitorInterval: NodeJS.Timeout | null = null;
+  rangeInterval: CitizenTimer | null = null;
+  monitorInterval: CitizenTimer | null = null;
   websocket: WebSocket | null = null;
   noPluginActivated = 0;
   messageDisplayed = false;
-  visualVoiceRangeTimeout: NodeJS.Timeout | null = null;
-  visualVoiceRangeTick: NodeJS.Timeout | null = null;
+  visualVoiceRangeTimeout: CitizenTimer | null = null;
+  visualVoiceRangeTick: CitizenTimer | null = null;
   uirange: number = 2;
   lastuiRange = 2;
   isTalking = false;
@@ -95,8 +95,8 @@ export class YaCAClientModule {
 
   useWhisper = false;
 
-  mhinTimeout: NodeJS.Timeout | null = null;
-  mhintTick: NodeJS.Timeout | null = null;
+  mhinTimeout: CitizenTimer | null = null;
+  mhintTick: CitizenTimer | null = null;
 
   inCall: boolean = false;
 
@@ -181,7 +181,9 @@ export class YaCAClientModule {
   }
 
   constructor() {
-    // TODO: Implement config loading
+    this.config = JSON.parse(
+      LoadResourceFile(cache.resource, `configs/client.json`),
+    );
 
     this.playerLocalPlugin = {
       canChangeVoiceRange: true,
@@ -198,9 +200,9 @@ export class YaCAClientModule {
       "",
       (
         bagName: string,
-        key: string,
+        _: string,
         value: number | undefined,
-        reserved: number,
+        __: number,
         replicated: boolean,
       ) => {
         if (replicated) return;
@@ -229,9 +231,9 @@ export class YaCAClientModule {
       "",
       (
         bagName: string,
-        key: string,
+        _: string,
         value: object,
-        reserved: number,
+        __: number,
         replicated: boolean,
       ) => {
         if (replicated) return;
@@ -260,9 +262,9 @@ export class YaCAClientModule {
       "",
       (
         bagName: string,
-        key: string,
+        _: string,
         value: boolean,
-        reserved: number,
+        __: number,
         replicated: boolean,
       ) => {
         if (replicated) return;
@@ -363,13 +365,13 @@ export class YaCAClientModule {
 
       if (!this.websocket) {
         this.websocket = new WebSocket();
-        this.websocket.on("message", (msg) => {
+        this.websocket.on("message", (msg: string) => {
           this.handleResponse(msg);
         });
-        this.websocket.on("error", (reason) =>
+        this.websocket.on("error", (reason: string) =>
           console.error("[YACA-Websocket] Error: ", reason),
         );
-        this.websocket.on("close", (code, reason) =>
+        this.websocket.on("close", (code: number, reason: string) =>
           console.error("[YACA-Websocket]: client disconnected", code, reason),
         );
         this.websocket.on("open", () => {
@@ -1091,7 +1093,6 @@ export class YaCAClientModule {
 
     this.visualVoiceRangeTick = setInterval(() => {
       const pos = GetEntityCoords(cache.ped, false);
-      // @ts-expect-error Type error in the native
       DrawMarker(
         1,
         pos[0],
@@ -1114,6 +1115,7 @@ export class YaCAClientModule {
         true,
         2,
         true,
+        // @ts-expect-error Type error in the native
         null,
         null,
         false,
@@ -1131,7 +1133,7 @@ export class YaCAClientModule {
    * @param {string} type - The type of communication to be validated.
    * @returns {boolean} Returns true if the type is valid, false otherwise.
    */
-  isCommTypeValid(type: string) {
+  isCommTypeValid(type: string): boolean {
     const valid = type in YacaFilterEnum;
     if (!valid) console.error(`[YaCA-Websocket]: Invalid commtype: ${type}`);
 
@@ -1686,7 +1688,7 @@ export class YaCAClientModule {
    *
    * @param {boolean} [state=false] - The state of the megaphone. Defaults to false if not provided.
    */
-  useMegaphone(state = false) {
+  useMegaphone(state: boolean = false) {
     if (
       (!cache.vehicle && !this.playerLocalPlugin.canUseMegaphone) ||
       state == this.playerLocalPlugin.lastMegaphoneState

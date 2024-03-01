@@ -1,5 +1,6 @@
-import { initLocale } from "@overextended/ox_lib/server";
-import { generateRandomName } from "./utils";
+import { initLocale, cache } from "@overextended/ox_lib/server";
+import { generateRandomName } from "utils";
+import type { YacaServerConfig } from "types";
 
 initLocale();
 
@@ -27,7 +28,13 @@ export class YaCAServerModule {
   static nameSet: Set<string> = new Set();
   static players: Map<string, YaCAPlayer> = new Map();
 
+  config: YacaServerConfig;
+
   constructor() {
+    this.config = JSON.parse(
+      LoadResourceFile(cache.resource, `configs/server.json`),
+    );
+
     this.registerEvents();
   }
 

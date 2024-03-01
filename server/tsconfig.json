@@ -1,21 +1,12 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "module": "CommonJS",
-    "types": [
-      "@citizenfx/server",
-      "@types/node",
-      "@overextended/ox_lib/server"
-    ],
-    "lib": ["ES2020"],
+    "baseUrl": ".",
+    "types": ["@citizenfx/server"],
+    "composite": true,
     "paths": {
-      "#server/*": ["./*"]
-    },
-    "skipLibCheck": true
+      "types": ["../types"]
+    }
   },
-  "include": ["./**/*"],
-  "exclude": ["**/node_modules", "**/__tests__/*"]
+  "include": ["./", "../types", "../locales/en.json"]
 }

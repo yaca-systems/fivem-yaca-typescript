@@ -1,10 +1,33 @@
-import {
-  CommDeviceMode,
-  type YacaFilterEnum,
-  YacaStereoMode,
-} from "#client/enums";
+/* EMUMS */
 
-interface YacaResponse {
+export enum YacaFilterEnum {
+  RADIO = "RADIO",
+  "MEGAPHONE" = "MEGAPHONE",
+  "PHONE" = "PHONE",
+  "PHONE_SPEAKER" = "PHONE_SPEAKER",
+  "INTERCOM" = "INTERCOM",
+  "PHONE_HISTORICAL" = "PHONE_HISTORICAL",
+}
+
+export enum YacaStereoMode {
+  MONO_LEFT = "MONO_LEFT",
+  MONO_RIGHT = "MONO_RIGHT",
+  STEREO = "STEREO",
+}
+
+export enum YacaBuildType {
+  RELEASE = 0,
+  DEVELOP = 1,
+}
+
+export enum CommDeviceMode {
+  SENDER = 0,
+  RECEIVER = 1,
+  TRANSCEIVER = 2,
+}
+
+/* TYPES */
+export interface YacaResponse {
   code:
     | "RENAME_CLIENT"
     | "MOVE_CLIENT"
@@ -21,14 +44,14 @@ interface YacaResponse {
   message: string;
 }
 
-interface YacaLocalPlugin {
+export interface YacaLocalPlugin {
   canChangeVoiceRange: boolean;
   maxVoiceRange: number;
   lastMegaphoneState: boolean;
   canUseMegaphone: boolean;
 }
 
-interface YacaPlayerData {
+export interface YacaPlayerData {
   remoteID?: number;
   clientId?: number;
   forceMuted?: boolean;
@@ -38,7 +61,7 @@ interface YacaPlayerData {
   phoneCallMemberIds?: number[];
 }
 
-interface DataObject {
+export interface DataObject {
   range?: number;
   clientId?: number;
   playerId?: number;
@@ -52,11 +75,11 @@ interface DataObject {
   useWhisper?: boolean;
 }
 
-interface YacaClient {
+export interface YacaClient {
   client_id?: number;
   mode?: CommDeviceMode;
 }
-interface YacaProtocol {
+export interface YacaProtocol {
   comm_type: YacaFilterEnum;
   output_mode?: YacaStereoMode;
   members?: YacaClient[];
@@ -66,19 +89,13 @@ interface YacaProtocol {
   range?: number;
 }
 
-interface YacaRadioSettings {
+export interface YacaRadioSettings {
   frequency: string;
   muted: boolean;
   volume: number;
   stereo: YacaStereoMode;
 }
 
-export {
-  YacaResponse,
-  YacaLocalPlugin,
-  YacaPlayerData,
-  DataObject,
-  YacaProtocol,
-  YacaClient,
-  YacaRadioSettings,
-};
+export interface YacaClientConfig {}
+
+export interface YacaServerConfig {}

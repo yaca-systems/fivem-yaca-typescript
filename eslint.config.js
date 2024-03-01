@@ -9,7 +9,7 @@ export default tsEslint.config(
   ...tsEslint.configs.recommended,
   // eslintPluginPrettierRecommended,
   {
-    ignores: ["build"],
+    ignores: ["build.js"],
   },
   {
     ignores: ["dist"],

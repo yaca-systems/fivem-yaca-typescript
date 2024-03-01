@@ -3,38 +3,44 @@
   "version": "1.0.0",
   "type": "module",
   "description": "YACA Voice Integration for FiveM",
-  "platform": "node",
+  "author": "MineMalox & LuftigerLuca",
+  "license": "TODO",
+  "repository": {
+    "type": "git",
+    "url": "https://git.baustella.club/HopeLife/fivem-yaca-js"
+  },
+  "files": [
+    "./tsconfig.json",
+    "./package/**/*.js",
+    "./package/**/*.d.ts"
+  ],
+  "imports": {
+    "#client": "./dist/client.js",
+    "#server": "./dist/server.js"
+  },
   "scripts": {
     "prepare": "husky",
-    "clearbuild": "rimraf ./dist",
-    "typecheck": "tsc --noEmit -p client/tsconfig.json && tsc --noEmit -p server/tsconfig.json",
+    "build": "pnpm run typecheck && node build.js --mode=production",
+    "watch": "node build.js",
+    "typecheck": "pnpm run typecheck-client && pnpm run typecheck-server",
+    "typecheck-client": "tsc --project client/tsconfig.json && tsc-alias -p client/tsconfig.json",
+    "typecheck-server": "tsc --project server/tsconfig.json && tsc-alias -p server/tsconfig.json",
     "lint": "eslint client server --fix",
     "prettier": "prettier --write \"{server,client}/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
-    "build": "npm run clearbuild && npm run typecheck && node build/build-bundle.cjs",
-    "watch": "npm run clearbuild && cross-env IS_WATCH_MODE=1 node build/build-bundle.cjs",
-    "ci:typecheck": "tsc --noEmit -p client/tsconfig.json && tsc --noEmit -p server/tsconfig.json",
+    "ci:typecheck": "pnpm run typecheck-client && pnpm run typecheck-server",
     "ci:lint": "eslint client server",
     "ci:prettier": "prettier --check \"{server,client}/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
-    "ci:build": "npm run clearbuild && npm run typecheck && node build/build-bundle.cjs"
-  },
-  "author": "MineMalox & LuftigerLuca",
-  "imports": {
-    "#client/*": "./dist/client/*.js",
-    "#server/*": "./dist/server/*.js"
+    "ci:build": "pnpm run typecheck && node build.js --mode=production"
   },
   "dependencies": {
-    "@citizenfx/client": "^2.0.7549-1",
-    "@citizenfx/server": "^2.0.7549-1",
     "@overextended/ox_lib": "^3.16.3",
-    "@types/events": "^3.0.3",
-    "@types/node": "^20.11.24",
-    "cross-env": "^7.0.3",
-    "esbuild": "^0.20.1",
-    "events": "^3.3.0",
-    "prettier": "3.2.5",
-    "rimraf": "^5.0.5"
+    "events": "^3.3.0"
   },
   "devDependencies": {
+    "@citizenfx/client": "latest",
+    "@citizenfx/server": "latest",
+    "@types/events": "^3.0.3",
+    "@types/node": "^20.11.24",
     "@eslint/js": "^8.57.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -42,8 +48,14 @@
     "husky": "^9.0.11",
     "install": "^0.13.0",
     "lint-staged": "^15.2.2",
+    "tsc-alias": "^1.8.8",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^7.1.0"
+    "typescript-eslint": "^7.1.0",
+    "prettier": "3.2.5",
+    "esbuild": "^0.20.1"
+  },
+  "engines": {
+    "node": ">=16.9.1"
   },
   "lint-staged": {
     "*.{mjs,cjs,js,ts}": [

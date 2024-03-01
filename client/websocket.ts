@@ -1,4 +1,4 @@
-import EventEmitter from "events";
+import { EventEmitter } from "events";
 
 export class WebSocket extends EventEmitter {
   public readyState: number = 0;

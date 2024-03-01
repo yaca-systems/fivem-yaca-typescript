@@ -1,4 +1,4 @@
-import { YaCAServerModule } from "./yaca.server";
+import { YaCAServerModule } from "yaca.server";
 
 /**
  * Generates a random string of a given length.
