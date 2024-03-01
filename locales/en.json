@@ -1,0 +1,12 @@
+{
+  "plugin_not_activated": "Please activate your voiceplugin!",
+  "connect_error": "Error while connecting to voiceserver, please reconnect!",
+  "plugin_not_initializiaed": "Plugin not initialized!",
+
+  "OUTDATED_VERSION": "You dont use the required plugin version!",
+  "WRONG_TS_SERVER": "You are on the wrong teamspeakserver!",
+  "NOT_CONNECTED": "You are on the wrong teamspeakserver!",
+  "MOVE_ERROR": "Error while moving into ingame teamspeak channel!",
+  "WAIT_GAME_INIT": "",
+  "HEARTBEAT": ""
+}

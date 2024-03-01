@@ -11,6 +11,9 @@ dependencies:
   "@citizenfx/server":
     specifier: 2.0.6063-1
     version: 2.0.6063-1
+  "@overextended/ox_lib":
+    specifier: ^3.16.3
+    version: 3.16.3
   "@types/node":
     specifier: ^20.11.24
     version: 20.11.24
@@ -448,6 +451,13 @@ packages:
       wrap-ansi-cjs: /wrap-ansi@7.0.0
     dev: false
 
+  /@nativewrappers/client@1.7.33:
+    resolution:
+      {
+        integrity: sha512-phuBBGdDPxZiZyw5CaFs1XWfvllnEtwATMdLaNucwMofVg/O/FjlP1bTUq4SOm4qhSZ4Zdo351ijHzBSIbZs6g==,
+      }
+    dev: false
+
   /@nodelib/fs.scandir@2.1.5:
     resolution:
       {
@@ -477,6 +487,17 @@ packages:
       "@nodelib/fs.scandir": 2.1.5
       fastq: 1.17.1
     dev: true
+
+  /@overextended/ox_lib@3.16.3:
+    resolution:
+      {
+        integrity: sha512-vqx/WAey/DJIokzBB8fv76IlUBdMf/yWmuN/Rs44qFB8Zbg7sWPWprRRVXcCo65QaCfJS0Lo2i/OZQcBq/LhKQ==,
+      }
+    dependencies:
+      "@nativewrappers/client": 1.7.33
+      fast-printf: 1.6.9
+      typescript: 5.3.3
+    dev: false
 
   /@pkgjs/parseargs@0.11.0:
     resolution:
@@ -774,6 +795,13 @@ packages:
       {
         integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==,
       }
+
+  /boolean@3.2.0:
+    resolution:
+      {
+        integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==,
+      }
+    dev: false
 
   /brace-expansion@1.1.11:
     resolution:
@@ -1241,6 +1269,16 @@ packages:
         integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==,
       }
     dev: true
+
+  /fast-printf@1.6.9:
+    resolution:
+      {
+        integrity: sha512-FChq8hbz65WMj4rstcQsFB0O7Cy++nmbNfLYnD9cYv2cRn8EG6k/MGn9kO/tjO66t09DLDugj3yL+V2o6Qftrg==,
+      }
+    engines: { node: ">=10.0" }
+    dependencies:
+      boolean: 3.2.0
+    dev: false
 
   /fastq@1.17.1:
     resolution:
@@ -2322,7 +2360,6 @@ packages:
       }
     engines: { node: ">=14.17" }
     hasBin: true
-    dev: true
 
   /undici-types@5.26.5:
     resolution:

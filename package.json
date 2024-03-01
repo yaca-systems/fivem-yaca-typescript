@@ -20,6 +20,7 @@
   "dependencies": {
     "@citizenfx/client": "2.0.6063-1",
     "@citizenfx/server": "2.0.6063-1",
+    "@overextended/ox_lib": "^3.16.3",
     "@types/node": "^20.11.24",
     "cross-env": "^7.0.3",
     "esbuild": "^0.19.12",

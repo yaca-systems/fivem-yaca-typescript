@@ -1,3 +1,7 @@
+import { initLocale } from "@overextended/ox_lib/client";
+
+initLocale();
+
 export class YaCAClientModule {
   static instance: YaCAClientModule;
 
