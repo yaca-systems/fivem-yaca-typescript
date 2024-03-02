@@ -3,5 +3,5 @@ node_modules
 dist
 resource
 .yarn.installed
-configs/server.json
-configs/shared.json
+config/server.json
+config/shared.json

@@ -2,12 +2,9 @@ import esbuild from "esbuild";
 import {
   readFileSync,
   writeFileSync,
-  copyFile,
-  mkdir,
   existsSync,
   copyFileSync,
   mkdirSync,
-  rmdirSync,
   cpSync,
 } from "fs";
 import { rmSync } from "node:fs";
@@ -82,7 +79,7 @@ server_script 'dist/server.js'
 );
 
 for (const context of ["client", "server"]) {
-  const build = await buildCmd({
+  await buildCmd({
     bundle: true,
     entryPoints: [`${context}/index.ts`],
     outfile: `dist/${context}.js`,
@@ -132,7 +129,19 @@ mkdirSync("resource/web");
 copyFileSync("web/index.html", "resource/web/index.html");
 copyFileSync("web/script.js", "resource/web/script.js");
 cpSync("locales", "resource/locales", { recursive: true });
-cpSync("configs", "resource/configs", { recursive: true });
+mkdirSync("resource/config");
+
+if (existsSync("config/shared.json")) {
+  copyFileSync("config/shared.json", "resource/config/shared.json");
+} else {
+  copyFileSync("config/shared.json.example", "resource/config/shared.json");
+}
+
+if (existsSync("config/server.json")) {
+  copyFileSync("config/server.json", "resource/config/server.json");
+} else {
+  copyFileSync("config/server.json.example", "resource/config/server.json");
+}
 copyFileSync("fxmanifest.lua", "resource/fxmanifest.lua");
 copyFileSync("README.md", "resource/README.md");
 copyFileSync(".yarn.installed", "resource/.yarn.installed");
