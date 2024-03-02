@@ -19,7 +19,7 @@ import {
   YacaStereoMode,
   type YacaClientConfig,
 } from "types";
-import { calculateDistanceVec3 } from "utils";
+import { calculateDistanceVec3, convertNumberArrayToXYZ } from "utils";
 import { WebSocket } from "websocket";
 
 initLocale();
@@ -938,11 +938,6 @@ export class YaCAClientModule {
    * @param {object} msg - The message to be sent.
    */
   sendWebsocket(msg: object) {
-    console.log(
-      "[Voice-Websocket]: Sending message: ",
-      JSON.stringify(msg),
-      this.websocket.readyState,
-    );
     if (!this.websocket)
       return console.error("[Voice-Websocket]: No websocket created");
 
@@ -1014,15 +1009,15 @@ export class YaCAClientModule {
    */
   getCamDirection() {
     const rotVector = GetGameplayCamRot(0);
-    const num = rotVector[0] * 0.0174532924;
-    const num2 = rotVector[1] * 0.0174532924;
+    const num = rotVector[2] * 0.0174532924;
+    const num2 = rotVector[0] * 0.0174532924;
     const num3 = Math.abs(Math.cos(num2));
 
-    return [
-      -Math.sin(num) * num3,
-      Math.cos(num) * num3,
-      GetEntityForwardVector(cache.ped)[2],
-    ];
+    return {
+      x: -Math.sin(num) * num3,
+      y: Math.cos(num) * num3,
+      z: GetEntityForwardVector(cache.ped)[2],
+    };
   }
 
   /**
@@ -1306,9 +1301,9 @@ export class YaCAClientModule {
 
     for (const player of GetActivePlayers()) {
       const remoteId = GetPlayerServerId(player);
-      if (remoteId == 0 || player.remoteID == cache.serverId) continue;
+      if (remoteId == 0 || remoteId == cache.serverId) continue;
 
-      const voiceSetting = this.getPlayerByID(player.remoteID);
+      const voiceSetting = this.getPlayerByID(remoteId);
       if (!voiceSetting?.clientId) continue;
 
       const playerPed = GetPlayerPed(player);
@@ -1322,14 +1317,16 @@ export class YaCAClientModule {
       }
 
       const playerPos = GetEntityCoords(playerPed, false);
+      const playerDirection = GetEntityForwardVector(playerPed);
+      const isUnderwater = IsPedSwimmingUnderWater(playerPed);
 
       if (!playersOnPhoneSpeaker.has(remoteId)) {
         players.set(remoteId, {
           client_id: voiceSetting.clientId,
-          position: playerPos,
-          direction: GetEntityForwardVector(player),
+          position: convertNumberArrayToXYZ(playerPos),
+          direction: convertNumberArrayToXYZ(playerDirection),
           range: voiceSetting.range,
-          is_underwater: IsPedSwimmingUnderWater(player),
+          is_underwater: isUnderwater,
           muffle_intensity: muffleIntensity,
           is_muted: voiceSetting.forceMuted,
         });
@@ -1364,10 +1361,10 @@ export class YaCAClientModule {
           players.delete(phoneCallMemberId);
           players.set(phoneCallMemberId, {
             client_id: phoneCallMember.clientId,
-            position: playerPos,
-            direction: GetEntityForwardVector(player),
+            position: convertNumberArrayToXYZ(playerPos),
+            direction: convertNumberArrayToXYZ(playerDirection),
             range: settings.maxPhoneSpeakerRange,
-            is_underwater: IsPedSwimmingUnderWater(player),
+            is_underwater: isUnderwater,
             muffle_intensity: muffleIntensity,
             is_muted: false,
           });
@@ -1436,7 +1433,7 @@ export class YaCAClientModule {
       base: { request_type: "INGAME" },
       player: {
         player_direction: this.getCamDirection(),
-        player_position: localPos,
+        player_position: convertNumberArrayToXYZ(localPos),
         player_range: localData.range,
         player_is_underwater: IsPedSwimmingUnderWater(cache.ped),
         player_is_muted: localData.forceMuted,

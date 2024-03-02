@@ -134,5 +134,6 @@ cpSync("locales", "resource/locales", { recursive: true });
 cpSync("configs", "resource/configs", { recursive: true });
 copyFileSync("fxmanifest.lua", "resource/fxmanifest.lua");
 copyFileSync("README.md", "resource/README.md");
+copyFileSync(".yarn.installed", "resource/.yarn.installed");
 
 console.log("Resource built successfully!");

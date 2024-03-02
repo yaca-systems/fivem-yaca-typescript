@@ -47,7 +47,7 @@ function runCommand(command) {
     return;
   }
 
-  webSocket.send(command);
+  webSocket.send(JSON.stringify(command));
 }
 
 function sendNuiData(event, data) {
