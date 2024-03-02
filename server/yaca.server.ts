@@ -1,6 +1,6 @@
 import { initLocale, cache } from "@overextended/ox_lib/server";
 import { generateRandomName } from "utils";
-import type { DataObject, YacaServerConfig } from "types";
+import type { DataObject, YacaServerConfig, YacaSharedConfig } from "types";
 
 initLocale();
 
@@ -44,13 +44,18 @@ export class YaCAServerModule {
   static players: Map<number, YaCAPlayer> = new Map();
   static radioFrequencyMap = new Map();
 
-  config: YacaServerConfig;
+  serverConfig: YacaServerConfig;
+  sharedConfig: YacaSharedConfig;
 
   constructor() {
     console.log("~g~ --> YaCA: Server loaded");
 
-    this.config = JSON.parse(
+    this.serverConfig = JSON.parse(
       LoadResourceFile(cache.resource, `configs/server.json`),
+    );
+
+    this.sharedConfig = JSON.parse(
+      LoadResourceFile(cache.resource, `configs/shared.json`),
     );
 
     this.registerEvents();
@@ -389,12 +394,13 @@ export class YaCAServerModule {
 
     //TODO: Change this to a config value
     const initObject: DataObject = {
-      suid: this.config.uniqueServerId,
-      chid: this.config.ingameChannelId,
-      deChid: this.config.defaultChannelId,
-      channelPassword: this.config.ingameChannelPassword,
+      suid: this.serverConfig.uniqueServerId,
+      chid: this.serverConfig.ingameChannelId,
+      deChid: this.serverConfig.defaultChannelId,
+      channelPassword: this.serverConfig.ingameChannelPassword,
       ingameName: player.voiceSettings.ingameName,
-      useWhisper: this.config.useWhisper,
+      useWhisper: this.serverConfig.useWhisper,
+      excludeChannels: this.serverConfig.excludeChannels,
     };
 
     emitNet("client:yaca:init", src, initObject);
@@ -476,7 +482,11 @@ export class YaCAServerModule {
         type: "error",
         description: "Das Funkgerät ist aus!",
       });
-    if (isNaN(channel) || channel < 1 || channel > this.config.maxRadioChannels)
+    if (
+      isNaN(channel) ||
+      channel < 1 ||
+      channel > this.sharedConfig.maxRadioChannels
+    )
       return emitNet("ox_lib:notify", src, {
         type: "error",
         description: "Fehlerhafter Funk Kanal!",
@@ -548,7 +558,7 @@ export class YaCAServerModule {
       allTargets.push(key);
     }
 
-    if (!this.config.useWhisper && players.length) {
+    if (!this.serverConfig.useWhisper && players.length) {
       for (const target of allTargets) {
         if (player.voiceplugin)
           emitNet(
@@ -559,7 +569,7 @@ export class YaCAServerModule {
           );
       }
     }
-    if (this.config.useWhisper)
+    if (this.serverConfig.useWhisper)
       emitNet(
         "client:yaca:radioTalking",
         source,
@@ -610,7 +620,11 @@ export class YaCAServerModule {
     const player = YaCAServerModule.players.get(src);
     if (!player) return;
 
-    if (isNaN(channel) || channel < 1 || channel > this.config.maxRadioChannels)
+    if (
+      isNaN(channel) ||
+      channel < 1 ||
+      channel > this.sharedConfig.maxRadioChannels
+    )
       return;
 
     player.radioSettings.currentChannel = channel;
@@ -676,7 +690,7 @@ export class YaCAServerModule {
         );
       }
     }
-    if (this.config.useWhisper)
+    if (this.serverConfig.useWhisper)
       emitNet(
         "client:yaca:radioTalking",
         src,

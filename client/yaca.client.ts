@@ -17,20 +17,12 @@ import {
   YacaBuildType,
   YacaFilterEnum,
   YacaStereoMode,
-  type YacaClientConfig,
+  type YacaSharedConfig,
 } from "types";
 import { calculateDistanceVec3, convertNumberArrayToXYZ } from "utils";
 import { WebSocket } from "websocket";
 
 initLocale();
-
-const settings = {
-  // Max Radio Channels
-  maxRadioChannels: 9, // needs to be sync with serverside setting
-
-  // Max phone speaker range
-  maxPhoneSpeakerRange: 5,
-};
 
 const lipsyncAnims: { [key: string]: { name: string; dict: string } } = {
   true: {
@@ -43,29 +35,10 @@ const lipsyncAnims: { [key: string]: { name: string; dict: string } } = {
   },
 };
 
-const defaultRadioChannelSettings: YacaRadioSettings = {
-  volume: 1,
-  stereo: YacaStereoMode.STEREO,
-  muted: false,
-  frequency: "0",
-};
-
-// Values are in meters
-const voiceRangesEnum: { [key: number]: number } = {
-  1: 1,
-  2: 3,
-  3: 8,
-  4: 15,
-  5: 20,
-  6: 25,
-  7: 30,
-  8: 40,
-};
-
 export class YaCAClientModule {
   static instance: YaCAClientModule;
   static allPlayers: Map<number, YacaPlayerData> = new Map();
-  config: YacaClientConfig;
+  sharedConfig: YacaSharedConfig;
   playerLocalPlugin: YacaLocalPlugin;
 
   rangeInterval: CitizenTimer | null = null;
@@ -182,8 +155,8 @@ export class YaCAClientModule {
   }
 
   constructor() {
-    this.config = JSON.parse(
-      LoadResourceFile(cache.resource, `configs/client.json`),
+    this.sharedConfig = JSON.parse(
+      LoadResourceFile(cache.resource, `configs/shared.json`),
     );
     this.websocket = new WebSocket();
 
@@ -908,15 +881,15 @@ export class YaCAClientModule {
       ingame_channel: dataObj.chid,
       default_channel: dataObj.deChid,
       ingame_channel_password: dataObj.channelPassword,
-      excluded_channels: [1337], // Channel ID's where users can be in while being ingame
+      excluded_channels: dataObj.excludeChannels,
       /**
        * default are 2 meters
        * if the value is set to -1, the player voice range is taken
        * if the value is >= 0, you can set the max muffling range before it gets completely cut off
        */
-      muffling_range: 2,
+      muffling_range: this.sharedConfig.mufflingRange ?? 2,
       build_type: YacaBuildType.RELEASE, // 0 = Release, 1 = Debug,
-      unmute_delay: 400,
+      unmute_delay: this.sharedConfig.unmuteDelay ?? 400,
       operation_mode: dataObj.useWhisper ? 1 : 0,
     });
 
@@ -1073,7 +1046,7 @@ export class YaCAClientModule {
     if (this.lastuiRange == this.uirange) return false;
     this.lastuiRange = this.uirange;
 
-    const voiceRange = voiceRangesEnum[this.uirange] || 1;
+    const voiceRange = this.sharedConfig.voiceRanges[this.uirange] || 1;
 
     this.visualVoiceRangeTimeout = setTimeout(() => {
       if (this.visualVoiceRangeTick) {
@@ -1338,7 +1311,7 @@ export class YaCAClientModule {
         this.phoneSpeakerActive &&
         this.inCall &&
         calculateDistanceVec3(localPos, playerPos) <=
-          settings.maxPhoneSpeakerRange
+          this.sharedConfig.maxPhoneSpeakerRange
       ) {
         playersToPhoneSpeaker.add(player.remoteID);
       }
@@ -1347,7 +1320,7 @@ export class YaCAClientModule {
       if (
         voiceSetting.phoneCallMemberIds &&
         calculateDistanceVec3(localPos, playerPos) <=
-          settings.maxPhoneSpeakerRange
+          this.sharedConfig.maxPhoneSpeakerRange
       ) {
         for (const phoneCallMemberId of voiceSetting.phoneCallMemberIds) {
           const phoneCallMember = this.getPlayerByID(phoneCallMemberId);
@@ -1363,7 +1336,7 @@ export class YaCAClientModule {
             client_id: phoneCallMember.clientId,
             position: convertNumberArrayToXYZ(playerPos),
             direction: convertNumberArrayToXYZ(playerDirection),
-            range: settings.maxPhoneSpeakerRange,
+            range: this.sharedConfig.maxPhoneSpeakerRange,
             is_underwater: isUnderwater,
             muffle_intensity: muffleIntensity,
             is_muted: false,
@@ -1376,7 +1349,7 @@ export class YaCAClientModule {
             YacaFilterEnum.PHONE_SPEAKER,
             true,
             undefined,
-            settings.maxPhoneSpeakerRange,
+            this.sharedConfig.maxPhoneSpeakerRange,
             CommDeviceMode.RECEIVER,
             CommDeviceMode.SENDER,
           );
@@ -1421,7 +1394,7 @@ export class YaCAClientModule {
           YacaFilterEnum.PHONE_SPEAKER,
           false,
           undefined,
-          settings.maxPhoneSpeakerRange,
+          this.sharedConfig.maxPhoneSpeakerRange,
           CommDeviceMode.RECEIVER,
           CommDeviceMode.SENDER,
         );
@@ -1471,11 +1444,11 @@ export class YaCAClientModule {
    * Set volume & stereo mode for all radio channels on first start and reconnect.
    */
   initRadioSettings() {
-    for (let i = 1; i <= settings.maxRadioChannels; i++) {
+    for (let i = 1; i <= this.sharedConfig.maxRadioChannels; i++) {
       if (!this.radioChannelSettings[i])
         this.radioChannelSettings[i] = Object.assign(
           {},
-          defaultRadioChannelSettings,
+          this.sharedConfig.defaultRadioChannelSettings,
         );
       if (!this.playersInRadioChannel.has(i))
         this.playersInRadioChannel.set(i, new Set());

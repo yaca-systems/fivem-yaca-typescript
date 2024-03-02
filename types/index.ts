@@ -73,6 +73,7 @@ export interface DataObject {
   channelPassword?: string;
   ingameName?: string;
   useWhisper?: boolean;
+  excludeChannels?: number[];
 }
 
 export interface YacaClient {
@@ -96,10 +97,17 @@ export interface YacaRadioSettings {
   stereo: YacaStereoMode;
 }
 
-export interface YacaClientConfig {}
+export interface YacaSharedConfig {
+  debug: boolean;
+  maxRadioChannels: number;
+  mufflingRange: number;
+  unmuteDelay: number;
+  maxPhoneSpeakerRange: number;
+  defaultRadioChannelSettings: YacaRadioSettings;
+  voiceRanges: { [key: number]: number };
+}
 
 export interface YacaServerConfig {
-  maxRadioChannels: number;
   uniqueServerId: string;
   ingameChannelId: number;
   ingameChannelPassword: string;
