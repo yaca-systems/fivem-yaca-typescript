@@ -116,4 +116,5 @@ export interface YacaServerConfig {
   defaultChannelId: number;
   useWhisper: boolean;
   excludeChannels: number[];
+  megaPhoneRange: number;
 }

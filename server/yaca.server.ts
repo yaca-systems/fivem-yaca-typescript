@@ -41,8 +41,8 @@ export interface YaCAServerSettings {
 export class YaCAServerModule {
   static instance: YaCAServerModule;
   static nameSet: Set<string> = new Set();
-  static players: Map<number, YaCAPlayer> = new Map();
-  static radioFrequencyMap = new Map();
+  players: Map<number, YaCAPlayer> = new Map();
+  radioFrequencyMap = new Map();
 
   serverConfig: YacaServerConfig;
   sharedConfig: YacaSharedConfig;
@@ -60,13 +60,6 @@ export class YaCAServerModule {
 
     this.registerEvents();
     this.registerCommands();
-
-    setTimeout(() => {
-      for (const player of getPlayers()) {
-        console.log(`Player ${player} is joining.`);
-        this.connectToVoice(parseInt(player));
-      }
-    }, 10000);
   }
 
   /**
@@ -91,7 +84,7 @@ export class YaCAServerModule {
     const name = generateRandomName(src);
     if (!name) return;
 
-    YaCAServerModule.players.set(src, {
+    this.players.set(src, {
       voiceSettings: {
         voiceRange: 3, //TODO: Change this to a config value
         voiceFirstConnect: false,
@@ -123,6 +116,10 @@ export class YaCAServerModule {
 
     onNet("server:yaca:playerLeftVehicle", () => {
       this.handlePlayerLeftVehicle(source);
+    });
+
+    onNet("server:yaca:nuiReady", () => {
+      this.connectToVoice(source);
     });
 
     // YaCA: voice range toggle
@@ -189,14 +186,14 @@ export class YaCAServerModule {
     onNet(
       "server:yaca:phoneSpeakerEmit",
       (enableForTargets?: number[], disableForTargets?: number[]) => {
-        const player = YaCAServerModule.players.get(source);
+        const player = this.players.get(source);
         if (!player) return;
 
         const enableWhisperReceive: number[] = [];
         const disableWhisperReceive: number[] = [];
 
         player.voiceSettings.inCallWith.forEach((callTarget) => {
-          const target = YaCAServerModule.players.get(callTarget);
+          const target = this.players.get(callTarget);
           if (!target) return;
 
           if (enableForTargets?.includes(callTarget))
@@ -246,10 +243,7 @@ export class YaCAServerModule {
     }>(
       "setAlive",
       async (source, args) => {
-        YaCAServerModule.changePlayerAliveStatus(
-          args.playerId,
-          args.state == "true",
-        );
+        this.changePlayerAliveStatus(args.playerId, args.state == "true");
       },
       {
         help: "Set the alive status of a player.",
@@ -349,10 +343,7 @@ export class YaCAServerModule {
     }>(
       "enablePhoneSpeaker",
       async (source, args) => {
-        this.enablePhoneSpeaker(args.playerId, args.state == "true", [
-          source,
-          args.playerId,
-        ]);
+        this.enablePhoneSpeaker(source, args.state == "true");
       },
       {
         help: "Enable or disable the phone speaker for a player.",
@@ -414,15 +405,15 @@ export class YaCAServerModule {
    * @param {number} src - The source-id of the player who disconnected.
    */
   handlePlayerDisconnect(src: number) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     YaCAServerModule.nameSet.delete(player.voiceSettings?.ingameName);
 
-    const allFrequences = YaCAServerModule.radioFrequencyMap;
+    const allFrequences = this.radioFrequencyMap;
     for (const [key, value] of allFrequences) {
       value.delete(src);
-      if (!value.size) YaCAServerModule.radioFrequencyMap.delete(key);
+      if (!value.size) this.radioFrequencyMap.delete(key);
     }
 
     emitNet("client:yaca:disconnect", -1, src);
@@ -434,7 +425,7 @@ export class YaCAServerModule {
    * @param {number} src - The source-id of the player who left the vehicle.
    */
   handlePlayerLeftVehicle(src: number) {
-    YaCAServerModule.changeMegaphoneState(src, false, true);
+    this.changeMegaphoneState(src, false, true);
   }
 
   /**
@@ -443,8 +434,8 @@ export class YaCAServerModule {
    * @param {number} src - The source-id of the player to sync.
    * @param {boolean} alive - The new alive status.
    */
-  static changePlayerAliveStatus(src: number, alive: boolean) {
-    const player = YaCAServerModule.players.get(src);
+  changePlayerAliveStatus(src: number, alive: boolean) {
+    const player = this.players.get(src);
     if (!player) return;
 
     player.voiceSettings.forceMuted = !alive;
@@ -460,7 +451,7 @@ export class YaCAServerModule {
    * @param {boolean} state - The state of the megaphone effect.
    */
   playerUseMegaphone(src: number, state: boolean) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     const playerState = Player(src).state;
@@ -480,7 +471,7 @@ export class YaCAServerModule {
     )
       return;
 
-    YaCAServerModule.changeMegaphoneState(src, state);
+    this.changeMegaphoneState(src, state);
   }
 
   /**
@@ -490,18 +481,18 @@ export class YaCAServerModule {
    * @param {boolean} state - The state of the megaphone effect.
    * @param {boolean} [forced=false] - Whether the change is forced. Defaults to false if not provided.
    */
-  static changeMegaphoneState(
-    src: number,
-    state: boolean,
-    forced: boolean = false,
-  ) {
+  changeMegaphoneState(src: number, state: boolean, forced: boolean = false) {
     const playerState = Player(src).state;
 
     if (!state && playerState["yaca:megaphoneactive"]) {
       playerState.set("yaca:megaphoneactive", null, true);
       if (forced) emitNet("client:yaca:setLastMegaphoneState", src, false);
     } else if (state && !playerState["yaca:megaphoneactive"]) {
-      playerState.set("yaca:megaphoneactive", 30, true);
+      playerState.set(
+        "yaca:megaphoneactive",
+        this.serverConfig.megaPhoneRange,
+        true,
+      );
     }
   }
 
@@ -521,7 +512,7 @@ export class YaCAServerModule {
    * @param {boolean} isFirstConnect - Whether this is the player's first connection.
    */
   playerReconnect(src: number, isFirstConnect: boolean) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     if (!player.voiceSettings.voiceFirstConnect) return;
@@ -544,7 +535,7 @@ export class YaCAServerModule {
    * @param {number} range - The new voice range.
    */
   changeVoiceRange(src: number, range: number) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     if (!this.sharedConfig.voiceRanges.includes(range)) {
@@ -572,7 +563,7 @@ export class YaCAServerModule {
    * @param {number} src - The source-id of the player to connect
    */
   connect(src: number) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) {
       console.error(`YaCA: Missing player data for ${src}.`);
       return;
@@ -580,7 +571,6 @@ export class YaCAServerModule {
 
     player.voiceSettings.voiceFirstConnect = true;
 
-    //TODO: Change this to a config value
     const initObject: DataObject = {
       suid: this.serverConfig.uniqueServerId,
       chid: this.serverConfig.ingameChannelId,
@@ -590,7 +580,6 @@ export class YaCAServerModule {
       useWhisper: this.serverConfig.useWhisper,
       excludeChannels: this.serverConfig.excludeChannels,
     };
-
     emitNet("client:yaca:init", src, initObject);
   }
 
@@ -601,7 +590,7 @@ export class YaCAServerModule {
    * @param {number} clientId - The client ID of the player.
    */
   addNewPlayer(src: number, clientId: number) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player || !clientId) return;
 
     player.voiceplugin = {
@@ -616,7 +605,7 @@ export class YaCAServerModule {
 
     const allPlayersData = [];
     for (const playerSource of getPlayers()) {
-      const playerServer = YaCAServerModule.players.get(parseInt(playerSource));
+      const playerServer = this.players.get(parseInt(playerSource));
       if (!playerServer) continue;
 
       if (!playerServer.voiceplugin || parseInt(playerSource) == src) continue;
@@ -631,10 +620,10 @@ export class YaCAServerModule {
   /**
    * Checks if a player is permitted to use long radio.
    */
-  static isLongRadioPermitted(src: number) {
+  isLongRadioPermitted(src: number) {
     if (!src) return;
 
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     player.radioSettings.hasLong = true; //Add some checks if you want shortrange system;
@@ -647,11 +636,11 @@ export class YaCAServerModule {
    * @param {boolean} state - The new state of the radio.
    */
   enableRadio(src: number, state: boolean) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     player.radioSettings.activated = state;
-    YaCAServerModule.isLongRadioPermitted(src);
+    this.isLongRadioPermitted(src);
   }
 
   /**
@@ -662,7 +651,7 @@ export class YaCAServerModule {
    * @param {string} frequency - The new frequency.
    */
   changeRadioFrequency(src: number, channel: number, frequency: string) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     if (!player.radioSettings.activated)
@@ -697,11 +686,9 @@ export class YaCAServerModule {
     }
 
     // Add player to channel map, so we know who is in which channel
-    if (!YaCAServerModule.radioFrequencyMap.has(frequency))
-      YaCAServerModule.radioFrequencyMap.set(frequency, new Map());
-    YaCAServerModule.radioFrequencyMap
-      .get(frequency)
-      .set(source, { muted: false });
+    if (!this.radioFrequencyMap.has(frequency))
+      this.radioFrequencyMap.set(frequency, new Map());
+    this.radioFrequencyMap.get(frequency).set(source, { muted: false });
 
     player.radioSettings.frequencies[channel] = frequency;
 
@@ -720,23 +707,22 @@ export class YaCAServerModule {
    * @param {string} frequency - The frequency to leave.
    */
   leaveRadioFrequency(src: number, channel: number, frequency: string) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     frequency =
       frequency == "0" ? player.radioSettings.frequencies[channel] : frequency;
 
-    if (!YaCAServerModule.radioFrequencyMap.has(frequency)) return;
+    if (!this.radioFrequencyMap.has(frequency)) return;
 
-    const allPlayersInChannel =
-      YaCAServerModule.radioFrequencyMap.get(frequency);
+    const allPlayersInChannel = this.radioFrequencyMap.get(frequency);
 
     player.radioSettings.frequencies[channel] = "0";
 
     const players = [];
     const allTargets = [];
     for (const [key] of allPlayersInChannel) {
-      const target = YaCAServerModule.players.get(key);
+      const target = this.players.get(key);
       if (!target) continue;
 
       players.push(key);
@@ -769,8 +755,8 @@ export class YaCAServerModule {
       );
 
     allPlayersInChannel.delete(source);
-    if (!YaCAServerModule.radioFrequencyMap.get(frequency).size)
-      YaCAServerModule.radioFrequencyMap.delete(frequency);
+    if (!this.radioFrequencyMap.get(frequency).size)
+      this.radioFrequencyMap.delete(frequency);
   }
 
   /**
@@ -780,13 +766,11 @@ export class YaCAServerModule {
    * @param {number} channel - The channel to mute.
    */
   radioChannelMute(src: number, channel: number) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     const radioFrequency = player.radioSettings.frequencies[channel];
-    const foundPlayer = YaCAServerModule.radioFrequencyMap
-      .get(radioFrequency)
-      ?.get(src);
+    const foundPlayer = this.radioFrequencyMap.get(radioFrequency)?.get(src);
     if (!foundPlayer) return;
 
     foundPlayer.muted = !foundPlayer.muted;
@@ -805,7 +789,7 @@ export class YaCAServerModule {
    * @param {number} channel - The new active channel.
    */
   radioActiveChannelChange(src: number, channel: number) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     if (
@@ -825,14 +809,14 @@ export class YaCAServerModule {
    * @param {boolean} state - The new talking state.
    */
   radioTalkingState(src: number, state: boolean) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player || !player.radioSettings.activated) return;
 
     const radioFrequency =
       player.radioSettings.frequencies[player.radioSettings.currentChannel];
     if (!radioFrequency) return;
 
-    const getPlayers = YaCAServerModule.radioFrequencyMap.get(radioFrequency);
+    const getPlayers = this.radioFrequencyMap.get(radioFrequency);
     let targets = [];
     const targetsToSender = [];
     const radioInfos: { [key: number]: { shortRange: boolean } } = {};
@@ -847,7 +831,7 @@ export class YaCAServerModule {
 
       if (key == source) continue;
 
-      const target = YaCAServerModule.players.get(key);
+      const target = this.players.get(key);
       if (!target || !target.radioSettings.activated) continue;
 
       const shortRange =
@@ -899,29 +883,31 @@ export class YaCAServerModule {
    * @param {boolean} state - The state of the call.
    */
   callPlayer(src: number, target: number, state: boolean) {
-    const player = YaCAServerModule.players.get(src);
-    const targetPlayer = YaCAServerModule.players.get(target);
+    const player = this.players.get(src);
+    const targetPlayer = this.players.get(target);
     if (!player || !targetPlayer) return;
 
     emitNet("client:yaca:phone", target, src, state);
     emitNet("client:yaca:phone", src, target, state);
 
-    if (!state) {
-      this.muteOnPhone(src, false, true);
-      this.muteOnPhone(target, false, true);
+    const playerState = Player(src).state;
 
+    if (state) {
       player.voiceSettings.inCallWith.push(target);
       targetPlayer.voiceSettings.inCallWith.push(src);
+
+      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, true);
     } else {
-      const playerState = Player(src).state;
-      if (playerState["yaca:phoneSpeaker"])
-        this.enablePhoneSpeaker(src, true, [src, target]);
+      this.muteOnPhone(src, false, true);
+      this.muteOnPhone(target, false, true);
 
       player.voiceSettings.inCallWith = player.voiceSettings.inCallWith.filter(
         (id) => id !== target,
       );
       targetPlayer.voiceSettings.inCallWith =
         targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
+
+      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, false);
     }
   }
 
@@ -933,29 +919,31 @@ export class YaCAServerModule {
    * @param {boolean} state - The state of the call.
    */
   callPlayerOldEffect(src: number, target: number, state: boolean) {
-    const player = YaCAServerModule.players.get(src);
-    const targetPlayer = YaCAServerModule.players.get(target);
+    const player = this.players.get(src);
+    const targetPlayer = this.players.get(target);
     if (!player || !targetPlayer) return;
 
     emitNet("client:yaca:phoneOld", target, src, state);
     emitNet("client:yaca:phoneOld", src, target, state);
 
-    if (!state) {
-      this.muteOnPhone(src, false, true);
-      this.muteOnPhone(target, false, true);
+    const playerState = Player(src).state;
 
+    if (state) {
       player.voiceSettings.inCallWith.push(target);
       targetPlayer.voiceSettings.inCallWith.push(src);
+
+      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, true);
     } else {
-      const playerState = Player(src).state;
-      if (playerState["yaca:phoneSpeaker"])
-        this.enablePhoneSpeaker(src, true, [src, target]);
+      this.muteOnPhone(src, false, true);
+      this.muteOnPhone(target, false, true);
 
       player.voiceSettings.inCallWith = player.voiceSettings.inCallWith.filter(
         (id) => id !== target,
       );
       targetPlayer.voiceSettings.inCallWith =
         targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
+
+      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, false);
     }
   }
 
@@ -967,7 +955,7 @@ export class YaCAServerModule {
    * @param {boolean} [onCallStop=false] - Whether the call has stopped. Defaults to false if not provided.
    */
   muteOnPhone(src: number, state: boolean, onCallStop: boolean = false) {
-    const player = YaCAServerModule.players.get(src);
+    const player = this.players.get(src);
     if (!player) return;
 
     player.voiceSettings.mutedOnPhone = state;
@@ -979,17 +967,19 @@ export class YaCAServerModule {
    *
    * @param {number} src - The source-id of the player to enable the phone speaker for.
    * @param {boolean} state - The state of the phone speaker.
-   * @param {number[]} phoneCallMemberIds - The IDs of the members in the phone call.
    */
-  enablePhoneSpeaker(
-    src: number,
-    state: boolean,
-    phoneCallMemberIds: number[],
-  ) {
+  enablePhoneSpeaker(src: number, state: boolean) {
+    const player = this.players.get(src);
+    if (!player) return;
+
     const playerState = Player(src).state;
 
-    if (state) {
-      playerState.set("yaca:phoneSpeaker", phoneCallMemberIds, true);
+    if (state && player.voiceSettings.inCallWith.length) {
+      playerState.set(
+        "yaca:phoneSpeaker",
+        player.voiceSettings.inCallWith,
+        true,
+      );
     } else {
       playerState.set("yaca:phoneSpeaker", null, true);
     }

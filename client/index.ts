@@ -5,5 +5,5 @@ on("onClientResourceStart", (resourceName: string) => {
     return;
   }
 
-  YaCAClientModule.getInstance(); // YACA Voiceplugin
+  YaCAClientModule.getInstance();
 });

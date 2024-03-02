@@ -38,7 +38,7 @@ const lipsyncAnims: { [key: string]: { name: string; dict: string } } = {
 
 export class YaCAClientModule {
   static instance: YaCAClientModule;
-  static allPlayers: Map<number, YacaPlayerData> = new Map();
+  allPlayers: Map<number, YacaPlayerData> = new Map();
   sharedConfig: YacaSharedConfig;
   playerLocalPlugin: YacaLocalPlugin;
 
@@ -160,10 +160,21 @@ export class YaCAClientModule {
     this.sharedConfig = JSON.parse(
       LoadResourceFile(cache.resource, `configs/shared.json`),
     );
-    this.rangeIndex = this.sharedConfig.defaultVoiceRangeIndex ?? 0;
-
     this.websocket = new WebSocket();
 
+    RegisterNuiCallbackType("YACA_OnNuiReady");
+    on(
+      "__cfx_nui:YACA_OnNuiReady",
+      (_: unknown, cb: (data: unknown) => void) => {
+        this.websocket.nuiReady = true;
+        setTimeout(() => {
+          emitNet("server:yaca:nuiReady");
+        }, 5000);
+        cb({});
+      },
+    );
+
+    this.rangeIndex = this.sharedConfig.defaultVoiceRangeIndex ?? 0;
     this.playerLocalPlugin = {
       canChangeVoiceRange: true,
       maxVoiceRange: 4,
@@ -185,19 +196,15 @@ export class YaCAClientModule {
         __: number,
         replicated: boolean,
       ) => {
-        console.log("megaphoneactive", bagName, value, replicated);
         if (replicated) return;
 
         const playerId = GetPlayerFromStateBagName(bagName);
-        console.log("playerId", playerId);
         if (playerId == 0) return;
 
         const playerSource = GetPlayerServerId(playerId);
-        console.log("playerSource", playerSource);
         if (playerSource == 0) return;
 
         const isOwnPlayer = playerSource === cache.serverId;
-        console.log("isOwnPlayer", isOwnPlayer);
         YaCAClientModule.setPlayersCommType(
           isOwnPlayer ? [] : this.getPlayerByID(playerSource),
           YacaFilterEnum.MEGAPHONE,
@@ -284,15 +291,10 @@ export class YaCAClientModule {
       if (vehicle) {
         const vehicleClass = GetVehicleClass(vehicle);
 
-        if (
+        this.playerLocalPlugin.canUseMegaphone =
           this.sharedConfig.megaphoneAllowedVehicleClasses.includes(
             vehicleClass,
-          )
-        ) {
-          this.playerLocalPlugin.canUseMegaphone = true;
-        } else {
-          this.playerLocalPlugin.canUseMegaphone = false;
-        }
+          );
       } else {
         this.playerLocalPlugin.canUseMegaphone = false;
         emitNet("server:yaca:playerLeftVehicle");
@@ -343,7 +345,6 @@ export class YaCAClientModule {
     RegisterCommand(
       "+yaca:megaphone",
       () => {
-        console.log("megaphone");
         this.useMegaphone(true);
       },
       false,
@@ -351,7 +352,6 @@ export class YaCAClientModule {
     RegisterCommand(
       "-yaca:megaphone",
       () => {
-        console.log("-megaphone");
         this.useMegaphone(false);
       },
       false,
@@ -360,6 +360,16 @@ export class YaCAClientModule {
   }
 
   registerEvents() {
+    on("onClientResourceStop", (resourceName: string) => {
+      if (GetCurrentResourceName() !== resourceName) {
+        return;
+      }
+
+      if (this.websocket.initialized) {
+        this.websocket.close();
+      }
+    });
+
     onNet("client:yaca:init", async (dataObj: DataObject) => {
       console.log("[YACA-Websocket]: init", JSON.stringify(dataObj));
       if (this.rangeInterval) {
@@ -407,7 +417,7 @@ export class YaCAClientModule {
     });
 
     onNet("client:yaca:disconnect", (remoteId: number) => {
-      YaCAClientModule.allPlayers.delete(remoteId);
+      this.allPlayers.delete(remoteId);
     });
 
     onNet(
@@ -426,7 +436,7 @@ export class YaCAClientModule {
 
           const currentData = this.getPlayerByID(dataObj.playerId);
 
-          YaCAClientModule.allPlayers.set(dataObj.playerId, {
+          this.allPlayers.set(dataObj.playerId, {
             remoteID: dataObj.playerId,
             clientId: dataObj.clientId,
             forceMuted: dataObj.forceMuted || false,
@@ -890,7 +900,7 @@ export class YaCAClientModule {
   }
 
   getPlayerByID(remoteId: number) {
-    return YaCAClientModule.allPlayers.get(remoteId);
+    return this.allPlayers.get(remoteId);
   }
 
   initRequest(dataObj: DataObject) {
@@ -1035,7 +1045,7 @@ export class YaCAClientModule {
   setPlayerVariable(player: number, variable: string, value: unknown) {
     const currentData = this.getPlayerByID(player);
 
-    if (!currentData) YaCAClientModule.allPlayers.set(player, {});
+    if (!currentData) this.allPlayers.set(player, {});
 
     // @ts-expect-error TODO
     this.getPlayerByID(player)[variable] = value;
@@ -1043,8 +1053,6 @@ export class YaCAClientModule {
 
   /**
    * Changes the voice range.
-   *
-   * @param {number} toggle - The new voice range.
    */
   changeVoiceRange() {
     if (!this.playerLocalPlugin.canChangeVoiceRange) return false;
@@ -1066,8 +1074,6 @@ export class YaCAClientModule {
     } else if (this.rangeIndex > this.sharedConfig.voiceRanges.length - 1) {
       this.rangeIndex = 0;
     }
-
-    console.log(this.rangeIndex);
 
     const voiceRange = this.sharedConfig.voiceRanges[this.rangeIndex] || 1;
 
