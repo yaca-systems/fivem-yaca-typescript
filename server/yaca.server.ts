@@ -1,4 +1,4 @@
-import { initLocale, cache } from "@overextended/ox_lib/server";
+import { initLocale, cache, addCommand } from "@overextended/ox_lib/server";
 import { generateRandomName } from "utils";
 import type { DataObject, YacaServerConfig, YacaSharedConfig } from "types";
 
@@ -222,6 +222,181 @@ export class YaCAServerModule {
     onNet("server:yaca:nuiReady", () => {
       this.connectToVoice(source);
     });
+  }
+
+  /**
+   * Register the commands for the YaCA server module.
+   * This is only done if the debug mode is enabled.
+   */
+  registerCommands() {
+    if (!this.sharedConfig.debug) return;
+
+    addCommand<{
+      playerId: number;
+      state: string;
+    }>(
+      "setAlive",
+      async (source, args) => {
+        YaCAServerModule.changePlayerAliveStatus(
+          args.playerId,
+          args.state == "true",
+        );
+      },
+      {
+        help: "Set the alive status of a player.",
+        params: [
+          {
+            name: "playerId",
+            help: "The ID of the player to set the alive status for.",
+            paramType: "playerId",
+          },
+          {
+            name: "state",
+            help: "The new alive status.",
+            paramType: "string",
+          },
+        ],
+      },
+    );
+
+    addCommand<{
+      playerId: number;
+      state: string;
+    }>(
+      "callPlayer",
+      async (source, args) => {
+        this.callPlayer(source, args.playerId, args.state == "true");
+      },
+      {
+        help: "Call another player.",
+        params: [
+          {
+            name: "playerId",
+            help: "The ID of the player to call.",
+            paramType: "playerId",
+          },
+          {
+            name: "state",
+            help: "The state of the call.",
+            paramType: "string",
+          },
+        ],
+      },
+    );
+
+    addCommand<{
+      playerId: number;
+      state: string;
+    }>(
+      "callPlayerOld",
+      async (source, args) => {
+        this.callPlayerOldEffect(source, args.playerId, args.state == "true");
+      },
+      {
+        help: "Call another player on old phone.",
+        params: [
+          {
+            name: "playerId",
+            help: "The ID of the player to call.",
+            paramType: "playerId",
+          },
+          {
+            name: "state",
+            help: "The state of the call.",
+            paramType: "string",
+          },
+        ],
+      },
+    );
+
+    addCommand<{
+      playerId: number;
+      state: string;
+    }>(
+      "muteOnPhone",
+      async (source, args) => {
+        this.muteOnPhone(args.playerId, args.state == "true");
+      },
+      {
+        help: "Mute a player during a phone call.",
+        params: [
+          {
+            name: "playerId",
+            help: "The ID of the player to mute.",
+            paramType: "playerId",
+          },
+          {
+            name: "state",
+            help: "The mute state.",
+            paramType: "string",
+          },
+        ],
+      },
+    );
+
+    addCommand<{
+      playerId: number;
+      state: string;
+    }>(
+      "enablePhoneSpeaker",
+      async (source, args) => {
+        this.enablePhoneSpeaker(args.playerId, args.state == "true", [
+          source,
+          args.playerId,
+        ]);
+      },
+      {
+        help: "Enable or disable the phone speaker for a player.",
+        params: [
+          {
+            name: "playerId",
+            help: "The ID of the player to enable the phone speaker for.",
+            paramType: "playerId",
+          },
+          {
+            name: "state",
+            help: "The state of the phone speaker.",
+            paramType: "string",
+          },
+        ],
+      },
+    );
+
+    addCommand<{
+      playerId: number;
+      state: string;
+    }>(
+      "intercom",
+      async (source, args) => {
+        emitNet(
+          "client:yaca:addRemovePlayerIntercomFilter",
+          source,
+          [args.playerId, source],
+          args.state == "true",
+        );
+        emitNet(
+          "client:yaca:addRemovePlayerIntercomFilter",
+          args.playerId,
+          [args.playerId, source],
+          args.state == "true",
+        );
+      },
+      {
+        help: "Enable or disable the intercom for a player.",
+        params: [
+          {
+            name: "playerId",
+            help: "The ID of the player to enable the intercom for.",
+            paramType: "playerId",
+          },
+          {
+            name: "state",
+            help: "The state of the intercom.",
+            paramType: "string",
+          },
+        ],
+      },
+    );
   }
 
   /**
