@@ -2,3 +2,6 @@ node_modules
 .idea
 dist
 resource
+.yarn.installed
+configs/server.json
+configs/shared.json

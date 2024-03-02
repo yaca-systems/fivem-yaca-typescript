@@ -1,0 +1,10 @@
+{
+  "maxRadioChannels": 4,
+  "uniqueServerId": "",
+  "ingameChannelId": 3,
+  "ingameChannelPassword": "",
+  "defaultChannelId": 1,
+  "useWhisper": false,
+  "excludeChannels": [],
+  "megaPhoneRange": 30
+}
