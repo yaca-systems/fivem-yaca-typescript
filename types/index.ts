@@ -104,7 +104,9 @@ export interface YacaSharedConfig {
   unmuteDelay: number;
   maxPhoneSpeakerRange: number;
   defaultRadioChannelSettings: YacaRadioSettings;
-  voiceRanges: { [key: number]: number };
+  defaultVoiceRangeIndex: number;
+  voiceRanges: number[];
+  megaphoneAllowedVehicleClasses: number[];
 }
 
 export interface YacaServerConfig {

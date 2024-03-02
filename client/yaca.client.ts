@@ -21,6 +21,7 @@ import {
 } from "types";
 import { calculateDistanceVec3, convertNumberArrayToXYZ } from "utils";
 import { WebSocket } from "websocket";
+import { onCache } from "@overextended/ox_lib/server";
 
 initLocale();
 
@@ -48,6 +49,7 @@ export class YaCAClientModule {
   messageDisplayed = false;
   visualVoiceRangeTimeout: CitizenTimer | null = null;
   visualVoiceRangeTick: CitizenTimer | null = null;
+  rangeIndex: number;
   uirange: number = 2;
   lastuiRange = 2;
   isTalking = false;
@@ -158,6 +160,8 @@ export class YaCAClientModule {
     this.sharedConfig = JSON.parse(
       LoadResourceFile(cache.resource, `configs/shared.json`),
     );
+    this.rangeIndex = this.sharedConfig.defaultVoiceRangeIndex ?? 0;
+
     this.websocket = new WebSocket();
 
     this.playerLocalPlugin = {
@@ -169,6 +173,7 @@ export class YaCAClientModule {
 
     this.registerEvents();
     this.registerKeybindings();
+    this.registerListeners();
 
     AddStateBagChangeHandler(
       "yaca:megaphoneactive",
@@ -180,15 +185,19 @@ export class YaCAClientModule {
         __: number,
         replicated: boolean,
       ) => {
+        console.log("megaphoneactive", bagName, value, replicated);
         if (replicated) return;
 
         const playerId = GetPlayerFromStateBagName(bagName);
+        console.log("playerId", playerId);
         if (playerId == 0) return;
 
         const playerSource = GetPlayerServerId(playerId);
+        console.log("playerSource", playerSource);
         if (playerSource == 0) return;
 
         const isOwnPlayer = playerSource === cache.serverId;
+        console.log("isOwnPlayer", isOwnPlayer);
         YaCAClientModule.setPlayersCommType(
           isOwnPlayer ? [] : this.getPlayerByID(playerSource),
           YacaFilterEnum.MEGAPHONE,
@@ -270,24 +279,41 @@ export class YaCAClientModule {
     return this.instance;
   }
 
+  registerListeners() {
+    onCache<number | false>("vehicle", (vehicle) => {
+      if (vehicle) {
+        const vehicleClass = GetVehicleClass(vehicle);
+
+        if (
+          this.sharedConfig.megaphoneAllowedVehicleClasses.includes(
+            vehicleClass,
+          )
+        ) {
+          this.playerLocalPlugin.canUseMegaphone = true;
+        } else {
+          this.playerLocalPlugin.canUseMegaphone = false;
+        }
+      } else {
+        this.playerLocalPlugin.canUseMegaphone = false;
+        emitNet("server:yaca:playerLeftVehicle");
+      }
+    });
+  }
+
   registerKeybindings() {
     RegisterCommand(
-      "yaca:changeVoiceRangeAdd",
+      "yaca:changeVoiceRange",
       () => {
-        this.changeVoiceRange(1);
+        this.changeVoiceRange();
       },
       false,
     );
-    // RegisterKeyMapping("yaca:changeVoiceRangeAdd", "Mikrofon-Reichweite +", "keyboard", "F9");
-
-    RegisterCommand(
-      "yaca:changeVoiceRangeRemove",
-      () => {
-        this.changeVoiceRange(-1);
-      },
-      false,
+    RegisterKeyMapping(
+      "yaca:changeVoiceRange",
+      "Mikrofon-Reichweite ändern",
+      "keyboard",
+      "Z",
     );
-    // RegisterKeyMapping("yaca:changeVoiceRangeRemove", "Mikrofon-Reichweite -", "keyboard", "F9");
 
     RegisterCommand(
       "yaca:radioUI",
@@ -317,6 +343,7 @@ export class YaCAClientModule {
     RegisterCommand(
       "+yaca:megaphone",
       () => {
+        console.log("megaphone");
         this.useMegaphone(true);
       },
       false,
@@ -324,11 +351,12 @@ export class YaCAClientModule {
     RegisterCommand(
       "-yaca:megaphone",
       () => {
+        console.log("-megaphone");
         this.useMegaphone(false);
       },
       false,
     );
-    RegisterKeyMapping("yaca:megaphone", "Megaphone", "keyboard", "M");
+    RegisterKeyMapping("+yaca:megaphone", "Megaphone", "keyboard", "M");
   }
 
   registerEvents() {
@@ -372,6 +400,10 @@ export class YaCAClientModule {
       if (this.firstConnect) return;
 
       this.initRequest(dataObj);
+    });
+
+    onNet("client:yaca:setLastMegaphoneState", (state: boolean) => {
+      this.playerLocalPlugin.lastMegaphoneState = state;
     });
 
     onNet("client:yaca:disconnect", (remoteId: number) => {
@@ -1014,7 +1046,7 @@ export class YaCAClientModule {
    *
    * @param {number} toggle - The new voice range.
    */
-  changeVoiceRange(toggle: number) {
+  changeVoiceRange() {
     if (!this.playerLocalPlugin.canChangeVoiceRange) return false;
 
     if (this.visualVoiceRangeTimeout) {
@@ -1027,26 +1059,17 @@ export class YaCAClientModule {
       this.visualVoiceRangeTick = null;
     }
 
-    this.uirange += toggle;
+    this.rangeIndex += 1;
 
-    if (this.uirange < 1) {
-      this.uirange = 1;
-    } else if (this.uirange == 5 && this.playerLocalPlugin.maxVoiceRange < 5) {
-      this.uirange = 4;
-    } else if (this.uirange == 6 && this.playerLocalPlugin.maxVoiceRange < 6) {
-      this.uirange = 5;
-    } else if (this.uirange == 7 && this.playerLocalPlugin.maxVoiceRange < 7) {
-      this.uirange = 6;
-    } else if (this.uirange == 8 && this.playerLocalPlugin.maxVoiceRange < 8) {
-      this.uirange = 7;
-    } else if (this.uirange > 8) {
-      this.uirange = 8;
+    if (this.rangeIndex < 1) {
+      this.rangeIndex = this.sharedConfig.voiceRanges.length - 1;
+    } else if (this.rangeIndex > this.sharedConfig.voiceRanges.length - 1) {
+      this.rangeIndex = 0;
     }
 
-    if (this.lastuiRange == this.uirange) return false;
-    this.lastuiRange = this.uirange;
+    console.log(this.rangeIndex);
 
-    const voiceRange = this.sharedConfig.voiceRanges[this.uirange] || 1;
+    const voiceRange = this.sharedConfig.voiceRanges[this.rangeIndex] || 1;
 
     this.visualVoiceRangeTimeout = setTimeout(() => {
       if (this.visualVoiceRangeTick) {
@@ -1658,7 +1681,8 @@ export class YaCAClientModule {
    */
   useMegaphone(state: boolean = false) {
     if (
-      (!cache.vehicle && !this.playerLocalPlugin.canUseMegaphone) ||
+      !cache.vehicle ||
+      !this.playerLocalPlugin.canUseMegaphone ||
       state == this.playerLocalPlugin.lastMegaphoneState
     )
       return;

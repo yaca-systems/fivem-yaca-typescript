@@ -79,8 +79,6 @@ export class WebSocket extends EventEmitter {
       data: data,
     });
 
-    console.log("Sending NUI message", nuiMessage);
-
     SendNuiMessage(nuiMessage);
   }
 

@@ -59,6 +59,7 @@ export class YaCAServerModule {
     );
 
     this.registerEvents();
+    this.registerCommands();
 
     setTimeout(() => {
       for (const player of getPlayers()) {
@@ -114,6 +115,14 @@ export class YaCAServerModule {
   registerEvents() {
     on("playerJoining", (source: number) => {
       this.connectToVoice(source);
+    });
+
+    on("playerDropped", () => {
+      this.handlePlayerDisconnect(source);
+    });
+
+    onNet("server:yaca:playerLeftVehicle", () => {
+      this.handlePlayerLeftVehicle(source);
     });
 
     // YaCA: voice range toggle
@@ -490,7 +499,7 @@ export class YaCAServerModule {
 
     if (!state && playerState["yaca:megaphoneactive"]) {
       playerState.set("yaca:megaphoneactive", null, true);
-      if (forced) console.log("TODO"); // player.setLocalMeta("lastMegaphoneState", false); // TODO: Implement this
+      if (forced) emitNet("client:yaca:setLastMegaphoneState", src, false);
     } else if (state && !playerState["yaca:megaphoneactive"]) {
       playerState.set("yaca:megaphoneactive", 30, true);
     }
@@ -538,9 +547,13 @@ export class YaCAServerModule {
     const player = YaCAServerModule.players.get(src);
     if (!player) return;
 
-    // Sanitycheck to prevent hackers or shit
-    if (player.voiceSettings.maxVoiceRangeInMeter < range)
-      return emitNet("client:yaca:setMaxVoiceRange", src, 15);
+    if (!this.sharedConfig.voiceRanges.includes(range)) {
+      return emitNet(
+        "client:yaca:setMaxVoiceRange",
+        src,
+        this.sharedConfig.voiceRanges[this.sharedConfig.defaultVoiceRangeIndex],
+      );
+    }
 
     player.voiceSettings.voiceRange = range;
     emitNet(
