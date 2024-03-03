@@ -1,5 +1,5 @@
-import { YaCAServerModule } from "yaca.server";
 import { getRandomString } from "@overextended/ox_lib/server";
+import { YaCAServerModule } from "yaca";
 
 /**
  * Generate a random name and insert it into the database.

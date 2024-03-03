@@ -1,5 +1,5 @@
-import { YaCAServerModule } from "./yaca.server";
+import { YaCAServerModule } from "yaca";
 
 (() => {
-  YaCAServerModule.getInstance(); // YACA Voiceplugin
+  new YaCAServerModule(); // YACA Voiceplugin
 })();
