@@ -27,20 +27,10 @@ import {
   YaCAClientMegaphoneModule,
   YaCAClientPhoneModule,
   YaCAClientRadioModule,
+  localLipSyncAnimations,
 } from "yaca";
 
 initLocale();
-
-const lipsyncAnims: { [key: string]: { name: string; dict: string } } = {
-  true: {
-    name: "mic_chatter",
-    dict: "mp_facial",
-  },
-  false: {
-    name: "mood_normal_1",
-    dict: "facials@gen_male@variations@normal",
-  },
-};
 
 export class YaCAClientModule {
   websocket: WebSocket;
@@ -184,6 +174,10 @@ export class YaCAClientModule {
     this.phoneModule = new YaCAClientPhoneModule(this);
     this.radioModule = new YaCAClientRadioModule(this);
 
+    /**
+     * Add a state bag change handler for the "yaca:lipsync" state bag.
+     * Which is used to override the talking state of the player.
+     */
     AddStateBagChangeHandler(
       "yaca:lipsync",
       "",
@@ -199,10 +193,7 @@ export class YaCAClientModule {
         const playerId = GetPlayerFromStateBagName(bagName);
         if (playerId == 0) return;
 
-        const playerSource = GetPlayerServerId(playerId);
-        if (playerSource == 0) return;
-
-        this.syncLipsPlayer(playerSource, value);
+        SetPlayerTalkingOverride(playerId, value);
       },
     );
 
@@ -779,10 +770,14 @@ export class YaCAClientModule {
     if (this.isTalking != isTalking) {
       this.isTalking = isTalking;
 
-      // TODO: this.webview.emit('webview:hud:isTalking', isTalking);
+      const animationData =
+        localLipSyncAnimations[isTalking ? "true" : "false"];
 
-      // TODO: Deprecated if alt:V syncs the playFacialAnim native
-      emitNet("server:yaca:lipsync", isTalking);
+      SetPlayerTalkingOverride(cache.playerId, isTalking);
+      PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
+      LocalPlayer.state.set("yaca:lipsync", isTalking, true);
+
+      // TODO: this.webview.emit('webview:hud:isTalking', isTalking);
     }
   }
 

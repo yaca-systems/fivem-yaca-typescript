@@ -119,13 +119,6 @@ export class YaCAServerModule {
       this.changeVoiceRange(source, range);
     });
 
-    // YACA: Playerlipsync
-    onNet("server:yaca:lipsync", (state: boolean) => {
-      const playerState = Player(source).state;
-
-      playerState.set("yaca:lipsync", state, true);
-    });
-
     // YaCA:successful voice connection and client-id sync
     onNet("server:yaca:addPlayer", (clientId: number) => {
       this.addNewPlayer(source, clientId);
