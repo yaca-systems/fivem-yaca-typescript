@@ -3,10 +3,8 @@
   "connect_error": "Error while connecting to voiceserver, please reconnect!",
   "plugin_not_initialized": "Plugin not initialized!",
 
-  "OUTDATED_VERSION": "You dont use the required plugin version!",
-  "WRONG_TS_SERVER": "You are on the wrong teamspeakserver!",
-  "NOT_CONNECTED": "You are on the wrong teamspeakserver!",
-  "MOVE_ERROR": "Error while moving into ingame teamspeak channel!",
-  "WAIT_GAME_INIT": "",
-  "HEARTBEAT": ""
+  "outdated_plugin": "Your plugin is outdated, please update it!",
+  "wrong_ts_server": "You are connected to the wrong teamspeak server!",
+  "not_connected": "You are not connected to the teamspeak server!",
+  "move_error": "Error while moving to the channel!"
 }

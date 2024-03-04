@@ -11,6 +11,7 @@ export class YaCAClientPhoneModule {
 
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
+
     this.registerEvents();
     this.registerStateBagHandlers();
   }
@@ -62,15 +63,22 @@ export class YaCAClientPhoneModule {
       );
     });
 
+    /**
+     * Handles the "client:yaca:phoneMute" server event.
+     *
+     * @param {number} targetID - The ID of the target.
+     * @param {boolean} state - The state of the phone mute.
+     * @param {boolean} onCallStop - The state of the call.
+     */
     onNet(
       "client:yaca:phoneMute",
-      (targetID: number, state: boolean, onCallstop: boolean = false) => {
+      (targetID: number, state: boolean, onCallStop: boolean = false) => {
         const target = this.clientModule.getPlayerByID(targetID);
         if (!target) return;
 
         target.mutedOnPhone = state;
 
-        if (onCallstop) return;
+        if (onCallStop) return;
 
         if (this.clientModule.useWhisper && target.remoteID == cache.serverId) {
           this.clientModule.setPlayersCommType(
@@ -107,6 +115,12 @@ export class YaCAClientPhoneModule {
       },
     );
 
+    /**
+     * Handles the "client:yaca:phoneSpeaker" server event.
+     *
+     * @param {number | number[]} playerIDs - The IDs of the players to be added or removed from the phone speaker.
+     * @param {boolean} state - The state indicating whether to add or remove the players.
+     */
     onNet(
       "client:yaca:playersToPhoneSpeakerEmit",
       (playerIDs: number | number[], state: boolean) => {
@@ -148,6 +162,9 @@ export class YaCAClientPhoneModule {
   }
 
   registerStateBagHandlers() {
+    /**
+     * Handles the "yaca:phone" state bag change.
+     */
     AddStateBagChangeHandler(
       "yaca:phoneSpeaker",
       "",

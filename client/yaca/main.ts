@@ -1,9 +1,4 @@
-import {
-  cache,
-  initLocale,
-  locale,
-  getLocales,
-} from "@overextended/ox_lib/client";
+import { cache, initLocale, locale } from "@overextended/ox_lib/client";
 import {
   DataObject,
   type YacaClient,
@@ -56,11 +51,20 @@ export class YaCAClientModule {
   isPlayerMuted = false;
   useWhisper = false;
 
-  mhinTimeout: CitizenTimer | null = null;
-  mhintTick: CitizenTimer | null = null;
+  mHintTimeout: CitizenTimer | null = null;
+  mHintTick: CitizenTimer | null = null;
 
   currentlyPhoneSpeakerApplied: Set<number> = new Set();
   currentlySendingPhoneSpeakerSender: Set<number> = new Set();
+
+  responseCodesToErrorMessages: { [key: string]: string | undefined } = {
+    OUTDATED_VERSION: locale("outdated_version"),
+    WRONG_TS_SERVER: locale("wrong_ts_server"),
+    NOT_CONNECTED: locale("not_connected"),
+    MOVE_ERROR: locale("move_error"),
+    WAIT_GAME_INIT: "",
+    HEARTBEAT: "",
+  };
 
   /**
    * Displays a hint message.
@@ -72,9 +76,9 @@ export class YaCAClientModule {
   mhint(head: string, msg: string, time: number = 0) {
     const scaleform = RequestScaleformMovie("MIDSIZED_MESSAGE");
 
-    this.mhinTimeout = setTimeout(
+    this.mHintTimeout = setTimeout(
       () => {
-        this.mhinTimeout = null;
+        this.mHintTimeout = null;
 
         if (!HasScaleformMovieLoaded(scaleform)) {
           this.mhint(head, msg, time);
@@ -90,14 +94,14 @@ export class YaCAClientModule {
         ScaleformMovieMethodAddParamInt(100);
         EndScaleformMovieMethod();
 
-        this.mhintTick = setInterval(() => {
+        this.mHintTick = setInterval(() => {
           DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0);
         }, 0);
 
         if (time != 0) {
           setTimeout(() => {
-            if (this.mhintTick) clearInterval(this.mhintTick);
-            this.mhintTick = null;
+            if (this.mHintTick) clearInterval(this.mHintTick);
+            this.mHintTick = null;
           }, time * 1000);
         }
       },
@@ -106,10 +110,10 @@ export class YaCAClientModule {
   }
 
   stopMhint() {
-    if (this.mhinTimeout) clearTimeout(this.mhinTimeout);
-    this.mhinTimeout = null;
-    if (this.mhintTick) clearInterval(this.mhintTick);
-    this.mhintTick = null;
+    if (this.mHintTimeout) clearTimeout(this.mHintTimeout);
+    this.mHintTimeout = null;
+    if (this.mHintTick) clearInterval(this.mHintTick);
+    this.mHintTick = null;
   }
 
   /**
@@ -146,6 +150,9 @@ export class YaCAClientModule {
     );
     this.websocket = new WebSocket();
 
+    /**
+     * Register the NUI callback types.
+     */
     RegisterNuiCallbackType("YACA_OnNuiReady");
     on(
       "__cfx_nui:YACA_OnNuiReady",
@@ -201,6 +208,9 @@ export class YaCAClientModule {
   }
 
   registerKeybindings() {
+    /**
+     * Registers the "yaca:changeVoiceRange" command and keybinding.
+     */
     RegisterCommand(
       "yaca:changeVoiceRange",
       () => {
@@ -217,6 +227,12 @@ export class YaCAClientModule {
   }
 
   registerEvents() {
+    /**
+     * Handles the "onClientResourceStart" event.
+     *
+     * @param {string} resourceName - The name of the resource that has started.
+     *
+     */
     on("onClientResourceStop", (resourceName: string) => {
       if (GetCurrentResourceName() !== resourceName) {
         return;
@@ -227,6 +243,11 @@ export class YaCAClientModule {
       }
     });
 
+    /**
+     * Handles the "client:yaca:init" server event.
+     *
+     * @param {DataObject} dataObj - The data object to be initialized.
+     */
     onNet("client:yaca:init", async (dataObj: DataObject) => {
       console.log("[YACA-Websocket]: init", JSON.stringify(dataObj));
       if (this.rangeInterval) {
@@ -269,10 +290,21 @@ export class YaCAClientModule {
       this.initRequest(dataObj);
     });
 
+    /**
+     * Handles the "client:yaca:disconnect" server event.
+     *
+     * @param {number} remoteId - The remote ID of the player to be disconnected.
+     *
+     */
     onNet("client:yaca:disconnect", (remoteId: number) => {
       this.allPlayers.delete(remoteId);
     });
 
+    /**
+     * Handles the "client:yaca:addPlayers" server event.
+     *
+     * @param {DataObject | DataObject[]} dataObjects - The data object or objects to be added.
+     */
     onNet(
       "client:yaca:addPlayers",
       (dataObjects: DataObject | DataObject[]) => {
@@ -388,10 +420,20 @@ export class YaCAClientModule {
     */
   }
 
+  /**
+   * Get the player by remote ID.
+   *
+   * @param remoteId The remote ID of the player.
+   */
   getPlayerByID(remoteId: number) {
     return this.allPlayers.get(remoteId);
   }
 
+  /**
+   * Initializes the plugin.
+   *
+   * @param {DataObject} dataObj - The data object to initialize the plugin with.
+   */
   initRequest(dataObj: DataObject) {
     if (
       !dataObj ||
@@ -427,6 +469,11 @@ export class YaCAClientModule {
     this.useWhisper = dataObj.useWhisper ?? false;
   }
 
+  /**
+   * Checks if the plugin is initialized.
+   *
+   * @returns {boolean} Returns true if the plugin is initialized, false otherwise.
+   */
   isPluginInitialized() {
     const inited = !!this.getPlayerByID(cache.serverId);
 
@@ -481,9 +528,9 @@ export class YaCAClientModule {
       return;
     }
 
-    const locale = getLocales()[payload.code];
-    const message = locale ?? "Unknown error!";
-    if (typeof locale === "undefined")
+    const message =
+      this.responseCodesToErrorMessages[payload.code] ?? "Unknown error!";
+    if (typeof this.responseCodesToErrorMessages[payload.code] === "undefined")
       console.log(`[YaCA-Websocket]: Unknown error code: ${payload.code}`);
     if (message.length < 1) return;
 
@@ -494,25 +541,9 @@ export class YaCAClientModule {
   }
 
   /**
-   * Synchronizes the lip movement of a player based on whether they are talking or not.
-   *
-   * @param {number} player - The player whose lips are to be synchronized.
-   * @param {boolean} isTalking - Indicates whether the player is talking.
-   */
-  syncLipsPlayer(player: number, isTalking: boolean) {
-    const animationData = lipsyncAnims[isTalking ? "true" : "false"];
-
-    const ped = GetPlayerPed(GetPlayerFromServerId(player));
-
-    PlayFacialAnim(ped, animationData.name, animationData.dict);
-
-    this.setPlayerVariable(player, "isTalking", isTalking);
-  }
-
-  /**
    * Convert camera rotation to direction vector.
    */
-  getCamDirection() {
+  getCamDirection(): { x: number; y: number; z: number } {
     const rotVector = GetGameplayCamRot(0);
     const num = rotVector[2] * 0.0174532924;
     const num2 = rotVector[0] * 0.0174532924;
@@ -537,15 +568,15 @@ export class YaCAClientModule {
 
     if (!currentData) this.allPlayers.set(player, {});
 
-    // @ts-expect-error TODO
+    // @ts-expect-error Object cannot be undefined
     this.getPlayerByID(player)[variable] = value;
   }
 
   /**
-   * Changes the voice range.
+   * Changes the voice range to the next range.
    */
   changeVoiceRange() {
-    if (!this.playerLocalPlugin.canChangeVoiceRange) return false;
+    if (!this.playerLocalPlugin.canChangeVoiceRange) return;
 
     if (this.visualVoiceRangeTimeout) {
       clearTimeout(this.visualVoiceRangeTimeout);
@@ -577,12 +608,15 @@ export class YaCAClientModule {
     }, 1000);
 
     this.visualVoiceRangeTick = setInterval(() => {
-      const pos = GetEntityCoords(cache.ped, false);
+      const entity = cache.vehicle || cache.ped;
+      const pos = GetEntityCoords(entity, false);
+      const posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98;
+
       DrawMarker(
         1,
         pos[0],
         pos[1],
-        pos[2] - 0.98,
+        posZ,
         0,
         0,
         0,
@@ -608,8 +642,6 @@ export class YaCAClientModule {
     });
 
     emitNet("server:yaca:changeVoiceRange", voiceRange);
-
-    return true;
   }
 
   /**
@@ -633,8 +665,8 @@ export class YaCAClientModule {
    * @param {boolean} state - The state of the communication.
    * @param {number} channel - The channel for the communication. Optional.
    * @param {number} range - The range for the communication. Optional.
-   * @param {CommDeviceMode} ownMode
-   * @param {CommDeviceMode} otherPlayersMode
+   * @param {CommDeviceMode} ownMode - The mode for the player. Optional.
+   * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
    */
   setPlayersCommType(
     players: YacaPlayerData | (YacaPlayerData | undefined)[] | undefined,
@@ -647,9 +679,9 @@ export class YaCAClientModule {
   ) {
     if (!Array.isArray(players)) players = [players];
 
-    const cids: YacaClient[] = [];
+    const clientIds: YacaClient[] = [];
     if (typeof ownMode != "undefined") {
-      cids.push({
+      clientIds.push({
         client_id: this.getPlayerByID(cache.serverId)?.clientId,
         mode: ownMode,
       });
@@ -658,7 +690,7 @@ export class YaCAClientModule {
     for (const player of players) {
       if (!player) continue;
 
-      cids.push({
+      clientIds.push({
         client_id: player.clientId,
         mode: otherPlayersMode,
       });
@@ -667,7 +699,7 @@ export class YaCAClientModule {
     const protocol: YacaProtocol = {
       on: state,
       comm_type: type,
-      members: cids,
+      members: clientIds,
     };
 
     if (typeof channel !== "undefined") protocol.channel = channel;
@@ -729,8 +761,6 @@ export class YaCAClientModule {
     });
   }
 
-  /* ======================== BASIC SYSTEM ======================== */
-
   /**
    * Monitoring if player is connected to teamspeak.
    */
@@ -782,7 +812,7 @@ export class YaCAClientModule {
   }
 
   /**
-   * Calculate the players in streamingrange and send them to the voiceplugin.
+   * Calculate the players in streaming range and send them to the voice plugin.
    */
   calcPlayers() {
     const players = new Map();
@@ -923,7 +953,7 @@ export class YaCAClientModule {
       }
     });
 
-    /** Send collected data to ts-plugin. */
+    /* Send collected data to the ts-plugin. */
     this.sendWebsocket({
       base: { request_type: "INGAME" },
       player: {

@@ -19,10 +19,21 @@ export class YaCAClientMegaphoneModule {
   }
 
   registerEvents() {
+    /**
+     * Handles the "client:yaca:setLastMegaphoneState" server event.
+     *
+     * @param {boolean} state - The state of the megaphone.
+     */
     onNet("client:yaca:setLastMegaphoneState", (state: boolean) => {
       this.lastMegaphoneState = state;
     });
 
+    /**
+     * Checks if the player can use the megaphone when they enter a vehicle.
+     * If they can, it sets the `canUseMegaphone` property to `true`.
+     * If they can't, it sets the `canUseMegaphone` property to `false`.
+     * If the player is not in a vehicle, it sets the `canUseMegaphone` property to `false` and emits the "server:yaca:playerLeftVehicle" event.
+     */
     onCache<number | false>("vehicle", (vehicle) => {
       if (vehicle) {
         const vehicleClass = GetVehicleClass(vehicle);
@@ -31,7 +42,7 @@ export class YaCAClientMegaphoneModule {
           this.clientModule.sharedConfig.megaphoneAllowedVehicleClasses.includes(
             vehicleClass,
           );
-      } else {
+      } else if (this.canUseMegaphone) {
         this.canUseMegaphone = false;
         emitNet("server:yaca:playerLeftVehicle");
       }
@@ -39,6 +50,9 @@ export class YaCAClientMegaphoneModule {
   }
 
   registerKeybinds() {
+    /**
+     * Registers the command and key mapping for the megaphone.
+     */
     RegisterCommand(
       "+yaca:megaphone",
       () => {
@@ -57,6 +71,9 @@ export class YaCAClientMegaphoneModule {
   }
 
   registerStateBagHandlers() {
+    /**
+     * Handles the "yaca:megaphoneactive" state bag change.
+     */
     AddStateBagChangeHandler(
       "yaca:megaphoneactive",
       "",

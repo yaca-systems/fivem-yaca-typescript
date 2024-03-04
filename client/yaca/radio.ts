@@ -40,10 +40,26 @@ export class YaCAClientRadioModule {
       this.webview.on("client:yaca:changeRadioSpeaker", () => {})
     */
 
+    /**
+     * Handles the "client:yaca:setRadioFreq" server event.
+     *
+     * @param {number} channel - The channel number.
+     * @param {string} frequency - The frequency to set.
+     */
     onNet("client:yaca:setRadioFreq", (channel: number, frequency: string) => {
       this.setRadioFrequency(channel, frequency);
     });
 
+    /**
+     * Handles the "client:yaca:radioTalking" server event.
+     *
+     * @param {number} target - The ID of the target.
+     * @param {string} frequency - The frequency of the radio.
+     * @param {boolean} state - The state of the radio talking.
+     * @param {object[]} infos - The information about the radio.
+     * @param {boolean} infos.shortRange - The state of the short range.
+     * @param {boolean} self - The state of the player.
+     */
     onNet(
       "client:yaca:radioTalking",
       (
@@ -94,6 +110,12 @@ export class YaCAClientRadioModule {
       },
     );
 
+    /**
+     * Handles the "client:yaca:setRadioMuteState" server event.
+     *
+     * @param {number} channel - The channel number.
+     * @param {boolean} state - The state of the radio mute.
+     */
     onNet(
       "client:yaca:setRadioMuteState",
       (channel: number, state: boolean) => {
@@ -103,6 +125,12 @@ export class YaCAClientRadioModule {
       },
     );
 
+    /**
+     * Handles the "client:yaca:leaveRadioChannel" server event.
+     *
+     * @param {number | number[]} client_ids - The IDs of the clients.
+     * @param {string} frequency - The frequency of the radio.
+     */
     onNet(
       "client:yaca:leaveRadioChannel",
       (client_ids: number | number[], frequency: string) => {
@@ -139,6 +167,9 @@ export class YaCAClientRadioModule {
     );
     // RegisterKeyMapping('yaca:radioUI', 'Radio UI', 'keyboard', 'F10')
 
+    /**
+     * Registers the command and key mapping for the radio talking.
+     */
     RegisterCommand(
       "+yaca:radioTalking",
       () => {
@@ -214,8 +245,6 @@ export class YaCAClientRadioModule {
     );
   }
 
-  /* ======================== RADIO SYSTEM ======================== */
-
   /**
    * Enable or disable the radio system.
    *
@@ -248,6 +277,11 @@ export class YaCAClientRadioModule {
     }
   }
 
+  /**
+   * Change the radio frequency.
+   *
+   * @param frequency - The new frequency.
+   */
   changeRadioFrequency(frequency: string) {
     if (!this.clientModule.isPluginInitialized()) return;
 
@@ -258,6 +292,9 @@ export class YaCAClientRadioModule {
     );
   }
 
+  /**
+   * Mute the active radio channel.
+   */
   muteRadioChannel() {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
 
@@ -279,6 +316,11 @@ export class YaCAClientRadioModule {
     this.updateRadioInWebview(channel);
   }
 
+  /**
+   * Change the volume of the active radio channel.
+   *
+   * @param higher - Whether to increase the volume.
+   */
   changeRadioChannelVolume(higher: boolean) {
     if (
       !this.clientModule.isPluginInitialized() ||
@@ -353,6 +395,10 @@ export class YaCAClientRadioModule {
   }
 
   // TODO: Implement the radio UI
+
+  /**
+   * Open the radio UI.
+   */
   openRadio() {
     if (!this.radioToggle /* && !alt.isCursorVisible() */) {
       this.radioToggle = true;
@@ -417,6 +463,12 @@ export class YaCAClientRadioModule {
     );
   }
 
+  /**
+   * Sends an event to the plugin when a player starts or stops talking on the radio with whisper.
+   *
+   * @param state - The state of the player talking on the radio.
+   * @param targets - The IDs of the targets.
+   */
   radioTalkingStateToPluginWithWhisper(
     state: boolean,
     targets: number | number[],
@@ -450,8 +502,8 @@ export class YaCAClientRadioModule {
   updateRadioInWebview(channel: number) {
     if (channel != this.activeRadioChannel) return;
 
-    // this.webview.emit("webview:radio:setChannelData", this.radioChannelSettings[channel]);
-    // this.webview.emit('webview:hud:radioChannel', channel, this.radioChannelSettings[channel].muted);
+    // TODO: this.webview.emit("webview:radio:setChannelData", this.radioChannelSettings[channel]);
+    // TODO: this.webview.emit('webview:hud:radioChannel', channel, this.radioChannelSettings[channel].muted);
   }
 
   /**
@@ -473,6 +525,12 @@ export class YaCAClientRadioModule {
     return foundChannel;
   }
 
+  /**
+   * Set the radio frequency.
+   *
+   * @param channel - The channel number.
+   * @param frequency - The frequency to set.
+   */
   setRadioFrequency(channel: number, frequency: string) {
     this.radioFrequencySet = true;
 
@@ -525,12 +583,16 @@ export class YaCAClientRadioModule {
     if (!state) {
       if (this.radioTalking) {
         this.radioTalking = false;
-        if (!this.clientModule.useWhisper)
+        if (!this.clientModule.useWhisper) {
           this.radioTalkingStateToPlugin(false);
+        }
+
         emitNet("server:yaca:radioTalking", false);
-        // this.webview.emit('webview:hud:isRadioTalking', false);
-        if (clearPedTasks)
+
+        // TODO: this.webview.emit('webview:hud:isRadioTalking', false);
+        if (clearPedTasks) {
           StopAnimTask(cache.ped, "random@arrests", "generic_radio_chatter", 4);
+        }
       }
 
       return;
@@ -540,7 +602,9 @@ export class YaCAClientRadioModule {
       return;
 
     this.radioTalking = true;
-    if (!this.clientModule.useWhisper) this.radioTalkingStateToPlugin(true);
+    if (!this.clientModule.useWhisper) {
+      this.radioTalkingStateToPlugin(true);
+    }
 
     requestAnimDict("random@arrests").then(() => {
       TaskPlayAnim(
@@ -558,7 +622,7 @@ export class YaCAClientRadioModule {
       );
 
       emitNet("server:yaca:radioTalking", true);
-      // this.webview.emit('webview:hud:isRadioTalking', true);
+      // TODO: this.webview.emit('webview:hud:isRadioTalking', true);
     });
   }
 }
