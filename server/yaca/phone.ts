@@ -1,6 +1,6 @@
 import { YaCAServerModule } from "yaca";
 
-export class YaCAPhoneModle {
+export class YaCAServerPhoneModle {
   private serverModule: YaCAServerModule;
 
   constructor(serverModule: YaCAServerModule) {

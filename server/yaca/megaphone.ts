@@ -1,7 +1,7 @@
 import { YacaServerConfig } from "types";
 import { YaCAServerModule } from "yaca";
 
-export class YaCAMegaphoneModule {
+export class YaCAServerMegaphoneModule {
   private serverModule: YaCAServerModule;
   private serverConfig: YacaServerConfig;
 

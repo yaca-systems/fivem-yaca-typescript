@@ -2,7 +2,6 @@ import {
   cache,
   initLocale,
   locale,
-  requestAnimDict,
   getLocales,
 } from "@overextended/ox_lib/client";
 import {
@@ -11,7 +10,6 @@ import {
   YacaLocalPlugin,
   YacaPlayerData,
   type YacaProtocol,
-  type YacaRadioSettings,
   YacaResponse,
   CommDeviceMode,
   YacaBuildType,
@@ -19,9 +17,17 @@ import {
   YacaStereoMode,
   type YacaSharedConfig,
 } from "types";
-import { calculateDistanceVec3, convertNumberArrayToXYZ } from "utils";
-import { WebSocket } from "websocket";
-import { onCache } from "@overextended/ox_lib/server";
+import {
+  calculateDistanceVec3,
+  convertNumberArrayToXYZ,
+  WebSocket,
+} from "utils";
+import {
+  YaCAClientIntercomModule,
+  YaCAClientMegaphoneModule,
+  YaCAClientPhoneModule,
+  YaCAClientRadioModule,
+} from "yaca";
 
 initLocale();
 
@@ -37,45 +43,33 @@ const lipsyncAnims: { [key: string]: { name: string; dict: string } } = {
 };
 
 export class YaCAClientModule {
-  static instance: YaCAClientModule;
-  allPlayers: Map<number, YacaPlayerData> = new Map();
+  websocket: WebSocket;
   sharedConfig: YacaSharedConfig;
+  allPlayers: Map<number, YacaPlayerData> = new Map();
   playerLocalPlugin: YacaLocalPlugin;
+  firstConnect = true;
 
+  radioModule: YaCAClientRadioModule;
+  phoneModule: YaCAClientPhoneModule;
+  megaphoneModule: YaCAClientMegaphoneModule;
+  intercomModule: YaCAClientIntercomModule;
+
+  rangeIndex: number;
   rangeInterval: CitizenTimer | null = null;
   monitorInterval: CitizenTimer | null = null;
-  websocket: WebSocket;
-  noPluginActivated = 0;
-  messageDisplayed = false;
   visualVoiceRangeTimeout: CitizenTimer | null = null;
   visualVoiceRangeTick: CitizenTimer | null = null;
-  rangeIndex: number;
-  uirange: number = 2;
-  lastuiRange = 2;
+
+  noPluginActivated = 0;
+  messageDisplayed = false;
   isTalking = false;
-  firstConnect = true;
   isPlayerMuted = false;
-
-  radioFrequenceSetted = false;
-  radioToggle = false;
-  radioEnabled = false;
-  radioTalking = false;
-  radioChannelSettings: { [key: number]: YacaRadioSettings } = {};
-  radioInited = false;
-  activeRadioChannel = 1;
-  playersWithShortRange = new Map();
-  playersInRadioChannel: Map<number, Set<number>> = new Map();
-
-  phoneSpeakerActive = false;
-  currentlyPhoneSpeakerApplied: Set<number> = new Set();
-
   useWhisper = false;
 
   mhinTimeout: CitizenTimer | null = null;
   mhintTick: CitizenTimer | null = null;
 
-  inCall: boolean = false;
-
+  currentlyPhoneSpeakerApplied: Set<number> = new Set();
   currentlySendingPhoneSpeakerSender: Set<number> = new Set();
 
   /**
@@ -184,69 +178,11 @@ export class YaCAClientModule {
 
     this.registerEvents();
     this.registerKeybindings();
-    this.registerListeners();
 
-    AddStateBagChangeHandler(
-      "yaca:megaphoneactive",
-      "",
-      (
-        bagName: string,
-        _: string,
-        value: number | undefined,
-        __: number,
-        replicated: boolean,
-      ) => {
-        if (replicated) return;
-
-        const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId == 0) return;
-
-        const playerSource = GetPlayerServerId(playerId);
-        if (playerSource == 0) return;
-
-        const isOwnPlayer = playerSource === cache.serverId;
-        YaCAClientModule.setPlayersCommType(
-          isOwnPlayer ? [] : this.getPlayerByID(playerSource),
-          YacaFilterEnum.MEGAPHONE,
-          typeof value !== "undefined",
-          undefined,
-          value,
-          isOwnPlayer ? CommDeviceMode.SENDER : CommDeviceMode.RECEIVER,
-          isOwnPlayer ? CommDeviceMode.RECEIVER : CommDeviceMode.SENDER,
-        );
-      },
-    );
-
-    AddStateBagChangeHandler(
-      "yaca:phoneSpeaker",
-      "",
-      (
-        bagName: string,
-        _: string,
-        value: object,
-        __: number,
-        replicated: boolean,
-      ) => {
-        if (replicated) return;
-
-        const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId == 0) return;
-
-        const playerSource = GetPlayerServerId(playerId);
-        if (playerSource == 0) return;
-
-        if (playerSource == cache.serverId) this.phoneSpeakerActive = !!value;
-
-        this.removePhoneSpeakerFromEntity(playerSource);
-        if (typeof value != "undefined") {
-          this.setPlayerVariable(
-            playerSource,
-            "phoneCallMemberIds",
-            Array.isArray(value) ? value : [value],
-          );
-        }
-      },
-    );
+    this.intercomModule = new YaCAClientIntercomModule(this);
+    this.megaphoneModule = new YaCAClientMegaphoneModule(this);
+    this.phoneModule = new YaCAClientPhoneModule(this);
+    this.radioModule = new YaCAClientRadioModule(this);
 
     AddStateBagChangeHandler(
       "yaca:lipsync",
@@ -273,35 +209,6 @@ export class YaCAClientModule {
     console.log("[Client] YaCA Client loaded.");
   }
 
-  /***
-   * Gets the singleton of YaCAClientModule
-   *
-   * @returns {YaCAClientModule}
-   */
-  static getInstance(): YaCAClientModule {
-    if (!this.instance) {
-      this.instance = new YaCAClientModule();
-    }
-
-    return this.instance;
-  }
-
-  registerListeners() {
-    onCache<number | false>("vehicle", (vehicle) => {
-      if (vehicle) {
-        const vehicleClass = GetVehicleClass(vehicle);
-
-        this.playerLocalPlugin.canUseMegaphone =
-          this.sharedConfig.megaphoneAllowedVehicleClasses.includes(
-            vehicleClass,
-          );
-      } else {
-        this.playerLocalPlugin.canUseMegaphone = false;
-        emitNet("server:yaca:playerLeftVehicle");
-      }
-    });
-  }
-
   registerKeybindings() {
     RegisterCommand(
       "yaca:changeVoiceRange",
@@ -316,47 +223,6 @@ export class YaCAClientModule {
       "keyboard",
       "Z",
     );
-
-    RegisterCommand(
-      "yaca:radioUI",
-      () => {
-        this.openRadio();
-      },
-      false,
-    );
-    // RegisterKeyMapping('yaca:radioUI', 'Radio UI', 'keyboard', 'F10')
-
-    RegisterCommand(
-      "+yaca:radioTalking",
-      () => {
-        this.radioTalkingStart(true);
-      },
-      false,
-    );
-    RegisterCommand(
-      "-yaca:radioTalking",
-      () => {
-        this.radioTalkingStart(false);
-      },
-      false,
-    );
-    RegisterKeyMapping("yaca:radioTalking", "Funk Sprechen", "keyboard", "N");
-
-    RegisterCommand(
-      "+yaca:megaphone",
-      () => {
-        this.useMegaphone(true);
-      },
-      false,
-    );
-    RegisterCommand(
-      "-yaca:megaphone",
-      () => {
-        this.useMegaphone(false);
-      },
-      false,
-    );
-    RegisterKeyMapping("+yaca:megaphone", "Megaphone", "keyboard", "M");
   }
 
   registerEvents() {
@@ -410,10 +276,6 @@ export class YaCAClientModule {
       if (this.firstConnect) return;
 
       this.initRequest(dataObj);
-    });
-
-    onNet("client:yaca:setLastMegaphoneState", (state: boolean) => {
-      this.playerLocalPlugin.lastMegaphoneState = state;
     });
 
     onNet("client:yaca:disconnect", (remoteId: number) => {
@@ -474,370 +336,6 @@ export class YaCAClientModule {
       const player = this.getPlayerByID(target);
       if (player) player.range = range;
     });
-
-    /**
-     * Handles the "client:yaca:setMaxVoiceRange" server event.
-     *
-     * @param {number} maxRange - The maximum voice range to be set.
-     */
-    onNet("client:yaca:setMaxVoiceRange", (maxRange: number) => {
-      this.playerLocalPlugin.maxVoiceRange = maxRange;
-
-      if (maxRange == 15) {
-        this.uirange = 4;
-        this.lastuiRange = 4;
-      }
-    });
-
-    /* =========== RADIO SYSTEM =========== */
-    /* this.webview.on('client:yaca:enableRadio', (state) => {
-      if (!this.isPluginInitialized()) return;
-
-      if (this.radioEnabled != state) {
-        this.radioEnabled = state;
-        alt.emitServerRaw("server:yaca:enableRadio", state);
-
-        if (!state) {
-          for (let i = 1; i <= settings.maxRadioChannels; i++) {
-            this.disableRadioFromPlayerInChannel(i);
-          }
-        }
-      }
-
-      this.webview.emit('webview:hud:radioState', state);
-
-      if (state && !this.radioInited) {
-        this.radioInited = true;
-        this.initRadioSettings();
-        this.updateRadioInWebview(this.activeRadioChannel);
-      }
-    });
-
-    this.webview.on('client:yaca:changeRadioFrequency', (frequency) => {
-      if (!this.isPluginInitialized()) return;
-
-      alt.emitServerRaw("server:yaca:changeRadioFrequency", this.activeRadioChannel, frequency);
-    }); */
-
-    onNet("client:yaca:setRadioFreq", (channel: number, frequency: string) => {
-      this.setRadioFrequency(channel, frequency);
-    });
-
-    onNet(
-      "client:yaca:radioTalking",
-      (
-        target: number,
-        frequency: string,
-        state: boolean,
-        infos: { shortRange: boolean }[],
-        self = false,
-      ) => {
-        if (self) {
-          this.radioTalkingStateToPluginWithWhisper(state, target);
-          return;
-        }
-
-        const channel = this.findRadioChannelByFrequency(frequency);
-        if (!channel) return;
-
-        const player = this.getPlayerByID(target);
-        if (!player) return;
-
-        const info = infos[cache.serverId];
-
-        if (
-          !info?.shortRange /* TODO: || (info?.shortRange && alt.Player.getByRemoteID(target)?.isSpawned) */
-        ) {
-          YaCAClientModule.setPlayersCommType(
-            player,
-            YacaFilterEnum.RADIO,
-            state,
-            channel,
-            undefined,
-            CommDeviceMode.RECEIVER,
-            CommDeviceMode.SENDER,
-          );
-        }
-
-        state
-          ? this.playersInRadioChannel.get(channel)?.add(target)
-          : this.playersInRadioChannel.get(channel)?.delete(target);
-
-        if (info?.shortRange || !state) {
-          if (state) {
-            this.playersWithShortRange.set(target, frequency);
-          } else {
-            this.playersWithShortRange.delete(target);
-          }
-        }
-      },
-    );
-
-    /* this.webview.on('client:yaca:muteRadioChannel', () => {
-      if (!this.isPluginInitialized() || !this.radioEnabled) return;
-
-      const channel = this.activeRadioChannel;
-      if (this.radioChannelSettings[channel].frequency == 0) return;
-      alt.emitServerRaw("server:yaca:muteRadioChannel", channel)
-    }); */
-
-    onNet(
-      "client:yaca:setRadioMuteState",
-      (channel: number, state: boolean) => {
-        this.radioChannelSettings[channel].muted = state;
-        this.updateRadioInWebview(channel);
-        this.disableRadioFromPlayerInChannel(channel);
-      },
-    );
-
-    onNet(
-      "client:yaca:leaveRadioChannel",
-      (client_ids: number | number[], frequency: string) => {
-        if (!Array.isArray(client_ids)) client_ids = [client_ids];
-
-        const channel = this.findRadioChannelByFrequency(frequency);
-        if (!channel) return;
-
-        const playerData = this.getPlayerByID(cache.serverId);
-        if (!playerData || !playerData.clientId) return;
-
-        if (client_ids.includes(playerData.clientId))
-          this.setRadioFrequency(channel, "0");
-
-        this.sendWebsocket({
-          base: { request_type: "INGAME" },
-          comm_device_left: {
-            comm_type: YacaFilterEnum.RADIO,
-            client_ids: client_ids,
-            channel: channel,
-          },
-        });
-      },
-    );
-
-    /*this.webview.on('client:yaca:changeActiveRadioChannel', (channel) => {
-      if (!this.isPluginInitialized() || !this.radioEnabled) return;
-
-      alt.emitServerRaw('server:yaca:changeActiveRadioChannel', channel);
-      this.activeRadioChannel = channel;
-      this.updateRadioInWebview(channel);
-    });
-
-    this.webview.on('client:yaca:changeRadioChannelVolume', (higher) => {
-      if (!this.isPluginInitialized() || !this.radioEnabled || this.radioChannelSettings[this.activeRadioChannel].frequency == 0) return;
-
-      const channel = this.activeRadioChannel;
-      const oldVolume = this.radioChannelSettings[channel].volume;
-      this.radioChannelSettings[channel].volume = this.clamp(
-        oldVolume + (higher ? 0.17 : -0.17),
-        0,
-        1
-      )
-
-      // Prevent event emit spams, if nothing changed
-      if (oldVolume == this.radioChannelSettings[channel].volume) return
-
-      if (this.radioChannelSettings[channel].volume == 0 || (oldVolume == 0 && this.radioChannelSettings[channel].volume > 0)) {
-        alt.emitServerRaw("server:yaca:muteRadioChannel", channel)
-      }
-
-      // Prevent duplicate update, cuz mute has its own update
-      if (this.radioChannelSettings[channel].volume > 0) this.updateRadioInWebview(channel);
-
-      // Send update to voiceplugin
-      this.setCommDeviceVolume(YacaFilterEnum.RADIO, this.radioChannelSettings[channel].volume, channel);
-    });
-
-    this.webview.on("client:yaca:changeRadioChannelStereo", () => {
-      if (!this.isPluginInitialized() || !this.radioEnabled) return;
-
-      const channel = this.activeRadioChannel;
-
-      switch (this.radioChannelSettings[channel].stereo) {
-        case YacaStereoMode.STEREO:
-          this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_LEFT;
-          this.radarNotification(`Kanal ${channel} ist nun auf der linken Seite hörbar.`);
-          break;
-        case YacaStereoMode.MONO_LEFT:
-          this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_RIGHT;
-          this.radarNotification(`Kanal ${channel} ist nun auf der rechten Seite hörbar.`);
-          break;
-        case YacaStereoMode.MONO_RIGHT:
-          this.radioChannelSettings[channel].stereo = YacaStereoMode.STEREO;
-          this.radarNotification(`Kanal ${channel} ist nun auf beiden Seiten hörbar.`);
-      };
-
-      // Send update to voiceplugin
-      this.setCommDeviceStereomode(YacaFilterEnum.RADIO, this.radioChannelSettings[channel].stereo, channel);
-    });
-
-    //TODO: Implement, will be used if player activates radio speaker so everyone around him can hear it
-    this.webview.on("client:yaca:changeRadioSpeaker", () => {
-
-    }) */
-
-    /* =========== INTERCOM SYSTEM =========== */
-    /**
-     * Handles the "client:yaca:addRemovePlayerIntercomFilter" server event.
-     *
-     * @param {Number[] | Number} playerIDs - The IDs of the players to be added or removed from the intercom filter.
-     * @param {boolean} state - The state indicating whether to add or remove the players.
-     */
-    onNet(
-      "client:yaca:addRemovePlayerIntercomFilter",
-      (playerIDs: number | number[], state: boolean) => {
-        if (!Array.isArray(playerIDs)) playerIDs = [playerIDs];
-
-        const playersToAddRemove: Set<YacaPlayerData> = new Set();
-        for (const playerID of playerIDs) {
-          const player = this.getPlayerByID(playerID);
-          if (!player) continue;
-          playersToAddRemove.add(player);
-        }
-
-        if (playersToAddRemove.size < 1) return;
-        YaCAClientModule.setPlayersCommType(
-          Array.from(playersToAddRemove),
-          YacaFilterEnum.INTERCOM,
-          state,
-          undefined,
-          undefined,
-          CommDeviceMode.TRANSCEIVER,
-          CommDeviceMode.TRANSCEIVER,
-        );
-      },
-    );
-
-    /* =========== PHONE SYSTEM =========== */
-    /**
-     * Handles the "client:yaca:phone" server event.
-     *
-     * @param {number} targetID - The ID of the target.
-     * @param {boolean} state - The state of the phone.
-     */
-    onNet("client:yaca:phone", (targetID: number, state: boolean) => {
-      const target = this.getPlayerByID(targetID);
-      if (!target) return;
-
-      this.inCall = state;
-
-      YaCAClientModule.setPlayersCommType(
-        target,
-        YacaFilterEnum.PHONE,
-        state,
-        undefined,
-        undefined,
-        CommDeviceMode.TRANSCEIVER,
-        CommDeviceMode.TRANSCEIVER,
-      );
-    });
-
-    /**
-     * Handles the "client:yaca:phoneOld" server event.
-     *
-     * @param {number} targetID - The ID of the target.
-     * @param {boolean} state - The state of the phone.
-     */
-    onNet("client:yaca:phoneOld", (targetID: number, state: boolean) => {
-      const target = this.getPlayerByID(targetID);
-      if (!target) return;
-
-      this.inCall = state;
-
-      YaCAClientModule.setPlayersCommType(
-        target,
-        YacaFilterEnum.PHONE_HISTORICAL,
-        state,
-        undefined,
-        undefined,
-        CommDeviceMode.TRANSCEIVER,
-        CommDeviceMode.TRANSCEIVER,
-      );
-    });
-
-    onNet(
-      "client:yaca:phoneMute",
-      (targetID: number, state: boolean, onCallstop: boolean = false) => {
-        const target = this.getPlayerByID(targetID);
-        if (!target) return;
-
-        target.mutedOnPhone = state;
-
-        if (onCallstop) return;
-
-        if (this.useWhisper && target.remoteID == cache.serverId) {
-          YaCAClientModule.setPlayersCommType(
-            [],
-            YacaFilterEnum.PHONE,
-            !state,
-            undefined,
-            undefined,
-            CommDeviceMode.SENDER,
-          );
-        } else if (!this.useWhisper) {
-          if (state) {
-            YaCAClientModule.setPlayersCommType(
-              target,
-              YacaFilterEnum.PHONE,
-              false,
-              undefined,
-              undefined,
-              CommDeviceMode.TRANSCEIVER,
-              CommDeviceMode.TRANSCEIVER,
-            );
-          } else {
-            YaCAClientModule.setPlayersCommType(
-              target,
-              YacaFilterEnum.PHONE,
-              true,
-              undefined,
-              undefined,
-              CommDeviceMode.TRANSCEIVER,
-              CommDeviceMode.TRANSCEIVER,
-            );
-          }
-        }
-      },
-    );
-
-    onNet(
-      "client:yaca:playersToPhoneSpeakerEmit",
-      (playerIDs: number | number[], state: boolean) => {
-        if (!Array.isArray(playerIDs)) playerIDs = [playerIDs];
-
-        const applyRemovePhoneSpeaker: Set<YacaPlayerData> = new Set();
-        for (const playerID of playerIDs) {
-          const player = this.getPlayerByID(playerID);
-          if (!player) continue;
-
-          applyRemovePhoneSpeaker.add(player);
-        }
-
-        if (applyRemovePhoneSpeaker.size < 1) return;
-
-        if (state) {
-          YaCAClientModule.setPlayersCommType(
-            Array.from(applyRemovePhoneSpeaker),
-            YacaFilterEnum.PHONE_SPEAKER,
-            true,
-            undefined,
-            undefined,
-            CommDeviceMode.SENDER,
-            CommDeviceMode.RECEIVER,
-          );
-        } else {
-          YaCAClientModule.setPlayersCommType(
-            Array.from(applyRemovePhoneSpeaker),
-            YacaFilterEnum.PHONE_SPEAKER,
-            false,
-            undefined,
-            undefined,
-            CommDeviceMode.SENDER,
-            CommDeviceMode.RECEIVER,
-          );
-        }
-      },
-    );
 
     /* TODO: Handle stream-in/out
 
@@ -979,7 +477,7 @@ export class YaCAClientModule {
         this.rangeInterval = setInterval(this.calcPlayers.bind(this), 250);
 
         // Set radio settings on reconnect only, else on first opening
-        if (this.radioInited) this.initRadioSettings();
+        if (this.radioModule.radioInited) this.radioModule.initRadioSettings();
         return;
       }
 
@@ -1146,7 +644,7 @@ export class YaCAClientModule {
    * @param {CommDeviceMode} ownMode
    * @param {CommDeviceMode} otherPlayersMode
    */
-  static setPlayersCommType(
+  setPlayersCommType(
     players: YacaPlayerData | (YacaPlayerData | undefined)[] | undefined,
     type: YacaFilterEnum,
     state: boolean,
@@ -1160,8 +658,7 @@ export class YaCAClientModule {
     const cids: YacaClient[] = [];
     if (typeof ownMode != "undefined") {
       cids.push({
-        client_id: YaCAClientModule.getInstance().getPlayerByID(cache.serverId)
-          ?.clientId,
+        client_id: this.getPlayerByID(cache.serverId)?.clientId,
         mode: ownMode,
       });
     }
@@ -1184,7 +681,7 @@ export class YaCAClientModule {
     if (typeof channel !== "undefined") protocol.channel = channel;
     if (typeof range !== "undefined") protocol.range = range;
 
-    YaCAClientModule.getInstance().sendWebsocket({
+    this.sendWebsocket({
       base: { request_type: "INGAME" },
       comm_device: protocol,
     });
@@ -1337,8 +834,8 @@ export class YaCAClientModule {
       // Phone speaker handling - user who enabled it.
       if (
         this.useWhisper &&
-        this.phoneSpeakerActive &&
-        this.inCall &&
+        this.phoneModule.phoneSpeakerActive &&
+        this.phoneModule.inCall &&
         calculateDistanceVec3(localPos, playerPos) <=
           this.sharedConfig.maxPhoneSpeakerRange
       ) {
@@ -1373,7 +870,7 @@ export class YaCAClientModule {
 
           playersOnPhoneSpeaker.add(phoneCallMemberId);
 
-          YaCAClientModule.setPlayersCommType(
+          this.setPlayersCommType(
             phoneCallMember,
             YacaFilterEnum.PHONE_SPEAKER,
             true,
@@ -1390,8 +887,8 @@ export class YaCAClientModule {
 
     if (
       this.useWhisper &&
-      ((this.phoneSpeakerActive && this.inCall) ||
-        ((!this.phoneSpeakerActive || !this.inCall) &&
+      ((this.phoneModule.phoneSpeakerActive && this.phoneModule.inCall) ||
+        ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCall) &&
           this.currentlySendingPhoneSpeakerSender.size))
     ) {
       const playersToNotReceivePhoneSpeaker = [
@@ -1418,7 +915,7 @@ export class YaCAClientModule {
     this.currentlyPhoneSpeakerApplied.forEach((playerId) => {
       if (!playersOnPhoneSpeaker.has(playerId)) {
         this.currentlyPhoneSpeakerApplied.delete(playerId);
-        YaCAClientModule.setPlayersCommType(
+        this.setPlayersCommType(
           this.getPlayerByID(playerId),
           YacaFilterEnum.PHONE_SPEAKER,
           false,
@@ -1442,259 +939,5 @@ export class YaCAClientModule {
         players_list: Array.from(players.values()),
       },
     });
-  }
-
-  /* ======================== RADIO SYSTEM ======================== */
-
-  // TODO: Implement the radio system
-  openRadio() {
-    if (!this.radioToggle /* && !alt.isCursorVisible() */) {
-      this.radioToggle = true;
-      /* alt.showCursor(true);
-      this.webview.emit('webview:radio:openState', true);
-      NKeyhandler.disableAllKeybinds("radioUI", true, ["yaca:radioUI", "yaca:radioTalking"], ["yaca:radioTalking"]) */
-    } else if (this.radioToggle) {
-      this.closeRadio();
-    }
-  }
-
-  /**
-   * Cleanup different things, if player closes his radio.
-   */
-  closeRadio() {
-    this.radioToggle = false;
-
-    /* alt.showCursor(false);
-    this.webview.emit('webview:radio:openState', false);
-    NKeyhandler.disableAllKeybinds("radioUI", false, ["yaca:radioUI", "yaca:radioTalking"], ["yaca:radioTalking"]); */
-  }
-
-  /**
-   * Set volume & stereo mode for all radio channels on first start and reconnect.
-   */
-  initRadioSettings() {
-    for (let i = 1; i <= this.sharedConfig.maxRadioChannels; i++) {
-      if (!this.radioChannelSettings[i])
-        this.radioChannelSettings[i] = Object.assign(
-          {},
-          this.sharedConfig.defaultRadioChannelSettings,
-        );
-      if (!this.playersInRadioChannel.has(i))
-        this.playersInRadioChannel.set(i, new Set());
-
-      const volume = this.radioChannelSettings[i].volume;
-      const stereo = this.radioChannelSettings[i].stereo;
-
-      this.setCommDeviceStereomode(YacaFilterEnum.RADIO, stereo, i);
-      this.setCommDeviceVolume(YacaFilterEnum.RADIO, volume, i);
-    }
-  }
-
-  /**
-   * Sends an event to the plugin when a player starts or stops talking on the radio.
-   *
-   * @param {boolean} state - The state of the player talking on the radio.
-   */
-  radioTalkingStateToPlugin(state: boolean) {
-    YaCAClientModule.setPlayersCommType(
-      cache.serverId,
-      YacaFilterEnum.RADIO,
-      state,
-      this.activeRadioChannel,
-      undefined,
-      CommDeviceMode.SENDER,
-      CommDeviceMode.RECEIVER,
-    );
-  }
-
-  radioTalkingStateToPluginWithWhisper(
-    state: boolean,
-    targets: number | number[],
-  ) {
-    if (!Array.isArray(targets)) targets = [targets];
-
-    const comDeviceTargets = [];
-    for (const target of targets) {
-      const player = this.getPlayerByID(target);
-      if (!player) continue;
-
-      comDeviceTargets.push(player);
-    }
-
-    YaCAClientModule.setPlayersCommType(
-      comDeviceTargets,
-      YacaFilterEnum.RADIO,
-      state,
-      this.activeRadioChannel,
-      undefined,
-      CommDeviceMode.SENDER,
-      CommDeviceMode.RECEIVER,
-    );
-  }
-
-  /**
-   * Updates the UI when a player changes the radio channel.
-   *
-   * @param {number} channel - The new radio channel.
-   */
-  updateRadioInWebview(channel: number) {
-    if (channel != this.activeRadioChannel) return;
-
-    // this.webview.emit("webview:radio:setChannelData", this.radioChannelSettings[channel]);
-    // this.webview.emit('webview:hud:radioChannel', channel, this.radioChannelSettings[channel].muted);
-  }
-
-  /**
-   * Finds a radio channel by a given frequency.
-   *
-   * @param {string} frequency - The frequency to search for.
-   * @returns {number | undefined} The channel number if found, undefined otherwise.
-   */
-  findRadioChannelByFrequency(frequency: string): number | undefined {
-    let foundChannel;
-    for (const channel in this.radioChannelSettings) {
-      const data = this.radioChannelSettings[channel];
-      if (data.frequency == frequency) {
-        foundChannel = parseInt(channel);
-        break;
-      }
-    }
-
-    return foundChannel;
-  }
-
-  setRadioFrequency(channel: number, frequency: string) {
-    this.radioFrequenceSetted = true;
-
-    if (this.radioChannelSettings[channel].frequency != frequency) {
-      this.disableRadioFromPlayerInChannel(channel);
-    }
-
-    this.radioChannelSettings[channel].frequency = frequency;
-  }
-
-  /**
-   * Disable radio effect for all players in the given channel.
-   *
-   * @param {number} channel - The channel number.
-   */
-  disableRadioFromPlayerInChannel(channel: number) {
-    if (!this.playersInRadioChannel.has(channel)) return;
-
-    const players = this.playersInRadioChannel.get(channel);
-    if (!players?.size) return;
-
-    const targets = [];
-    for (const playerId of players) {
-      const player = this.getPlayerByID(playerId);
-      if (!player || !player.remoteID) continue;
-
-      targets.push(player);
-      players.delete(player.remoteID);
-    }
-
-    if (targets.length)
-      YaCAClientModule.setPlayersCommType(
-        targets,
-        YacaFilterEnum.RADIO,
-        false,
-        channel,
-        undefined,
-        CommDeviceMode.RECEIVER,
-        CommDeviceMode.SENDER,
-      );
-  }
-
-  /**
-   * Starts the radio talking state.
-   *
-   * @param {boolean} state - The state of the radio talking.
-   * @param {boolean} [clearPedTasks=true] - Whether to clear ped tasks. Defaults to true if not provided.
-   */
-  radioTalkingStart(state: boolean, clearPedTasks: boolean = true) {
-    if (!state) {
-      if (this.radioTalking) {
-        this.radioTalking = false;
-        if (!this.useWhisper) this.radioTalkingStateToPlugin(false);
-        emitNet("server:yaca:radioTalking", false);
-        // this.webview.emit('webview:hud:isRadioTalking', false);
-        if (clearPedTasks)
-          StopAnimTask(cache.ped, "random@arrests", "generic_radio_chatter", 4);
-      }
-
-      return;
-    }
-
-    if (!this.radioEnabled || !this.radioFrequenceSetted || this.radioTalking)
-      return;
-
-    this.radioTalking = true;
-    if (!this.useWhisper) this.radioTalkingStateToPlugin(true);
-
-    requestAnimDict("random@arrests").then(() => {
-      TaskPlayAnim(
-        cache.ped,
-        "random@arrests",
-        "generic_radio_chatter",
-        3,
-        -4,
-        -1,
-        49,
-        0.0,
-        false,
-        false,
-        false,
-      );
-
-      emitNet("server:yaca:radioTalking", true);
-      // this.webview.emit('webview:hud:isRadioTalking', true);
-    });
-  }
-
-  /* ======================== PHONE SYSTEM ======================== */
-
-  /**
-   * Removes the phone speaker effect from a player entity.
-   *
-   * @param {number} player - The player entity from which the phone speaker effect is to be removed.
-   */
-  removePhoneSpeakerFromEntity(player: number) {
-    const entityData = this.getPlayerByID(player);
-    if (!entityData?.phoneCallMemberIds) return;
-
-    const playersToSet = [];
-    for (const phoneCallMemberId of entityData.phoneCallMemberIds) {
-      const phoneCallMember = this.getPlayerByID(phoneCallMemberId);
-      if (!phoneCallMember) continue;
-
-      playersToSet.push(phoneCallMember);
-    }
-
-    YaCAClientModule.setPlayersCommType(
-      playersToSet,
-      YacaFilterEnum.PHONE_SPEAKER,
-      false,
-    );
-
-    delete entityData.phoneCallMemberIds;
-  }
-
-  /* ======================== MEGAPHONE SYSTEM ======================== */
-  /**
-   * Toggles the use of the megaphone.
-   *
-   * @param {boolean} [state=false] - The state of the megaphone. Defaults to false if not provided.
-   */
-  useMegaphone(state: boolean = false) {
-    if (
-      !cache.vehicle ||
-      !this.playerLocalPlugin.canUseMegaphone ||
-      state == this.playerLocalPlugin.lastMegaphoneState
-    )
-      return;
-
-    this.playerLocalPlugin.lastMegaphoneState =
-      !this.playerLocalPlugin.lastMegaphoneState;
-    emitNet("server:yaca:useMegaphone", state);
   }
 }
