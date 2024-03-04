@@ -23,9 +23,111 @@ export class YaCAClientRadioModule {
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 
+    this.registerExports();
     this.registerEvents();
     this.registerKeybinds();
     if (this.clientModule.sharedConfig.debug) this.registerDebugCommands();
+  }
+
+  registerExports() {
+    /**
+     * Enables or disables the radio system.
+     *
+     * @param {boolean} state - The state of the radio system.
+     */
+    exports("enableRadio", (state: boolean) => this.enableRadio(state));
+
+    /**
+     * Changes the radio frequency of the active channel.
+     *
+     * @param {string} frequency - The frequency to set.
+     */
+    exports("changeRadioFrequency", (frequency: string) =>
+      this.changeRadioFrequency(frequency),
+    );
+
+    /**
+     * Changes the radio frequency.
+     *
+     * @param {number} channel - The channel number.
+     * @param {string} frequency - The frequency to set.
+     */
+    exports("changeRadioFrequencyRaw", (channel: number, frequency: string) =>
+      this.changeRadioFrequencyRaw(channel, frequency),
+    );
+
+    /**
+     * Mutes the active radio channel.
+     */
+    exports("muteRadioChannel", () => this.muteRadioChannel());
+
+    /**
+     * Exports the `muteRadioChannelRaw` function to the plugin.
+     * This function mutes a radio channel.
+     *
+     * @param {number} channel - The channel number.
+     */
+    exports("muteRadioChannelRaw", (channel: number) =>
+      this.muteRadioChannelRaw(channel),
+    );
+
+    /**
+     * Exports the `changeActiveRadioChannel` function to the plugin.
+     * This function changes the active radio channel.
+     *
+     * @param {number} channel - The new radio channel.
+     */
+    exports("changeActiveRadioChannel", (channel: number) =>
+      this.changeActiveRadioChannel(channel),
+    );
+
+    /**
+     * Exports the `getActiveRadioChannel` function to the plugin.
+     * This function returns the active radio channel.
+     *
+     * @returns {number} The active radio channel.
+     */
+    exports("getActiveRadioChannel", () => this.activeRadioChannel);
+
+    /**
+     * Exports the `changeRadioChannelVolume` function to the plugin.
+     * This function changes the volume of the active radio channel.
+     *
+     * @param {boolean} higher - Whether to increase the volume.
+     */
+    exports("changeRadioChannelVolume", (higher: boolean) =>
+      this.changeRadioChannelVolume(higher),
+    );
+
+    /**
+     * Exports the `changeRadioChannelVolumeRaw` function to the plugin.
+     * This function changes the volume of a radio channel.
+     *
+     * @param {number} channel - The channel number.
+     * @param {number} volume - The volume to set.
+     */
+    exports("changeRadioChannelVolumeRaw", (channel: number, volume: number) =>
+      this.changeRadioChannelVolumeRaw(channel, volume),
+    );
+
+    /**
+     * Exports the `changeRadioChannelStereo` function to the plugin.
+     * This function changes the stereo mode for the active radio channel.
+     */
+    exports("changeRadioChannelStereo", () => this.changeRadioChannelStereo());
+
+    /**
+     * Exports the `changeRadioChannelStereoRaw` function to the plugin.
+     * This function changes the stereo mode for a radio channel.
+     *
+     * @param {number} channel - The channel number.
+     * @param {YacaStereoMode} stereo - The stereo mode to set.
+     */
+    exports(
+      "changeRadioChannelStereoRaw",
+      (channel: number, stereo: YacaStereoMode) =>
+        this.changeRadioChannelStereoRaw(channel, stereo),
+    );
   }
 
   registerEvents() {
@@ -278,9 +380,9 @@ export class YaCAClientRadioModule {
   }
 
   /**
-   * Change the radio frequency.
+   * Change the radio frequency ot the current active channel.
    *
-   * @param frequency - The new frequency.
+   * @param {string} frequency - The new frequency.
    */
   changeRadioFrequency(frequency: string) {
     if (!this.clientModule.isPluginInitialized()) return;
@@ -293,12 +395,32 @@ export class YaCAClientRadioModule {
   }
 
   /**
+   * Change the radio frequency.
+   *
+   * @param {number} channel - The channel number.
+   * @param {string} frequency - The frequency to set.
+   */
+  changeRadioFrequencyRaw(channel: number, frequency: string) {
+    if (!this.clientModule.isPluginInitialized()) return;
+
+    emitNet("server:yaca:changeRadioFrequency", channel, frequency);
+  }
+
+  /**
    * Mute the active radio channel.
    */
   muteRadioChannel() {
+    this.muteRadioChannelRaw(this.activeRadioChannel);
+  }
+
+  /**
+   * Mute a radio channel.
+   *
+   * @param {number} channel - The channel to mute.
+   */
+  muteRadioChannelRaw(channel: number) {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
 
-    const channel = this.activeRadioChannel;
     if (this.radioChannelSettings[channel].frequency == "0") return;
     emitNet("server:yaca:muteRadioChannel", channel);
   }
@@ -306,7 +428,7 @@ export class YaCAClientRadioModule {
   /**
    * Change the active radio channel.
    *
-   * @param channel - The new radio channel.
+   * @param {number} channel - The new radio channel.
    */
   changeActiveRadioChannel(channel: number) {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
@@ -319,20 +441,34 @@ export class YaCAClientRadioModule {
   /**
    * Change the volume of the active radio channel.
    *
-   * @param higher - Whether to increase the volume.
+   * @param {boolean} higher - Whether to increase the volume.
    */
   changeRadioChannelVolume(higher: boolean) {
+    const channel = this.activeRadioChannel;
+    const oldVolume = this.radioChannelSettings[channel].volume;
+    this.changeRadioChannelVolumeRaw(
+      channel,
+      oldVolume + (higher ? 0.17 : -0.17),
+    );
+  }
+
+  /**
+   * Change the volume of a radio channel.
+   *
+   * @param {number} channel - The channel number.
+   * @param {number} volume - The volume to set.
+   */
+  changeRadioChannelVolumeRaw(channel: number, volume: number) {
     if (
       !this.clientModule.isPluginInitialized() ||
       !this.radioEnabled ||
-      this.radioChannelSettings[this.activeRadioChannel].frequency == "0"
+      this.radioChannelSettings[channel].frequency == "0"
     )
       return;
 
-    const channel = this.activeRadioChannel;
     const oldVolume = this.radioChannelSettings[channel].volume;
     this.radioChannelSettings[channel].volume = this.clientModule.clamp(
-      oldVolume + (higher ? 0.17 : -0.17),
+      volume,
       0,
       1,
     );
@@ -348,10 +484,11 @@ export class YaCAClientRadioModule {
     }
 
     // Prevent duplicate update, cuz mute has its own update
-    if (this.radioChannelSettings[channel].volume > 0)
+    if (this.radioChannelSettings[channel].volume > 0) {
       this.updateRadioInWebview(channel);
+    }
 
-    // Send update to voiceplugin
+    // Send update to voice plugin
     this.clientModule.setCommDeviceVolume(
       YacaFilterEnum.RADIO,
       this.radioChannelSettings[channel].volume,
@@ -369,27 +506,40 @@ export class YaCAClientRadioModule {
 
     switch (this.radioChannelSettings[channel].stereo) {
       case YacaStereoMode.STEREO:
-        this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_LEFT;
+        this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT);
         this.clientModule.radarNotification(
           `Kanal ${channel} ist nun auf der linken Seite hörbar.`,
         );
-        break;
+        return;
       case YacaStereoMode.MONO_LEFT:
-        this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_RIGHT;
+        this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_RIGHT);
         this.clientModule.radarNotification(
           `Kanal ${channel} ist nun auf der rechten Seite hörbar.`,
         );
-        break;
+        return;
       case YacaStereoMode.MONO_RIGHT:
-        this.radioChannelSettings[channel].stereo = YacaStereoMode.STEREO;
+        this.changeRadioChannelStereoRaw(channel, YacaStereoMode.STEREO);
         this.clientModule.radarNotification(
           `Kanal ${channel} ist nun auf beiden Seiten hörbar.`,
         );
+        return;
     }
+  }
+
+  /**
+   * Change the stereo mode for a radio channel.
+   *
+   * @param channel - The channel number.
+   * @param stereo - The stereo mode to set.
+   */
+  changeRadioChannelStereoRaw(channel: number, stereo: YacaStereoMode) {
+    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
+
+    this.radioChannelSettings[channel].stereo = stereo;
 
     this.clientModule.setCommDeviceStereomode(
       YacaFilterEnum.RADIO,
-      this.radioChannelSettings[channel].stereo,
+      stereo,
       channel,
     );
   }

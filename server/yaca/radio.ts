@@ -12,6 +12,45 @@ export class YaCAServerRadioModule {
     this.serverModule = serverModule;
     this.sharedConfig = serverModule.sharedConfig;
     this.serverConfig = serverModule.serverConfig;
+
+    this.registerExports();
+  }
+
+  registerExports() {
+    /**
+     * Get all players in a radio frequency.
+     *
+     * @param {string} frequency - The frequency to get the players for.
+     * @returns {number[]} - The players in the radio frequency.
+     */
+    exports("getPlayersInRadioFrequency", (frequency: string) =>
+      this.getPlayersInRadioFrequency(frequency),
+    );
+
+    /**
+     * Set the radio channel for a player.
+     *
+     * @param {number} src - The player to set the radio channel for.
+     * @param {number} channel - The channel to set.
+     * @param {string} frequency - The frequency to set.
+     */
+    exports(
+      "setPlayerRadioChannel",
+      (src: number, channel: number, frequency: string) =>
+        this.changeRadioFrequency(src, channel, frequency),
+    );
+  }
+
+  getPlayersInRadioFrequency(frequency: string) {
+    const players = this.serverModule.getPlayers();
+    const allPlayersInChannel = this.radioFrequencyMap.get(frequency);
+    const playersArray = [];
+    for (const [key] of allPlayersInChannel) {
+      const target = players.get(key);
+      if (!target) continue;
+      playersArray.push(key);
+    }
+    return playersArray;
   }
 
   /**
@@ -134,11 +173,11 @@ export class YaCAServerRadioModule {
 
     if (!this.serverConfig.useWhisper && playersArray.length) {
       for (const target of allTargets) {
-        if (player.voiceplugin)
+        if (player.voicePlugin)
           emitNet(
             "client:yaca:leaveRadioChannel",
             target,
-            player.voiceplugin.clientId,
+            player.voicePlugin.clientId,
             frequency,
           );
       }

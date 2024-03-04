@@ -2,7 +2,6 @@ import { cache, initLocale, locale } from "@overextended/ox_lib/client";
 import {
   DataObject,
   type YacaClient,
-  YacaLocalPlugin,
   YacaPlayerData,
   type YacaProtocol,
   YacaResponse,
@@ -31,7 +30,6 @@ export class YaCAClientModule {
   websocket: WebSocket;
   sharedConfig: YacaSharedConfig;
   allPlayers: Map<number, YacaPlayerData> = new Map();
-  playerLocalPlugin: YacaLocalPlugin;
   firstConnect = true;
 
   radioModule: YaCAClientRadioModule;
@@ -39,6 +37,7 @@ export class YaCAClientModule {
   megaphoneModule: YaCAClientMegaphoneModule;
   intercomModule: YaCAClientIntercomModule;
 
+  canChangeVoiceRange: boolean;
   rangeIndex: number;
   rangeInterval: CitizenTimer | null = null;
   monitorInterval: CitizenTimer | null = null;
@@ -73,19 +72,19 @@ export class YaCAClientModule {
    * @param {string} msg - The message to be displayed.
    * @param {number} [time=0] - The duration for which the hint should be displayed. If not provided, defaults to 0.
    */
-  mhint(head: string, msg: string, time: number = 0) {
-    const scaleform = RequestScaleformMovie("MIDSIZED_MESSAGE");
+  mHint(head: string, msg: string, time: number = 0) {
+    const scaleForm = RequestScaleformMovie("MIDSIZED_MESSAGE");
 
     this.mHintTimeout = setTimeout(
       () => {
         this.mHintTimeout = null;
 
-        if (!HasScaleformMovieLoaded(scaleform)) {
-          this.mhint(head, msg, time);
+        if (!HasScaleformMovieLoaded(scaleForm)) {
+          this.mHint(head, msg, time);
           return;
         }
 
-        BeginScaleformMovieMethod(scaleform, "SHOW_MIDSIZED_MESSAGE");
+        BeginScaleformMovieMethod(scaleForm, "SHOW_MIDSIZED_MESSAGE");
         BeginTextCommandScaleformString("STRING");
         ScaleformMovieMethodAddParamPlayerNameString(head);
         ScaleformMovieMethodAddParamTextureNameString(msg);
@@ -95,7 +94,7 @@ export class YaCAClientModule {
         EndScaleformMovieMethod();
 
         this.mHintTick = setInterval(() => {
-          DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0);
+          DrawScaleformMovieFullscreen(scaleForm, 255, 255, 255, 255, 0);
         }, 0);
 
         if (time != 0) {
@@ -105,11 +104,11 @@ export class YaCAClientModule {
           }, time * 1000);
         }
       },
-      HasScaleformMovieLoaded(scaleform) ? 0 : 1000,
+      HasScaleformMovieLoaded(scaleForm) ? 0 : 1000,
     );
   }
 
-  stopMhint() {
+  stopMHint() {
     if (this.mHintTimeout) clearTimeout(this.mHintTimeout);
     this.mHintTimeout = null;
     if (this.mHintTick) clearInterval(this.mHintTick);
@@ -166,13 +165,8 @@ export class YaCAClientModule {
     );
 
     this.rangeIndex = this.sharedConfig.defaultVoiceRangeIndex ?? 0;
-    this.playerLocalPlugin = {
-      canChangeVoiceRange: true,
-      maxVoiceRange: 4,
-      lastMegaphoneState: false,
-      canUseMegaphone: false,
-    };
 
+    this.registerExports();
     this.registerEvents();
     this.registerKeybindings();
 
@@ -207,9 +201,29 @@ export class YaCAClientModule {
     console.log("[Client] YaCA Client loaded.");
   }
 
+  registerExports() {
+    /**
+     * Get the current voice range.
+     *
+     * @returns {number} The current voice range.
+     */
+    exports(
+      "getVoiceRange",
+      () => this.sharedConfig.voiceRanges[this.rangeIndex],
+    );
+
+    /**
+     * Get all voice ranges.
+     *
+     * @returns {number[]}
+     */
+    exports("getVoiceRanges", () => this.sharedConfig.voiceRanges);
+  }
+
   registerKeybindings() {
     /**
      * Registers the "yaca:changeVoiceRange" command and keybinding.
+     * This command is used to change the voice range.
      */
     RegisterCommand(
       "yaca:changeVoiceRange",
@@ -474,7 +488,7 @@ export class YaCAClientModule {
    *
    * @returns {boolean} Returns true if the plugin is initialized, false otherwise.
    */
-  isPluginInitialized() {
+  isPluginInitialized(): boolean {
     const inited = !!this.getPlayerByID(cache.serverId);
 
     if (!inited)
@@ -576,7 +590,7 @@ export class YaCAClientModule {
    * Changes the voice range to the next range.
    */
   changeVoiceRange() {
-    if (!this.playerLocalPlugin.canChangeVoiceRange) return;
+    if (!this.canChangeVoiceRange) return;
 
     if (this.visualVoiceRangeTimeout) {
       clearTimeout(this.visualVoiceRangeTimeout);
@@ -767,7 +781,7 @@ export class YaCAClientModule {
   monitorConnectstate() {
     if (this.websocket?.readyState == 0 || this.websocket?.readyState == 1) {
       if (this.messageDisplayed && this.websocket.readyState == 1) {
-        this.stopMhint();
+        this.stopMHint();
         this.messageDisplayed = false;
         this.noPluginActivated = 0;
       }
@@ -777,7 +791,7 @@ export class YaCAClientModule {
     this.noPluginActivated++;
 
     if (!this.messageDisplayed) {
-      this.mhint("Voiceplugin", locale("plugin_not_activated") ?? "");
+      this.mHint("Voiceplugin", locale("plugin_not_activated") ?? "");
       this.messageDisplayed = true;
     }
 

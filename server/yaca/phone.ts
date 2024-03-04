@@ -5,6 +5,54 @@ export class YaCAServerPhoneModle {
 
   constructor(serverModule: YaCAServerModule) {
     this.serverModule = serverModule;
+
+    this.registerExports();
+  }
+
+  registerExports() {
+    /**
+     * Creates a phone call between two players.
+     *
+     * @param {number} src - The player who is making the call.
+     * @param {number} target - The player who is being called.
+     * @param {boolean} state - The state of the call.
+     */
+    exports("callPlayer", (src: number, target: number, state: boolean) =>
+      this.callPlayer(src, target, state),
+    );
+
+    /**
+     * Creates a phone call between two players with the old effect.
+     *
+     * @param {number} src - The player who is making the call.
+     * @param {number} target - The player who is being called.
+     * @param {boolean} state - The state of the call.
+     */
+    exports(
+      "callPlayerOldEffect",
+      (src: number, target: number, state: boolean) =>
+        this.callPlayerOldEffect(src, target, state),
+    );
+
+    /**
+     * Mute a player during a phone call.
+     *
+     * @param {number} src - The source-id of the player to mute.
+     * @param {boolean} state - The mute state.
+     */
+    exports("muteOnPhone", (src: number, state: boolean) =>
+      this.muteOnPhone(src, state),
+    );
+
+    /**
+     * Enable or disable the phone speaker for a player.
+     *
+     * @param {number} src - The source-id of the player to enable the phone speaker for.
+     * @param {boolean} state - The state of the phone speaker.
+     */
+    exports("enablePhoneSpeaker", (src: number, state: boolean) =>
+      this.enablePhoneSpeaker(src, state),
+    );
   }
 
   /**
