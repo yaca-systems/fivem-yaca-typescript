@@ -1,16 +1,21 @@
 import type { YaCAClientModule } from "yaca";
-import { CommDeviceMode, YacaFilterEnum, type YacaRadioSettings } from "types";
+import {
+  CommDeviceMode,
+  YacaFilterEnum,
+  type YacaRadioSettings,
+  YacaStereoMode,
+} from "types";
 import { cache, requestAnimDict } from "@overextended/ox_lib/client";
 
 export class YaCAClientRadioModule {
   clientModule: YaCAClientModule;
 
-  radioFrequenceSetted = false;
+  radioFrequencySet = false;
   radioToggle = false;
   radioEnabled = false;
   radioTalking = false;
   radioChannelSettings: { [key: number]: YacaRadioSettings } = {};
-  radioInited = false;
+  radioInitialized = false;
   activeRadioChannel = 1;
   playersWithShortRange = new Map();
   playersInRadioChannel: Map<number, Set<number>> = new Map();
@@ -20,38 +25,20 @@ export class YaCAClientRadioModule {
 
     this.registerEvents();
     this.registerKeybinds();
+    if (this.clientModule.sharedConfig.debug) this.registerDebugCommands();
   }
 
   registerEvents() {
-    /* =========== RADIO SYSTEM =========== */
-    /* this.webview.on('client:yaca:enableRadio', (state) => {
-      if (!this.isPluginInitialized()) return;
-
-      if (this.radioEnabled != state) {
-        this.radioEnabled = state;
-        alt.emitServerRaw("server:yaca:enableRadio", state);
-
-        if (!state) {
-          for (let i = 1; i <= settings.maxRadioChannels; i++) {
-            this.disableRadioFromPlayerInChannel(i);
-          }
-        }
-      }
-
-      this.webview.emit('webview:hud:radioState', state);
-
-      if (state && !this.radioInited) {
-        this.radioInited = true;
-        this.initRadioSettings();
-        this.updateRadioInWebview(this.activeRadioChannel);
-      }
-    });
-
-    this.webview.on('client:yaca:changeRadioFrequency', (frequency) => {
-      if (!this.isPluginInitialized()) return;
-
-      alt.emitServerRaw("server:yaca:changeRadioFrequency", this.activeRadioChannel, frequency);
-    }); */
+    /*
+      this.webview.on('client:yaca:enableRadio', (state) => {});
+      this.webview.on('client:yaca:changeRadioFrequency', (frequency) => {});
+      this.webview.on('client:yaca:muteRadioChannel', () => {});
+      this.webview.on('client:yaca:changeActiveRadioChannel', (channel) => {});
+      this.webview.on('client:yaca:changeRadioChannelVolume', (higher) => {});
+      this.webview.on("client:yaca:changeRadioChannelStereo", () => {});
+      //TODO: Implement, will be used if player activates radio speaker so everyone around him can hear it
+      this.webview.on("client:yaca:changeRadioSpeaker", () => {})
+    */
 
     onNet("client:yaca:setRadioFreq", (channel: number, frequency: string) => {
       this.setRadioFrequency(channel, frequency);
@@ -107,14 +94,6 @@ export class YaCAClientRadioModule {
       },
     );
 
-    /* this.webview.on('client:yaca:muteRadioChannel', () => {
-      if (!this.isPluginInitialized() || !this.radioEnabled) return;
-
-      const channel = this.activeRadioChannel;
-      if (this.radioChannelSettings[channel].frequency == 0) return;
-      alt.emitServerRaw("server:yaca:muteRadioChannel", channel)
-    }); */
-
     onNet(
       "client:yaca:setRadioMuteState",
       (channel: number, state: boolean) => {
@@ -148,67 +127,6 @@ export class YaCAClientRadioModule {
         });
       },
     );
-
-    /*this.webview.on('client:yaca:changeActiveRadioChannel', (channel) => {
-      if (!this.isPluginInitialized() || !this.radioEnabled) return;
-
-      alt.emitServerRaw('server:yaca:changeActiveRadioChannel', channel);
-      this.activeRadioChannel = channel;
-      this.updateRadioInWebview(channel);
-    });
-
-    this.webview.on('client:yaca:changeRadioChannelVolume', (higher) => {
-      if (!this.isPluginInitialized() || !this.radioEnabled || this.radioChannelSettings[this.activeRadioChannel].frequency == 0) return;
-
-      const channel = this.activeRadioChannel;
-      const oldVolume = this.radioChannelSettings[channel].volume;
-      this.radioChannelSettings[channel].volume = this.clamp(
-        oldVolume + (higher ? 0.17 : -0.17),
-        0,
-        1
-      )
-
-      // Prevent event emit spams, if nothing changed
-      if (oldVolume == this.radioChannelSettings[channel].volume) return
-
-      if (this.radioChannelSettings[channel].volume == 0 || (oldVolume == 0 && this.radioChannelSettings[channel].volume > 0)) {
-        alt.emitServerRaw("server:yaca:muteRadioChannel", channel)
-      }
-
-      // Prevent duplicate update, cuz mute has its own update
-      if (this.radioChannelSettings[channel].volume > 0) this.updateRadioInWebview(channel);
-
-      // Send update to voiceplugin
-      this.setCommDeviceVolume(YacaFilterEnum.RADIO, this.radioChannelSettings[channel].volume, channel);
-    });
-
-    this.webview.on("client:yaca:changeRadioChannelStereo", () => {
-      if (!this.isPluginInitialized() || !this.radioEnabled) return;
-
-      const channel = this.activeRadioChannel;
-
-      switch (this.radioChannelSettings[channel].stereo) {
-        case YacaStereoMode.STEREO:
-          this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_LEFT;
-          this.radarNotification(`Kanal ${channel} ist nun auf der linken Seite hörbar.`);
-          break;
-        case YacaStereoMode.MONO_LEFT:
-          this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_RIGHT;
-          this.radarNotification(`Kanal ${channel} ist nun auf der rechten Seite hörbar.`);
-          break;
-        case YacaStereoMode.MONO_RIGHT:
-          this.radioChannelSettings[channel].stereo = YacaStereoMode.STEREO;
-          this.radarNotification(`Kanal ${channel} ist nun auf beiden Seiten hörbar.`);
-      };
-
-      // Send update to voiceplugin
-      this.setCommDeviceStereomode(YacaFilterEnum.RADIO, this.radioChannelSettings[channel].stereo, channel);
-    });
-
-    //TODO: Implement, will be used if player activates radio speaker so everyone around him can hear it
-    this.webview.on("client:yaca:changeRadioSpeaker", () => {
-
-    }) */
   }
 
   registerKeybinds() {
@@ -235,12 +153,206 @@ export class YaCAClientRadioModule {
       },
       false,
     );
-    RegisterKeyMapping("yaca:radioTalking", "Funk Sprechen", "keyboard", "N");
+    RegisterKeyMapping("+yaca:radioTalking", "Funken", "keyboard", "N");
+  }
+
+  registerDebugCommands() {
+    RegisterCommand(
+      "enableRadio",
+      () => {
+        this.enableRadio(true);
+      },
+      false,
+    );
+
+    RegisterCommand(
+      "disableRadio",
+      () => {
+        this.enableRadio(false);
+      },
+      false,
+    );
+
+    RegisterCommand(
+      "changeRadioChannel",
+      (_source: number, args: string[]) => {
+        this.changeActiveRadioChannel(parseInt(args[0]));
+      },
+      false,
+    );
+
+    RegisterCommand(
+      "changeRadioFrequency",
+      (_source: number, args: string[]) => {
+        this.changeRadioFrequency(args[0]);
+      },
+      false,
+    );
+
+    RegisterCommand(
+      "muteRadioChannel",
+      () => {
+        this.muteRadioChannel();
+      },
+      false,
+    );
+
+    RegisterCommand(
+      "changeRadioChannelVolume",
+      (_source: number, args: string[]) => {
+        this.changeRadioChannelVolume(args[0] == "true");
+      },
+      false,
+    );
+
+    RegisterCommand(
+      "changeRadioChannelStereo",
+      () => {
+        this.changeRadioChannelStereo();
+      },
+      false,
+    );
   }
 
   /* ======================== RADIO SYSTEM ======================== */
 
-  // TODO: Implement the radio system
+  /**
+   * Enable or disable the radio system.
+   *
+   * @param {boolean} state - The state of the radio system.
+   */
+  enableRadio(state: boolean) {
+    if (!this.clientModule.isPluginInitialized()) return;
+
+    if (this.radioEnabled != state) {
+      this.radioEnabled = state;
+      emitNet("server:yaca:enableRadio", state);
+
+      if (!state) {
+        for (
+          let i = 1;
+          i <= this.clientModule.sharedConfig.maxRadioChannels;
+          i++
+        ) {
+          this.disableRadioFromPlayerInChannel(i);
+        }
+      }
+
+      // TODO: this.webview.emit('webview:hud:radioState', state);
+
+      if (state && !this.radioInitialized) {
+        this.radioInitialized = true;
+        this.initRadioSettings();
+        this.updateRadioInWebview(this.activeRadioChannel);
+      }
+    }
+  }
+
+  changeRadioFrequency(frequency: string) {
+    if (!this.clientModule.isPluginInitialized()) return;
+
+    emitNet(
+      "server:yaca:changeRadioFrequency",
+      this.activeRadioChannel,
+      frequency,
+    );
+  }
+
+  muteRadioChannel() {
+    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
+
+    const channel = this.activeRadioChannel;
+    if (this.radioChannelSettings[channel].frequency == "0") return;
+    emitNet("server:yaca:muteRadioChannel", channel);
+  }
+
+  /**
+   * Change the active radio channel.
+   *
+   * @param channel - The new radio channel.
+   */
+  changeActiveRadioChannel(channel: number) {
+    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
+
+    emitNet("server:yaca:changeActiveRadioChannel", channel);
+    this.activeRadioChannel = channel;
+    this.updateRadioInWebview(channel);
+  }
+
+  changeRadioChannelVolume(higher: boolean) {
+    if (
+      !this.clientModule.isPluginInitialized() ||
+      !this.radioEnabled ||
+      this.radioChannelSettings[this.activeRadioChannel].frequency == "0"
+    )
+      return;
+
+    const channel = this.activeRadioChannel;
+    const oldVolume = this.radioChannelSettings[channel].volume;
+    this.radioChannelSettings[channel].volume = this.clientModule.clamp(
+      oldVolume + (higher ? 0.17 : -0.17),
+      0,
+      1,
+    );
+
+    // Prevent event emit spams, if nothing changed
+    if (oldVolume == this.radioChannelSettings[channel].volume) return;
+
+    if (
+      this.radioChannelSettings[channel].volume == 0 ||
+      (oldVolume == 0 && this.radioChannelSettings[channel].volume > 0)
+    ) {
+      emitNet("server:yaca:muteRadioChannel", channel);
+    }
+
+    // Prevent duplicate update, cuz mute has its own update
+    if (this.radioChannelSettings[channel].volume > 0)
+      this.updateRadioInWebview(channel);
+
+    // Send update to voiceplugin
+    this.clientModule.setCommDeviceVolume(
+      YacaFilterEnum.RADIO,
+      this.radioChannelSettings[channel].volume,
+      channel,
+    );
+  }
+
+  /**
+   * Change the stereo mode for the active radio channel.
+   */
+  changeRadioChannelStereo() {
+    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
+
+    const channel = this.activeRadioChannel;
+
+    switch (this.radioChannelSettings[channel].stereo) {
+      case YacaStereoMode.STEREO:
+        this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_LEFT;
+        this.clientModule.radarNotification(
+          `Kanal ${channel} ist nun auf der linken Seite hörbar.`,
+        );
+        break;
+      case YacaStereoMode.MONO_LEFT:
+        this.radioChannelSettings[channel].stereo = YacaStereoMode.MONO_RIGHT;
+        this.clientModule.radarNotification(
+          `Kanal ${channel} ist nun auf der rechten Seite hörbar.`,
+        );
+        break;
+      case YacaStereoMode.MONO_RIGHT:
+        this.radioChannelSettings[channel].stereo = YacaStereoMode.STEREO;
+        this.clientModule.radarNotification(
+          `Kanal ${channel} ist nun auf beiden Seiten hörbar.`,
+        );
+    }
+
+    this.clientModule.setCommDeviceStereomode(
+      YacaFilterEnum.RADIO,
+      this.radioChannelSettings[channel].stereo,
+      channel,
+    );
+  }
+
+  // TODO: Implement the radio UI
   openRadio() {
     if (!this.radioToggle /* && !alt.isCursorVisible() */) {
       this.radioToggle = true;
@@ -362,7 +474,7 @@ export class YaCAClientRadioModule {
   }
 
   setRadioFrequency(channel: number, frequency: string) {
-    this.radioFrequenceSetted = true;
+    this.radioFrequencySet = true;
 
     if (this.radioChannelSettings[channel].frequency != frequency) {
       this.disableRadioFromPlayerInChannel(channel);
@@ -424,7 +536,7 @@ export class YaCAClientRadioModule {
       return;
     }
 
-    if (!this.radioEnabled || !this.radioFrequenceSetted || this.radioTalking)
+    if (!this.radioEnabled || !this.radioFrequencySet || this.radioTalking)
       return;
 
     this.radioTalking = true;

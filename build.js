@@ -68,7 +68,7 @@ ui_page 'web/index.html'
 files {
     'web/index.html',
     'web/script.js',
-    'configs/shared.json',
+    'config/shared.json',
     'locales/*.json',
 }
 

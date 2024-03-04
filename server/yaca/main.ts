@@ -48,11 +48,11 @@ export class YaCAServerModule {
     console.log("~g~ --> YaCA: Server loaded");
 
     this.serverConfig = JSON.parse(
-      LoadResourceFile(cache.resource, `configs/server.json`),
+      LoadResourceFile(cache.resource, `config/server.json`),
     );
 
     this.sharedConfig = JSON.parse(
-      LoadResourceFile(cache.resource, `configs/shared.json`),
+      LoadResourceFile(cache.resource, `config/shared.json`),
     );
 
     this.phoneModule = new YaCAServerPhoneModle(this);
@@ -371,13 +371,13 @@ export class YaCAServerModule {
         emitNet(
           "client:yaca:addRemovePlayerIntercomFilter",
           source,
-          [args.playerId, source],
+          [args.playerId],
           args.state == "true",
         );
         emitNet(
           "client:yaca:addRemovePlayerIntercomFilter",
           args.playerId,
-          [args.playerId, source],
+          [source],
           args.state == "true",
         );
       },

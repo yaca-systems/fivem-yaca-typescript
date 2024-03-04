@@ -152,7 +152,7 @@ export class YaCAClientModule {
 
   constructor() {
     this.sharedConfig = JSON.parse(
-      LoadResourceFile(cache.resource, `configs/shared.json`),
+      LoadResourceFile(cache.resource, "config/shared.json"),
     );
     this.websocket = new WebSocket();
 
@@ -477,7 +477,8 @@ export class YaCAClientModule {
         this.rangeInterval = setInterval(this.calcPlayers.bind(this), 250);
 
         // Set radio settings on reconnect only, else on first opening
-        if (this.radioModule.radioInited) this.radioModule.initRadioSettings();
+        if (this.radioModule.radioInitialized)
+          this.radioModule.initRadioSettings();
         return;
       }
 
