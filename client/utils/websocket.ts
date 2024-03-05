@@ -11,7 +11,6 @@ export class WebSocket extends EventEmitter {
     console.log("WebSocket created");
 
     RegisterNuiCallbackType("YACA_OnMessage");
-    RegisterNuiCallbackType("YACA_OnError");
     RegisterNuiCallbackType("YACA_OnConnected");
     RegisterNuiCallbackType("YACA_OnDisconnected");
 
@@ -19,14 +18,6 @@ export class WebSocket extends EventEmitter {
       "__cfx_nui:YACA_OnMessage",
       (data: object, cb: (data: unknown) => void) => {
         this.emit("message", data);
-        cb({});
-      },
-    );
-
-    on(
-      "__cfx_nui:YACA_OnError",
-      (data: { reason: string }, cb: (data: unknown) => void) => {
-        this.emit("error", data.reason);
         cb({});
       },
     );
@@ -43,6 +34,7 @@ export class WebSocket extends EventEmitter {
     on(
       "__cfx_nui:YACA_OnDisconnected",
       (data: { code: number; reason: string }, cb: (data: unknown) => void) => {
+        console.log("Disconnected", data);
         this.readyState = 3;
         this.emit("close", data.code, data.reason);
         cb({});
@@ -51,9 +43,7 @@ export class WebSocket extends EventEmitter {
   }
 
   async start() {
-    console.log("Starting WebSocket");
     while (!this.nuiReady) {
-      console.log("Waiting for NUI to be ready");
       await sleep(100);
     }
 

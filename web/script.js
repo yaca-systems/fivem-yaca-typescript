@@ -1,4 +1,3 @@
-let isConnected = false;
 let webSocket = null;
 
 function connect() {
@@ -13,10 +12,6 @@ function connect() {
   webSocket.onmessage = (event) => {
     if (!event) return;
     sendNuiData("YACA_OnMessage", event.data);
-  };
-
-  webSocket.onerror = (event) => {
-    sendNuiData("YACA_OnError", event);
   };
 
   webSocket.onopen = (event) => {

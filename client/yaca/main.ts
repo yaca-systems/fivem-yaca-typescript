@@ -247,7 +247,7 @@ export class YaCAClientModule {
      * @param {string} resourceName - The name of the resource that has started.
      *
      */
-    on("onClientResourceStop", (resourceName: string) => {
+    on("onResourceStop", (resourceName: string) => {
       if (GetCurrentResourceName() !== resourceName) {
         return;
       }
@@ -275,12 +275,11 @@ export class YaCAClientModule {
         this.websocket.on("message", (msg: YacaResponse) => {
           this.handleResponse(msg);
         });
-        this.websocket.on("error", (reason: string) =>
-          console.error("[YACA-Websocket] Error: ", reason),
-        );
+
         this.websocket.on("close", (code: number, reason: string) =>
           console.error("[YACA-Websocket]: client disconnected", code, reason),
         );
+
         this.websocket.on("open", () => {
           if (this.firstConnect) {
             this.initRequest(dataObj);
@@ -291,6 +290,7 @@ export class YaCAClientModule {
 
           console.log("[YACA-Websocket]: connected");
         });
+
         await this.websocket.start();
       }
 
