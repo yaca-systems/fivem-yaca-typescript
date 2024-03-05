@@ -34,7 +34,6 @@ export class WebSocket extends EventEmitter {
     on(
       "__cfx_nui:YACA_OnDisconnected",
       (data: { code: number; reason: string }, cb: (data: unknown) => void) => {
-        console.log("Disconnected", data);
         this.readyState = 3;
         this.emit("close", data.code, data.reason);
         cb({});

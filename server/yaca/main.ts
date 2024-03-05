@@ -6,6 +6,7 @@ import {
   YaCAServerRadioModule,
   YaCAServerPhoneModle,
 } from "yaca";
+import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 
 initLocale();
 
@@ -33,6 +34,7 @@ export interface YaCAPlayer {
     mutedOnPhone: boolean;
   };
 }
+
 export class YaCAServerModule {
   nameSet: Set<string> = new Set();
   players: Map<number, YaCAPlayer> = new Map();
@@ -43,6 +45,8 @@ export class YaCAServerModule {
   phoneModule: YaCAServerPhoneModle;
   radioModule: YaCAServerRadioModule;
   megaphoneModule: YaCAServerMegaphoneModule;
+
+  saltChatBridge?: YaCAServerSaltyChatBridge;
 
   constructor() {
     console.log("~g~ --> YaCA: Server loaded");
@@ -62,6 +66,11 @@ export class YaCAServerModule {
     this.registerExports();
     this.registerEvents();
     this.registerCommands();
+
+    if (this.sharedConfig.saltyChatBridge) {
+      this.sharedConfig.maxRadioChannels = 2;
+      this.saltChatBridge = new YaCAServerSaltyChatBridge(this);
+    }
   }
 
   getPlayers(): Map<number, YaCAPlayer> {
@@ -100,6 +109,16 @@ export class YaCAServerModule {
 
   registerExports() {
     /**
+     * Get the alive status of a player.
+     *
+     * @param {number} playerId - The ID of the player to get the alive status for.
+     * @returns {boolean} - The alive status of the player.
+     */
+    exports("getPlayerAliveStatus", (playerId: number) =>
+      this.getPlayerAliveStatus(playerId),
+    );
+
+    /**
      * Set the alive status of a player.
      *
      * @param {number} playerId - The ID of the player to set the alive status for.
@@ -110,28 +129,13 @@ export class YaCAServerModule {
     );
 
     /**
-     * Get the alive status of a player.
-     *
-     * @param {number} playerId - The ID of the player to get the alive status for.
-     * @returns {boolean} - The alive status of the player.
-     */
-    exports(
-      "getPlayerAliveStatus",
-      (playerId: number) =>
-        this.players.get(playerId)?.voiceSettings.forceMuted ?? false,
-    );
-
-    /**
      * Get the voice range of a player.
      *
      * @param {number} playerId - The ID of the player to get the voice range for.
      * @returns {number} - The voice range of the player.
      */
-    exports(
-      "getPlayerVoiceRange",
-      (playerId: number) =>
-        this.players.get(playerId)?.voiceSettings.voiceRange ??
-        this.sharedConfig.voiceRanges[this.sharedConfig.defaultVoiceRangeIndex],
+    exports("getPlayerVoiceRange", (playerId: number) =>
+      this.getPlayerVoiceRange(playerId),
     );
 
     /**
@@ -145,8 +149,8 @@ export class YaCAServerModule {
   }
 
   registerEvents() {
-    on("playerJoining", (source: number) => {
-      this.connectToVoice(source);
+    on("playerJoining", (src: number) => {
+      this.connectToVoice(src);
     });
 
     on("playerDropped", () => {
@@ -274,7 +278,7 @@ export class YaCAServerModule {
       state: string;
     }>(
       "setAlive",
-      async (_source, args) => {
+      async (_src, args) => {
         this.changePlayerAliveStatus(args.playerId, args.state == "true");
       },
       {
@@ -299,12 +303,8 @@ export class YaCAServerModule {
       state: string;
     }>(
       "callPlayer",
-      async (source, args) => {
-        this.phoneModule.callPlayer(
-          source,
-          args.playerId,
-          args.state == "true",
-        );
+      async (src, args) => {
+        this.phoneModule.callPlayer(src, args.playerId, args.state == "true");
       },
       {
         help: "Call another player.",
@@ -328,9 +328,9 @@ export class YaCAServerModule {
       state: string;
     }>(
       "callPlayerOld",
-      async (source, args) => {
+      async (src, args) => {
         this.phoneModule.callPlayerOldEffect(
-          source,
+          src,
           args.playerId,
           args.state == "true",
         );
@@ -357,7 +357,7 @@ export class YaCAServerModule {
       state: string;
     }>(
       "muteOnPhone",
-      async (_source, args) => {
+      async (_src, args) => {
         this.phoneModule.muteOnPhone(args.playerId, args.state == "true");
       },
       {
@@ -382,8 +382,8 @@ export class YaCAServerModule {
       state: string;
     }>(
       "enablePhoneSpeaker",
-      async (source, args) => {
-        this.phoneModule.enablePhoneSpeaker(source, args.state == "true");
+      async (src, args) => {
+        this.phoneModule.enablePhoneSpeaker(src, args.state == "true");
       },
       {
         help: "Enable or disable the phone speaker for a player.",
@@ -407,17 +407,17 @@ export class YaCAServerModule {
       state: string;
     }>(
       "intercom",
-      async (source, args) => {
+      async (src, args) => {
         emitNet(
           "client:yaca:addRemovePlayerIntercomFilter",
-          source,
+          src,
           [args.playerId],
           args.state == "true",
         );
         emitNet(
           "client:yaca:addRemovePlayerIntercomFilter",
           args.playerId,
-          [source],
+          [src],
           args.state == "true",
         );
       },
@@ -485,6 +485,15 @@ export class YaCAServerModule {
   }
 
   /**
+   * Get the alive status of a player.
+   *
+   * @param playerId - The ID of the player to get the alive status for.
+   */
+  getPlayerAliveStatus(playerId: number) {
+    return this.players.get(playerId)?.voiceSettings.forceMuted ?? false;
+  }
+
+  /**
    * Kick player if he doesn't have the voice plugin activated.
    *
    * @param {number} src - The player to check for the voice plugin.
@@ -546,6 +555,18 @@ export class YaCAServerModule {
   }
 
   /**
+   * Get the voice range of a player.
+   *
+   * @param playerId - The ID of the player to get the voice range for.
+   */
+  getPlayerVoiceRange(playerId: number) {
+    return (
+      this.players.get(playerId)?.voiceSettings.voiceRange ??
+      this.sharedConfig.voiceRanges[this.sharedConfig.defaultVoiceRangeIndex]
+    );
+  }
+
+  /**
    * Sends initial data needed to connect to teamspeak plugin.
    *
    * @param {number} src - The source-id of the player to connect
@@ -585,7 +606,7 @@ export class YaCAServerModule {
       clientId: clientId,
       forceMuted: player.voiceSettings.forceMuted,
       range: player.voiceSettings.voiceRange,
-      playerId: source,
+      playerId: src,
       mutedOnPhone: player.voiceSettings.mutedOnPhone,
     };
 

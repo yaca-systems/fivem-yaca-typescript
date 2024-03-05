@@ -25,7 +25,10 @@ export class YaCAClientRadioModule {
 
     this.registerExports();
     this.registerEvents();
-    this.registerKeybinds();
+
+    if (!this.clientModule.sharedConfig.saltyChatBridge) {
+      this.registerKeybinds();
+    }
     if (this.clientModule.sharedConfig.debug) this.registerDebugCommands();
   }
 
@@ -286,7 +289,12 @@ export class YaCAClientRadioModule {
       },
       false,
     );
-    RegisterKeyMapping("+yaca:radioTalking", "Funken", "keyboard", "N");
+    RegisterKeyMapping(
+      "+yaca:radioTalking",
+      "Funken",
+      "keyboard",
+      this.clientModule.sharedConfig.keyBinds.radioTransmit,
+    );
   }
 
   registerDebugCommands() {
@@ -654,6 +662,15 @@ export class YaCAClientRadioModule {
 
     // TODO: this.webview.emit("webview:radio:setChannelData", this.radioChannelSettings[channel]);
     // TODO: this.webview.emit('webview:hud:radioChannel', channel, this.radioChannelSettings[channel].muted);
+
+    // SaltyChat bridge
+    if (this.clientModule.sharedConfig.saltyChatBridge) {
+      let frequency: string | null =
+        this.radioChannelSettings[channel].frequency;
+      if (frequency === "0") frequency = null;
+
+      emit("SaltyChat_RadioChannelChanged", frequency, channel == 1);
+    }
   }
 
   /**

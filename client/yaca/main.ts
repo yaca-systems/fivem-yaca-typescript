@@ -23,6 +23,7 @@ import {
   YaCAClientRadioModule,
   localLipSyncAnimations,
 } from "yaca";
+import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 
 initLocale();
 
@@ -37,7 +38,9 @@ export class YaCAClientModule {
   megaphoneModule: YaCAClientMegaphoneModule;
   intercomModule: YaCAClientIntercomModule;
 
-  canChangeVoiceRange: boolean;
+  saltyChatBridge?: YaCAClientSaltyChatBridge;
+
+  canChangeVoiceRange: boolean = true;
   rangeIndex: number;
   rangeInterval: CitizenTimer | null = null;
   monitorInterval: CitizenTimer | null = null;
@@ -198,6 +201,11 @@ export class YaCAClientModule {
       },
     );
 
+    if (this.sharedConfig.saltyChatBridge) {
+      this.sharedConfig.maxRadioChannels = 2;
+      this.saltyChatBridge = new YaCAClientSaltyChatBridge(this);
+    }
+
     console.log("[Client] YaCA Client loaded.");
   }
 
@@ -207,10 +215,7 @@ export class YaCAClientModule {
      *
      * @returns {number} The current voice range.
      */
-    exports(
-      "getVoiceRange",
-      () => this.sharedConfig.voiceRanges[this.rangeIndex],
-    );
+    exports("getVoiceRange", () => this.getVoiceRange());
 
     /**
      * Get all voice ranges.
@@ -236,7 +241,7 @@ export class YaCAClientModule {
       "yaca:changeVoiceRange",
       "Mikrofon-Reichweite ändern",
       "keyboard",
-      "Z",
+      this.sharedConfig.keyBinds.toggleRange,
     );
   }
 
@@ -263,7 +268,6 @@ export class YaCAClientModule {
      * @param {DataObject} dataObj - The data object to be initialized.
      */
     onNet("client:yaca:init", async (dataObj: DataObject) => {
-      console.log("[YACA-Websocket]: init", JSON.stringify(dataObj));
       if (this.rangeInterval) {
         clearInterval(this.rangeInterval);
         this.rangeInterval = null;
@@ -272,13 +276,15 @@ export class YaCAClientModule {
       if (!this.websocket.initialized) {
         this.websocket.initialized = true;
 
-        this.websocket.on("message", (msg: YacaResponse) => {
+        this.websocket.on("message", (msg: string) => {
           this.handleResponse(msg);
         });
 
-        this.websocket.on("close", (code: number, reason: string) =>
-          console.error("[YACA-Websocket]: client disconnected", code, reason),
-        );
+        this.websocket.on("close", (code: number, reason: string) => {
+          console.error("[YACA-Websocket]: client disconnected", code, reason);
+          if (this.saltyChatBridge)
+            this.saltyChatBridge.handleDisconnectState();
+        });
 
         this.websocket.on("open", () => {
           if (this.firstConnect) {
@@ -488,10 +494,10 @@ export class YaCAClientModule {
    *
    * @returns {boolean} Returns true if the plugin is initialized, false otherwise.
    */
-  isPluginInitialized(): boolean {
+  isPluginInitialized(silent: boolean = false): boolean {
     const inited = !!this.getPlayerByID(cache.serverId);
 
-    if (!inited)
+    if (!inited && !silent)
       this.radarNotification(locale("plugin_not_initializiaed") ?? "");
 
     return inited;
@@ -514,12 +520,23 @@ export class YaCAClientModule {
    *
    * @param {string} payload - The response from the voice plugin.
    */
-  handleResponse(payload: YacaResponse) {
+  handleResponse(payload: string) {
     if (!payload) return;
 
-    if (payload.code === "OK") {
-      if (payload.requestType === "JOIN") {
-        emitNet("server:yaca:addPlayer", parseInt(payload.message));
+    let parsedPayload: YacaResponse;
+
+    try {
+      parsedPayload = JSON.parse(payload);
+    } catch (e) {
+      console.error("[YaCA-Websocket]: Error while parsing message: ", e);
+      return;
+    }
+
+    if (this.saltyChatBridge)
+      this.saltyChatBridge.handleChangePluginState(parsedPayload.code);
+    if (parsedPayload.code === "OK") {
+      if (parsedPayload.requestType === "JOIN") {
+        emitNet("server:yaca:addPlayer", parseInt(parsedPayload.message));
 
         if (this.rangeInterval) {
           clearInterval(this.rangeInterval);
@@ -537,15 +554,23 @@ export class YaCAClientModule {
       return;
     }
 
-    if (payload.code === "TALK_STATE" || payload.code === "MUTE_STATE") {
-      this.handleTalkState(payload);
+    if (
+      parsedPayload.code === "TALK_STATE" ||
+      parsedPayload.code === "MUTE_STATE"
+    ) {
+      this.handleTalkState(parsedPayload);
       return;
     }
 
     const message =
-      this.responseCodesToErrorMessages[payload.code] ?? "Unknown error!";
-    if (typeof this.responseCodesToErrorMessages[payload.code] === "undefined")
-      console.log(`[YaCA-Websocket]: Unknown error code: ${payload.code}`);
+      this.responseCodesToErrorMessages[parsedPayload.code] ?? "Unknown error!";
+    if (
+      typeof this.responseCodesToErrorMessages[parsedPayload.code] ===
+      "undefined"
+    )
+      console.log(
+        `[YaCA-Websocket]: Unknown error code: ${parsedPayload.code}`,
+      );
     if (message.length < 1) return;
 
     BeginTextCommandThefeedPost("STRING");
@@ -637,8 +662,8 @@ export class YaCAClientModule {
         0,
         0,
         0,
-        voiceRange * 2 - 1,
-        voiceRange * 2 - 1,
+        voiceRange * 2,
+        voiceRange * 2,
         1,
         0,
         255,
@@ -656,6 +681,16 @@ export class YaCAClientModule {
     });
 
     emitNet("server:yaca:changeVoiceRange", voiceRange);
+
+    // SaltyChat bridge
+    if (this.sharedConfig.saltyChatBridge) {
+      emit(
+        "SaltyChat_VoiceRangeChanged",
+        voiceRange.toFixed(1),
+        this.rangeIndex,
+        this.sharedConfig.voiceRanges.length,
+      );
+    }
   }
 
   /**
@@ -808,6 +843,11 @@ export class YaCAClientModule {
     if (payload.code === "MUTE_STATE") {
       this.isPlayerMuted = !!parseInt(payload.message);
       // TODO: this.webview.emit('webview:hud:voiceDistance', this.isPlayerMuted ? 0 : voiceRangesEnum[this.uirange]);
+
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge) {
+        emit("SaltyChat_MicStateChanged", this.isPlayerMuted);
+      }
     }
 
     const isTalking = !this.isPlayerMuted && !!parseInt(payload.message);
@@ -822,6 +862,11 @@ export class YaCAClientModule {
       LocalPlayer.state.set("yaca:lipsync", isTalking, true);
 
       // TODO: this.webview.emit('webview:hud:isTalking', isTalking);
+
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge) {
+        emit("SaltyChat_TalkStateChanged", isTalking);
+      }
     }
   }
 
@@ -979,5 +1024,14 @@ export class YaCAClientModule {
         players_list: Array.from(players.values()),
       },
     });
+  }
+
+  /**
+   * Get the current voice range.
+   *
+   * @returns {number} The current voice range.
+   */
+  getVoiceRange(): number {
+    return this.sharedConfig.voiceRanges[this.rangeIndex];
   }
 }

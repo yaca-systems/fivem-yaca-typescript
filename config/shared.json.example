@@ -1,5 +1,6 @@
 {
   "debug": false,
+  "saltyChatBridge": false,
   "maxRadioChannels": 6,
   "mufflingRange": -1,
   "unmuteDelay": 300,

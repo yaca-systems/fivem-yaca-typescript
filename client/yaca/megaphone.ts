@@ -67,7 +67,12 @@ export class YaCAClientMegaphoneModule {
       },
       false,
     );
-    RegisterKeyMapping("+yaca:megaphone", "Megaphone", "keyboard", "M");
+    RegisterKeyMapping(
+      "+yaca:megaphone",
+      "Megaphone",
+      "keyboard",
+      this.clientModule.sharedConfig.keyBinds.megaphone,
+    );
   }
 
   registerStateBagHandlers() {

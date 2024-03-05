@@ -45,12 +45,16 @@ function runCommand(command) {
   webSocket.send(JSON.stringify(command));
 }
 
-function sendNuiData(event, data) {
-  if (typeof data === "undefined") {
-    $.post(`http://${GetParentResourceName()}/${event}`);
-  } else {
-    $.post(`http://${GetParentResourceName()}/${event}`, data);
-  }
+function sendNuiData(event, data = {}) {
+  fetch(`https://${GetParentResourceName()}/${event}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify(data),
+  }).catch((error) =>
+    console.error("[YaCA-Websocket] Error sending NUI Message:", error),
+  );
 }
 
 $(function () {

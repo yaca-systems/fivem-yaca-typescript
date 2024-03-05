@@ -1,5 +1,3 @@
 import { YaCAServerModule } from "yaca";
 
-(() => {
-  new YaCAServerModule();
-})();
+new YaCAServerModule();

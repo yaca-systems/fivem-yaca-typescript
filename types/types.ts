@@ -68,6 +68,16 @@ export interface YacaRadioSettings {
 
 export interface YacaSharedConfig {
   debug: boolean;
+  saltyChatBridge: boolean;
+  saltyChatKeyBinds: {
+    primaryRadio: string;
+    secondaryRadio: string;
+  };
+  keyBinds: {
+    toggleRange: string;
+    radioTransmit: string;
+    megaphone: string;
+  };
   maxRadioChannels: number;
   mufflingRange: number;
   unmuteDelay: number;

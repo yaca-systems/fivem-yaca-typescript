@@ -125,11 +125,11 @@ export class YaCAServerRadioModule {
     // Add player to channel map, so we know who is in which channel
     if (!this.radioFrequencyMap.has(frequency))
       this.radioFrequencyMap.set(frequency, new Map());
-    this.radioFrequencyMap.get(frequency).set(source, { muted: false });
+    this.radioFrequencyMap.get(frequency).set(src, { muted: false });
 
     player.radioSettings.frequencies[channel] = frequency;
 
-    emitNet("client:yaca:setRadioFreq", source, channel, frequency);
+    emitNet("client:yaca:setRadioFreq", src, channel, frequency);
 
     //TODO: Add radio effect to player in new frequency
     // const newPlayers = this.getPlayersInRadioFrequency(frequency);
@@ -166,7 +166,7 @@ export class YaCAServerRadioModule {
 
       playersArray.push(key);
 
-      if (key == source) continue;
+      if (key == src) continue;
 
       allTargets.push(key);
     }
@@ -185,7 +185,7 @@ export class YaCAServerRadioModule {
     if (this.serverConfig.useWhisper)
       emitNet(
         "client:yaca:radioTalking",
-        source,
+        src,
         allTargets,
         frequency,
         false,
@@ -193,7 +193,7 @@ export class YaCAServerRadioModule {
         true,
       );
 
-    allPlayersInChannel.delete(source);
+    allPlayersInChannel.delete(src);
     if (!this.radioFrequencyMap.get(frequency).size)
       this.radioFrequencyMap.delete(frequency);
   }
@@ -266,14 +266,14 @@ export class YaCAServerRadioModule {
     const radioInfos: { [key: number]: { shortRange: boolean } } = {};
     for (const [key, values] of getPlayers) {
       if (values.muted) {
-        if (key == source) {
+        if (key == src) {
           targets = [];
           break;
         }
         continue;
       }
 
-      if (key == source) continue;
+      if (key == src) continue;
       const target = players.get(key);
       if (!target || !target.radioSettings.activated) continue;
 
