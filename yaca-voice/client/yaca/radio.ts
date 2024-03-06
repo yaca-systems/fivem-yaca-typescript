@@ -20,6 +20,13 @@ export class YaCAClientRadioModule {
   playersWithShortRange = new Map();
   playersInRadioChannel: Map<number, Set<number>> = new Map();
 
+  defaultRadioSettings: YacaRadioSettings = {
+    frequency: "0",
+    muted: false,
+    volume: 1,
+    stereo: YacaStereoMode.STEREO,
+  }
+
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 
@@ -350,7 +357,7 @@ export class YaCAClientRadioModule {
       if (!state) {
         for (
           let i = 1;
-          i <= this.clientModule.sharedConfig.radio.maxChannels;
+          i <= this.clientModule.sharedConfig.maxRadioChannels;
           i++
         ) {
           this.disableRadioFromPlayerInChannel(i);
@@ -559,13 +566,13 @@ export class YaCAClientRadioModule {
   initRadioSettings() {
     for (
       let i = 1;
-      i <= this.clientModule.sharedConfig.radio.maxChannels;
+      i <= this.clientModule.sharedConfig.maxRadioChannels;
       i++
     ) {
       if (!this.radioChannelSettings[i])
         this.radioChannelSettings[i] = Object.assign(
           {},
-          this.clientModule.sharedConfig.radio.defaultSettings,
+          this.defaultRadioSettings,
         );
       if (!this.playersInRadioChannel.has(i))
         this.playersInRadioChannel.set(i, new Set());

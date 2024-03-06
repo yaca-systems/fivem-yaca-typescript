@@ -164,7 +164,7 @@ export class YaCAServerRadioModule {
     if (
       isNaN(channel) ||
       channel < 1 ||
-      channel > this.sharedConfig.radio.maxChannels
+      channel > this.sharedConfig.maxRadioChannels
     )
       return emitNet("ox_lib:notify", src, {
         type: "error",
@@ -305,7 +305,7 @@ export class YaCAServerRadioModule {
     if (
       isNaN(channel) ||
       channel < 1 ||
-      channel > this.sharedConfig.radio.maxChannels
+      channel > this.sharedConfig.maxRadioChannels
     )
       return;
 

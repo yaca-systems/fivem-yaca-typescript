@@ -80,10 +80,7 @@ export interface YacaSharedConfig {
     radioTransmit: string;
     megaphone: string;
   };
-  radio: {
-    maxChannels: number;
-    defaultSettings: YacaRadioSettings;
-  };
+  maxRadioChannels: number;
   voiceRange: {
     defaultIndex: number;
     ranges: number[];

@@ -12,15 +12,7 @@
     "radioTransmit": "CAPITAL",
     "megaphone": "B"
   },
-  "radio": {
-    "maxChannels": 6,
-    "defaultSettings": {
-      "frequency": "0",
-      "muted": false,
-      "volume": 1,
-      "stereo": "STEREO"
-    }
-  },
+  "maxRadioChannels": 6,
   "voiceRange": {
     "defaultIndex": 2,
     "ranges": [1, 3, 8, 15, 20, 25, 30, 40]
