@@ -25,17 +25,9 @@ const client = {
 
 const production = process.argv.includes("--mode=production");
 const buildCmd = production ? esbuild.build : esbuild.context;
-// const wordWrap = new RegExp(`.{1,65}\\s+|\\S+`, 'g');
 const packageJson = JSON.parse(
   readFileSync("package.json", { encoding: "utf8" }),
 );
-/* const copyright = readFileSync('README.md', { encoding: 'utf8' })
-  .replace(/[\s\S]*?## Copyright/, '')
-  .match(wordWrap)
-  .join('\n  * ')
-  .replace(/\n{2,}/g, '\n');
-
-console.log(copyright.split('\n')[0]); */
 
 writeFileSync(
   ".yarn.installed",
@@ -54,7 +46,6 @@ game 'gta5'
 name '${packageJson.name}'
 author '${packageJson.author}'
 version '${packageJson.version}'
-license '${packageJson.license}'
 repository '${packageJson.repository.url}'
 description '${packageJson.description}'
 

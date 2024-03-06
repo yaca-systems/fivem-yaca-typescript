@@ -25,7 +25,7 @@ export class YaCAClientRadioModule {
     muted: false,
     volume: 1,
     stereo: YacaStereoMode.STEREO,
-  }
+  };
 
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
@@ -564,11 +564,7 @@ export class YaCAClientRadioModule {
    * Set volume & stereo mode for all radio channels on first start and reconnect.
    */
   initRadioSettings() {
-    for (
-      let i = 1;
-      i <= this.clientModule.sharedConfig.maxRadioChannels;
-      i++
-    ) {
+    for (let i = 1; i <= this.clientModule.sharedConfig.maxRadioChannels; i++) {
       if (!this.radioChannelSettings[i])
         this.radioChannelSettings[i] = Object.assign(
           {},

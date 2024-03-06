@@ -4,22 +4,16 @@
   "type": "module",
   "description": "YACA Voice Integration for FiveM",
   "author": "MineMalox & LuftigerLuca",
-  "license": "TODO",
   "repository": {
     "type": "git",
-    "url": "https://git.baustella.club/HopeLife/fivem-yaca-js"
+    "url": "https://github.com/yaca-systems/fivem-yaca-typescript"
   },
-  "files": [
-    "./tsconfig.json",
-    "./package/**/*.js",
-    "./package/**/*.d.ts"
-  ],
   "imports": {
     "#client": "./dist/client.js",
     "#server": "./dist/server.js"
   },
   "scripts": {
-    "prepare": "husky",
+    "prepare": "cd .. && husky yaca-voice/.husky",
     "build": "pnpm run typecheck && node build.js --mode=production",
     "watch": "node build.js",
     "typecheck": "pnpm run typecheck-client && pnpm run typecheck-server",
