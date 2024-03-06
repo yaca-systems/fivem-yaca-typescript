@@ -1,17 +1,39 @@
 {
   "debug": false,
-  "saltyChatBridge": false,
-  "maxRadioChannels": 6,
   "mufflingRange": -1,
   "unmuteDelay": 300,
   "maxPhoneSpeakerRange": 5,
-  "defaultRadioChannelSettings": {
-    "frequency": "0",
-    "muted": false,
-    "volume": 1,
-    "stereo": "STEREO"
+  "notifications": {
+    "oxLib": true,
+    "gta": true
   },
-  "defaultVoiceRangeIndex": 2,
-  "voiceRanges": [1, 3, 8, 15, 20, 25, 30, 40],
-  "megaphoneAllowedVehicleClasses": [18, 19]
+  "keyBinds": {
+    "toggleRange": "Z",
+    "radioTransmit": "CAPITAL",
+    "megaphone": "B"
+  },
+  "radio": {
+    "maxChannels": 6,
+    "defaultSettings": {
+      "frequency": "0",
+      "muted": false,
+      "volume": 1,
+      "stereo": "STEREO"
+    }
+  },
+  "voiceRange": {
+    "defaultIndex": 2,
+    "ranges": [1, 3, 8, 15, 20, 25, 30, 40]
+  },
+  "megaphone": {
+    "range": 30,
+    "allowedVehicleClasses": [18, 19]
+  },
+  "saltyChatBridge": {
+    "enabled": true,
+    "keyBinds": {
+      "primaryRadio": "N",
+      "secondaryRadio": "CAPITAL"
+    }
+  }
 }

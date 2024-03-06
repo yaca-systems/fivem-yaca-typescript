@@ -1,15 +1,15 @@
-import { YacaServerConfig } from "types";
+import { YacaSharedConfig } from "types";
 import { YaCAServerModule } from "yaca";
 
 export class YaCAServerMegaphoneModule {
   private serverModule: YaCAServerModule;
-  private serverConfig: YacaServerConfig;
+  private sharedConfig: YacaSharedConfig;
 
   constructor(serverModule: YaCAServerModule) {
     this.serverModule = serverModule;
-    this.serverConfig = serverModule.serverConfig;
+    this.sharedConfig = serverModule.sharedConfig;
 
-    this.registerEvents()
+    this.registerEvents();
   }
 
   registerEvents() {
@@ -71,7 +71,7 @@ export class YaCAServerMegaphoneModule {
     } else if (state && !playerState["yaca:megaphoneactive"]) {
       playerState.set(
         "yaca:megaphoneactive",
-        this.serverConfig.megaPhoneRange,
+        this.sharedConfig.megaphone.range,
         true,
       );
     }

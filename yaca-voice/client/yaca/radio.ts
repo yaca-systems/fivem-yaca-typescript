@@ -2,10 +2,11 @@ import type { YaCAClientModule } from "yaca";
 import {
   CommDeviceMode,
   YacaFilterEnum,
+  YacaNotificationType,
   type YacaRadioSettings,
   YacaStereoMode,
 } from "types";
-import { cache, requestAnimDict } from "@overextended/ox_lib/client";
+import { cache, locale, requestAnimDict } from "@overextended/ox_lib/client";
 
 export class YaCAClientRadioModule {
   clientModule: YaCAClientModule;
@@ -270,7 +271,7 @@ export class YaCAClientRadioModule {
     );
     RegisterKeyMapping(
       "+yaca:radioTalking",
-      "Funken",
+      locale("use_radio")!,
       "keyboard",
       this.clientModule.sharedConfig.keyBinds.radioTransmit,
     );
@@ -349,7 +350,7 @@ export class YaCAClientRadioModule {
       if (!state) {
         for (
           let i = 1;
-          i <= this.clientModule.sharedConfig.maxRadioChannels;
+          i <= this.clientModule.sharedConfig.radio.maxChannels;
           i++
         ) {
           this.disableRadioFromPlayerInChannel(i);
@@ -471,7 +472,11 @@ export class YaCAClientRadioModule {
 
     // Prevent duplicate update, cuz mute has its own update
     if (this.radioChannelSettings[channel].volume > 0) {
-      emit("yaca:external:setRadioVolume", channel, this.radioChannelSettings[channel].volume);
+      emit(
+        "yaca:external:setRadioVolume",
+        channel,
+        this.radioChannelSettings[channel].volume,
+      );
     }
 
     // Send update to voice plugin
@@ -493,23 +498,38 @@ export class YaCAClientRadioModule {
     switch (this.radioChannelSettings[channel].stereo) {
       case YacaStereoMode.STEREO:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT);
-        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_LEFT);
-        this.clientModule.radarNotification(
-          `Kanal ${channel} ist nun auf der linken Seite hörbar.`,
+        emit(
+          "yaca:external:setRadioChannelStereo",
+          channel,
+          YacaStereoMode.MONO_LEFT,
+        );
+        this.clientModule.notification(
+          locale("changed_stereo_mode", channel, locale("left_ear")!)!,
+          YacaNotificationType.INFO,
         );
         return;
       case YacaStereoMode.MONO_LEFT:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_RIGHT);
-        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_RIGHT);
-        this.clientModule.radarNotification(
-          `Kanal ${channel} ist nun auf der rechten Seite hörbar.`,
+        emit(
+          "yaca:external:setRadioChannelStereo",
+          channel,
+          YacaStereoMode.MONO_RIGHT,
+        );
+        this.clientModule.notification(
+          locale("changed_stereo_mode", channel, locale("right_ear")!)!,
+          YacaNotificationType.INFO,
         );
         return;
       case YacaStereoMode.MONO_RIGHT:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.STEREO);
-        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.STEREO);
-        this.clientModule.radarNotification(
-          `Kanal ${channel} ist nun auf beiden Seiten hörbar.`,
+        emit(
+          "yaca:external:setRadioChannelStereo",
+          channel,
+          YacaStereoMode.STEREO,
+        );
+        this.clientModule.notification(
+          locale("changed_stereo_mode", channel, locale("both_ears")!)!,
+          YacaNotificationType.INFO,
         );
         return;
     }
@@ -537,11 +557,15 @@ export class YaCAClientRadioModule {
    * Set volume & stereo mode for all radio channels on first start and reconnect.
    */
   initRadioSettings() {
-    for (let i = 1; i <= this.clientModule.sharedConfig.maxRadioChannels; i++) {
+    for (
+      let i = 1;
+      i <= this.clientModule.sharedConfig.radio.maxChannels;
+      i++
+    ) {
       if (!this.radioChannelSettings[i])
         this.radioChannelSettings[i] = Object.assign(
           {},
-          this.clientModule.sharedConfig.defaultRadioChannelSettings,
+          this.clientModule.sharedConfig.radio.defaultSettings,
         );
       if (!this.playersInRadioChannel.has(i))
         this.playersInRadioChannel.set(i, new Set());
@@ -612,7 +636,11 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The new radio channel.
    */
   updateRadioInWebview(channel: number) {
-    emit("yaca:external:updatedRadioChannelData", channel, this.radioChannelSettings[channel]);
+    emit(
+      "yaca:external:updatedRadioChannelData",
+      channel,
+      this.radioChannelSettings[channel],
+    );
 
     // SaltyChat bridge
     if (this.clientModule.sharedConfig.saltyChatBridge) {

@@ -6,5 +6,18 @@
   "outdated_plugin": "Your plugin is outdated, please update it!",
   "wrong_ts_server": "You are connected to the wrong teamspeak server!",
   "not_connected": "You are not connected to the teamspeak server!",
-  "move_error": "Error while moving to the channel!"
+  "move_error": "Error while moving to the channel!",
+
+  "changed_stereo_mode": "Channel %s is now only heard in %s.",
+  "left_ear": "the left ear",
+  "right_ear": "the right ear",
+  "both_ears": "both ears",
+
+  "use_megaphone": "Use megaphone",
+  "use_radio": "Use radio",
+
+  "use_salty_primary_radio": "Use primary radio",
+  "use_salty_secondary_radio": "Use secondary radio",
+
+  "change_voice_range": "Change voice range"
 }

@@ -2,6 +2,7 @@ import type { YaCAClientModule } from "../yaca/main";
 import { cache } from "@overextended/ox_lib/server";
 import { sleep } from "@overextended/ox_lib";
 import { YacaResponseCode } from "types";
+import { locale } from "@overextended/ox_lib/client";
 
 export class YaCAClientSaltyChatBridge {
   private clientModule: YaCAClientModule;
@@ -50,7 +51,6 @@ export class YaCAClientSaltyChatBridge {
     RegisterCommand(
       "+primaryRadio",
       () => {
-        console.log("Primary radio");
         this.clientModule.radioModule.changeActiveRadioChannel(1);
         this.clientModule.radioModule.radioTalkingStart(true);
       },
@@ -65,9 +65,9 @@ export class YaCAClientSaltyChatBridge {
     );
     RegisterKeyMapping(
       "+primaryRadio",
-      "Use Primary Radio",
+      locale("use_salty_primary_radio")!,
       "keyboard",
-      this.clientModule.sharedConfig.saltyChatKeyBinds.primaryRadio,
+      this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio,
     );
 
     RegisterCommand(
@@ -87,9 +87,9 @@ export class YaCAClientSaltyChatBridge {
     );
     RegisterKeyMapping(
       "+secondaryRadio",
-      "Use Secondary Radio",
+      locale("use_salty_secondary_radio")!,
       "keyboard",
-      this.clientModule.sharedConfig.saltyChatKeyBinds.secondaryRadio,
+      this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio,
     );
   }
 

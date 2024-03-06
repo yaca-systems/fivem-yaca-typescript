@@ -68,24 +68,37 @@ export interface YacaRadioSettings {
 
 export interface YacaSharedConfig {
   debug: boolean;
-  saltyChatBridge: boolean;
-  saltyChatKeyBinds: {
-    primaryRadio: string;
-    secondaryRadio: string;
+  mufflingRange: number;
+  unmuteDelay: number;
+  maxPhoneSpeakerRange: number;
+  notifications: {
+    oxLib: boolean;
+    gta: boolean;
   };
   keyBinds: {
     toggleRange: string;
     radioTransmit: string;
     megaphone: string;
   };
-  maxRadioChannels: number;
-  mufflingRange: number;
-  unmuteDelay: number;
-  maxPhoneSpeakerRange: number;
-  defaultRadioChannelSettings: YacaRadioSettings;
-  defaultVoiceRangeIndex: number;
-  voiceRanges: number[];
-  megaphoneAllowedVehicleClasses: number[];
+  radio: {
+    maxChannels: number;
+    defaultSettings: YacaRadioSettings;
+  };
+  voiceRange: {
+    defaultIndex: number;
+    ranges: number[];
+  };
+  megaphone: {
+    range: number;
+    allowedVehicleClasses: number[];
+  }
+  saltyChatBridge: {
+    enabled: boolean;
+    keyBinds: {
+      primaryRadio: string;
+      secondaryRadio: string;
+    }
+  };
 }
 
 export interface YacaServerConfig {
@@ -95,5 +108,4 @@ export interface YacaServerConfig {
   defaultChannelId: number;
   useWhisper: boolean;
   excludeChannels: number[];
-  megaPhoneRange: number;
 }

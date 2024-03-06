@@ -6,5 +6,4 @@
   "defaultChannelId": 1,
   "useWhisper": false,
   "excludeChannels": [],
-  "megaPhoneRange": 30
 }

@@ -1,4 +1,4 @@
-import { cache } from "@overextended/ox_lib/client";
+import { cache, locale } from "@overextended/ox_lib/client";
 import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum } from "types";
 import { onCache } from "@overextended/ox_lib/server";
@@ -39,7 +39,7 @@ export class YaCAClientMegaphoneModule {
         const vehicleClass = GetVehicleClass(vehicle);
 
         this.canUseMegaphone =
-          this.clientModule.sharedConfig.megaphoneAllowedVehicleClasses.includes(
+          this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(
             vehicleClass,
           );
       } else if (this.canUseMegaphone) {
@@ -69,7 +69,7 @@ export class YaCAClientMegaphoneModule {
     );
     RegisterKeyMapping(
       "+yaca:megaphone",
-      "Megaphone",
+      locale("use_megaphone")!,
       "keyboard",
       this.clientModule.sharedConfig.keyBinds.megaphone,
     );

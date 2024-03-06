@@ -164,7 +164,7 @@ export class YaCAServerRadioModule {
     if (
       isNaN(channel) ||
       channel < 1 ||
-      channel > this.sharedConfig.maxRadioChannels
+      channel > this.sharedConfig.radio.maxChannels
     )
       return emitNet("ox_lib:notify", src, {
         type: "error",
@@ -282,7 +282,12 @@ export class YaCAServerRadioModule {
       radioFrequency,
       foundPlayer.muted,
     );
-    emit("yaca:external:changedRadioMuteState", src, radioFrequency, foundPlayer.muted);
+    emit(
+      "yaca:external:changedRadioMuteState",
+      src,
+      radioFrequency,
+      foundPlayer.muted,
+    );
   }
 
   /**
@@ -300,7 +305,7 @@ export class YaCAServerRadioModule {
     if (
       isNaN(channel) ||
       channel < 1 ||
-      channel > this.sharedConfig.maxRadioChannels
+      channel > this.sharedConfig.radio.maxChannels
     )
       return;
 

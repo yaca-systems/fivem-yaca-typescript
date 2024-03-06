@@ -1,15 +1,16 @@
-import { cache, initLocale, locale } from "@overextended/ox_lib/client";
+import { cache, initLocale, locale, notify } from "@overextended/ox_lib/client";
 import {
+  CommDeviceMode,
   DataObject,
+  YacaBuildType,
   type YacaClient,
+  YacaFilterEnum,
+  YacaNotificationType,
   YacaPlayerData,
   type YacaProtocol,
   YacaResponse,
-  CommDeviceMode,
-  YacaBuildType,
-  YacaFilterEnum,
-  YacaStereoMode,
   type YacaSharedConfig,
+  YacaStereoMode,
 } from "types";
 import {
   calculateDistanceVec3,
@@ -17,11 +18,11 @@ import {
   WebSocket,
 } from "utils";
 import {
+  localLipSyncAnimations,
   YaCAClientIntercomModule,
   YaCAClientMegaphoneModule,
   YaCAClientPhoneModule,
   YaCAClientRadioModule,
-  localLipSyncAnimations,
 } from "yaca";
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 
@@ -133,17 +134,25 @@ export class YaCAClientModule {
    * Sends a radar notification.
    *
    * @param {string} message - The message to be sent in the notification.
+   * @param {YacaNotificationType} type - The type of the notification, e.g. error, inform, success.
    */
-  radarNotification(message: string) {
-    /*
-    ~g~ --> green
-    ~w~ --> white
-    ~r~ --> white
-    */
+  notification(message: string, type: YacaNotificationType) {
+    if (this.sharedConfig.notifications.oxLib) {
+      notify({
+        id: "yaca",
+        title: "YaCA",
+        description: message,
+        type: type,
+      });
+    }
 
-    BeginTextCommandThefeedPost("STRING");
-    AddTextComponentSubstringPlayerName(message);
-    EndTextCommandThefeedPostTicker(false, false);
+    if (this.sharedConfig.notifications.gta) {
+      BeginTextCommandThefeedPost("STRING");
+      AddTextComponentSubstringPlayerName("YaCA: " + message);
+      if (type === YacaNotificationType.ERROR)
+        ThefeedSetNextPostBackgroundColor(6);
+      EndTextCommandThefeedPostTicker(false, false);
+    }
   }
 
   constructor() {
@@ -167,7 +176,7 @@ export class YaCAClientModule {
       },
     );
 
-    this.rangeIndex = this.sharedConfig.defaultVoiceRangeIndex ?? 0;
+    this.rangeIndex = this.sharedConfig.voiceRange.defaultIndex ?? 0;
 
     this.registerExports();
     this.registerEvents();
@@ -202,7 +211,7 @@ export class YaCAClientModule {
     );
 
     if (this.sharedConfig.saltyChatBridge) {
-      this.sharedConfig.maxRadioChannels = 2;
+      this.sharedConfig.radio.maxChannels = 2;
       this.saltyChatBridge = new YaCAClientSaltyChatBridge(this);
     }
 
@@ -222,7 +231,7 @@ export class YaCAClientModule {
      *
      * @returns {number[]}
      */
-    exports("getVoiceRanges", () => this.sharedConfig.voiceRanges);
+    exports("getVoiceRanges", () => this.sharedConfig.voiceRange.ranges);
   }
 
   registerKeybindings() {
@@ -239,7 +248,7 @@ export class YaCAClientModule {
     );
     RegisterKeyMapping(
       "yaca:changeVoiceRange",
-      "Mikrofon-Reichweite ändern",
+      locale("change_voice_range")!,
       "keyboard",
       this.sharedConfig.keyBinds.toggleRange,
     );
@@ -373,14 +382,14 @@ export class YaCAClientModule {
      */
     onNet("client:yaca:changeVoiceRange", (target: number, range: number) => {
       if (target == cache.serverId && !this.isPlayerMuted) {
-        emit('yaca:external:voiceRangeUpdate', range);
+        emit("yaca:external:voiceRangeUpdate", range);
         // SaltyChat bridge
         if (this.sharedConfig.saltyChatBridge) {
           emit(
             "SaltyChat_VoiceRangeChanged",
             range.toFixed(1),
             this.rangeIndex,
-            this.sharedConfig.voiceRanges.length,
+            this.sharedConfig.voiceRange.ranges.length,
           );
         }
       }
@@ -473,7 +482,10 @@ export class YaCAClientModule {
       !dataObj.channelPassword
     ) {
       console.log("[YACA-Websocket]: Error while initializing plugin");
-      return this.radarNotification(locale("connect_error") ?? "");
+      return this.notification(
+        locale("connect_error")!,
+        YacaNotificationType.ERROR,
+      );
     }
 
     this.sendWebsocket({
@@ -507,7 +519,10 @@ export class YaCAClientModule {
     const inited = !!this.getPlayerByID(cache.serverId);
 
     if (!inited && !silent)
-      this.radarNotification(locale("plugin_not_initializiaed") ?? "");
+      this.notification(
+        locale("plugin_not_initialized")!,
+        YacaNotificationType.ERROR,
+      );
 
     return inited;
   }
@@ -583,10 +598,7 @@ export class YaCAClientModule {
       );
     if (message.length < 1) return;
 
-    BeginTextCommandThefeedPost("STRING");
-    AddTextComponentSubstringPlayerName(`Voice: ${message}`);
-    ThefeedSetNextPostBackgroundColor(6);
-    EndTextCommandThefeedPostTicker(false, false);
+    this.notification(message, YacaNotificationType.ERROR);
   }
 
   /**
@@ -627,7 +639,7 @@ export class YaCAClientModule {
    * @returns {number} The current voice range.
    */
   getVoiceRange(): number {
-    return this.sharedConfig.voiceRanges[this.rangeIndex];
+    return this.sharedConfig.voiceRange.ranges[this.rangeIndex];
   }
 
   /**
@@ -649,12 +661,16 @@ export class YaCAClientModule {
     this.rangeIndex += 1;
 
     if (this.rangeIndex < 1) {
-      this.rangeIndex = this.sharedConfig.voiceRanges.length - 1;
-    } else if (this.rangeIndex > this.sharedConfig.voiceRanges.length - 1) {
+      this.rangeIndex = this.sharedConfig.voiceRange.ranges.length - 1;
+    } else if (
+      this.rangeIndex >
+      this.sharedConfig.voiceRange.ranges.length - 1
+    ) {
       this.rangeIndex = 0;
     }
 
-    const voiceRange = this.sharedConfig.voiceRanges[this.rangeIndex] || 1;
+    const voiceRange =
+      this.sharedConfig.voiceRange.ranges[this.rangeIndex] || 1;
 
     this.visualVoiceRangeTimeout = setTimeout(() => {
       if (this.visualVoiceRangeTick) {
@@ -851,7 +867,10 @@ export class YaCAClientModule {
     // Update state if player is muted or not
     if (payload.code === "MUTE_STATE") {
       this.isPlayerMuted = !!parseInt(payload.message);
-      emit('yaca:external:voiceRangeUpdate', this.isPlayerMuted ? 0 : this.getVoiceRange());
+      emit(
+        "yaca:external:voiceRangeUpdate",
+        this.isPlayerMuted ? 0 : this.getVoiceRange(),
+      );
 
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge) {
@@ -870,7 +889,7 @@ export class YaCAClientModule {
       PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
       LocalPlayer.state.set("yaca:lipsync", isTalking, true);
 
-      emit('yaca:external:isTalking', isTalking);
+      emit("yaca:external:isTalking", isTalking);
 
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge) {

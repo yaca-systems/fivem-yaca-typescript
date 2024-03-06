@@ -67,7 +67,7 @@ export class YaCAServerModule {
     this.registerCommands();
 
     if (this.sharedConfig.saltyChatBridge) {
-      this.sharedConfig.maxRadioChannels = 2;
+      this.sharedConfig.radio.maxChannels = 2;
       this.saltChatBridge = new YaCAServerSaltyChatBridge(this);
     }
   }
@@ -87,7 +87,10 @@ export class YaCAServerModule {
 
     this.players.set(src, {
       voiceSettings: {
-        voiceRange: this.sharedConfig.voiceRanges[this.sharedConfig.defaultVoiceRangeIndex],
+        voiceRange:
+          this.sharedConfig.voiceRange.ranges[
+            this.sharedConfig.voiceRange.defaultIndex
+          ],
         voiceFirstConnect: false,
         forceMuted: false,
         ingameName: name,
@@ -458,11 +461,13 @@ export class YaCAServerModule {
     const player = this.players.get(src);
     if (!player) return;
 
-    if (!this.sharedConfig.voiceRanges.includes(range)) {
+    if (!this.sharedConfig.voiceRange.ranges.includes(range)) {
       return emitNet(
         "client:yaca:setMaxVoiceRange",
         src,
-        this.sharedConfig.voiceRanges[this.sharedConfig.defaultVoiceRangeIndex],
+        this.sharedConfig.voiceRange.ranges[
+          this.sharedConfig.voiceRange.defaultIndex
+        ],
       );
     }
 
@@ -485,7 +490,9 @@ export class YaCAServerModule {
   getPlayerVoiceRange(playerId: number) {
     return (
       this.players.get(playerId)?.voiceSettings.voiceRange ??
-      this.sharedConfig.voiceRanges[this.sharedConfig.defaultVoiceRangeIndex]
+      this.sharedConfig.voiceRange.ranges[
+        this.sharedConfig.voiceRange.defaultIndex
+      ]
     );
   }
 
