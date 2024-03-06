@@ -1,7 +1,2 @@
-node_modules
+# JetBrains
 .idea
-dist
-resource
-.yarn.installed
-config/server.json
-config/shared.json

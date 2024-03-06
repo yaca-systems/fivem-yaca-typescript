@@ -14,7 +14,6 @@ export interface YaCAPlayer {
   voiceSettings: {
     voiceRange: number;
     voiceFirstConnect: boolean;
-    maxVoiceRangeInMeter: number;
     forceMuted: boolean;
     ingameName: string;
     mutedOnPhone: boolean;
@@ -88,9 +87,8 @@ export class YaCAServerModule {
 
     this.players.set(src, {
       voiceSettings: {
-        voiceRange: 3, //TODO: Change this to a config value
+        voiceRange: this.sharedConfig.voiceRanges[this.sharedConfig.defaultVoiceRangeIndex],
         voiceFirstConnect: false,
-        maxVoiceRangeInMeter: 15,
         forceMuted: false,
         ingameName: name,
         mutedOnPhone: false,
@@ -175,11 +173,6 @@ export class YaCAServerModule {
       this.addNewPlayer(source, clientId);
     });
 
-    // YaCA: Change megaphone state by player
-    onNet("server:yaca:useMegaphone", (state: boolean) => {
-      this.megaphoneModule.playerUseMegaphone(source, state);
-    });
-
     // YaCA: Triggers if voiceplugin is for x amount of time not connected
     onNet("server:yaca:noVoicePlugin", () => {
       this.playerNoVoicePlugin(source);
@@ -190,76 +183,6 @@ export class YaCAServerModule {
       console.log(`Player ${source} is ready for voice.`);
       this.playerReconnect(source, isFirstConnect);
     });
-
-    //YaCA: Enable radio
-    onNet("server:yaca:enableRadio", (state: boolean) => {
-      this.radioModule.enableRadio(source, state);
-    });
-
-    //YaCA-Radio: Change radio channel frequency
-    onNet(
-      "server:yaca:changeRadioFrequency",
-      (channel: number, frequency: string) => {
-        this.radioModule.changeRadioFrequency(source, channel, frequency);
-      },
-    );
-
-    //YaCA-Radio: Mute a radio channel
-    onNet("server:yaca:muteRadioChannel", (channel: number) => {
-      this.radioModule.radioChannelMute(source, channel);
-    });
-
-    //YaCA-Radio: Talk in radio channel
-    onNet("server:yaca:radioTalking", (state: boolean) => {
-      this.radioModule.radioTalkingState(source, state);
-    });
-
-    //YaCA-Radio: Change active radio channel
-    onNet("server:yaca:changeActiveRadioChannel", (channel: number) => {
-      this.radioModule.radioActiveChannelChange(source, channel);
-    });
-
-    onNet(
-      "server:yaca:phoneSpeakerEmit",
-      (enableForTargets?: number[], disableForTargets?: number[]) => {
-        const player = this.players.get(source);
-        if (!player) return;
-
-        const enableWhisperReceive: number[] = [];
-        const disableWhisperReceive: number[] = [];
-
-        player.voiceSettings.inCallWith.forEach((callTarget) => {
-          const target = this.players.get(callTarget);
-          if (!target) return;
-
-          if (enableForTargets?.includes(callTarget))
-            enableWhisperReceive.push(callTarget);
-          if (disableForTargets?.includes(callTarget))
-            disableWhisperReceive.push(callTarget);
-        });
-
-        if (enableWhisperReceive.length) {
-          for (const target of enableWhisperReceive) {
-            emitNet(
-              "client:yaca:playersToPhoneSpeakerEmit",
-              target,
-              enableForTargets,
-              true,
-            );
-          }
-        }
-        if (disableWhisperReceive.length) {
-          for (const target of disableWhisperReceive) {
-            emitNet(
-              "client:yaca:playersToPhoneSpeakerEmit",
-              target,
-              disableForTargets,
-              false,
-            );
-          }
-        }
-      },
-    );
 
     onNet("server:yaca:nuiReady", () => {
       this.connectToVoice(source);

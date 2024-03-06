@@ -11,7 +11,6 @@ export class YaCAClientRadioModule {
   clientModule: YaCAClientModule;
 
   radioFrequencySet = false;
-  radioToggle = false;
   radioEnabled = false;
   radioTalking = false;
   radioChannelSettings: { [key: number]: YacaRadioSettings } = {};
@@ -134,17 +133,6 @@ export class YaCAClientRadioModule {
   }
 
   registerEvents() {
-    /*
-      this.webview.on('client:yaca:enableRadio', (state) => {});
-      this.webview.on('client:yaca:changeRadioFrequency', (frequency) => {});
-      this.webview.on('client:yaca:muteRadioChannel', () => {});
-      this.webview.on('client:yaca:changeActiveRadioChannel', (channel) => {});
-      this.webview.on('client:yaca:changeRadioChannelVolume', (higher) => {});
-      this.webview.on("client:yaca:changeRadioChannelStereo", () => {});
-      //TODO: Implement, will be used if player activates radio speaker so everyone around him can hear it
-      this.webview.on("client:yaca:changeRadioSpeaker", () => {})
-    */
-
     /**
      * Handles the "client:yaca:setRadioFreq" server event.
      *
@@ -225,7 +213,7 @@ export class YaCAClientRadioModule {
       "client:yaca:setRadioMuteState",
       (channel: number, state: boolean) => {
         this.radioChannelSettings[channel].muted = state;
-        this.updateRadioInWebview(channel);
+        emit("yaca:external:setRadioMuteState", channel, state);
         this.disableRadioFromPlayerInChannel(channel);
       },
     );
@@ -263,15 +251,6 @@ export class YaCAClientRadioModule {
   }
 
   registerKeybinds() {
-    RegisterCommand(
-      "yaca:radioUI",
-      () => {
-        this.openRadio();
-      },
-      false,
-    );
-    // RegisterKeyMapping('yaca:radioUI', 'Radio UI', 'keyboard', 'F10')
-
     /**
      * Registers the command and key mapping for the radio talking.
      */
@@ -377,12 +356,11 @@ export class YaCAClientRadioModule {
         }
       }
 
-      // TODO: this.webview.emit('webview:hud:radioState', state);
+      emit("yaca:external:isRadioEnabled", state);
 
       if (state && !this.radioInitialized) {
         this.radioInitialized = true;
         this.initRadioSettings();
-        this.updateRadioInWebview(this.activeRadioChannel);
       }
     }
   }
@@ -442,8 +420,8 @@ export class YaCAClientRadioModule {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
 
     emitNet("server:yaca:changeActiveRadioChannel", channel);
+    emit("yaca:external:changedActiveRadioChannel", channel);
     this.activeRadioChannel = channel;
-    this.updateRadioInWebview(channel);
   }
 
   /**
@@ -493,7 +471,7 @@ export class YaCAClientRadioModule {
 
     // Prevent duplicate update, cuz mute has its own update
     if (this.radioChannelSettings[channel].volume > 0) {
-      this.updateRadioInWebview(channel);
+      emit("yaca:external:setRadioVolume", channel, this.radioChannelSettings[channel].volume);
     }
 
     // Send update to voice plugin
@@ -515,18 +493,21 @@ export class YaCAClientRadioModule {
     switch (this.radioChannelSettings[channel].stereo) {
       case YacaStereoMode.STEREO:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT);
+        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_LEFT);
         this.clientModule.radarNotification(
           `Kanal ${channel} ist nun auf der linken Seite hörbar.`,
         );
         return;
       case YacaStereoMode.MONO_LEFT:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_RIGHT);
+        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_RIGHT);
         this.clientModule.radarNotification(
           `Kanal ${channel} ist nun auf der rechten Seite hörbar.`,
         );
         return;
       case YacaStereoMode.MONO_RIGHT:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.STEREO);
+        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.STEREO);
         this.clientModule.radarNotification(
           `Kanal ${channel} ist nun auf beiden Seiten hörbar.`,
         );
@@ -550,33 +531,6 @@ export class YaCAClientRadioModule {
       stereo,
       channel,
     );
-  }
-
-  // TODO: Implement the radio UI
-
-  /**
-   * Open the radio UI.
-   */
-  openRadio() {
-    if (!this.radioToggle /* && !alt.isCursorVisible() */) {
-      this.radioToggle = true;
-      /* alt.showCursor(true);
-      this.webview.emit('webview:radio:openState', true);
-      NKeyhandler.disableAllKeybinds("radioUI", true, ["yaca:radioUI", "yaca:radioTalking"], ["yaca:radioTalking"]) */
-    } else if (this.radioToggle) {
-      this.closeRadio();
-    }
-  }
-
-  /**
-   * Cleanup different things, if player closes his radio.
-   */
-  closeRadio() {
-    this.radioToggle = false;
-
-    /* alt.showCursor(false);
-    this.webview.emit('webview:radio:openState', false);
-    NKeyhandler.disableAllKeybinds("radioUI", false, ["yaca:radioUI", "yaca:radioTalking"], ["yaca:radioTalking"]); */
   }
 
   /**
@@ -658,10 +612,7 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The new radio channel.
    */
   updateRadioInWebview(channel: number) {
-    if (channel != this.activeRadioChannel) return;
-
-    // TODO: this.webview.emit("webview:radio:setChannelData", this.radioChannelSettings[channel]);
-    // TODO: this.webview.emit('webview:hud:radioChannel', channel, this.radioChannelSettings[channel].muted);
+    emit("yaca:external:updatedRadioChannelData", channel, this.radioChannelSettings[channel]);
 
     // SaltyChat bridge
     if (this.clientModule.sharedConfig.saltyChatBridge) {
@@ -706,6 +657,7 @@ export class YaCAClientRadioModule {
     }
 
     this.radioChannelSettings[channel].frequency = frequency;
+    emit("yaca:external:setRadioFrequency", channel, frequency);
   }
 
   /**
@@ -755,8 +707,8 @@ export class YaCAClientRadioModule {
         }
 
         emitNet("server:yaca:radioTalking", false);
+        emit("yaca:external:isRadioTalking", false);
 
-        // TODO: this.webview.emit('webview:hud:isRadioTalking', false);
         if (clearPedTasks) {
           StopAnimTask(cache.ped, "random@arrests", "generic_radio_chatter", 4);
         }
@@ -789,7 +741,7 @@ export class YaCAClientRadioModule {
       );
 
       emitNet("server:yaca:radioTalking", true);
-      // TODO: this.webview.emit('webview:hud:isRadioTalking', true);
+      emit("yaca:external:isRadioTalking", true);
     });
   }
 }

@@ -373,7 +373,16 @@ export class YaCAClientModule {
      */
     onNet("client:yaca:changeVoiceRange", (target: number, range: number) => {
       if (target == cache.serverId && !this.isPlayerMuted) {
-        // this.webview.emit('webview:hud:voiceDistance', range);
+        emit('yaca:external:voiceRangeUpdate', range);
+        // SaltyChat bridge
+        if (this.sharedConfig.saltyChatBridge) {
+          emit(
+            "SaltyChat_VoiceRangeChanged",
+            range.toFixed(1),
+            this.rangeIndex,
+            this.sharedConfig.voiceRanges.length,
+          );
+        }
       }
 
       const player = this.getPlayerByID(target);
@@ -534,6 +543,7 @@ export class YaCAClientModule {
 
     if (this.saltyChatBridge)
       this.saltyChatBridge.handleChangePluginState(parsedPayload.code);
+
     if (parsedPayload.code === "OK") {
       if (parsedPayload.requestType === "JOIN") {
         emitNet("server:yaca:addPlayer", parseInt(parsedPayload.message));
@@ -612,6 +622,15 @@ export class YaCAClientModule {
   }
 
   /**
+   * Get the current voice range.
+   *
+   * @returns {number} The current voice range.
+   */
+  getVoiceRange(): number {
+    return this.sharedConfig.voiceRanges[this.rangeIndex];
+  }
+
+  /**
    * Changes the voice range to the next range.
    */
   changeVoiceRange() {
@@ -681,16 +700,6 @@ export class YaCAClientModule {
     });
 
     emitNet("server:yaca:changeVoiceRange", voiceRange);
-
-    // SaltyChat bridge
-    if (this.sharedConfig.saltyChatBridge) {
-      emit(
-        "SaltyChat_VoiceRangeChanged",
-        voiceRange.toFixed(1),
-        this.rangeIndex,
-        this.sharedConfig.voiceRanges.length,
-      );
-    }
   }
 
   /**
@@ -842,7 +851,7 @@ export class YaCAClientModule {
     // Update state if player is muted or not
     if (payload.code === "MUTE_STATE") {
       this.isPlayerMuted = !!parseInt(payload.message);
-      // TODO: this.webview.emit('webview:hud:voiceDistance', this.isPlayerMuted ? 0 : voiceRangesEnum[this.uirange]);
+      emit('yaca:external:voiceRangeUpdate', this.isPlayerMuted ? 0 : this.getVoiceRange());
 
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge) {
@@ -861,7 +870,7 @@ export class YaCAClientModule {
       PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
       LocalPlayer.state.set("yaca:lipsync", isTalking, true);
 
-      // TODO: this.webview.emit('webview:hud:isTalking', isTalking);
+      emit('yaca:external:isTalking', isTalking);
 
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge) {
@@ -1024,14 +1033,5 @@ export class YaCAClientModule {
         players_list: Array.from(players.values()),
       },
     });
-  }
-
-  /**
-   * Get the current voice range.
-   *
-   * @returns {number} The current voice range.
-   */
-  getVoiceRange(): number {
-    return this.sharedConfig.voiceRanges[this.rangeIndex];
   }
 }

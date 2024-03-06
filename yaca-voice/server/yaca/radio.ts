@@ -13,7 +13,59 @@ export class YaCAServerRadioModule {
     this.sharedConfig = serverModule.sharedConfig;
     this.serverConfig = serverModule.serverConfig;
 
+    this.registerEvents();
     this.registerExports();
+  }
+
+  registerEvents() {
+    /**
+     * Handles the "server:yaca:enableRadio" server event.
+     *
+     * @param {boolean} state - The state of the radio.
+     */
+    onNet("server:yaca:enableRadio", (state: boolean) => {
+      this.enableRadio(source, state);
+    });
+
+    /**
+     * Handles the "server:yaca:changeRadioFrequency" server event.
+     *
+     * @param {number} channel - The channel to change the frequency of.
+     * @param {string} frequency - The new frequency.
+     */
+    onNet(
+      "server:yaca:changeRadioFrequency",
+      (channel: number, frequency: string) => {
+        this.changeRadioFrequency(source, channel, frequency);
+      },
+    );
+
+    /**
+     * Handles the "server:yaca:muteRadioChannel" server event.
+     *
+     * @param {number} channel - The channel to mute.
+     */
+    onNet("server:yaca:muteRadioChannel", (channel: number) => {
+      this.radioChannelMute(source, channel);
+    });
+
+    /**
+     * Handles the "server:yaca:radioTalking" server event.
+     *
+     * @param {boolean} state - The state of the radio.
+     */
+    onNet("server:yaca:radioTalking", (state: boolean) => {
+      this.radioTalkingState(source, state);
+    });
+
+    /**
+     * Handles the "server:yaca:changeActiveRadioChannel" server event.
+     *
+     * @param {number} channel - The channel to change the frequency of.
+     */
+    onNet("server:yaca:changeActiveRadioChannel", (channel: number) => {
+      this.radioActiveChannelChange(source, channel);
+    });
   }
 
   registerExports() {
@@ -41,6 +93,11 @@ export class YaCAServerRadioModule {
     );
   }
 
+  /**
+   * Get all players in a radio frequency.
+   *
+   * @param frequency - The frequency to get the players for.
+   */
   getPlayersInRadioFrequency(frequency: string) {
     const players = this.serverModule.getPlayers();
     const allPlayersInChannel = this.radioFrequencyMap.get(frequency);
@@ -55,6 +112,8 @@ export class YaCAServerRadioModule {
 
   /**
    * Checks if a player is permitted to use long radio.
+   *
+   * TODO: Make setter for short range system.
    */
   isLongRadioPermitted(src: number) {
     if (!src) return;
@@ -79,6 +138,8 @@ export class YaCAServerRadioModule {
     if (!player) return;
 
     player.radioSettings.activated = state;
+    emit("yaca:export:enabledRadio", src, state);
+
     this.isLongRadioPermitted(src);
   }
 
@@ -130,6 +191,7 @@ export class YaCAServerRadioModule {
     player.radioSettings.frequencies[channel] = frequency;
 
     emitNet("client:yaca:setRadioFreq", src, channel, frequency);
+    emit("yaca:external:changedRadioFrequency", src, channel, frequency);
 
     //TODO: Add radio effect to player in new frequency
     // const newPlayers = this.getPlayersInRadioFrequency(frequency);
@@ -220,6 +282,7 @@ export class YaCAServerRadioModule {
       radioFrequency,
       foundPlayer.muted,
     );
+    emit("yaca:external:changedRadioMuteState", src, radioFrequency, foundPlayer.muted);
   }
 
   /**
@@ -242,6 +305,7 @@ export class YaCAServerRadioModule {
       return;
 
     player.radioSettings.currentChannel = channel;
+    emit("yaca:external:changedRadioActiveChannel", src, channel);
   }
 
   /**

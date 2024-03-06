@@ -8,6 +8,19 @@ export class YaCAServerMegaphoneModule {
   constructor(serverModule: YaCAServerModule) {
     this.serverModule = serverModule;
     this.serverConfig = serverModule.serverConfig;
+
+    this.registerEvents()
+  }
+
+  registerEvents() {
+    /**
+     * Changes megaphone state by player
+     *
+     * @param {boolean} state - The state of the megaphone effect.
+     */
+    onNet("server:yaca:useMegaphone", (state: boolean) => {
+      this.playerUseMegaphone(source, state);
+    });
   }
 
   /**
@@ -39,6 +52,7 @@ export class YaCAServerMegaphoneModule {
       return;
 
     this.changeMegaphoneState(src, state);
+    emit("yaca:external:changeMegaphoneState", src, state);
   }
 
   /**

@@ -126,5 +126,6 @@ export class YaCAClientMegaphoneModule {
 
     this.lastMegaphoneState = !this.lastMegaphoneState;
     emitNet("server:yaca:useMegaphone", state);
+    emit("yaca:external:megaphoneState", state);
   }
 }
