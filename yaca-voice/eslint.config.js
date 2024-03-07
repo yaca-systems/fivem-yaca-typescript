@@ -9,6 +9,11 @@ export default tsEslint.config(
   ...tsEslint.configs.recommended,
   // eslintPluginPrettierRecommended,
   {
+    rules: {
+      "eqeqeq": "error",
+    }
+  },
+  {
     ignores: ["build.js"],
   },
   {

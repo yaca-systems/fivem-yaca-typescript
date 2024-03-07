@@ -80,7 +80,10 @@ export class YaCAClientPhoneModule {
 
         if (onCallStop) return;
 
-        if (this.clientModule.useWhisper && target.remoteID == cache.serverId) {
+        if (
+          this.clientModule.useWhisper &&
+          target.remoteID === cache.serverId
+        ) {
           this.clientModule.setPlayersCommType(
             [],
             YacaFilterEnum.PHONE,
@@ -178,15 +181,15 @@ export class YaCAClientPhoneModule {
         if (replicated) return;
 
         const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId == 0) return;
+        if (playerId === 0) return;
 
         const playerSource = GetPlayerServerId(playerId);
-        if (playerSource == 0) return;
+        if (playerSource === 0) return;
 
-        if (playerSource == cache.serverId) this.phoneSpeakerActive = !!value;
+        if (playerSource === cache.serverId) this.phoneSpeakerActive = !!value;
 
         this.removePhoneSpeakerFromEntity(playerSource);
-        if (typeof value != "undefined") {
+        if (typeof value !== "undefined") {
           this.clientModule.setPlayerVariable(
             playerSource,
             "phoneCallMemberIds",

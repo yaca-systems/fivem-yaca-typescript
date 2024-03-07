@@ -172,10 +172,10 @@ export class YaCAServerRadioModule {
       });
 
     // Leave radiochannel if frequency is 0
-    if (frequency == "0")
+    if (frequency === "0")
       return this.leaveRadioFrequency(src, channel, frequency);
 
-    if (player.radioSettings.frequencies[channel] != frequency) {
+    if (player.radioSettings.frequencies[channel] !== frequency) {
       this.leaveRadioFrequency(
         src,
         channel,
@@ -212,7 +212,7 @@ export class YaCAServerRadioModule {
     if (!player) return;
 
     frequency =
-      frequency == "0" ? player.radioSettings.frequencies[channel] : frequency;
+      frequency === "0" ? player.radioSettings.frequencies[channel] : frequency;
 
     if (!this.radioFrequencyMap.has(frequency)) return;
 
@@ -228,7 +228,7 @@ export class YaCAServerRadioModule {
 
       playersArray.push(key);
 
-      if (key == src) continue;
+      if (key === src) continue;
 
       allTargets.push(key);
     }
@@ -335,14 +335,14 @@ export class YaCAServerRadioModule {
     const radioInfos: { [key: number]: { shortRange: boolean } } = {};
     for (const [key, values] of getPlayers) {
       if (values.muted) {
-        if (key == src) {
+        if (key === src) {
           targets = [];
           break;
         }
         continue;
       }
 
-      if (key == src) continue;
+      if (key === src) continue;
       const target = players.get(key);
       if (!target || !target.radioSettings.activated) continue;
 

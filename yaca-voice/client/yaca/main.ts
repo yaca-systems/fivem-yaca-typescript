@@ -101,7 +101,7 @@ export class YaCAClientModule {
           DrawScaleformMovieFullscreen(scaleForm, 255, 255, 255, 255, 0);
         }, 0);
 
-        if (time != 0) {
+        if (time !== 0) {
           setTimeout(() => {
             if (this.mHintTick) clearInterval(this.mHintTick);
             this.mHintTick = null;
@@ -204,7 +204,7 @@ export class YaCAClientModule {
         if (replicated) return;
 
         const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId == 0) return;
+        if (playerId === 0) return;
 
         SetPlayerTalkingOverride(playerId, value);
       },
@@ -342,9 +342,9 @@ export class YaCAClientModule {
         for (const dataObj of dataObjects) {
           if (
             !dataObj ||
-            typeof dataObj.range == "undefined" ||
-            typeof dataObj.clientId == "undefined" ||
-            typeof dataObj.playerId == "undefined"
+            typeof dataObj.range === "undefined" ||
+            typeof dataObj.clientId === "undefined" ||
+            typeof dataObj.playerId === "undefined"
           )
             continue;
 
@@ -381,7 +381,7 @@ export class YaCAClientModule {
      * @param {number} range - The new voice range.
      */
     onNet("client:yaca:changeVoiceRange", (target: number, range: number) => {
-      if (target == cache.serverId && !this.isPlayerMuted) {
+      if (target === cache.serverId && !this.isPlayerMuted) {
         emit("yaca:external:voiceRangeUpdate", range);
         // SaltyChat bridge
         if (this.sharedConfig.saltyChatBridge) {
@@ -476,7 +476,7 @@ export class YaCAClientModule {
     if (
       !dataObj ||
       !dataObj.suid ||
-      typeof dataObj.chid != "number" ||
+      typeof dataObj.chid !== "number" ||
       !dataObj.deChid ||
       !dataObj.ingameName ||
       !dataObj.channelPassword
@@ -536,7 +536,7 @@ export class YaCAClientModule {
     if (!this.websocket)
       return console.error("[Voice-Websocket]: No websocket created");
 
-    if (this.websocket.readyState == 1) this.websocket.send(msg);
+    if (this.websocket.readyState === 1) this.websocket.send(msg);
   }
 
   /**
@@ -754,7 +754,7 @@ export class YaCAClientModule {
     if (!Array.isArray(players)) players = [players];
 
     const clientIds: YacaClient[] = [];
-    if (typeof ownMode != "undefined") {
+    if (typeof ownMode !== "undefined") {
       clientIds.push({
         client_id: this.getPlayerByID(cache.serverId)?.clientId,
         mode: ownMode,
@@ -839,8 +839,8 @@ export class YaCAClientModule {
    * Monitoring if player is connected to teamspeak.
    */
   monitorConnectstate() {
-    if (this.websocket?.readyState == 0 || this.websocket?.readyState == 1) {
-      if (this.messageDisplayed && this.websocket.readyState == 1) {
+    if (this.websocket?.readyState === 0 || this.websocket?.readyState === 1) {
+      if (this.messageDisplayed && this.websocket.readyState === 1) {
         this.stopMHint();
         this.messageDisplayed = false;
         this.noPluginActivated = 0;
@@ -879,7 +879,7 @@ export class YaCAClientModule {
     }
 
     const isTalking = !this.isPlayerMuted && !!parseInt(payload.message);
-    if (this.isTalking != isTalking) {
+    if (this.isTalking !== isTalking) {
       this.isTalking = isTalking;
 
       const animationData =
@@ -913,7 +913,7 @@ export class YaCAClientModule {
 
     for (const player of GetActivePlayers()) {
       const remoteId = GetPlayerServerId(player);
-      if (remoteId == 0 || remoteId == cache.serverId) continue;
+      if (remoteId === 0 || remoteId === cache.serverId) continue;
 
       const voiceSetting = this.getPlayerByID(remoteId);
       if (!voiceSetting?.clientId) continue;
@@ -922,7 +922,7 @@ export class YaCAClientModule {
 
       let muffleIntensity = 0;
       if (
-        currentRoom != GetRoomKeyFromEntity(player) &&
+        currentRoom !== GetRoomKeyFromEntity(player) &&
         !HasEntityClearLosToEntity(cache.ped, playerPed, 17)
       ) {
         muffleIntensity = 10; // 10 is the maximum intensity

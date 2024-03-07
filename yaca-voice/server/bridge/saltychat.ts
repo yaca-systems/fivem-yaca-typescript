@@ -126,23 +126,13 @@ export class YaCAServerSaltyChatBridge {
       playerHandle = [playerHandle];
     }
 
-    if (!this.callMap.has(callIdentifier)) {
-      this.callMap.set(callIdentifier, []);
-    }
-
-    const currentlyInCall = this.callMap.get(callIdentifier)!;
-
-    if (currentlyInCall) {
-      this.callMap.set(callIdentifier, currentlyInCall.concat(playerHandle));
-    } else {
-      this.callMap.set(callIdentifier, playerHandle);
-    }
-
-    const nowInCall = this.callMap.get(callIdentifier)!;
+    const beforeInCall = this.callMap.get(callIdentifier) ?? [];
+    const nowInCall = beforeInCall.concat(playerHandle);
+    this.callMap.set(callIdentifier, nowInCall);
 
     for (const player of nowInCall) {
       for (const otherPlayer of nowInCall) {
-        if (player !== otherPlayer && !currentlyInCall.includes(otherPlayer)) {
+        if (player !== otherPlayer && !beforeInCall.includes(otherPlayer)) {
           this.serverModule.phoneModule.callPlayer(player, otherPlayer, true);
         }
       }
@@ -157,23 +147,18 @@ export class YaCAServerSaltyChatBridge {
       playerHandle = [playerHandle];
     }
 
-    if (!this.callMap.has(callIdentifier)) {
+    const beforeInCall = this.callMap.get(callIdentifier);
+    if (!beforeInCall) {
       return;
     }
 
-    const currentlyInCall = this.callMap.get(callIdentifier)!;
-
-    this.callMap.set(
-      callIdentifier,
-      currentlyInCall.filter(
-        (player) => !(playerHandle as number[]).includes(player),
-      ),
+    const nowInCall = beforeInCall?.filter(
+      (player) => !(playerHandle as number[]).includes(player),
     );
+    this.callMap.set(callIdentifier, nowInCall);
 
-    const nowInCall = this.callMap.get(callIdentifier)!;
-
-    for (const player of currentlyInCall) {
-      for (const otherPlayer of currentlyInCall) {
+    for (const player of beforeInCall) {
+      for (const otherPlayer of beforeInCall) {
         if (player !== otherPlayer && !nowInCall.includes(otherPlayer)) {
           this.serverModule.phoneModule.callPlayer(player, otherPlayer, false);
         }

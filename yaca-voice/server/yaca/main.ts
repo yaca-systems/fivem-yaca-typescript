@@ -205,7 +205,7 @@ export class YaCAServerModule {
     }>(
       "setAlive",
       async (_src, args) => {
-        this.changePlayerAliveStatus(args.playerId, args.state == "true");
+        this.changePlayerAliveStatus(args.playerId, args.state === "true");
       },
       {
         help: "Set the alive status of a player.",
@@ -230,7 +230,7 @@ export class YaCAServerModule {
     }>(
       "callPlayer",
       async (src, args) => {
-        this.phoneModule.callPlayer(src, args.playerId, args.state == "true");
+        this.phoneModule.callPlayer(src, args.playerId, args.state === "true");
       },
       {
         help: "Call another player.",
@@ -258,7 +258,7 @@ export class YaCAServerModule {
         this.phoneModule.callPlayerOldEffect(
           src,
           args.playerId,
-          args.state == "true",
+          args.state === "true",
         );
       },
       {
@@ -284,7 +284,7 @@ export class YaCAServerModule {
     }>(
       "muteOnPhone",
       async (_src, args) => {
-        this.phoneModule.muteOnPhone(args.playerId, args.state == "true");
+        this.phoneModule.muteOnPhone(args.playerId, args.state === "true");
       },
       {
         help: "Mute a player during a phone call.",
@@ -309,7 +309,7 @@ export class YaCAServerModule {
     }>(
       "enablePhoneSpeaker",
       async (src, args) => {
-        this.phoneModule.enablePhoneSpeaker(src, args.state == "true");
+        this.phoneModule.enablePhoneSpeaker(src, args.state === "true");
       },
       {
         help: "Enable or disable the phone speaker for a player.",
@@ -338,13 +338,13 @@ export class YaCAServerModule {
           "client:yaca:addRemovePlayerIntercomFilter",
           src,
           [args.playerId],
-          args.state == "true",
+          args.state === "true",
         );
         emitNet(
           "client:yaca:addRemovePlayerIntercomFilter",
           args.playerId,
           [src],
-          args.state == "true",
+          args.state === "true",
         );
       },
       {
@@ -547,7 +547,7 @@ export class YaCAServerModule {
       const playerServer = this.players.get(parseInt(playerSource));
       if (!playerServer) continue;
 
-      if (!playerServer.voicePlugin || parseInt(playerSource) == src) continue;
+      if (!playerServer.voicePlugin || parseInt(playerSource) === src) continue;
 
       allPlayersData.push(playerServer.voicePlugin);
     }

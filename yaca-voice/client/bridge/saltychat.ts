@@ -144,7 +144,7 @@ export class YaCAClientSaltyChatBridge {
   }
 
   handleChangePluginState(response: YacaResponseCode) {
-    if (this.prevPluginState == response) return;
+    if (this.prevPluginState === response) return;
     let state: number = 0;
 
     switch (response) {

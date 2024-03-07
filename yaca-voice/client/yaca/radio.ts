@@ -328,7 +328,7 @@ export class YaCAClientRadioModule {
     RegisterCommand(
       "changeRadioChannelVolume",
       (_source: number, args: string[]) => {
-        this.changeRadioChannelVolume(args[0] == "true");
+        this.changeRadioChannelVolume(args[0] === "true");
       },
       false,
     );
@@ -350,7 +350,7 @@ export class YaCAClientRadioModule {
   enableRadio(state: boolean) {
     if (!this.clientModule.isPluginInitialized()) return;
 
-    if (this.radioEnabled != state) {
+    if (this.radioEnabled !== state) {
       this.radioEnabled = state;
       emitNet("server:yaca:enableRadio", state);
 
@@ -415,7 +415,7 @@ export class YaCAClientRadioModule {
   muteRadioChannelRaw(channel: number) {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) return;
 
-    if (this.radioChannelSettings[channel].frequency == "0") return;
+    if (this.radioChannelSettings[channel].frequency === "0") return;
     emitNet("server:yaca:muteRadioChannel", channel);
   }
 
@@ -456,7 +456,7 @@ export class YaCAClientRadioModule {
     if (
       !this.clientModule.isPluginInitialized() ||
       !this.radioEnabled ||
-      this.radioChannelSettings[channel].frequency == "0"
+      this.radioChannelSettings[channel].frequency === "0"
     )
       return;
 
@@ -468,11 +468,11 @@ export class YaCAClientRadioModule {
     );
 
     // Prevent event emit spams, if nothing changed
-    if (oldVolume == this.radioChannelSettings[channel].volume) return;
+    if (oldVolume === this.radioChannelSettings[channel].volume) return;
 
     if (
-      this.radioChannelSettings[channel].volume == 0 ||
-      (oldVolume == 0 && this.radioChannelSettings[channel].volume > 0)
+      this.radioChannelSettings[channel].volume === 0 ||
+      (oldVolume === 0 && this.radioChannelSettings[channel].volume > 0)
     ) {
       emitNet("server:yaca:muteRadioChannel", channel);
     }
@@ -643,7 +643,7 @@ export class YaCAClientRadioModule {
     let foundChannel;
     for (const channel in this.radioChannelSettings) {
       const data = this.radioChannelSettings[channel];
-      if (data.frequency == frequency) {
+      if (data.frequency === frequency) {
         foundChannel = parseInt(channel);
         break;
       }
@@ -661,7 +661,7 @@ export class YaCAClientRadioModule {
   setRadioFrequency(channel: number, frequency: string) {
     this.radioFrequencySet = true;
 
-    if (this.radioChannelSettings[channel].frequency != frequency) {
+    if (this.radioChannelSettings[channel].frequency !== frequency) {
       this.disableRadioFromPlayerInChannel(channel);
     }
 
@@ -674,7 +674,7 @@ export class YaCAClientRadioModule {
         this.radioChannelSettings[channel].frequency;
       if (frequency === "0") frequency = null;
 
-      emit("SaltyChat_RadioChannelChanged", frequency, channel == 1);
+      emit("SaltyChat_RadioChannelChanged", frequency, channel === 1);
     }
   }
 

@@ -38,11 +38,11 @@ export class YaCAServerMegaphoneModule {
     const playerPed = GetPlayerPed(src.toString());
     const playerVehicle = GetVehiclePedIsIn(playerPed, false);
 
-    if (playerVehicle == 0 && playerState["yaca:megaphoneactive"]) return;
-    if (playerVehicle != 0) {
+    if (playerVehicle === 0 && playerState["yaca:megaphoneactive"]) return;
+    if (playerVehicle !== 0) {
       const playerSeatDriver = GetPedInVehicleSeat(playerVehicle, -1);
       const playerSeatPassenger = GetPedInVehicleSeat(playerVehicle, 0);
-      if (playerSeatDriver != playerPed && playerSeatPassenger != playerPed)
+      if (playerSeatDriver !== playerPed && playerSeatPassenger !== playerPed)
         return;
     }
     if (
