@@ -634,28 +634,6 @@ export class YaCAClientRadioModule {
   }
 
   /**
-   * Updates the UI when a player changes the radio channel.
-   *
-   * @param {number} channel - The new radio channel.
-   */
-  updateRadioInWebview(channel: number) {
-    emit(
-      "yaca:external:updatedRadioChannelData",
-      channel,
-      this.radioChannelSettings[channel],
-    );
-
-    // SaltyChat bridge
-    if (this.clientModule.sharedConfig.saltyChatBridge) {
-      let frequency: string | null =
-        this.radioChannelSettings[channel].frequency;
-      if (frequency === "0") frequency = null;
-
-      emit("SaltyChat_RadioChannelChanged", frequency, channel == 1);
-    }
-  }
-
-  /**
    * Finds a radio channel by a given frequency.
    *
    * @param {string} frequency - The frequency to search for.
@@ -689,6 +667,15 @@ export class YaCAClientRadioModule {
 
     this.radioChannelSettings[channel].frequency = frequency;
     emit("yaca:external:setRadioFrequency", channel, frequency);
+
+    // SaltyChat bridge
+    if (this.clientModule.sharedConfig.saltyChatBridge) {
+      let frequency: string | null =
+        this.radioChannelSettings[channel].frequency;
+      if (frequency === "0") frequency = null;
+
+      emit("SaltyChat_RadioChannelChanged", frequency, channel == 1);
+    }
   }
 
   /**

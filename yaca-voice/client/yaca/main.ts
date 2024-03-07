@@ -211,7 +211,7 @@ export class YaCAClientModule {
     );
 
     if (this.sharedConfig.saltyChatBridge) {
-      this.sharedConfig.radio.maxChannels = 2;
+      this.sharedConfig.maxRadioChannels = 2;
       this.saltyChatBridge = new YaCAClientSaltyChatBridge(this);
     }
 

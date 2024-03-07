@@ -67,7 +67,7 @@ export class YaCAServerModule {
     this.registerCommands();
 
     if (this.sharedConfig.saltyChatBridge) {
-      this.sharedConfig.radio.maxChannels = 2;
+      this.sharedConfig.maxRadioChannels = 2;
       this.saltChatBridge = new YaCAServerSaltyChatBridge(this);
     }
   }
@@ -444,7 +444,7 @@ export class YaCAServerModule {
       const name = generateRandomName(src, this.nameSet);
       if (!name) return;
 
-      this.nameSet.delete(player.voiceSettings?.ingameName);
+      this.nameSet.delete(player.voiceSettings.ingameName);
       player.voiceSettings.ingameName = name;
     }
 

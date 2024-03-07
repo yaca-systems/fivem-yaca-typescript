@@ -234,7 +234,7 @@ export class YaCAServerRadioModule {
     }
 
     if (!this.serverConfig.useWhisper && playersArray.length) {
-      for (const target of allTargets) {
+      for (const target of playersArray) {
         if (player.voicePlugin)
           emitNet(
             "client:yaca:leaveRadioChannel",
