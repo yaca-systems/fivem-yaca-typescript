@@ -59,11 +59,11 @@ export class YaCAServerModule {
       LoadResourceFile(cache.resource, "config/server.json"),
     );
 
-    initLocale(this.sharedConfig.locale);
-
     this.sharedConfig = JSON.parse(
       LoadResourceFile(cache.resource, "config/shared.json"),
     );
+
+    initLocale(this.sharedConfig.locale);
 
     this.phoneModule = new YaCAServerPhoneModle(this);
     this.radioModule = new YaCAServerRadioModule(this);
@@ -186,7 +186,6 @@ export class YaCAServerModule {
 
     //YaCa: voice restart
     onNet("server:yaca:wsReady", (isFirstConnect: boolean) => {
-      console.log(`Player ${source} is ready for voice.`);
       this.playerReconnect(source, isFirstConnect);
     });
 

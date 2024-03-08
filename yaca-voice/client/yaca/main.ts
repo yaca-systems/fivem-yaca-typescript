@@ -245,7 +245,7 @@ export class YaCAClientModule {
             emitNet("server:yaca:wsReady", this.firstConnect);
           }
 
-          console.log("[YACA-Websocket]: connected");
+          console.log("[YACA-Websocket]: Successfully connected to the voice plugin");
         });
 
         await this.websocket.start();

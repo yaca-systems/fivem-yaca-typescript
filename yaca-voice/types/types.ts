@@ -67,8 +67,8 @@ export interface YacaRadioSettings {
 }
 
 export interface YacaSharedConfig {
-  locale: string;
   debug: boolean;
+  locale: string;
   mufflingRange: number;
   unmuteDelay: number;
   maxPhoneSpeakerRange: number;

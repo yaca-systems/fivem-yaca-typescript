@@ -33,7 +33,6 @@ export class YaCAClientSaltyChatBridge {
       `__cfx_export_saltychat_${method}`,
       // eslint-disable-next-line
       (setCb: (...args: any[]) => void) => {
-        console.log("Called", `__cfx_export_saltychat_${method}`);
         setCb(cb);
       },
     );

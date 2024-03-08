@@ -1,5 +1,6 @@
 {
   "debug": false,
+  "locale": "en",
   "mufflingRange": -1,
   "unmuteDelay": 300,
   "maxPhoneSpeakerRange": 5,

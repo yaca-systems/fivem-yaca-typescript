@@ -65,8 +65,8 @@ $(() => {
       runCommand(event.data.data);
     } else if (event.data.action === "close") {
       if (webSocket) webSocket.close();
+    } else {
+      console.error("[YaCA-Websocket] Unknown message:", event.data);
     }
-
-    console.error("[YaCA-Websocket] Unknown message:", event.data);
   })
 });

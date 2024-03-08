@@ -8,7 +8,6 @@ export class WebSocket extends EventEmitter {
 
   constructor() {
     super();
-    console.log("WebSocket created");
 
     RegisterNuiCallbackType("YACA_OnMessage");
     RegisterNuiCallbackType("YACA_OnConnected");
