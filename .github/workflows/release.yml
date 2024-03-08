@@ -51,7 +51,7 @@ jobs:
       - name: Bundle files
         run: |
           mkdir -p ./temp/yaca-voice
-          cp -r ./yaca-voice/resource ./temp/yaca-voice/
+          cp -r ./yaca-voice/resource/* ./temp/yaca-voice/
           cd ./temp && zip -r ../yaca-voice.zip ./yaca-voice
 
       - name: Bump package version
