@@ -91,6 +91,25 @@ export class YaCAServerRadioModule {
       (src: number, channel: number, frequency: string) =>
         this.changeRadioFrequency(src, channel, frequency),
     );
+
+    /**
+     * Get if a player has long range radio.
+     *
+     * @param {number} src - The player to set the long range radio for.
+     */
+    exports("getPlayerHasLongRange", (src: number) =>
+      this.getPlayerHasLongRange(src),
+    );
+
+    /**
+     * Set if a player has long range radio.
+     *
+     * @param {number} src - The player to set the long range radio for.
+     * @param {boolean} state - The new state of the long range radio.
+     */
+    exports("setPlayerHadLongRange", (src: number, state: boolean) =>
+      this.setPlayerHadLongRange(src, state),
+    );
   }
 
   /**
@@ -113,21 +132,32 @@ export class YaCAServerRadioModule {
   }
 
   /**
-   * Checks if a player is permitted to use long radio.
+   * Gets if a player has long range radio.
    *
-   * TODO: Make setter for short range system.
+   * @param src - The player to get the long range radio for.
    */
-  isLongRadioPermitted(src: number) {
-    if (!src) {
-      return;
-    }
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src);
+  getPlayerHasLongRange(src: number) {
+    const player = this.serverModule.getPlayers().get(src);
     if (!player) {
       return;
     }
 
-    player.radioSettings.hasLong = true; //Add some checks if you want shortrange system;
+    return player.radioSettings.hasLong;
+  }
+
+  /**
+   * Sets if a player has long range radio.
+   *
+   * @param src - The player to set the long range radio for.
+   * @param state - The new state of the long range radio.
+   */
+  setPlayerHadLongRange(src: number, state: boolean) {
+    const player = this.serverModule.getPlayers().get(src);
+    if (!player) {
+      return;
+    }
+
+    player.radioSettings.hasLong = state;
   }
 
   /**
@@ -145,8 +175,6 @@ export class YaCAServerRadioModule {
 
     player.radioSettings.activated = state;
     emit("yaca:export:enabledRadio", src, state);
-
-    this.isLongRadioPermitted(src);
   }
 
   /**
@@ -306,12 +334,7 @@ export class YaCAServerRadioModule {
     }
 
     foundPlayer.muted = !foundPlayer.muted;
-    emitNet(
-      "client:yaca:setRadioMuteState",
-      src,
-      channel,
-      foundPlayer.muted,
-    );
+    emitNet("client:yaca:setRadioMuteState", src, channel, foundPlayer.muted);
     emit(
       "yaca:external:changedRadioMuteState",
       src,

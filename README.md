@@ -37,6 +37,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 | Variable                                | Type       | Description                                                                                                             |
 |-----------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------|
 | debug                                   | `bool`     | Enable the debug mode to enable some debug commands                                                                     |
+| locale                                  | `string`   | The locale that should be used preferred                                                                                |
 | mufflingRange                           | `number`   | If set to -1, the player voice range is used, all values >= 0 sets the muffling range before it gets completely cut off |
 | unmuteDelay                             | `number`   | The time before the teamspeak client is being unmuted after joining the ingame channel.                                 |
 | maxPhoneSpeakerRange                    | `number`   | The range in which you can here the phone speaker when active.                                                          |
@@ -53,8 +54,6 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 | saltyChatBridge.enabled                 | `bool`     | If the saltychat bridge should be enabled or not.                                                                       |
 | saltyChatBridge.keyBinds.primaryRadio   | `string`   | The default keybind for using the primary radio. (only available if the saltychat bridge is enabled)                    |
 | saltyChatBridge.keyBinds.secondaryRadio | `string`   | The default keybind for using the secondary radio. (only available if the saltychat bridge is enabled)                  |
-
-
 
 # Exports
 
@@ -213,6 +212,23 @@ Sets the radio channel of a player.
 | channel   | `number` | the channel to set   |
 | frequency | `string` | the frequency to set |
 
+#### `getPlayerHasLongRange(source: number): bool`
+
+Returns whether a player has long range enabled as `bool`.
+
+| Parameter | Type     | Description       |
+|-----------|----------|-------------------|
+| source    | `number` | the player source |
+
+#### `setPlayerHasLongRange(source: number, state: bool)`
+
+Sets the long range state of a player.
+
+| Parameter | Type     | Description          |
+|-----------|----------|----------------------|
+| source    | `number` | the player source    |
+| state     | `bool`   | the long range state |
+
 ### Phone
 
 #### `callPlayer(source: number, target: number, state: bool)`
@@ -259,7 +275,6 @@ Enable or disable the phone speaker for a player.
 
 <details>
 <summary style="font-size: x-large">Client</summary>
-
 
 ### yaca:external:voiceRangeUpdate
 
@@ -349,7 +364,6 @@ The event is triggered when a player starts or stops talking on the radio.
 
 <details>
 <summary style="font-size: x-large">Server</summary>
-
 
 ### yaca:external:changeMegaphoneState
 

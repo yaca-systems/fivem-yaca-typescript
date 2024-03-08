@@ -245,7 +245,9 @@ export class YaCAClientModule {
             emitNet("server:yaca:wsReady", this.firstConnect);
           }
 
-          console.log("[YACA-Websocket]: Successfully connected to the voice plugin");
+          console.log(
+            "[YACA-Websocket]: Successfully connected to the voice plugin",
+          );
         });
 
         await this.websocket.start();
@@ -343,66 +345,6 @@ export class YaCAClientModule {
         player.range = range;
       }
     });
-
-    /*
-     * TODO: Handle stream-in/out
-     *
-     * alt.on("gameEntityCreate", (entity) => {
-     * if (!entity?.valid || !(entity instanceof alt.Player)) return;
-     *
-     * const entityID = entity.remoteID;
-     *
-     * // Handle megaphone on stream-in
-     * if (entity.hasStreamSyncedMeta("yaca:megaphoneactive")) {
-     *  YaCAClientModule.setPlayersCommType(
-     *    this.getPlayerByID(entity.remoteID),
-     *    YacaFilterEnum.MEGAPHONE,
-     *    true,
-     *    undefined,
-     *    entity.getStreamSyncedMeta("yaca:megaphoneactive"),
-     *    CommDeviceMode.RECEIVER,
-     *    CommDeviceMode.SENDER
-     *  );
-     * }
-     *
-     * // Handle phonecallspeaker on stream-in
-     * if (entity.hasStreamSyncedMeta("yaca:phoneSpeaker")) {
-     *  const value = entity.getStreamSyncedMeta("yaca:phoneSpeaker");
-     *
-     *  this.setPlayerVariable(entity, "phoneCallMemberIds", Array.isArray(value) ? value : [value]);
-     * }
-     *
-     * // Handle shortrange radio on stream-in
-     * if (this.playersWithShortRange.has(entityID)) {
-     *  const channel = this.findRadioChannelByFrequency(this.playersWithShortRange.get(entityID));
-     *  if (channel) {
-     *    YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-     *  }
-     * }
-     *
-     * this.syncLipsPlayer(entity, !!entity.getStreamSyncedMeta("yaca:lipsync"));
-     * });
-     *
-     * onNet("gameEntityDestroy", (entity) => {
-     * if (!entity?.valid || !(entity instanceof alt.Player)) return;
-     *
-     * const entityID = entity.remoteID;
-     *
-     * // Handle phonecallspeaker on stream-out
-     * this.removePhoneSpeakerFromEntity(entity);
-     *
-     * // Handle megaphone on stream-out
-     * if (entity?.hasStreamSyncedMeta("yaca:megaphoneactive")) {
-     *  YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.MEGAPHONE, false, undefined, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-     * }
-     *
-     * // Handle shortrange radio on stream-out
-     * if (this.playersWithShortRange.has(entityID)) {
-     *  YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.RADIO, false, undefined, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-     * }
-     * });
-     *
-     */
   }
 
   /**
@@ -429,10 +371,7 @@ export class YaCAClientModule {
       !dataObj.channelPassword
     ) {
       console.log("[YACA-Websocket]: Error while initializing plugin");
-      this.notification(
-        locale("connect_error"),
-        YacaNotificationType.ERROR,
-      );
+      this.notification(locale("connect_error"), YacaNotificationType.ERROR);
       return;
     }
 

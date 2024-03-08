@@ -82,6 +82,7 @@ export interface YacaSharedConfig {
     megaphone: string;
   };
   maxRadioChannels: number;
+  shortRadioRange: number;
   voiceRange: {
     defaultIndex: number;
     ranges: number[];
