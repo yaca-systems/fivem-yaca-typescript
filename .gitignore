@@ -1,2 +1,6 @@
 # JetBrains
 .idea
+
+# GitHub Actions
+temp
+*.zip
