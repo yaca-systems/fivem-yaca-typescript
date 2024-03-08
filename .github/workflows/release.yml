@@ -42,6 +42,13 @@ jobs:
         run: pnpm i --frozen-lockfile
         working-directory: yaca-voice
 
+      - name: Bump package version
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          pnpm version ${{ github.ref_name }} --git-tag-version false
+        working-directory: yaca-voice
+
       - name: Run build
         run: pnpm build
         env:
@@ -53,13 +60,6 @@ jobs:
           mkdir -p ./temp/yaca-voice
           cp -r ./yaca-voice/resource/* ./temp/yaca-voice/
           cd ./temp && zip -r ../yaca-voice.zip ./yaca-voice
-
-      - name: Bump package version
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          pnpm version ${{ github.ref_name }} --git-tag-version false
-        working-directory: yaca-voice
 
       - name: Update repository
         run: |
