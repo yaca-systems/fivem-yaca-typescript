@@ -5,7 +5,7 @@ const playerId = PlayerId();
 const cache: ClientCache = new Proxy(
   {
     serverId: GetPlayerServerId(playerId),
-    playerId: playerId,
+    playerId,
     resource: GetCurrentResourceName(),
     ped: PlayerPedId(),
     vehicle: false,

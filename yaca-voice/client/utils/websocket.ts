@@ -54,6 +54,10 @@ export class WebSocket extends EventEmitter {
   }
 
   send(data: object) {
+    if (this.readyState !== 1) {
+      return;
+    }
+
     const nuiMessage = JSON.stringify({
       action: "command",
       data,
@@ -63,6 +67,10 @@ export class WebSocket extends EventEmitter {
   }
 
   close() {
+    if (this.readyState === 3) {
+      return;
+    }
+
     SendNuiMessage(
       JSON.stringify({
         action: "close",

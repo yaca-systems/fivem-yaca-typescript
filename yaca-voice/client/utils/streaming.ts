@@ -18,6 +18,7 @@ async function streamingRequest(
   await waitFor(
     () => {
       if (hasLoaded(asset)) return asset;
+      return null;
     },
     `failed to load ${assetType} '${asset}' after ${timeout} ticks`,
     timeout || 500,

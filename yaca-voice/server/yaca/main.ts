@@ -184,11 +184,6 @@ export class YaCAServerModule {
       this.addNewPlayer(source, clientId);
     });
 
-    // YaCA: Triggers if voiceplugin is for x amount of time not connected
-    onNet("server:yaca:noVoicePlugin", () => {
-      this.playerNoVoicePlugin(source);
-    });
-
     //YaCa: voice restart
     onNet("server:yaca:wsReady", (isFirstConnect: boolean) => {
       console.log(`Player ${source} is ready for voice.`);
@@ -263,15 +258,6 @@ export class YaCAServerModule {
   }
 
   /**
-   * Kick player if he doesn't have the voice plugin activated.
-   *
-   * @param {number} src - The player to check for the voice plugin.
-   */
-  playerNoVoicePlugin(src: number) {
-    DropPlayer(src.toString(), "Dein Voiceplugin war nicht aktiviert!");
-  }
-
-  /**
    * Used if a player reconnects to the server.
    *
    * @param {number} src - The source-id of the player to reconnect.
@@ -313,8 +299,7 @@ export class YaCAServerModule {
     }
 
     if (!this.sharedConfig.voiceRange.ranges.includes(range)) {
-      return emitNet(
-        "client:yaca:setMaxVoiceRange",
+      this.changeVoiceRange(
         src,
         this.sharedConfig.voiceRange.ranges[
           this.sharedConfig.voiceRange.defaultIndex

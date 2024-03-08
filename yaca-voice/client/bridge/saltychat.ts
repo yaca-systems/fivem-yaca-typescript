@@ -14,7 +14,7 @@ export class YaCAClientSaltyChatBridge {
 
     this.registerSaltyChatKeyBinds();
     this.registerSaltyChatExports();
-    this.enableRadio().then(() => {});
+    this.enableRadio();
 
     console.log("[YaCA] SaltyChat bridge loaded");
 

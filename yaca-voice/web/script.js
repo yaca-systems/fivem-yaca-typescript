@@ -34,11 +34,7 @@ function connect() {
 }
 
 function runCommand(command) {
-  if (!webSocket) {
-    return;
-  }
-
-  if (webSocket.readyState !== WebSocket.OPEN) {
+  if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
     return;
   }
 
@@ -57,36 +53,20 @@ function sendNuiData(event, data = {}) {
   );
 }
 
-$(function () {
-  window.addEventListener("DOMContentLoaded", function () {
+$(() => {
+  window.addEventListener("DOMContentLoaded", () => {
     sendNuiData("YACA_OnNuiReady");
   });
 
-  window.addEventListener("beforeunload", function () {
-    if (webSocket) webSocket.close();
-  });
+  window.addEventListener("message", (event) => {
+    if (event.data.action === "connect") {
+      connect();
+    } else if (event.data.action === "command") {
+      runCommand(event.data.data);
+    } else if (event.data.action === "close") {
+      if (webSocket) webSocket.close();
+    }
 
-  window.addEventListener("unload", function () {
-    if (webSocket) webSocket.close();
-  });
-
-  window.addEventListener(
-    "message",
-    function (event) {
-      switch (event.data.action) {
-        case "connect":
-          connect();
-          break;
-        case "command":
-          runCommand(event.data.data);
-          break;
-        case "close":
-          if (webSocket) webSocket.close();
-          break;
-          default:
-            break;
-      }
-    },
-    false,
-  );
+    console.error("[YaCA-Websocket] Unknown message:", event.data);
+  })
 });
