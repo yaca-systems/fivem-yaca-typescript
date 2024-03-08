@@ -22,9 +22,9 @@ export class YaCAServerSaltyChatBridge {
     });
   }
 
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   saltyChatExport(method: string, cb: (...args: any[]) => void) {
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(`__cfx_export_saltychat_${method}`, (setCb: (...args: any[]) => void) =>
       setCb(cb),
     );
