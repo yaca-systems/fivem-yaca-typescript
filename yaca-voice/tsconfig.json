@@ -7,7 +7,7 @@
     "module": "es2020",
     "target": "es2021",
     "lib": ["es2021", "esnext.disposable"],
-    "types": ["@citizenfx/client", "@citizenfx/server"],
+    "types": ["@types/node", "@citizenfx/client", "@citizenfx/server"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowUnreachableCode": false,

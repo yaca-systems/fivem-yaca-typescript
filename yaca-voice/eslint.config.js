@@ -6,7 +6,7 @@ import tsEslint from "typescript-eslint";
 
 export default tsEslint.config(
   eslint.configs.recommended,
-  ...tsEslint.configs.recommended,
+  ...tsEslint.configs.strict,
   // eslintPluginPrettierRecommended,
   {
     rules: {

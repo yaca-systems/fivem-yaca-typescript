@@ -67,6 +67,7 @@ export interface YacaRadioSettings {
 }
 
 export interface YacaSharedConfig {
+  locale: string;
   debug: boolean;
   mufflingRange: number;
   unmuteDelay: number;
@@ -105,4 +106,17 @@ export interface YacaServerConfig {
   defaultChannelId: number;
   useWhisper: boolean;
   excludeChannels: number[];
+}
+
+export type ClientCache = {
+  serverId: number;
+  playerId: number;
+  resource: string;
+  ped: number;
+  vehicle: number | false;
+  seat: number | false;
+}
+
+export type ServerCache = {
+  resource: string;
 }

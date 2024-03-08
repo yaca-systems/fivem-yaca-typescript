@@ -1,14 +1,17 @@
-import { addCommand, cache, initLocale } from "@overextended/ox_lib/server";
-import { generateRandomName } from "utils";
-import type { DataObject, YacaServerConfig, YacaSharedConfig } from "types";
+import { cache, generateRandomName } from "utils";
+import type {
+  DataObject,
+  ServerCache,
+  YacaServerConfig,
+  YacaSharedConfig,
+} from "types";
 import {
   YaCAServerMegaphoneModule,
   YaCAServerPhoneModle,
   YaCAServerRadioModule,
 } from "yaca";
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
-
-initLocale();
+import { initLocale } from "common/locale";
 
 export interface YaCAPlayer {
   voiceSettings: {
@@ -35,6 +38,8 @@ export interface YaCAPlayer {
 }
 
 export class YaCAServerModule {
+  cache: ServerCache;
+
   nameSet: Set<string> = new Set();
   players: Map<number, YaCAPlayer> = new Map();
 
@@ -54,6 +59,8 @@ export class YaCAServerModule {
       LoadResourceFile(cache.resource, "config/server.json"),
     );
 
+    initLocale(this.sharedConfig.locale);
+
     this.sharedConfig = JSON.parse(
       LoadResourceFile(cache.resource, "config/shared.json"),
     );
@@ -64,7 +71,6 @@ export class YaCAServerModule {
 
     this.registerExports();
     this.registerEvents();
-    this.registerCommands();
 
     if (this.sharedConfig.saltyChatBridge) {
       this.sharedConfig.maxRadioChannels = 2;
@@ -192,181 +198,6 @@ export class YaCAServerModule {
     onNet("server:yaca:nuiReady", () => {
       this.connectToVoice(source);
     });
-  }
-
-  /**
-   * Register the commands for the YaCA server module.
-   * This is only done if the debug mode is enabled.
-   */
-  registerCommands() {
-    if (!this.sharedConfig.debug) {
-      return;
-    }
-
-    addCommand<{
-      playerId: number;
-      state: string;
-    }>(
-      "setAlive",
-      async (_src, args) => {
-        this.changePlayerAliveStatus(args.playerId, args.state === "true");
-      },
-      {
-        help: "Set the alive status of a player.",
-        params: [
-          {
-            name: "playerId",
-            help: "The ID of the player to set the alive status for.",
-            paramType: "playerId",
-          },
-          {
-            name: "state",
-            help: "The new alive status.",
-            paramType: "string",
-          },
-        ],
-      },
-    );
-
-    addCommand<{
-      playerId: number;
-      state: string;
-    }>(
-      "callPlayer",
-      async (src, args) => {
-        this.phoneModule.callPlayer(src, args.playerId, args.state === "true");
-      },
-      {
-        help: "Call another player.",
-        params: [
-          {
-            name: "playerId",
-            help: "The ID of the player to call.",
-            paramType: "playerId",
-          },
-          {
-            name: "state",
-            help: "The state of the call.",
-            paramType: "string",
-          },
-        ],
-      },
-    );
-
-    addCommand<{
-      playerId: number;
-      state: string;
-    }>(
-      "callPlayerOld",
-      async (src, args) => {
-        this.phoneModule.callPlayerOldEffect(
-          src,
-          args.playerId,
-          args.state === "true",
-        );
-      },
-      {
-        help: "Call another player on old phone.",
-        params: [
-          {
-            name: "playerId",
-            help: "The ID of the player to call.",
-            paramType: "playerId",
-          },
-          {
-            name: "state",
-            help: "The state of the call.",
-            paramType: "string",
-          },
-        ],
-      },
-    );
-
-    addCommand<{
-      playerId: number;
-      state: string;
-    }>(
-      "muteOnPhone",
-      async (_src, args) => {
-        this.phoneModule.muteOnPhone(args.playerId, args.state === "true");
-      },
-      {
-        help: "Mute a player during a phone call.",
-        params: [
-          {
-            name: "playerId",
-            help: "The ID of the player to mute.",
-            paramType: "playerId",
-          },
-          {
-            name: "state",
-            help: "The mute state.",
-            paramType: "string",
-          },
-        ],
-      },
-    );
-
-    addCommand<{
-      playerId: number;
-      state: string;
-    }>(
-      "enablePhoneSpeaker",
-      async (src, args) => {
-        this.phoneModule.enablePhoneSpeaker(src, args.state === "true");
-      },
-      {
-        help: "Enable or disable the phone speaker for a player.",
-        params: [
-          {
-            name: "playerId",
-            help: "The ID of the player to enable the phone speaker for.",
-            paramType: "playerId",
-          },
-          {
-            name: "state",
-            help: "The state of the phone speaker.",
-            paramType: "string",
-          },
-        ],
-      },
-    );
-
-    addCommand<{
-      playerId: number;
-      state: string;
-    }>(
-      "intercom",
-      async (src, args) => {
-        emitNet(
-          "client:yaca:addRemovePlayerIntercomFilter",
-          src,
-          [args.playerId],
-          args.state === "true",
-        );
-        emitNet(
-          "client:yaca:addRemovePlayerIntercomFilter",
-          args.playerId,
-          [src],
-          args.state === "true",
-        );
-      },
-      {
-        help: "Enable or disable the intercom for a player.",
-        params: [
-          {
-            name: "playerId",
-            help: "The ID of the player to enable the intercom for.",
-            paramType: "playerId",
-          },
-          {
-            name: "state",
-            help: "The state of the intercom.",
-            paramType: "string",
-          },
-        ],
-      },
-    );
   }
 
   /**

@@ -6,7 +6,9 @@ import {
   type YacaRadioSettings,
   YacaStereoMode,
 } from "types";
-import { cache, locale, requestAnimDict } from "@overextended/ox_lib/client";
+import { cache } from "../utils";
+import { locale } from "common/locale";
+import { requestAnimDict } from "../utils";
 
 export class YaCAClientRadioModule {
   clientModule: YaCAClientModule;
@@ -35,9 +37,6 @@ export class YaCAClientRadioModule {
 
     if (!this.clientModule.sharedConfig.saltyChatBridge) {
       this.registerKeybinds();
-    }
-    if (this.clientModule.sharedConfig.debug) {
-      this.registerDebugCommands();
     }
   }
 
@@ -291,67 +290,9 @@ export class YaCAClientRadioModule {
     );
     RegisterKeyMapping(
       "+yaca:radioTalking",
-      locale("use_radio")!,
+      locale("use_radio"),
       "keyboard",
       this.clientModule.sharedConfig.keyBinds.radioTransmit,
-    );
-  }
-
-  registerDebugCommands() {
-    RegisterCommand(
-      "enableRadio",
-      () => {
-        this.enableRadio(true);
-      },
-      false,
-    );
-
-    RegisterCommand(
-      "disableRadio",
-      () => {
-        this.enableRadio(false);
-      },
-      false,
-    );
-
-    RegisterCommand(
-      "changeRadioChannel",
-      (_source: number, args: string[]) => {
-        this.changeActiveRadioChannel(parseInt(args[0]));
-      },
-      false,
-    );
-
-    RegisterCommand(
-      "changeRadioFrequency",
-      (_source: number, args: string[]) => {
-        this.changeRadioFrequency(args[0]);
-      },
-      false,
-    );
-
-    RegisterCommand(
-      "muteRadioChannel",
-      () => {
-        this.muteRadioChannel();
-      },
-      false,
-    );
-
-    RegisterCommand(
-      "changeRadioChannelVolume",
-      (_source: number, args: string[]) => {
-        this.changeRadioChannelVolume(args[0] === "true");
-      },
-      false,
-    );
-
-    RegisterCommand(
-      "changeRadioChannelStereo",
-      () => {
-        this.changeRadioChannelStereo();
-      },
-      false,
     );
   }
 
@@ -541,7 +482,7 @@ export class YaCAClientRadioModule {
           YacaStereoMode.MONO_LEFT,
         );
         this.clientModule.notification(
-          locale("changed_stereo_mode", channel, locale("left_ear")!)!,
+          locale("changed_stereo_mode", channel, locale("left_ear")),
           YacaNotificationType.INFO,
         );
         return;
@@ -553,7 +494,7 @@ export class YaCAClientRadioModule {
           YacaStereoMode.MONO_RIGHT,
         );
         this.clientModule.notification(
-          locale("changed_stereo_mode", channel, locale("right_ear")!)!,
+          locale("changed_stereo_mode", channel, locale("right_ear")),
           YacaNotificationType.INFO,
         );
         return;
@@ -566,7 +507,7 @@ export class YaCAClientRadioModule {
           YacaStereoMode.STEREO,
         );
         this.clientModule.notification(
-          locale("changed_stereo_mode", channel, locale("both_ears")!)!,
+          locale("changed_stereo_mode", channel, locale("both_ears")),
           YacaNotificationType.INFO,
         );
         return;
@@ -626,13 +567,10 @@ export class YaCAClientRadioModule {
    */
   radioTalkingStateToPlugin(state: boolean) {
     this.clientModule.setPlayersCommType(
-      cache.serverId,
+      this.clientModule.getPlayerByID(cache.serverId),
       YacaFilterEnum.RADIO,
       state,
       this.activeRadioChannel,
-      undefined,
-      CommDeviceMode.SENDER,
-      CommDeviceMode.RECEIVER,
     );
   }
 

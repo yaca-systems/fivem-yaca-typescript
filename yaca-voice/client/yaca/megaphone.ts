@@ -1,7 +1,7 @@
-import { cache, locale } from "@overextended/ox_lib/client";
 import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum } from "types";
-import { onCache } from "@overextended/ox_lib/server";
+import { locale } from "common/locale";
+import { cache, onCache } from "utils";
 
 /* ======================== MEGAPHONE SYSTEM ======================== */
 export class YaCAClientMegaphoneModule {
@@ -69,7 +69,7 @@ export class YaCAClientMegaphoneModule {
     );
     RegisterKeyMapping(
       "+yaca:megaphone",
-      locale("use_megaphone")!,
+      locale("use_megaphone"),
       "keyboard",
       this.clientModule.sharedConfig.keyBinds.megaphone,
     );

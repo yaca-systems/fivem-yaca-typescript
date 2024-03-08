@@ -5,8 +5,9 @@
     "types": ["@citizenfx/server"],
     "composite": true,
     "paths": {
-      "types": ["../types"]
+      "types": ["../types"],
+      "common/*": ["../common/*"]
     }
   },
-  "include": ["./", "../types", "../locales/en.json"]
+  "include": ["./", "../types", "../common", "../locales/en.json"]
 }

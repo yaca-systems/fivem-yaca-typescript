@@ -1,6 +1,6 @@
-import { cache } from "@overextended/ox_lib/client";
 import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData } from "types";
+import { cache } from "../utils";
 
 /* ======================== PHONE SYSTEM ======================== */
 export class YaCAClientPhoneModule {

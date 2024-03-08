@@ -1,5 +1,5 @@
 import { YaCAServerModule } from "../yaca";
-import { cache } from "@overextended/ox_lib/server";
+import { cache } from "../utils";
 
 export class YaCAServerSaltyChatBridge {
   serverModule: YaCAServerModule;

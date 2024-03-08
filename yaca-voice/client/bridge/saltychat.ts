@@ -1,8 +1,8 @@
-import type { YaCAClientModule } from "../yaca/main";
-import { cache } from "@overextended/ox_lib/server";
-import { sleep } from "@overextended/ox_lib";
+import type { YaCAClientModule } from "../yaca";
 import { YacaResponseCode } from "types";
-import { locale } from "@overextended/ox_lib/client";
+import { cache } from "../utils";
+import { sleep } from "common/index";
+import { locale } from "common/locale";
 
 export class YaCAClientSaltyChatBridge {
   private clientModule: YaCAClientModule;
@@ -65,7 +65,7 @@ export class YaCAClientSaltyChatBridge {
     );
     RegisterKeyMapping(
       "+primaryRadio",
-      locale("use_salty_primary_radio")!,
+      locale("use_salty_primary_radio"),
       "keyboard",
       this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio,
     );
@@ -87,7 +87,7 @@ export class YaCAClientSaltyChatBridge {
     );
     RegisterKeyMapping(
       "+secondaryRadio",
-      locale("use_salty_secondary_radio")!,
+      locale("use_salty_secondary_radio"),
       "keyboard",
       this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio,
     );

@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { sleep } from "@overextended/ox_lib";
+import { sleep } from "common/index";
 
 export class WebSocket extends EventEmitter {
   public readyState = 0;

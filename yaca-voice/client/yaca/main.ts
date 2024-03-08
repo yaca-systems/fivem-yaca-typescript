@@ -1,4 +1,3 @@
-import { cache, initLocale, locale, notify } from "@overextended/ox_lib/client";
 import {
   CommDeviceMode,
   DataObject,
@@ -25,8 +24,8 @@ import {
   localLipSyncAnimations,
 } from "yaca";
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
-
-initLocale();
+import { initLocale, locale } from "common/locale";
+import { cache } from "../utils";
 
 export class YaCAClientModule {
   websocket: WebSocket;
@@ -144,7 +143,7 @@ export class YaCAClientModule {
    */
   notification(message: string, type: YacaNotificationType) {
     if (this.sharedConfig.notifications.oxLib) {
-      notify({
+      emit("ox_lib:notify", {
         id: "yaca",
         title: "YaCA",
         description: message,
@@ -166,6 +165,8 @@ export class YaCAClientModule {
     this.sharedConfig = JSON.parse(
       LoadResourceFile(cache.resource, "config/shared.json"),
     );
+    initLocale(this.sharedConfig.locale);
+
     this.websocket = new WebSocket();
 
     /**
@@ -259,7 +260,7 @@ export class YaCAClientModule {
     );
     RegisterKeyMapping(
       "yaca:changeVoiceRange",
-      locale("change_voice_range")!,
+      locale("change_voice_range"),
       "keyboard",
       this.sharedConfig.keyBinds.toggleRange,
     );
@@ -505,7 +506,7 @@ export class YaCAClientModule {
     ) {
       console.log("[YACA-Websocket]: Error while initializing plugin");
       return this.notification(
-        locale("connect_error")!,
+        locale("connect_error"),
         YacaNotificationType.ERROR,
       );
     }
@@ -542,7 +543,7 @@ export class YaCAClientModule {
 
     if (!inited && !silent) {
       this.notification(
-        locale("plugin_not_initialized")!,
+        locale("plugin_not_initialized"),
         YacaNotificationType.ERROR,
       );
     }

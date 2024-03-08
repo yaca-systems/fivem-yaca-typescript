@@ -27,8 +27,8 @@
     "ci:build": "pnpm run typecheck && node build.js --mode=production"
   },
   "dependencies": {
-    "@overextended/ox_lib": "^3.16.3",
-    "events": "^3.3.0"
+    "events": "^3.3.0",
+    "fast-printf": "^1.6.9"
   },
   "devDependencies": {
     "@citizenfx/client": "latest",
