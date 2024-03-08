@@ -9,52 +9,62 @@ jobs:
   create-release:
     name: Build and Create Tagged release
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yaca-voice
 
     steps:
-      - name: Install archive tools
-        run: sudo apt install zip
-
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: ${{ github.event.repository.default_branch }}
 
+      - name: Install archive tools
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y zip
+
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.4.0
+        uses: pnpm/action-setup@v3
         with:
           version: 8
 
       - name: Get variables
         id: get_vars
         run: |
-          echo '::set-output name=SHORT_SHA::$(git rev-parse --short HEAD)'
-          echo '::set-output name=DATE::$(date +'%D')'
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "DATE=$(date +'%D')" >> $GITHUB_OUTPUT
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'pnpm'
-          cache-dependency-path: 'pnpm-lock.yaml'
+          cache-dependency-path: yaca-voice/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
+        working-directory: yaca-voice
 
       - name: Run build
         run: pnpm build
         env:
           CI: false
+        working-directory: yaca-voice
 
       - name: Bundle files
         run: |
-          cd ./resource && zip -r ../yaca-voice.zip ./resource
+          mkdir -p ./temp/yaca-voice
+          cp -r ./yaca-voice/resource ./temp/yaca-voice/
+          cd ./temp && zip -r ../yaca-voice.zip ./yaca-voice
 
       - name: Bump package version
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           pnpm version ${{ github.ref_name }} --git-tag-version false
+        working-directory: yaca-voice
 
       - name: Update repository
         run: |
@@ -68,7 +78,6 @@ jobs:
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           title: '${{ env.RELEASE_VERSION }}'
-          prerelease: true
           files: yaca-voice.zip
 
         env:
