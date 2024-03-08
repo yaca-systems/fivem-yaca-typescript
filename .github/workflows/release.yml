@@ -9,9 +9,6 @@ jobs:
   create-release:
     name: Build and Create Tagged release
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: yaca-voice
 
     steps:
       - name: Checkout source code
