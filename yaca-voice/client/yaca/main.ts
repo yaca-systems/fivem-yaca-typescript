@@ -41,7 +41,7 @@ export class YaCAClientModule {
 
   saltyChatBridge?: YaCAClientSaltyChatBridge;
 
-  canChangeVoiceRange: boolean = true;
+  canChangeVoiceRange = true;
   rangeIndex: number;
   rangeInterval: CitizenTimer | null = null;
   monitorInterval: CitizenTimer | null = null;
@@ -142,13 +142,13 @@ export class YaCAClientModule {
         id: "yaca",
         title: "YaCA",
         description: message,
-        type: type,
+        type,
       });
     }
 
     if (this.sharedConfig.notifications.gta) {
       BeginTextCommandThefeedPost("STRING");
-      AddTextComponentSubstringPlayerName("YaCA: " + message);
+      AddTextComponentSubstringPlayerName(`YaCA: ${message}`);
       if (type === YacaNotificationType.ERROR)
         ThefeedSetNextPostBackgroundColor(6);
       EndTextCommandThefeedPostTicker(false, false);
@@ -515,8 +515,8 @@ export class YaCAClientModule {
    *
    * @returns {boolean} Returns true if the plugin is initialized, false otherwise.
    */
-  isPluginInitialized(silent: boolean = false): boolean {
-    const inited = !!this.getPlayerByID(cache.serverId);
+  isPluginInitialized(silent = false): boolean {
+    const inited = Boolean(this.getPlayerByID(cache.serverId));
 
     if (!inited && !silent)
       this.notification(
@@ -866,7 +866,7 @@ export class YaCAClientModule {
   handleTalkState(payload: YacaResponse) {
     // Update state if player is muted or not
     if (payload.code === "MUTE_STATE") {
-      this.isPlayerMuted = !!parseInt(payload.message);
+      this.isPlayerMuted = Boolean(parseInt(payload.message));
       emit(
         "yaca:external:voiceRangeUpdate",
         this.isPlayerMuted ? 0 : this.getVoiceRange(),
@@ -878,7 +878,7 @@ export class YaCAClientModule {
       }
     }
 
-    const isTalking = !this.isPlayerMuted && !!parseInt(payload.message);
+    const isTalking = !this.isPlayerMuted && Boolean(parseInt(payload.message));
     if (this.isTalking !== isTalking) {
       this.isTalking = isTalking;
 

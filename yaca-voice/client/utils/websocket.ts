@@ -3,8 +3,8 @@ import { sleep } from "@overextended/ox_lib";
 
 export class WebSocket extends EventEmitter {
   public readyState: number = 0;
-  nuiReady: boolean = false;
-  initialized: boolean = false;
+  nuiReady = false;
+  initialized = false;
 
   constructor() {
     super();
@@ -56,7 +56,7 @@ export class WebSocket extends EventEmitter {
   send(data: object) {
     const nuiMessage = JSON.stringify({
       action: "command",
-      data: data,
+      data,
     });
 
     SendNuiMessage(nuiMessage);

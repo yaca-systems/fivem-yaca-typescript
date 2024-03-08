@@ -51,11 +51,11 @@ export class YaCAServerModule {
     console.log("~g~ --> YaCA: Server loaded");
 
     this.serverConfig = JSON.parse(
-      LoadResourceFile(cache.resource, `config/server.json`),
+      LoadResourceFile(cache.resource, "config/server.json"),
     );
 
     this.sharedConfig = JSON.parse(
-      LoadResourceFile(cache.resource, `config/shared.json`),
+      LoadResourceFile(cache.resource, "config/shared.json"),
     );
 
     this.phoneModule = new YaCAServerPhoneModle(this);
@@ -533,7 +533,7 @@ export class YaCAServerModule {
     if (!player || !clientId) return;
 
     player.voicePlugin = {
-      clientId: clientId,
+      clientId,
       forceMuted: player.voiceSettings.forceMuted,
       range: player.voiceSettings.voiceRange,
       playerId: src,

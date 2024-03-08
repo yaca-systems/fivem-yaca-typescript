@@ -9,3 +9,7 @@ name = "javascript"
     "nodejs",
     "browser"
   ]
+
+[[transformers]]
+name = "prettier"
+enabled = true

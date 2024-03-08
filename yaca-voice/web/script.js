@@ -4,7 +4,7 @@ function connect() {
   console.log("[YaCA-Websocket] Trying to Connect to YaCA WebSocket...");
 
   try {
-    webSocket = new window.WebSocket(`ws://127.0.0.1:30125/`);
+    webSocket = new window.WebSocket("ws://127.0.0.1:30125/");
   } catch {
     connect();
   }

@@ -62,7 +62,7 @@ export class YaCAServerMegaphoneModule {
    * @param {boolean} state - The state of the megaphone effect.
    * @param {boolean} [forced=false] - Whether the change is forced. Defaults to false if not provided.
    */
-  changeMegaphoneState(src: number, state: boolean, forced: boolean = false) {
+  changeMegaphoneState(src: number, state: boolean, forced = false) {
     const playerState = Player(src).state;
 
     if (!state && playerState["yaca:megaphoneactive"]) {

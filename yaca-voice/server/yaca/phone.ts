@@ -193,7 +193,7 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The mute state.
    * @param {boolean} [onCallStop=false] - Whether the call has stopped. Defaults to false if not provided.
    */
-  muteOnPhone(src: number, state: boolean, onCallStop: boolean = false) {
+  muteOnPhone(src: number, state: boolean, onCallStop = false) {
     const players = this.serverModule.getPlayers();
 
     const player = players.get(src);

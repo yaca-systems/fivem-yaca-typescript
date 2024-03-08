@@ -7,8 +7,8 @@ import { onCache } from "@overextended/ox_lib/server";
 export class YaCAClientMegaphoneModule {
   clientModule: YaCAClientModule;
 
-  canUseMegaphone: boolean = false;
-  lastMegaphoneState: boolean = false;
+  canUseMegaphone = false;
+  lastMegaphoneState = false;
 
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
@@ -116,7 +116,7 @@ export class YaCAClientMegaphoneModule {
    *
    * @param {boolean} [state=false] - The state of the megaphone. Defaults to false if not provided.
    */
-  useMegaphone(state: boolean = false) {
+  useMegaphone(state = false) {
     if (
       !cache.vehicle ||
       !this.canUseMegaphone ||

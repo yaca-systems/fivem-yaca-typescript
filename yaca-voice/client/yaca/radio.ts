@@ -250,8 +250,8 @@ export class YaCAClientRadioModule {
           base: { request_type: "INGAME" },
           comm_device_left: {
             comm_type: YacaFilterEnum.RADIO,
-            client_ids: client_ids,
-            channel: channel,
+            client_ids,
+            channel,
           },
         });
       },
@@ -642,10 +642,14 @@ export class YaCAClientRadioModule {
   findRadioChannelByFrequency(frequency: string): number | undefined {
     let foundChannel;
     for (const channel in this.radioChannelSettings) {
-      const data = this.radioChannelSettings[channel];
-      if (data.frequency === frequency) {
-        foundChannel = parseInt(channel);
-        break;
+      if (
+        Object.prototype.hasOwnProperty.call(this.radioChannelSettings, channel)
+      ) {
+        const data = this.radioChannelSettings[channel];
+        if (data.frequency === frequency) {
+          foundChannel = parseInt(channel);
+          break;
+        }
       }
     }
 
@@ -716,7 +720,7 @@ export class YaCAClientRadioModule {
    * @param {boolean} state - The state of the radio talking.
    * @param {boolean} [clearPedTasks=true] - Whether to clear ped tasks. Defaults to true if not provided.
    */
-  radioTalkingStart(state: boolean, clearPedTasks: boolean = true) {
+  radioTalkingStart(state: boolean, clearPedTasks = true) {
     if (!state) {
       if (this.radioTalking) {
         this.radioTalking = false;

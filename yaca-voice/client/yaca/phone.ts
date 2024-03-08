@@ -6,8 +6,8 @@ import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData } from "types";
 export class YaCAClientPhoneModule {
   clientModule: YaCAClientModule;
 
-  inCall: boolean = false;
-  phoneSpeakerActive: boolean = false;
+  inCall = false;
+  phoneSpeakerActive = false;
 
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
@@ -72,7 +72,7 @@ export class YaCAClientPhoneModule {
      */
     onNet(
       "client:yaca:phoneMute",
-      (targetID: number, state: boolean, onCallStop: boolean = false) => {
+      (targetID: number, state: boolean, onCallStop = false) => {
         const target = this.clientModule.getPlayerByID(targetID);
         if (!target) return;
 

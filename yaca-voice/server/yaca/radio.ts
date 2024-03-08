@@ -355,7 +355,7 @@ export class YaCAServerRadioModule {
         targets.push(key);
 
         radioInfos[key] = {
-          shortRange: shortRange,
+          shortRange,
         };
 
         targetsToSender.push(key);
