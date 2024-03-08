@@ -59,7 +59,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 # Exports
 
 <details>
-<summary><h2>Client</h2></summary>
+<summary style="font-size: x-large">Client</summary>
 
 ### General
 
@@ -155,7 +155,7 @@ Changes the stereo mode of a radio channel.
 </details>
 
 <details>
-<summary><h2>Server</h2></summary>
+<summary style="font-size: x-large">Server</summary>
 
 ### General
 
@@ -258,7 +258,7 @@ Enable or disable the phone speaker for a player.
 # Events
 
 <details>
-<summary><h2>Client</h2></summary>
+<summary style="font-size: x-large">Client</summary>
 
 
 ### yaca:external:voiceRangeUpdate
@@ -348,7 +348,7 @@ The event is triggered when a player starts or stops talking on the radio.
 </details>
 
 <details>
-<summary><h2>Server</h2></summary>
+<summary style="font-size: x-large">Server</summary>
 
 
 ### yaca:external:changeMegaphoneState
