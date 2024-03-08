@@ -309,13 +309,13 @@ export class YaCAServerRadioModule {
     emitNet(
       "client:yaca:setRadioMuteState",
       src,
-      radioFrequency,
+      channel,
       foundPlayer.muted,
     );
     emit(
       "yaca:external:changedRadioMuteState",
       src,
-      radioFrequency,
+      channel,
       foundPlayer.muted,
     );
   }
