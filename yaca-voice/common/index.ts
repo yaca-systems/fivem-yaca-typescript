@@ -17,29 +17,29 @@ export async function waitFor<T>(cb: () => T, errMessage?: string, timeout?: num
         if (typeof timeout !== 'number') timeout = 1000;
 
         if (IsDuplicityVersion()) timeout /= 50;
-        else timeout -= GetFrameTime() * 1000;
+        else timeout -= GetGameTimer() * 1000;
     }
 
     const start = GetGameTimer();
     let id: number;
     let i = 0;
 
-    const p = new Promise<T>((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
         id = setTick(async () => {
             if (timeout) {
                 i++;
 
                 if (i > timeout)
-                    return reject(`${errMessage || 'failed to resolve callback'} (waited ${(GetGameTimer() - start) / 1000}ms)`);
+                    return reject(new Error(`${errMessage || 'failed to resolve callback'} (waited ${(GetGameTimer() - start) / 1000}ms)`));
             }
 
             value = await cb();
 
-            if (value !== undefined) resolve(value);
+            if (value !== undefined) return resolve(value);
+
+            return null;
         });
     }).finally(() => clearTick(id));
-
-    return p;
 }
 
 export * from "types";

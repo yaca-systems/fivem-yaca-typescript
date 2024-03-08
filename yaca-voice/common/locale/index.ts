@@ -3,10 +3,9 @@ import { printf } from 'fast-printf';
 const resourceName = GetCurrentResourceName();
 const dict: Record<string, string> = {};
 
-function flattenDict(source: Record<string, any>, target: Record<string, string>, prefix?: string) {
-    for (const key in source) {
+function flattenDict(source: Record<string, string | number | boolean>, target: Record<string, string>, prefix?: string) {
+    for (const [key, value] of Object.entries(source)) {
         const fullKey = prefix ? `${prefix}.${key}` : key;
-        const value = source[key];
 
         if (typeof value === 'object') flattenDict(value, target, fullKey);
         else target[fullKey] = String(value);
@@ -15,15 +14,15 @@ function flattenDict(source: Record<string, any>, target: Record<string, string>
     return target;
 }
 
-export const locale = (str: string, ...args: any[]): string => {
-    const lstr = dict[str];
+export const locale = (str: string, ...args: (string | number | boolean)[]): string => {
+    const localeStr = dict[str];
 
-    if (lstr) {
+    if (localeStr) {
         if (args.length > 0) {
-            return printf(lstr, ...args);
+            return printf(localeStr, ...args);
         }
 
-        return lstr;
+        return localeStr;
     } else {
         return str;
     }
@@ -42,7 +41,7 @@ export const initLocale = (configLocale: string) => {
             locales = JSON.parse(LoadResourceFile(resourceName, 'locales/en.json'));
 
             if (!locales) {
-                console.warn(`could not load 'locales/en.json'`);
+                console.warn("could not load 'locales/en.json'");
             }
         }
 
@@ -52,13 +51,13 @@ export const initLocale = (configLocale: string) => {
     const flattened = flattenDict(locales, {});
 
     for (let [k, v] of Object.entries(flattened)) {
-        const regExp = new RegExp(/\$\{([^}]+)\}/g);
+        const regExp = new RegExp(/\$\{([^}]+)}/g);
         const matches = v.match(regExp);
         if (matches) {
             for (const match of matches) {
                 if (!match) break;
                 const variable = match.substring(2, match.length - 1) as keyof typeof locales;
-                let locale: string = flattened[variable];
+                const locale: string = flattened[variable];
 
                 if (locale) {
                     v = v.replace(match, locale);

@@ -6,9 +6,8 @@ import {
   type YacaRadioSettings,
   YacaStereoMode,
 } from "types";
-import { cache } from "../utils";
+import { cache, clamp, requestAnimDict } from "../utils";
 import { locale } from "common/locale";
-import { requestAnimDict } from "../utils";
 
 export class YaCAClientRadioModule {
   clientModule: YaCAClientModule;
@@ -428,11 +427,7 @@ export class YaCAClientRadioModule {
     }
 
     const oldVolume = this.radioChannelSettings[channel].volume;
-    this.radioChannelSettings[channel].volume = this.clientModule.clamp(
-      volume,
-      0,
-      1,
-    );
+    this.radioChannelSettings[channel].volume = clamp(volume, 0, 1);
 
     // Prevent event emit spams, if nothing changed
     if (oldVolume === this.radioChannelSettings[channel].volume) {
@@ -617,8 +612,7 @@ export class YaCAClientRadioModule {
    */
   findRadioChannelByFrequency(frequency: string): number | undefined {
     let foundChannel;
-    for (const channel in Object.keys(this.radioChannelSettings)) {
-      const data = this.radioChannelSettings[channel];
+    for (const [channel, data] of Object.entries(this.radioChannelSettings)) {
       if (data.frequency === frequency) {
         foundChannel = parseInt(channel);
         break;

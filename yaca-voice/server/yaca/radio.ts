@@ -164,25 +164,28 @@ export class YaCAServerRadioModule {
     }
 
     if (!player.radioSettings.activated) {
-      return emitNet("ox_lib:notify", src, {
+      emitNet("ox_lib:notify", src, {
         type: "error",
         description: "Das Funkgerät ist aus!",
       });
+      return;
     }
     if (
       isNaN(channel) ||
       channel < 1 ||
       channel > this.sharedConfig.maxRadioChannels
     ) {
-      return emitNet("ox_lib:notify", src, {
+      emitNet("ox_lib:notify", src, {
         type: "error",
         description: "Fehlerhafter Funk Kanal!",
       });
+      return;
     }
 
     // Leave radiochannel if frequency is 0
     if (frequency === "0") {
-      return this.leaveRadioFrequency(src, channel, frequency);
+      this.leaveRadioFrequency(src, channel, frequency);
+      return;
     }
 
     if (player.radioSettings.frequencies[channel] !== frequency) {

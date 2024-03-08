@@ -15,6 +15,8 @@ import {
   WebSocket,
   calculateDistanceVec3,
   convertNumberArrayToXYZ,
+  getCamDirection,
+  clamp,
 } from "utils";
 import {
   YaCAClientIntercomModule,
@@ -43,18 +45,12 @@ export class YaCAClientModule {
   canChangeVoiceRange = true;
   rangeIndex: number;
   rangeInterval: CitizenTimer | null = null;
-  monitorInterval: CitizenTimer | null = null;
   visualVoiceRangeTimeout: CitizenTimer | null = null;
   visualVoiceRangeTick: CitizenTimer | null = null;
 
-  noPluginActivated = 0;
-  messageDisplayed = false;
   isTalking = false;
   isPlayerMuted = false;
   useWhisper = false;
-
-  mHintTimeout: CitizenTimer | null = null;
-  mHintTick: CitizenTimer | null = null;
 
   currentlyPhoneSpeakerApplied: Set<number> = new Set();
   currentlySendingPhoneSpeakerSender: Set<number> = new Set();
@@ -67,73 +63,6 @@ export class YaCAClientModule {
     WAIT_GAME_INIT: "",
     HEARTBEAT: "",
   };
-
-  /**
-   * Displays a hint message.
-   *
-   * @param {string} head - The heading of the hint.
-   * @param {string} msg - The message to be displayed.
-   * @param {number} [time=0] - The duration for which the hint should be displayed. If not provided, defaults to 0.
-   */
-  mHint(head: string, msg: string, time = 0) {
-    const scaleForm = RequestScaleformMovie("MIDSIZED_MESSAGE");
-
-    this.mHintTimeout = setTimeout(
-      () => {
-        this.mHintTimeout = null;
-
-        if (!HasScaleformMovieLoaded(scaleForm)) {
-          this.mHint(head, msg, time);
-          return;
-        }
-
-        BeginScaleformMovieMethod(scaleForm, "SHOW_MIDSIZED_MESSAGE");
-        BeginTextCommandScaleformString("STRING");
-        ScaleformMovieMethodAddParamPlayerNameString(head);
-        ScaleformMovieMethodAddParamTextureNameString(msg);
-        ScaleformMovieMethodAddParamInt(100);
-        ScaleformMovieMethodAddParamBool(true);
-        ScaleformMovieMethodAddParamInt(100);
-        EndScaleformMovieMethod();
-
-        this.mHintTick = setInterval(() => {
-          DrawScaleformMovieFullscreen(scaleForm, 255, 255, 255, 255, 0);
-        }, 0);
-
-        if (time !== 0) {
-          setTimeout(() => {
-            if (this.mHintTick) {
-              clearInterval(this.mHintTick);
-            }
-            this.mHintTick = null;
-          }, time * 1000);
-        }
-      },
-      HasScaleformMovieLoaded(scaleForm) ? 0 : 1000,
-    );
-  }
-
-  stopMHint() {
-    if (this.mHintTimeout) {
-      clearTimeout(this.mHintTimeout);
-    }
-    this.mHintTimeout = null;
-    if (this.mHintTick) {
-      clearInterval(this.mHintTick);
-    }
-    this.mHintTick = null;
-  }
-
-  /**
-   * Clamps a value between a minimum and maximum value.
-   *
-   * @param {number} value - The value to be clamped.
-   * @param {number} [min=0] - The minimum value. Defaults to 0 if not provided.
-   * @param {number} [max=1] - The maximum value. Defaults to 1 if not provided.
-   */
-  clamp(value: number, min = 0, max = 1) {
-    return Math.max(min, Math.min(max, value));
-  }
 
   /**
    * Sends a radar notification.
@@ -322,11 +251,6 @@ export class YaCAClientModule {
         await this.websocket.start();
       }
 
-      this.monitorInterval = setInterval(
-        this.monitorConnectstate.bind(this),
-        1000,
-      );
-
       if (this.firstConnect) {
         return;
       }
@@ -505,10 +429,11 @@ export class YaCAClientModule {
       !dataObj.channelPassword
     ) {
       console.log("[YACA-Websocket]: Error while initializing plugin");
-      return this.notification(
+      this.notification(
         locale("connect_error"),
         YacaNotificationType.ERROR,
       );
+      return;
     }
 
     this.sendWebsocket({
@@ -558,7 +483,8 @@ export class YaCAClientModule {
    */
   sendWebsocket(msg: object) {
     if (!this.websocket) {
-      return console.error("[Voice-Websocket]: No websocket created");
+      console.error("[Voice-Websocket]: No websocket created");
+      return;
     }
 
     if (this.websocket.readyState === 1) {
@@ -633,22 +559,6 @@ export class YaCAClientModule {
     }
 
     this.notification(message, YacaNotificationType.ERROR);
-  }
-
-  /**
-   * Convert camera rotation to direction vector.
-   */
-  getCamDirection(): { x: number; y: number; z: number } {
-    const rotVector = GetGameplayCamRot(0),
-      num = rotVector[2] * 0.0174532924,
-      num2 = rotVector[0] * 0.0174532924,
-      num3 = Math.abs(Math.cos(num2));
-
-    return {
-      x: -Math.sin(num) * num3,
-      y: Math.cos(num) * num3,
-      z: GetEntityForwardVector(cache.ped)[2],
-    };
   }
 
   /**
@@ -762,10 +672,10 @@ export class YaCAClientModule {
    * @param {string} type - The type of communication to be validated.
    * @returns {boolean} Returns true if the type is valid, false otherwise.
    */
-  isCommTypeValid(type: string): boolean {
+  static isCommTypeValid(type: string): boolean {
     const valid = type in YacaFilterEnum;
     if (!valid) {
-      console.error(`[YaCA-Websocket]: Invalid commtype: ${type}`);
+      console.error(`[YaCA-Websocket]: Invalid comm type: ${type}`);
     }
 
     return valid;
@@ -841,13 +751,13 @@ export class YaCAClientModule {
    * @param {number} channel - The channel for the communication.
    */
   setCommDeviceVolume(type: YacaFilterEnum, volume: number, channel: number) {
-    if (!this.isCommTypeValid(type)) {
+    if (!YaCAClientModule.isCommTypeValid(type)) {
       return;
     }
 
     const protocol: YacaProtocol = {
       comm_type: type,
-      volume: this.clamp(volume, 0, 1),
+      volume: clamp(volume, 0, 1),
     };
 
     if (typeof channel !== "undefined") {
@@ -872,7 +782,7 @@ export class YaCAClientModule {
     mode: YacaStereoMode,
     channel: number,
   ) {
-    if (!this.isCommTypeValid(type)) {
+    if (!YaCAClientModule.isCommTypeValid(type)) {
       return;
     }
 
@@ -889,31 +799,6 @@ export class YaCAClientModule {
       base: { request_type: "INGAME" },
       comm_device_settings: protocol,
     });
-  }
-
-  /**
-   * Monitoring if player is connected to teamspeak.
-   */
-  monitorConnectstate() {
-    if (this.websocket?.readyState === 0 || this.websocket?.readyState === 1) {
-      if (this.messageDisplayed && this.websocket.readyState === 1) {
-        this.stopMHint();
-        this.messageDisplayed = false;
-        this.noPluginActivated = 0;
-      }
-      return;
-    }
-
-    this.noPluginActivated++;
-
-    if (!this.messageDisplayed) {
-      this.mHint("Voiceplugin", locale("plugin_not_activated") ?? "");
-      this.messageDisplayed = true;
-    }
-
-    if (this.noPluginActivated >= 120) {
-      emitNet("server:yaca:noVoicePlugin");
-    }
   }
 
   /**
@@ -1108,7 +993,7 @@ export class YaCAClientModule {
     this.sendWebsocket({
       base: { request_type: "INGAME" },
       player: {
-        player_direction: this.getCamDirection(),
+        player_direction: getCamDirection(),
         player_position: convertNumberArrayToXYZ(localPos),
         player_range: localData.range,
         player_is_underwater: IsPedSwimmingUnderWater(cache.ped),

@@ -98,12 +98,15 @@ for (const context of ["client", "server"]) {
   })
     .then((build) => {
       if (production) {
-        return console.log(`Successfully built ${context}`);
+        console.log(`Successfully built ${context}`);
+        return;
       }
 
       build.watch();
     })
-    .catch(() => process.exit(1));
+    .catch(() => {
+      throw new Error(`Failed to build ${context}`);
+    });
 }
 
 console.log("Building resource...");
