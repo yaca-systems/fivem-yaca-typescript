@@ -1,0 +1,8 @@
+{
+  "uniqueServerId": "",
+  "ingameChannelId": 3,
+  "ingameChannelPassword": "",
+  "defaultChannelId": 1,
+  "useWhisper": false,
+  "excludeChannels": [],
+}

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "module": "es2020",
+    "target": "es2021",
+    "lib": ["es2021", "esnext.disposable"],
+    "types": ["@types/node", "@citizenfx/client", "@citizenfx/server"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowUnreachableCode": false,
+    "strictFunctionTypes": true,
+    "moduleResolution": "bundler",
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "removeComments": true,
+    "outDir": "./dist/"
+  },
+  "include": ["./", "./types/"]
+}

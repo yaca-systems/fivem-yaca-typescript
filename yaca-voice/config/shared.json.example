@@ -1,0 +1,33 @@
+{
+  "debug": false,
+  "locale": "en",
+  "mufflingRange": -1,
+  "unmuteDelay": 300,
+  "maxPhoneSpeakerRange": 5,
+  "notifications": {
+    "oxLib": true,
+    "gta": true
+  },
+  "keyBinds": {
+    "toggleRange": "Z",
+    "radioTransmit": "CAPITAL",
+    "megaphone": "B"
+  },
+  "maxRadioChannels": 6,
+  shortRadioRange: 150,
+  "voiceRange": {
+    "defaultIndex": 2,
+    "ranges": [1, 3, 8, 15, 20, 25, 30, 40]
+  },
+  "megaphone": {
+    "range": 30,
+    "allowedVehicleClasses": [18, 19]
+  },
+  "saltyChatBridge": {
+    "enabled": true,
+    "keyBinds": {
+      "primaryRadio": "N",
+      "secondaryRadio": "CAPITAL"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "plugin_not_activated": "Bitte aktiviere das Voice-Plugin!",
+  "connect_error": "Fehler beim Verbinden zum Teamspeak-Server, bitte verbinde dich erneut!",
+  "plugin_not_initialized": "Das Voice-Plugin wurde noch nicht initialisiert!",
+
+  "outdated_plugin": "Dein Voice-Plugin ist veraltet! Bitte aktualisiere es auf die neueste Version!",
+  "wrong_ts_server": "Du bist auf dem falschen Teamspeak-Server!",
+  "not_connected": "Du bist nicht mit dem Teamspeak-Server verbunden!",
+  "move_error": "Fehler beim Verschieben auf den Teamspeak-Server!",
+
+  "changed_stereo_mode": "Kanal %s ist jetzt auf %s zu hören.",
+  "left_ear": "dem linken Ohr",
+  "right_ear": "dem rechten Ohr",
+  "both_ears": "beiden Ohren",
+
+  "use_megaphone": "Megaphon benutzen",
+  "use_radio": "Funkgerät benutzen",
+
+  "use_salty_primary_radio": "Primäres Funkgerät benutzen",
+  "use_salty_secondary_radio": "Sekundäres Funkgerät benutzen",
+
+  "change_voice_range": "Sprachreichweite ändern"
+}
