@@ -1,3 +1,9 @@
+/**
+ * Calculate the distance between two points in 3D space
+ *
+ * @param firstPoint - The first point
+ * @param secondPoint - The second point
+ */
 export function calculateDistanceVec3(
   firstPoint: number[],
   secondPoint: number[],
@@ -9,6 +15,12 @@ export function calculateDistanceVec3(
   );
 }
 
+/**
+ * Calculate the distance between two points in 2D space
+ *
+ * @param firstPoint - The first point
+ * @param secondPoint - The second point
+ */
 export function calculateDistanceVec2(
   firstPoint: number[],
   secondPoint: number[],
@@ -19,6 +31,11 @@ export function calculateDistanceVec2(
   );
 }
 
+/**
+ * Convert an array of numbers to an object with x, y, and z properties
+ *
+ * @param array - The array to convert
+ */
 export function convertNumberArrayToXYZ(array: number[]): {
   x: number;
   y: number;

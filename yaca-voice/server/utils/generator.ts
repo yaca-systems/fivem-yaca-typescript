@@ -1,26 +1,51 @@
+/**
+ * Generate a random integer between min and max.
+ * If min is greater than max, the values are swapped.
+ * If no values are provided, the default range is 0-9.
+ *
+ * @param min - The minimum value.
+ * @param max - The maximum value.
+ */
 export function getRandomInt(min = 0, max = 9) {
   if (min > max) [min, max] = [max, min];
 
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Generate a random character.
+ * If lowercase is true, the character is returned in lowercase.
+ * If no value is provided, the default is an uppercase character.
+ *
+ * @param lowercase - Whether to return a lowercase character.
+ */
 export function getRandomChar(lowercase?: boolean) {
   const str = String.fromCharCode(getRandomInt(65, 90));
   return lowercase ? str.toLowerCase() : str;
 }
 
+/**
+ * Generate a random alphanumeric character.
+ * If lowercase is true, the character is returned in lowercase.
+ * If no value is provided, the default is an uppercase alphanumeric character.
+ *
+ * @param lowercase - Whether to return a lowercase character.
+ */
 export function getRandomAlphanumeric(lowercase?: boolean) {
   return Math.random() > 0.5 ? getRandomChar(lowercase) : getRandomInt();
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatChar: Record<string, (...args: any) => string | number> = {
-  "1": getRandomInt,
-  A: getRandomChar,
-  ".": getRandomAlphanumeric,
-  a: getRandomChar,
-};
-
+/**
+ * Generate a random string based on a pattern.
+ *
+ * @param pattern
+ *  - The pattern to use for the string.
+ *  - A = Uppercase letter.
+ *  - a = Lowercase letter.
+ *  - 1 = Number.
+ *  - . = Alphanumeric.
+ * @param length - The length of the string. Defaults to the length of the pattern.
+ */
 export function getRandomString(pattern: string, length?: number): string {
   const len = length || pattern.replace(/\^/g, "").length;
   const arr: Array<string | number> = Array(len).fill(0);
@@ -38,8 +63,15 @@ export function getRandomString(pattern: string, length?: number): string {
       i += 1;
       char = pattern.charAt(i - 1);
     } else {
-      const fn = formatChar[char];
-      char = fn ? fn(char === "a") : char;
+      if (char === "1") {
+        char = getRandomInt();
+      } else if (char === "A") {
+        char = getRandomChar();
+      } else if (char === ".") {
+        char = getRandomAlphanumeric();
+      } else if (char === "a") {
+        char = getRandomChar(true);
+      }
     }
 
     size += 1;

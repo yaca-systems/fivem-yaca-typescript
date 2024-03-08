@@ -29,6 +29,11 @@ import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale, locale } from "common/locale";
 import { cache } from "../utils";
 
+/**
+ * The YaCA client module.
+ * This module is responsible for handling the client side of the voice plugin.
+ * It also handles the websocket connection to the voice plugin.
+ */
 export class YaCAClientModule {
   websocket: WebSocket;
   sharedConfig: YacaSharedConfig;

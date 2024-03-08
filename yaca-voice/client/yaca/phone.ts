@@ -2,13 +2,20 @@ import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData } from "types";
 import { cache } from "../utils";
 
-/* ======================== PHONE SYSTEM ======================== */
+/**
+ * The phone module for the client.
+ */
 export class YaCAClientPhoneModule {
   clientModule: YaCAClientModule;
 
   inCall = false;
   phoneSpeakerActive = false;
 
+  /**
+   * Creates an instance of the phone module.
+   *
+   * @param clientModule - The client module.
+   */
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 

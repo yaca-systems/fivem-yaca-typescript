@@ -13,7 +13,10 @@ import {
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale } from "common/locale";
 
-export interface YaCAPlayer {
+/**
+ * The player data type for YaCA.
+ */
+export type YaCAPlayer = {
   voiceSettings: {
     voiceRange: number;
     voiceFirstConnect: boolean;
@@ -35,8 +38,11 @@ export interface YaCAPlayer {
     playerId: number;
     mutedOnPhone: boolean;
   };
-}
+};
 
+/**
+ * The main server module for YaCA.
+ */
 export class YaCAServerModule {
   cache: ServerCache;
 
@@ -52,6 +58,9 @@ export class YaCAServerModule {
 
   saltChatBridge?: YaCAServerSaltyChatBridge;
 
+  /**
+   * Creates an instance of the server module.
+   */
   constructor() {
     console.log("~g~ --> YaCA: Server loaded");
 
@@ -78,6 +87,9 @@ export class YaCAServerModule {
     }
   }
 
+  /**
+   * Get all registered players.
+   */
   getPlayers(): Map<number, YaCAPlayer> {
     return this.players;
   }
@@ -116,6 +128,9 @@ export class YaCAServerModule {
     this.connect(src);
   }
 
+  /**
+   * Register all exports for the YaCA module.
+   */
   registerExports() {
     /**
      * Get the alive status of a player.
@@ -157,19 +172,26 @@ export class YaCAServerModule {
     );
   }
 
+  /**
+   * Register all events for the YaCA module.
+   */
   registerEvents() {
+    // FiveM: player joining
     on("playerJoining", (src: number) => {
       this.connectToVoice(src);
     });
 
+    // FiveM: player dropped
     on("playerDropped", () => {
       this.handlePlayerDisconnect(source);
     });
 
+    // YaCA: player left vehicle
     onNet("server:yaca:playerLeftVehicle", () => {
       this.handlePlayerLeftVehicle(source);
     });
 
+    // YaCA: connect to voice when NUI is ready
     onNet("server:yaca:nuiReady", () => {
       this.connectToVoice(source);
     });
@@ -187,10 +209,6 @@ export class YaCAServerModule {
     //YaCa: voice restart
     onNet("server:yaca:wsReady", (isFirstConnect: boolean) => {
       this.playerReconnect(source, isFirstConnect);
-    });
-
-    onNet("server:yaca:nuiReady", () => {
-      this.connectToVoice(source);
     });
   }
 

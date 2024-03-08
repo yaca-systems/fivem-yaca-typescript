@@ -1,5 +1,15 @@
 import { waitFor } from "common/index";
 
+/**
+ * Requests an animation dictionary.
+ *
+ * @param request - The function to request the animation dictionary.
+ * @param hasLoaded - The function to check if the animation dictionary has loaded.
+ * @param assetType - The type of asset being requested.
+ * @param asset - The asset being requested.
+ * @param timeout - The timeout for the request.
+ * @param args - The arguments for the request.
+ */
 async function streamingRequest(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: (...args: any) => void,
@@ -27,6 +37,12 @@ async function streamingRequest(
   return asset;
 }
 
+/**
+ * Request a animation dictionary.
+ *
+ * @param animDict - The animation dictionary to request.
+ * @param timeout - The timeout for the request.
+ */
 export const requestAnimDict = (
   animDict: string,
   timeout?: number,

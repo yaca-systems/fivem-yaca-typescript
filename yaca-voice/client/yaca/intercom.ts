@@ -1,16 +1,26 @@
 import { CommDeviceMode, YacaFilterEnum, YacaPlayerData } from "types";
 import { YaCAClientModule } from "yaca";
 
-/* =========== INTERCOM SYSTEM =========== */
+/**
+ * The intercom module for the client.
+ */
 export class YaCAClientIntercomModule {
   clientModule: YaCAClientModule;
 
+  /**
+   * Creates an instance of the intercom module.
+   *
+   * @param clientModule - The client module.
+   */
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 
     this.registerEvents();
   }
 
+  /**
+   * Register the intercom events.
+   */
   registerEvents() {
     /**
      * Handles the "client:yaca:addRemovePlayerIntercomFilter" server event.

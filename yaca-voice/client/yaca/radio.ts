@@ -9,6 +9,9 @@ import {
 import { cache, calculateDistanceVec3, clamp, requestAnimDict } from "../utils";
 import { locale } from "common/locale";
 
+/**
+ * The radio module for the client.
+ */
 export class YaCAClientRadioModule {
   clientModule: YaCAClientModule;
 
@@ -28,6 +31,11 @@ export class YaCAClientRadioModule {
     stereo: YacaStereoMode.STEREO,
   };
 
+  /**
+   * Creates an instance of the radio module.
+   *
+   * @param clientModule - The client module.
+   */
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 
@@ -39,6 +47,9 @@ export class YaCAClientRadioModule {
     }
   }
 
+  /**
+   * Registers the exports for the radio module.
+   */
   registerExports() {
     /**
      * Enables or disables the radio system.
@@ -140,6 +151,9 @@ export class YaCAClientRadioModule {
     );
   }
 
+  /**
+   * Registers the events for the radio module.
+   */
   registerEvents() {
     /**
      * Handles the "client:yaca:setRadioFreq" server event.
@@ -275,10 +289,10 @@ export class YaCAClientRadioModule {
     );
   }
 
+  /**
+   * Registers the command and key mapping for the radio talking.
+   */
   registerKeybinds() {
-    /**
-     * Registers the command and key mapping for the radio talking.
-     */
     RegisterCommand(
       "+yaca:radioTalking",
       () => {

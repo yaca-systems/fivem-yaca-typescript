@@ -1,10 +1,18 @@
 import { YacaSharedConfig } from "types";
 import { YaCAServerModule } from "yaca";
 
+/**
+ * The server-side megaphone module.
+ */
 export class YaCAServerMegaphoneModule {
   private serverModule: YaCAServerModule;
   private sharedConfig: YacaSharedConfig;
 
+  /**
+   * Creates an instance of the megaphone module.
+   *
+   * @param serverModule - The server module.
+   */
   constructor(serverModule: YaCAServerModule) {
     this.serverModule = serverModule;
     this.sharedConfig = serverModule.sharedConfig;
@@ -12,6 +20,9 @@ export class YaCAServerMegaphoneModule {
     this.registerEvents();
   }
 
+  /**
+   * Register server events.
+   */
   registerEvents() {
     /**
      * Changes megaphone state by player
