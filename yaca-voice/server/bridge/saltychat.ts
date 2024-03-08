@@ -126,8 +126,8 @@ export class YaCAServerSaltyChatBridge {
       playerHandle = [playerHandle];
     }
 
-    const beforeInCall = this.callMap.get(callIdentifier) ?? [];
-    const nowInCall = beforeInCall.concat(playerHandle);
+    const beforeInCall = this.callMap.get(callIdentifier) ?? [],
+      nowInCall = beforeInCall.concat(playerHandle);
     this.callMap.set(callIdentifier, nowInCall);
 
     for (const player of nowInCall) {

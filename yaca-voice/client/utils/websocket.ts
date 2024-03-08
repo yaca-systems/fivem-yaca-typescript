@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import { sleep } from "@overextended/ox_lib";
 
 export class WebSocket extends EventEmitter {
-  public readyState: number = 0;
+  public readyState = 0;
   nuiReady = false;
   initialized = false;
 

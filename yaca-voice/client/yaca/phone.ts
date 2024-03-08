@@ -25,7 +25,9 @@ export class YaCAClientPhoneModule {
      */
     onNet("client:yaca:phone", (targetID: number, state: boolean) => {
       const target = this.clientModule.getPlayerByID(targetID);
-      if (!target) return;
+      if (!target) {
+        return;
+      }
 
       this.inCall = state;
 
@@ -48,7 +50,9 @@ export class YaCAClientPhoneModule {
      */
     onNet("client:yaca:phoneOld", (targetID: number, state: boolean) => {
       const target = this.clientModule.getPlayerByID(targetID);
-      if (!target) return;
+      if (!target) {
+        return;
+      }
 
       this.inCall = state;
 
@@ -74,11 +78,15 @@ export class YaCAClientPhoneModule {
       "client:yaca:phoneMute",
       (targetID: number, state: boolean, onCallStop = false) => {
         const target = this.clientModule.getPlayerByID(targetID);
-        if (!target) return;
+        if (!target) {
+          return;
+        }
 
         target.mutedOnPhone = state;
 
-        if (onCallStop) return;
+        if (onCallStop) {
+          return;
+        }
 
         if (
           this.clientModule.useWhisper &&
@@ -127,17 +135,23 @@ export class YaCAClientPhoneModule {
     onNet(
       "client:yaca:playersToPhoneSpeakerEmit",
       (playerIDs: number | number[], state: boolean) => {
-        if (!Array.isArray(playerIDs)) playerIDs = [playerIDs];
+        if (!Array.isArray(playerIDs)) {
+          playerIDs = [playerIDs];
+        }
 
         const applyRemovePhoneSpeaker: Set<YacaPlayerData> = new Set();
         for (const playerID of playerIDs) {
           const player = this.clientModule.getPlayerByID(playerID);
-          if (!player) continue;
+          if (!player) {
+            continue;
+          }
 
           applyRemovePhoneSpeaker.add(player);
         }
 
-        if (applyRemovePhoneSpeaker.size < 1) return;
+        if (applyRemovePhoneSpeaker.size < 1) {
+          return;
+        }
 
         if (state) {
           this.clientModule.setPlayersCommType(
@@ -178,15 +192,23 @@ export class YaCAClientPhoneModule {
         __: number,
         replicated: boolean,
       ) => {
-        if (replicated) return;
+        if (replicated) {
+          return;
+        }
 
         const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId === 0) return;
+        if (playerId === 0) {
+          return;
+        }
 
         const playerSource = GetPlayerServerId(playerId);
-        if (playerSource === 0) return;
+        if (playerSource === 0) {
+          return;
+        }
 
-        if (playerSource === cache.serverId) this.phoneSpeakerActive = !!value;
+        if (playerSource === cache.serverId) {
+          this.phoneSpeakerActive = Boolean(value);
+        }
 
         this.removePhoneSpeakerFromEntity(playerSource);
         if (typeof value !== "undefined") {
@@ -207,13 +229,17 @@ export class YaCAClientPhoneModule {
    */
   removePhoneSpeakerFromEntity(player: number) {
     const entityData = this.clientModule.getPlayerByID(player);
-    if (!entityData?.phoneCallMemberIds) return;
+    if (!entityData?.phoneCallMemberIds) {
+      return;
+    }
 
     const playersToSet = [];
     for (const phoneCallMemberId of entityData.phoneCallMemberIds) {
       const phoneCallMember =
         this.clientModule.getPlayerByID(phoneCallMemberId);
-      if (!phoneCallMember) continue;
+      if (!phoneCallMember) {
+        continue;
+      }
 
       playersToSet.push(phoneCallMember);
     }

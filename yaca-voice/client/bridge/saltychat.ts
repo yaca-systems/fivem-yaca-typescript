@@ -94,9 +94,7 @@ export class YaCAClientSaltyChatBridge {
   }
 
   registerSaltyChatExports() {
-    this.saltyChatExport("y", () => {
-      return this.clientModule.getVoiceRange();
-    });
+    this.saltyChatExport("y", () => this.clientModule.getVoiceRange());
 
     this.saltyChatExport("GetRadioChannel", (primary: boolean) => {
       const channel = primary ? 1 : 2;
@@ -104,9 +102,10 @@ export class YaCAClientSaltyChatBridge {
         .frequency;
     });
 
-    this.saltyChatExport("GetRadioVolume", () => {
-      return this.clientModule.radioModule.radioChannelSettings[1].volume;
-    });
+    this.saltyChatExport(
+      "GetRadioVolume",
+      () => this.clientModule.radioModule.radioChannelSettings[1].volume,
+    );
 
     this.saltyChatExport("GetRadioSpeaker", () => {
       console.warn("GetRadioSpeaker is not implemented in YaCA");
@@ -144,8 +143,10 @@ export class YaCAClientSaltyChatBridge {
   }
 
   handleChangePluginState(response: YacaResponseCode) {
-    if (this.prevPluginState === response) return;
-    let state: number = 0;
+    if (this.prevPluginState === response) {
+      return;
+    }
+    let state = 0;
 
     switch (response) {
       case "OK":

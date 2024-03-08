@@ -13,16 +13,16 @@ import {
   YacaStereoMode,
 } from "types";
 import {
+  WebSocket,
   calculateDistanceVec3,
   convertNumberArrayToXYZ,
-  WebSocket,
 } from "utils";
 import {
-  localLipSyncAnimations,
   YaCAClientIntercomModule,
   YaCAClientMegaphoneModule,
   YaCAClientPhoneModule,
   YaCAClientRadioModule,
+  localLipSyncAnimations,
 } from "yaca";
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 
@@ -76,7 +76,7 @@ export class YaCAClientModule {
    * @param {string} msg - The message to be displayed.
    * @param {number} [time=0] - The duration for which the hint should be displayed. If not provided, defaults to 0.
    */
-  mHint(head: string, msg: string, time: number = 0) {
+  mHint(head: string, msg: string, time = 0) {
     const scaleForm = RequestScaleformMovie("MIDSIZED_MESSAGE");
 
     this.mHintTimeout = setTimeout(
@@ -103,7 +103,9 @@ export class YaCAClientModule {
 
         if (time !== 0) {
           setTimeout(() => {
-            if (this.mHintTick) clearInterval(this.mHintTick);
+            if (this.mHintTick) {
+              clearInterval(this.mHintTick);
+            }
             this.mHintTick = null;
           }, time * 1000);
         }
@@ -113,9 +115,13 @@ export class YaCAClientModule {
   }
 
   stopMHint() {
-    if (this.mHintTimeout) clearTimeout(this.mHintTimeout);
+    if (this.mHintTimeout) {
+      clearTimeout(this.mHintTimeout);
+    }
     this.mHintTimeout = null;
-    if (this.mHintTick) clearInterval(this.mHintTick);
+    if (this.mHintTick) {
+      clearInterval(this.mHintTick);
+    }
     this.mHintTick = null;
   }
 
@@ -126,7 +132,7 @@ export class YaCAClientModule {
    * @param {number} [min=0] - The minimum value. Defaults to 0 if not provided.
    * @param {number} [max=1] - The maximum value. Defaults to 1 if not provided.
    */
-  clamp(value: number, min: number = 0, max: number = 1) {
+  clamp(value: number, min = 0, max = 1) {
     return Math.max(min, Math.min(max, value));
   }
 
@@ -149,8 +155,9 @@ export class YaCAClientModule {
     if (this.sharedConfig.notifications.gta) {
       BeginTextCommandThefeedPost("STRING");
       AddTextComponentSubstringPlayerName(`YaCA: ${message}`);
-      if (type === YacaNotificationType.ERROR)
+      if (type === YacaNotificationType.ERROR) {
         ThefeedSetNextPostBackgroundColor(6);
+      }
       EndTextCommandThefeedPostTicker(false, false);
     }
   }
@@ -201,10 +208,14 @@ export class YaCAClientModule {
         __: number,
         replicated: boolean,
       ) => {
-        if (replicated) return;
+        if (replicated) {
+          return;
+        }
 
         const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId === 0) return;
+        if (playerId === 0) {
+          return;
+        }
 
         SetPlayerTalkingOverride(playerId, value);
       },
@@ -291,8 +302,9 @@ export class YaCAClientModule {
 
         this.websocket.on("close", (code: number, reason: string) => {
           console.error("[YACA-Websocket]: client disconnected", code, reason);
-          if (this.saltyChatBridge)
+          if (this.saltyChatBridge) {
             this.saltyChatBridge.handleDisconnectState();
+          }
         });
 
         this.websocket.on("open", () => {
@@ -314,7 +326,9 @@ export class YaCAClientModule {
         1000,
       );
 
-      if (this.firstConnect) return;
+      if (this.firstConnect) {
+        return;
+      }
 
       this.initRequest(dataObj);
     });
@@ -337,7 +351,9 @@ export class YaCAClientModule {
     onNet(
       "client:yaca:addPlayers",
       (dataObjects: DataObject | DataObject[]) => {
-        if (!Array.isArray(dataObjects)) dataObjects = [dataObjects];
+        if (!Array.isArray(dataObjects)) {
+          dataObjects = [dataObjects];
+        }
 
         for (const dataObj of dataObjects) {
           if (
@@ -345,8 +361,9 @@ export class YaCAClientModule {
             typeof dataObj.range === "undefined" ||
             typeof dataObj.clientId === "undefined" ||
             typeof dataObj.playerId === "undefined"
-          )
+          ) {
             continue;
+          }
 
           const currentData = this.getPlayerByID(dataObj.playerId);
 
@@ -371,7 +388,9 @@ export class YaCAClientModule {
      */
     onNet("client:yaca:muteTarget", (target: number, muted: boolean) => {
       const player = this.getPlayerByID(target);
-      if (player) player.forceMuted = muted;
+      if (player) {
+        player.forceMuted = muted;
+      }
     });
 
     /**
@@ -395,67 +414,70 @@ export class YaCAClientModule {
       }
 
       const player = this.getPlayerByID(target);
-      if (player) player.range = range;
-    });
-
-    /* TODO: Handle stream-in/out
-
-    alt.on("gameEntityCreate", (entity) => {
-      if (!entity?.valid || !(entity instanceof alt.Player)) return;
-
-      const entityID = entity.remoteID;
-
-      // Handle megaphone on stream-in
-      if (entity.hasStreamSyncedMeta("yaca:megaphoneactive")) {
-        YaCAClientModule.setPlayersCommType(
-          this.getPlayerByID(entity.remoteID),
-          YacaFilterEnum.MEGAPHONE,
-          true,
-          undefined,
-          entity.getStreamSyncedMeta("yaca:megaphoneactive"),
-          CommDeviceMode.RECEIVER,
-          CommDeviceMode.SENDER
-        );
-      }
-
-      // Handle phonecallspeaker on stream-in
-      if (entity.hasStreamSyncedMeta("yaca:phoneSpeaker")) {
-        const value = entity.getStreamSyncedMeta("yaca:phoneSpeaker");
-
-        this.setPlayerVariable(entity, "phoneCallMemberIds", Array.isArray(value) ? value : [value]);
-      }
-
-      // Handle shortrange radio on stream-in
-      if (this.playersWithShortRange.has(entityID)) {
-        const channel = this.findRadioChannelByFrequency(this.playersWithShortRange.get(entityID));
-        if (channel) {
-          YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-        }
-      }
-
-      this.syncLipsPlayer(entity, !!entity.getStreamSyncedMeta("yaca:lipsync"));
-    });
-
-    onNet("gameEntityDestroy", (entity) => {
-      if (!entity?.valid || !(entity instanceof alt.Player)) return;
-
-      const entityID = entity.remoteID;
-
-      // Handle phonecallspeaker on stream-out
-      this.removePhoneSpeakerFromEntity(entity);
-
-      // Handle megaphone on stream-out
-      if (entity?.hasStreamSyncedMeta("yaca:megaphoneactive")) {
-        YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.MEGAPHONE, false, undefined, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-      }
-
-      // Handle shortrange radio on stream-out
-      if (this.playersWithShortRange.has(entityID)) {
-        YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.RADIO, false, undefined, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+      if (player) {
+        player.range = range;
       }
     });
 
-    */
+    /*
+     * TODO: Handle stream-in/out
+     *
+     * alt.on("gameEntityCreate", (entity) => {
+     * if (!entity?.valid || !(entity instanceof alt.Player)) return;
+     *
+     * const entityID = entity.remoteID;
+     *
+     * // Handle megaphone on stream-in
+     * if (entity.hasStreamSyncedMeta("yaca:megaphoneactive")) {
+     *  YaCAClientModule.setPlayersCommType(
+     *    this.getPlayerByID(entity.remoteID),
+     *    YacaFilterEnum.MEGAPHONE,
+     *    true,
+     *    undefined,
+     *    entity.getStreamSyncedMeta("yaca:megaphoneactive"),
+     *    CommDeviceMode.RECEIVER,
+     *    CommDeviceMode.SENDER
+     *  );
+     * }
+     *
+     * // Handle phonecallspeaker on stream-in
+     * if (entity.hasStreamSyncedMeta("yaca:phoneSpeaker")) {
+     *  const value = entity.getStreamSyncedMeta("yaca:phoneSpeaker");
+     *
+     *  this.setPlayerVariable(entity, "phoneCallMemberIds", Array.isArray(value) ? value : [value]);
+     * }
+     *
+     * // Handle shortrange radio on stream-in
+     * if (this.playersWithShortRange.has(entityID)) {
+     *  const channel = this.findRadioChannelByFrequency(this.playersWithShortRange.get(entityID));
+     *  if (channel) {
+     *    YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+     *  }
+     * }
+     *
+     * this.syncLipsPlayer(entity, !!entity.getStreamSyncedMeta("yaca:lipsync"));
+     * });
+     *
+     * onNet("gameEntityDestroy", (entity) => {
+     * if (!entity?.valid || !(entity instanceof alt.Player)) return;
+     *
+     * const entityID = entity.remoteID;
+     *
+     * // Handle phonecallspeaker on stream-out
+     * this.removePhoneSpeakerFromEntity(entity);
+     *
+     * // Handle megaphone on stream-out
+     * if (entity?.hasStreamSyncedMeta("yaca:megaphoneactive")) {
+     *  YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.MEGAPHONE, false, undefined, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+     * }
+     *
+     * // Handle shortrange radio on stream-out
+     * if (this.playersWithShortRange.has(entityID)) {
+     *  YaCAClientModule.setPlayersCommType(this.getPlayerByID(entityID), YacaFilterEnum.RADIO, false, undefined, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+     * }
+     * });
+     *
+     */
   }
 
   /**
@@ -497,7 +519,7 @@ export class YaCAClientModule {
       ingame_channel_password: dataObj.channelPassword,
       excluded_channels: dataObj.excludeChannels,
       /**
-       * default are 2 meters
+       * Default are 2 meters
        * if the value is set to -1, the player voice range is taken
        * if the value is >= 0, you can set the max muffling range before it gets completely cut off
        */
@@ -518,11 +540,12 @@ export class YaCAClientModule {
   isPluginInitialized(silent = false): boolean {
     const inited = Boolean(this.getPlayerByID(cache.serverId));
 
-    if (!inited && !silent)
+    if (!inited && !silent) {
       this.notification(
         locale("plugin_not_initialized")!,
         YacaNotificationType.ERROR,
       );
+    }
 
     return inited;
   }
@@ -533,10 +556,13 @@ export class YaCAClientModule {
    * @param {object} msg - The message to be sent.
    */
   sendWebsocket(msg: object) {
-    if (!this.websocket)
+    if (!this.websocket) {
       return console.error("[Voice-Websocket]: No websocket created");
+    }
 
-    if (this.websocket.readyState === 1) this.websocket.send(msg);
+    if (this.websocket.readyState === 1) {
+      this.websocket.send(msg);
+    }
   }
 
   /**
@@ -545,7 +571,9 @@ export class YaCAClientModule {
    * @param {string} payload - The response from the voice plugin.
    */
   handleResponse(payload: string) {
-    if (!payload) return;
+    if (!payload) {
+      return;
+    }
 
     let parsedPayload: YacaResponse;
 
@@ -556,8 +584,9 @@ export class YaCAClientModule {
       return;
     }
 
-    if (this.saltyChatBridge)
+    if (this.saltyChatBridge) {
       this.saltyChatBridge.handleChangePluginState(parsedPayload.code);
+    }
 
     if (parsedPayload.code === "OK") {
       if (parsedPayload.requestType === "JOIN") {
@@ -571,8 +600,9 @@ export class YaCAClientModule {
         this.rangeInterval = setInterval(this.calcPlayers.bind(this), 250);
 
         // Set radio settings on reconnect only, else on first opening
-        if (this.radioModule.radioInitialized)
+        if (this.radioModule.radioInitialized) {
           this.radioModule.initRadioSettings();
+        }
         return;
       }
 
@@ -592,11 +622,14 @@ export class YaCAClientModule {
     if (
       typeof this.responseCodesToErrorMessages[parsedPayload.code] ===
       "undefined"
-    )
+    ) {
       console.log(
         `[YaCA-Websocket]: Unknown error code: ${parsedPayload.code}`,
       );
-    if (message.length < 1) return;
+    }
+    if (message.length < 1) {
+      return;
+    }
 
     this.notification(message, YacaNotificationType.ERROR);
   }
@@ -605,10 +638,10 @@ export class YaCAClientModule {
    * Convert camera rotation to direction vector.
    */
   getCamDirection(): { x: number; y: number; z: number } {
-    const rotVector = GetGameplayCamRot(0);
-    const num = rotVector[2] * 0.0174532924;
-    const num2 = rotVector[0] * 0.0174532924;
-    const num3 = Math.abs(Math.cos(num2));
+    const rotVector = GetGameplayCamRot(0),
+      num = rotVector[2] * 0.0174532924,
+      num2 = rotVector[0] * 0.0174532924,
+      num3 = Math.abs(Math.cos(num2));
 
     return {
       x: -Math.sin(num) * num3,
@@ -627,7 +660,9 @@ export class YaCAClientModule {
   setPlayerVariable(player: number, variable: string, value: unknown) {
     const currentData = this.getPlayerByID(player);
 
-    if (!currentData) this.allPlayers.set(player, {});
+    if (!currentData) {
+      this.allPlayers.set(player, {});
+    }
 
     // @ts-expect-error Object cannot be undefined
     this.getPlayerByID(player)[variable] = value;
@@ -646,7 +681,9 @@ export class YaCAClientModule {
    * Changes the voice range to the next range.
    */
   changeVoiceRange() {
-    if (!this.canChangeVoiceRange) return;
+    if (!this.canChangeVoiceRange) {
+      return;
+    }
 
     if (this.visualVoiceRangeTimeout) {
       clearTimeout(this.visualVoiceRangeTimeout);
@@ -682,9 +719,9 @@ export class YaCAClientModule {
     }, 1000);
 
     this.visualVoiceRangeTick = setInterval(() => {
-      const entity = cache.vehicle || cache.ped;
-      const pos = GetEntityCoords(entity, false);
-      const posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98;
+      const entity = cache.vehicle || cache.ped,
+        pos = GetEntityCoords(entity, false),
+        posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98;
 
       DrawMarker(
         1,
@@ -726,7 +763,9 @@ export class YaCAClientModule {
    */
   isCommTypeValid(type: string): boolean {
     const valid = type in YacaFilterEnum;
-    if (!valid) console.error(`[YaCA-Websocket]: Invalid commtype: ${type}`);
+    if (!valid) {
+      console.error(`[YaCA-Websocket]: Invalid commtype: ${type}`);
+    }
 
     return valid;
   }
@@ -751,7 +790,9 @@ export class YaCAClientModule {
     ownMode?: CommDeviceMode,
     otherPlayersMode?: CommDeviceMode,
   ) {
-    if (!Array.isArray(players)) players = [players];
+    if (!Array.isArray(players)) {
+      players = [players];
+    }
 
     const clientIds: YacaClient[] = [];
     if (typeof ownMode !== "undefined") {
@@ -762,7 +803,9 @@ export class YaCAClientModule {
     }
 
     for (const player of players) {
-      if (!player) continue;
+      if (!player) {
+        continue;
+      }
 
       clientIds.push({
         client_id: player.clientId,
@@ -776,8 +819,12 @@ export class YaCAClientModule {
       members: clientIds,
     };
 
-    if (typeof channel !== "undefined") protocol.channel = channel;
-    if (typeof range !== "undefined") protocol.range = range;
+    if (typeof channel !== "undefined") {
+      protocol.channel = channel;
+    }
+    if (typeof range !== "undefined") {
+      protocol.range = range;
+    }
 
     this.sendWebsocket({
       base: { request_type: "INGAME" },
@@ -793,14 +840,18 @@ export class YaCAClientModule {
    * @param {number} channel - The channel for the communication.
    */
   setCommDeviceVolume(type: YacaFilterEnum, volume: number, channel: number) {
-    if (!this.isCommTypeValid(type)) return;
+    if (!this.isCommTypeValid(type)) {
+      return;
+    }
 
     const protocol: YacaProtocol = {
       comm_type: type,
       volume: this.clamp(volume, 0, 1),
     };
 
-    if (typeof channel !== "undefined") protocol.channel = channel;
+    if (typeof channel !== "undefined") {
+      protocol.channel = channel;
+    }
 
     this.sendWebsocket({
       base: { request_type: "INGAME" },
@@ -820,14 +871,18 @@ export class YaCAClientModule {
     mode: YacaStereoMode,
     channel: number,
   ) {
-    if (!this.isCommTypeValid(type)) return;
+    if (!this.isCommTypeValid(type)) {
+      return;
+    }
 
     const protocol: YacaProtocol = {
       comm_type: type,
       output_mode: mode,
     };
 
-    if (typeof channel !== "undefined") protocol.channel = channel;
+    if (typeof channel !== "undefined") {
+      protocol.channel = channel;
+    }
 
     this.sendWebsocket({
       base: { request_type: "INGAME" },
@@ -855,7 +910,9 @@ export class YaCAClientModule {
       this.messageDisplayed = true;
     }
 
-    if (this.noPluginActivated >= 120) emitNet("server:yaca:noVoicePlugin");
+    if (this.noPluginActivated >= 120) {
+      emitNet("server:yaca:noVoicePlugin");
+    }
   }
 
   /**
@@ -902,21 +959,26 @@ export class YaCAClientModule {
    * Calculate the players in streaming range and send them to the voice plugin.
    */
   calcPlayers() {
-    const players = new Map();
-    const localPos = GetEntityCoords(cache.ped, false);
-    const currentRoom = GetRoomKeyFromEntity(cache.ped);
-    const playersToPhoneSpeaker: Set<number> = new Set();
-    const playersOnPhoneSpeaker: Set<number> = new Set();
-
-    const localData = this.getPlayerByID(cache.serverId);
-    if (!localData) return;
+    const players = new Map(),
+      localPos = GetEntityCoords(cache.ped, false),
+      currentRoom = GetRoomKeyFromEntity(cache.ped),
+      playersToPhoneSpeaker: Set<number> = new Set(),
+      playersOnPhoneSpeaker: Set<number> = new Set(),
+      localData = this.getPlayerByID(cache.serverId);
+    if (!localData) {
+      return;
+    }
 
     for (const player of GetActivePlayers()) {
       const remoteId = GetPlayerServerId(player);
-      if (remoteId === 0 || remoteId === cache.serverId) continue;
+      if (remoteId === 0 || remoteId === cache.serverId) {
+        continue;
+      }
 
       const voiceSetting = this.getPlayerByID(remoteId);
-      if (!voiceSetting?.clientId) continue;
+      if (!voiceSetting?.clientId) {
+        continue;
+      }
 
       const playerPed = GetPlayerPed(player);
 
@@ -928,9 +990,9 @@ export class YaCAClientModule {
         muffleIntensity = 10; // 10 is the maximum intensity
       }
 
-      const playerPos = GetEntityCoords(playerPed, false);
-      const playerDirection = GetEntityForwardVector(playerPed);
-      const isUnderwater = IsPedSwimmingUnderWater(playerPed);
+      const playerPos = GetEntityCoords(playerPed, false),
+        playerDirection = GetEntityForwardVector(playerPed),
+        isUnderwater = IsPedSwimmingUnderWater(playerPed);
 
       if (!playersOnPhoneSpeaker.has(remoteId)) {
         players.set(remoteId, {
@@ -967,8 +1029,9 @@ export class YaCAClientModule {
             !phoneCallMember ||
             phoneCallMember.mutedOnPhone ||
             phoneCallMember.forceMuted
-          )
+          ) {
             continue;
+          }
 
           players.delete(phoneCallMemberId);
           players.set(phoneCallMemberId, {
@@ -1005,11 +1068,11 @@ export class YaCAClientModule {
           this.currentlySendingPhoneSpeakerSender.size))
     ) {
       const playersToNotReceivePhoneSpeaker = [
-        ...this.currentlySendingPhoneSpeakerSender,
-      ].filter((playerId) => !playersToPhoneSpeaker.has(playerId));
-      const playersNeedsReceivePhoneSpeaker = [...playersToPhoneSpeaker].filter(
-        (playerId) => !this.currentlySendingPhoneSpeakerSender.has(playerId),
-      );
+          ...this.currentlySendingPhoneSpeakerSender,
+        ].filter((playerId) => !playersToPhoneSpeaker.has(playerId)),
+        playersNeedsReceivePhoneSpeaker = [...playersToPhoneSpeaker].filter(
+          (playerId) => !this.currentlySendingPhoneSpeakerSender.has(playerId),
+        );
 
       this.currentlySendingPhoneSpeakerSender = new Set(playersToPhoneSpeaker);
 

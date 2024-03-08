@@ -1,10 +1,10 @@
-import { initLocale, cache, addCommand } from "@overextended/ox_lib/server";
+import { addCommand, cache, initLocale } from "@overextended/ox_lib/server";
 import { generateRandomName } from "utils";
 import type { DataObject, YacaServerConfig, YacaSharedConfig } from "types";
 import {
   YaCAServerMegaphoneModule,
-  YaCAServerRadioModule,
   YaCAServerPhoneModle,
+  YaCAServerRadioModule,
 } from "yaca";
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 
@@ -83,7 +83,9 @@ export class YaCAServerModule {
    */
   connectToVoice(src: number) {
     const name = generateRandomName(src, this.nameSet);
-    if (!name) return;
+    if (!name) {
+      return;
+    }
 
     this.players.set(src, {
       voiceSettings: {
@@ -197,7 +199,9 @@ export class YaCAServerModule {
    * This is only done if the debug mode is enabled.
    */
   registerCommands() {
-    if (!this.sharedConfig.debug) return;
+    if (!this.sharedConfig.debug) {
+      return;
+    }
 
     addCommand<{
       playerId: number;
@@ -372,14 +376,18 @@ export class YaCAServerModule {
    */
   handlePlayerDisconnect(src: number) {
     const player = this.players.get(src);
-    if (!player) return;
+    if (!player) {
+      return;
+    }
 
     this.nameSet.delete(player.voiceSettings?.ingameName);
 
     const allFrequences = this.radioModule.radioFrequencyMap;
     for (const [key, value] of allFrequences) {
       value.delete(src);
-      if (!value.size) this.radioModule.radioFrequencyMap.delete(key);
+      if (!value.size) {
+        this.radioModule.radioFrequencyMap.delete(key);
+      }
     }
 
     emitNet("client:yaca:disconnect", -1, src);
@@ -402,12 +410,16 @@ export class YaCAServerModule {
    */
   changePlayerAliveStatus(src: number, alive: boolean) {
     const player = this.players.get(src);
-    if (!player) return;
+    if (!player) {
+      return;
+    }
 
     player.voiceSettings.forceMuted = !alive;
     emitNet("client:yaca:muteTarget", -1, src, !alive);
 
-    if (player.voicePlugin) player.voicePlugin.forceMuted = !alive;
+    if (player.voicePlugin) {
+      player.voicePlugin.forceMuted = !alive;
+    }
   }
 
   /**
@@ -436,13 +448,19 @@ export class YaCAServerModule {
    */
   playerReconnect(src: number, isFirstConnect: boolean) {
     const player = this.players.get(src);
-    if (!player) return;
+    if (!player) {
+      return;
+    }
 
-    if (!player.voiceSettings.voiceFirstConnect) return;
+    if (!player.voiceSettings.voiceFirstConnect) {
+      return;
+    }
 
     if (!isFirstConnect) {
       const name = generateRandomName(src, this.nameSet);
-      if (!name) return;
+      if (!name) {
+        return;
+      }
 
       this.nameSet.delete(player.voiceSettings.ingameName);
       player.voiceSettings.ingameName = name;
@@ -459,7 +477,9 @@ export class YaCAServerModule {
    */
   changeVoiceRange(src: number, range: number) {
     const player = this.players.get(src);
-    if (!player) return;
+    if (!player) {
+      return;
+    }
 
     if (!this.sharedConfig.voiceRange.ranges.includes(range)) {
       return emitNet(
@@ -479,7 +499,9 @@ export class YaCAServerModule {
       player.voiceSettings.voiceRange,
     );
 
-    if (player.voicePlugin) player.voicePlugin.range = range;
+    if (player.voicePlugin) {
+      player.voicePlugin.range = range;
+    }
   }
 
   /**
@@ -530,7 +552,9 @@ export class YaCAServerModule {
    */
   addNewPlayer(src: number, clientId: number) {
     const player = this.players.get(src);
-    if (!player || !clientId) return;
+    if (!player || !clientId) {
+      return;
+    }
 
     player.voicePlugin = {
       clientId,
@@ -545,9 +569,13 @@ export class YaCAServerModule {
     const allPlayersData = [];
     for (const playerSource of getPlayers()) {
       const playerServer = this.players.get(parseInt(playerSource));
-      if (!playerServer) continue;
+      if (!playerServer) {
+        continue;
+      }
 
-      if (!playerServer.voicePlugin || parseInt(playerSource) === src) continue;
+      if (!playerServer.voicePlugin || parseInt(playerSource) === src) {
+        continue;
+      }
 
       allPlayersData.push(playerServer.voicePlugin);
     }

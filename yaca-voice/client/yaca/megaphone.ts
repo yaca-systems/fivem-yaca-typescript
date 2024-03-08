@@ -89,13 +89,19 @@ export class YaCAClientMegaphoneModule {
         __: number,
         replicated: boolean,
       ) => {
-        if (replicated) return;
+        if (replicated) {
+          return;
+        }
 
         const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId === 0) return;
+        if (playerId === 0) {
+          return;
+        }
 
         const playerSource = GetPlayerServerId(playerId);
-        if (playerSource === 0) return;
+        if (playerSource === 0) {
+          return;
+        }
 
         const isOwnPlayer = playerSource === cache.serverId;
         this.clientModule.setPlayersCommType(
@@ -121,8 +127,9 @@ export class YaCAClientMegaphoneModule {
       !cache.vehicle ||
       !this.canUseMegaphone ||
       state === this.lastMegaphoneState
-    )
+    ) {
       return;
+    }
 
     this.lastMegaphoneState = !this.lastMegaphoneState;
     emitNet("server:yaca:useMegaphone", state);

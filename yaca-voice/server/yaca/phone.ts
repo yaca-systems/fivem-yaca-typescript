@@ -21,19 +21,25 @@ export class YaCAServerPhoneModle {
       "server:yaca:phoneSpeakerEmit",
       (enableForTargets?: number[], disableForTargets?: number[]) => {
         const player = this.serverModule.players.get(source);
-        if (!player) return;
+        if (!player) {
+          return;
+        }
 
-        const enableWhisperReceive: number[] = [];
-        const disableWhisperReceive: number[] = [];
+        const enableWhisperReceive: number[] = [],
+          disableWhisperReceive: number[] = [];
 
         player.voiceSettings.inCallWith.forEach((callTarget) => {
           const target = this.serverModule.players.get(callTarget);
-          if (!target) return;
+          if (!target) {
+            return;
+          }
 
-          if (enableForTargets?.includes(callTarget))
+          if (enableForTargets?.includes(callTarget)) {
             enableWhisperReceive.push(callTarget);
-          if (disableForTargets?.includes(callTarget))
+          }
+          if (disableForTargets?.includes(callTarget)) {
             disableWhisperReceive.push(callTarget);
+          }
         });
 
         if (enableWhisperReceive.length) {
@@ -114,11 +120,12 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the call.
    */
   callPlayer(src: number, target: number, state: boolean) {
-    const players = this.serverModule.getPlayers();
-
-    const player = players.get(src);
-    const targetPlayer = players.get(target);
-    if (!player || !targetPlayer) return;
+    const players = this.serverModule.getPlayers(),
+      player = players.get(src),
+      targetPlayer = players.get(target);
+    if (!player || !targetPlayer) {
+      return;
+    }
 
     emitNet("client:yaca:phone", target, src, state);
     emitNet("client:yaca:phone", src, target, state);
@@ -129,7 +136,9 @@ export class YaCAServerPhoneModle {
       player.voiceSettings.inCallWith.push(target);
       targetPlayer.voiceSettings.inCallWith.push(src);
 
-      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, true);
+      if (playerState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(src, true);
+      }
     } else {
       this.muteOnPhone(src, false, true);
       this.muteOnPhone(target, false, true);
@@ -140,7 +149,9 @@ export class YaCAServerPhoneModle {
       targetPlayer.voiceSettings.inCallWith =
         targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
 
-      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, false);
+      if (playerState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(src, false);
+      }
     }
 
     emit("yaca:external:phoneCall", src, target, state);
@@ -154,11 +165,12 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the call.
    */
   callPlayerOldEffect(src: number, target: number, state: boolean) {
-    const players = this.serverModule.getPlayers();
-
-    const player = players.get(src);
-    const targetPlayer = players.get(target);
-    if (!player || !targetPlayer) return;
+    const players = this.serverModule.getPlayers(),
+      player = players.get(src),
+      targetPlayer = players.get(target);
+    if (!player || !targetPlayer) {
+      return;
+    }
 
     emitNet("client:yaca:phoneOld", target, src, state);
     emitNet("client:yaca:phoneOld", src, target, state);
@@ -169,18 +181,22 @@ export class YaCAServerPhoneModle {
       player.voiceSettings.inCallWith.push(target);
       targetPlayer.voiceSettings.inCallWith.push(src);
 
-      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, true);
+      if (playerState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(src, true);
+      }
     } else {
       this.muteOnPhone(src, false, true);
       this.muteOnPhone(target, false, true);
 
       player.voiceSettings.inCallWith = player.voiceSettings.inCallWith.filter(
-        (id) => id !== target,
+        (id: number) => id !== target,
       );
       targetPlayer.voiceSettings.inCallWith =
         targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
 
-      if (playerState["yaca:phoneSpeaker"]) this.enablePhoneSpeaker(src, false);
+      if (playerState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(src, false);
+      }
     }
 
     emit("yaca:external:phoneCallOldEffect", src, target, state);
@@ -194,10 +210,11 @@ export class YaCAServerPhoneModle {
    * @param {boolean} [onCallStop=false] - Whether the call has stopped. Defaults to false if not provided.
    */
   muteOnPhone(src: number, state: boolean, onCallStop = false) {
-    const players = this.serverModule.getPlayers();
-
-    const player = players.get(src);
-    if (!player) return;
+    const players = this.serverModule.getPlayers(),
+      player = players.get(src);
+    if (!player) {
+      return;
+    }
 
     player.voiceSettings.mutedOnPhone = state;
     emitNet("client:yaca:phoneMute", -1, src, state, onCallStop);
@@ -211,10 +228,11 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the phone speaker.
    */
   enablePhoneSpeaker(src: number, state: boolean) {
-    const players = this.serverModule.getPlayers();
-
-    const player = players.get(src);
-    if (!player) return;
+    const players = this.serverModule.getPlayers(),
+      player = players.get(src);
+    if (!player) {
+      return;
+    }
 
     const playerState = Player(src).state;
 

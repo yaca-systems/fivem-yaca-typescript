@@ -3,9 +3,9 @@ export function calculateDistanceVec3(
   secondPoint: number[],
 ) {
   return Math.sqrt(
-    Math.pow(firstPoint[0] - secondPoint[0], 2) +
-      Math.pow(firstPoint[1] - secondPoint[1], 2) +
-      Math.pow(firstPoint[2] - secondPoint[2], 2),
+    (firstPoint[0] - secondPoint[0]) ** 2 +
+      (firstPoint[1] - secondPoint[1]) ** 2 +
+      (firstPoint[2] - secondPoint[2]) ** 2,
   );
 }
 
@@ -14,8 +14,8 @@ export function calculateDistanceVec2(
   secondPoint: number[],
 ) {
   return Math.sqrt(
-    Math.pow(firstPoint[0] - secondPoint[0], 2) +
-      Math.pow(firstPoint[1] - secondPoint[1], 2),
+    (firstPoint[0] - secondPoint[0]) ** 2 +
+      (firstPoint[1] - secondPoint[1]) ** 2,
   );
 }
 

@@ -83,6 +83,8 @@ $(function () {
         case "close":
           if (webSocket) webSocket.close();
           break;
+          default:
+            break;
       }
     },
     false,
