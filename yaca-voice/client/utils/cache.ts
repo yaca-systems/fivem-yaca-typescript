@@ -2,6 +2,9 @@ import { ClientCache } from "types";
 
 const playerId = PlayerId();
 
+/**
+ * Cached values for the client.
+ */
 const cache: ClientCache = new Proxy(
   {
     serverId: GetPlayerServerId(playerId),
@@ -26,6 +29,10 @@ const cache: ClientCache = new Proxy(
   },
 );
 
+/**
+ * Initializes the cache.
+ * This function will update the cache every 100ms.
+ */
 function initCache() {
   const updateCache = () => {
     const ped = PlayerPedId();
@@ -59,6 +66,12 @@ function initCache() {
   updateCache();
 }
 
+/**
+ * Listen for cache updates.
+ *
+ * @param key - The cache key to listen for.
+ * @param cb - The callback to execute when the cache updates.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const onCache = <T = any>(
   key: keyof ClientCache,

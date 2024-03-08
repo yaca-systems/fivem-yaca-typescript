@@ -1,8 +1,16 @@
 import { YaCAServerModule } from "yaca";
 
+/**
+ * The phone module for the server.
+ */
 export class YaCAServerPhoneModle {
   private serverModule: YaCAServerModule;
 
+  /**
+   * Creates an instance of the phone module.
+   *
+   * @param {YaCAServerModule} serverModule - The server module.
+   */
   constructor(serverModule: YaCAServerModule) {
     this.serverModule = serverModule;
 
@@ -10,6 +18,9 @@ export class YaCAServerPhoneModle {
     this.registerExports();
   }
 
+  /**
+   * Register server events.
+   */
   registerEvents() {
     /**
      * Handles the "server:yaca:phoneSpeakerEmit" event.

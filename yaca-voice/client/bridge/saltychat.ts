@@ -3,12 +3,21 @@ import { YacaResponseCode } from "types";
 import { cache } from "../utils";
 import { sleep } from "common/index";
 import { locale } from "common/locale";
+import { saltyChatExport } from "common/bridge";
 
+/**
+ * The SaltyChat bridge for the client.
+ */
 export class YaCAClientSaltyChatBridge {
   private clientModule: YaCAClientModule;
 
   private prevPluginState: YacaResponseCode | null = null;
 
+  /**
+   * Creates an instance of the SaltyChat bridge.
+   *
+   * @param {YaCAClientModule} clientModule - The client module.
+   */
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 
@@ -27,17 +36,9 @@ export class YaCAClientSaltyChatBridge {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  saltyChatExport(method: string, cb: (...args: any[]) => void) {
-    on(
-      `__cfx_export_saltychat_${method}`,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (setCb: (...args: any[]) => void) => {
-        setCb(cb);
-      },
-    );
-  }
-
+  /**
+   * Enables the radio on bridge load.
+   */
   async enableRadio() {
     while (!this.clientModule.isPluginInitialized(true)) {
       await sleep(1000);
@@ -46,6 +47,9 @@ export class YaCAClientSaltyChatBridge {
     this.clientModule.radioModule.enableRadio(true);
   }
 
+  /**
+   * Register SaltyChat key binds.
+   */
   registerSaltyChatKeyBinds() {
     RegisterCommand(
       "+primaryRadio",
@@ -92,31 +96,34 @@ export class YaCAClientSaltyChatBridge {
     );
   }
 
+  /**
+   * Register SaltyChat exports.
+   */
   registerSaltyChatExports() {
-    this.saltyChatExport("y", () => this.clientModule.getVoiceRange());
+    saltyChatExport("y", () => this.clientModule.getVoiceRange());
 
-    this.saltyChatExport("GetRadioChannel", (primary: boolean) => {
+    saltyChatExport("GetRadioChannel", (primary: boolean) => {
       const channel = primary ? 1 : 2;
       return this.clientModule.radioModule.radioChannelSettings[channel]
         .frequency;
     });
 
-    this.saltyChatExport(
+    saltyChatExport(
       "GetRadioVolume",
       () => this.clientModule.radioModule.radioChannelSettings[1].volume,
     );
 
-    this.saltyChatExport("GetRadioSpeaker", () => {
+    saltyChatExport("GetRadioSpeaker", () => {
       console.warn("GetRadioSpeaker is not implemented in YaCA");
       return false;
     });
 
-    this.saltyChatExport("GetMicClick", () => {
+    saltyChatExport("GetMicClick", () => {
       console.warn("GetMicClick is not implemented in YaCA");
       return false;
     });
 
-    this.saltyChatExport(
+    saltyChatExport(
       "SetRadioChannel",
       (radioChannelName: string, primary: boolean) => {
         const channel = primary ? 1 : 2;
@@ -127,20 +134,25 @@ export class YaCAClientSaltyChatBridge {
       },
     );
 
-    this.saltyChatExport("SetRadioVolume", (volume: number) => {
+    saltyChatExport("SetRadioVolume", (volume: number) => {
       this.clientModule.radioModule.changeRadioChannelVolumeRaw(1, volume);
       this.clientModule.radioModule.changeRadioChannelVolumeRaw(2, volume);
     });
 
-    this.saltyChatExport("SetRadioSpeaker", () => {
+    saltyChatExport("SetRadioSpeaker", () => {
       console.warn("SetRadioSpeaker is not implemented in YaCA");
     });
 
-    this.saltyChatExport("SetMicClick", () => {
+    saltyChatExport("SetMicClick", () => {
       console.warn("SetMicClick is not implemented in YaCA");
     });
   }
 
+  /**
+   * Handles the plugin state change.
+   *
+   * @param response - The last response code.
+   */
   handleChangePluginState(response: YacaResponseCode) {
     if (this.prevPluginState === response) {
       return;
@@ -168,6 +180,9 @@ export class YaCAClientSaltyChatBridge {
     emit("SaltyChat_PluginStateChanged", state);
   }
 
+  /**
+   * Handles the websocket disconnect.
+   */
   handleDisconnectState() {
     this.prevPluginState = null;
     emit("SaltyChat_PluginStateChanged", -1);

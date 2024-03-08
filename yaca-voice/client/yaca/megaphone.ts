@@ -3,13 +3,20 @@ import { CommDeviceMode, YacaFilterEnum } from "types";
 import { locale } from "common/locale";
 import { cache, onCache } from "utils";
 
-/* ======================== MEGAPHONE SYSTEM ======================== */
+/**
+ * The megaphone module for the client.
+ */
 export class YaCAClientMegaphoneModule {
   clientModule: YaCAClientModule;
 
   canUseMegaphone = false;
   lastMegaphoneState = false;
 
+  /**
+   * Creates an instance of the megaphone module.
+   *
+   * @param clientModule - The client module.
+   */
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 
@@ -49,6 +56,9 @@ export class YaCAClientMegaphoneModule {
     });
   }
 
+  /**
+   * Registers the command and key mapping for the megaphone.
+   */
   registerKeybinds() {
     /**
      * Registers the command and key mapping for the megaphone.

@@ -1,6 +1,9 @@
 import { YaCAServerModule } from "yaca";
 import type { YacaServerConfig, YacaSharedConfig } from "types";
 
+/**
+ * The server-side radio module.
+ */
 export class YaCAServerRadioModule {
   private serverModule: YaCAServerModule;
   private sharedConfig: YacaSharedConfig;
@@ -8,6 +11,11 @@ export class YaCAServerRadioModule {
 
   radioFrequencyMap = new Map();
 
+  /**
+   * Creates an instance of the radio module.
+   *
+   * @param {YaCAServerModule} serverModule - The server module.
+   */
   constructor(serverModule: YaCAServerModule) {
     this.serverModule = serverModule;
     this.sharedConfig = serverModule.sharedConfig;
@@ -17,6 +25,9 @@ export class YaCAServerRadioModule {
     this.registerExports();
   }
 
+  /**
+   * Register server events.
+   */
   registerEvents() {
     /**
      * Handles the "server:yaca:enableRadio" server event.
@@ -68,6 +79,9 @@ export class YaCAServerRadioModule {
     });
   }
 
+  /**
+   * Register server exports.
+   */
   registerExports() {
     /**
      * Get all players in a radio frequency.
@@ -139,7 +153,7 @@ export class YaCAServerRadioModule {
   getPlayerHasLongRange(src: number) {
     const player = this.serverModule.getPlayers().get(src);
     if (!player) {
-      return;
+      return false;
     }
 
     return player.radioSettings.hasLong;

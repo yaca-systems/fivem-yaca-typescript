@@ -1,5 +1,8 @@
 let webSocket = null;
 
+/**
+ * Connect to the YaCA voice plugin
+ */
 function connect() {
   console.log("[YaCA-Websocket] Trying to Connect to YaCA WebSocket...");
 
@@ -33,6 +36,11 @@ function connect() {
   };
 }
 
+/**
+ * Send a command to the YaCA voice plugin
+ *
+ * @param command - The command to send as a object
+ */
 function runCommand(command) {
   if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
     return;
@@ -41,6 +49,12 @@ function runCommand(command) {
   webSocket.send(JSON.stringify(command));
 }
 
+/**
+ * Send a NUI message to the client
+ *
+ * @param event - The name of the callback
+ * @param data - The data to send
+ */
 function sendNuiData(event, data = {}) {
   fetch(`https://${GetParentResourceName()}/${event}`, {
     method: "POST",

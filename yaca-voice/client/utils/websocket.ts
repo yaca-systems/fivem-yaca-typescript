@@ -1,11 +1,17 @@
 import { EventEmitter } from "events";
 import { sleep } from "common/index";
 
+/**
+ * The WebSocket class handles the communication between the nui and the client.
+ */
 export class WebSocket extends EventEmitter {
   public readyState = 0;
   nuiReady = false;
   initialized = false;
 
+  /**
+   * Creates an instance of the WebSocket class.
+   */
   constructor() {
     super();
 
@@ -40,6 +46,9 @@ export class WebSocket extends EventEmitter {
     );
   }
 
+  /**
+   * Sends the message to the nui that the websocket should connect.
+   */
   async start() {
     while (!this.nuiReady) {
       await sleep(100);
@@ -52,6 +61,11 @@ export class WebSocket extends EventEmitter {
     );
   }
 
+  /**
+   * Sends the message to the nui that the websocket should disconnect.
+   *
+   * @param data - The data to send.
+   */
   send(data: object) {
     if (this.readyState !== 1) {
       return;
@@ -65,6 +79,9 @@ export class WebSocket extends EventEmitter {
     SendNuiMessage(nuiMessage);
   }
 
+  /**
+   * Sends the message to the nui that the websocket should disconnect.
+   */
   close() {
     if (this.readyState === 3) {
       return;

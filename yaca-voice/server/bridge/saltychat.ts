@@ -1,11 +1,20 @@
 import { YaCAServerModule } from "../yaca";
 import { cache } from "../utils";
+import { saltyChatExport } from "common/bridge";
 
+/**
+ * The SaltyChat bridge for the server.
+ */
 export class YaCAServerSaltyChatBridge {
   serverModule: YaCAServerModule;
 
   callMap: Map<string, number[]> = new Map();
 
+  /**
+   * Creates an instance of the SaltyChat bridge.
+   *
+   * @param {YaCAServerModule} serverModule - The server module.
+   */
   constructor(serverModule: YaCAServerModule) {
     this.serverModule = serverModule;
 
@@ -22,81 +31,71 @@ export class YaCAServerSaltyChatBridge {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  saltyChatExport(method: string, cb: (...args: any[]) => void) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    on(`__cfx_export_saltychat_${method}`, (setCb: (...args: any[]) => void) =>
-      setCb(cb),
-    );
-  }
-
+  /**
+   * Register SaltyChat events.
+   */
   registerSaltyChatEvents() {
-    this.saltyChatExport("GetPlayerAlive", (netId: number) => {
+    saltyChatExport("GetPlayerAlive", (netId: number) => {
       this.serverModule.getPlayerAliveStatus(netId);
     });
 
-    this.saltyChatExport(
-      "SetPlayerAlive",
-      (netId: number, isAlive: boolean) => {
-        this.serverModule.changePlayerAliveStatus(netId, isAlive);
-      },
-    );
+    saltyChatExport("SetPlayerAlive", (netId: number, isAlive: boolean) => {
+      this.serverModule.changePlayerAliveStatus(netId, isAlive);
+    });
 
-    this.saltyChatExport("GetPlayerVoiceRange", (netId: number) => {
+    saltyChatExport("GetPlayerVoiceRange", (netId: number) => {
       this.serverModule.getPlayerVoiceRange(netId);
     });
 
-    this.saltyChatExport(
+    saltyChatExport(
       "SetPlayerVoiceRange",
       (netId: number, voiceRange: number) => {
         this.serverModule.changeVoiceRange(netId, voiceRange);
       },
     );
 
-    this.saltyChatExport(
+    saltyChatExport(
       "AddPlayerToCall",
       (callIdentifier: string, playerHandle: number) =>
         this.addPlayerToCall(callIdentifier, playerHandle),
     );
 
-    this.saltyChatExport(
+    saltyChatExport(
       "AddPlayersToCall",
       (callIdentifier: string, playerHandles: number[]) =>
         this.addPlayerToCall(callIdentifier, playerHandles),
     );
 
-    this.saltyChatExport(
+    saltyChatExport(
       "RemovePlayerFromCall",
       (callIdentifier: string, playerHandle: number) =>
         this.removePlayerFromCall(callIdentifier, playerHandle),
     );
 
-    this.saltyChatExport(
+    saltyChatExport(
       "RemovePlayersFromCall",
       (callIdentifier: string, playerHandles: number[]) =>
         this.removePlayerFromCall(callIdentifier, playerHandles),
     );
 
-    this.saltyChatExport(
+    saltyChatExport(
       "SetPhoneSpeaker",
       (playerHandle: number, toggle: boolean) => {
         this.serverModule.phoneModule.enablePhoneSpeaker(playerHandle, toggle);
       },
     );
 
-    this.saltyChatExport("SetPlayerRadioSpeaker", () => {
+    saltyChatExport("SetPlayerRadioSpeaker", () => {
       console.warn("SetPlayerRadioSpeaker is not implemented in YaCA");
     });
 
-    this.saltyChatExport(
-      "GetPlayersInRadioChannel",
-      (radioChannelName: string) =>
-        this.serverModule.radioModule.getPlayersInRadioFrequency(
-          radioChannelName,
-        ),
+    saltyChatExport("GetPlayersInRadioChannel", (radioChannelName: string) =>
+      this.serverModule.radioModule.getPlayersInRadioFrequency(
+        radioChannelName,
+      ),
     );
 
-    this.saltyChatExport(
+    saltyChatExport(
       "SetPlayerRadioChannel",
       (netId: number, radioChannelName: string, primary = true) => {
         const channel = primary ? 1 : 2;
@@ -108,7 +107,7 @@ export class YaCAServerSaltyChatBridge {
       },
     );
 
-    this.saltyChatExport(
+    saltyChatExport(
       "RemovePlayerRadioChannel",
       (netId: number, primary: boolean) => {
         const channel = primary ? 1 : 2;
@@ -116,11 +115,17 @@ export class YaCAServerSaltyChatBridge {
       },
     );
 
-    this.saltyChatExport("SetRadioTowers", () => {
+    saltyChatExport("SetRadioTowers", () => {
       console.warn("SetRadioTowers is not implemented in YaCA");
     });
   }
 
+  /**
+   * Add a player to a call.
+   *
+   * @param callIdentifier - The call identifier.
+   * @param playerHandle - The player handles.
+   */
   addPlayerToCall(callIdentifier: string, playerHandle: number | number[]) {
     if (!Array.isArray(playerHandle)) {
       playerHandle = [playerHandle];
@@ -139,6 +144,12 @@ export class YaCAServerSaltyChatBridge {
     }
   }
 
+  /**
+   * Remove a player from a call.
+   *
+   * @param callIdentifier - The call identifier.
+   * @param playerHandle - The player handles.
+   */
   removePlayerFromCall(
     callIdentifier: string,
     playerHandle: number | number[],
