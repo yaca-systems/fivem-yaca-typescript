@@ -41,7 +41,7 @@ export const initLocale = (configLocale: string) => {
             locales = JSON.parse(LoadResourceFile(resourceName, 'locales/en.json'));
 
             if (!locales) {
-                console.warn(`could not load 'locales/en.json'`);
+                console.warn("could not load 'locales/en.json'");
             }
         }
 
