@@ -60,14 +60,7 @@ export class YaCAClientModule {
   currentlyPhoneSpeakerApplied: Set<number> = new Set();
   currentlySendingPhoneSpeakerSender: Set<number> = new Set();
 
-  responseCodesToErrorMessages: { [key: string]: string | undefined } = {
-    OUTDATED_VERSION: locale("outdated_version"),
-    WRONG_TS_SERVER: locale("wrong_ts_server"),
-    NOT_CONNECTED: locale("not_connected"),
-    MOVE_ERROR: locale("move_error"),
-    WAIT_GAME_INIT: "",
-    HEARTBEAT: "",
-  };
+  responseCodesToErrorMessages: { [key: string]: string | undefined };
 
   /**
    * Sends a radar notification.
@@ -100,6 +93,15 @@ export class YaCAClientModule {
       LoadResourceFile(cache.resource, "config/shared.json"),
     );
     initLocale(this.sharedConfig.locale);
+
+    this.responseCodesToErrorMessages = {
+      OUTDATED_VERSION: locale("outdated_version"),
+      WRONG_TS_SERVER: locale("wrong_ts_server"),
+      NOT_CONNECTED: locale("not_connected"),
+      MOVE_ERROR: locale("move_error"),
+      WAIT_GAME_INIT: "",
+      HEARTBEAT: "",
+    };
 
     this.websocket = new WebSocket();
 
@@ -822,7 +824,7 @@ export class YaCAClientModule {
 
       const playerPos = GetEntityCoords(playerPed, false),
         playerDirection = GetEntityForwardVector(playerPed),
-        isUnderwater = IsPedSwimmingUnderWater(playerPed);
+        isUnderwater = Boolean(IsPedSwimmingUnderWater(playerPed));
 
       if (!playersOnPhoneSpeaker.has(remoteId)) {
         players.set(remoteId, {
@@ -868,7 +870,7 @@ export class YaCAClientModule {
             client_id: phoneCallMember.clientId,
             position: convertNumberArrayToXYZ(playerPos),
             direction: convertNumberArrayToXYZ(playerDirection),
-            range: this.sharedConfig.maxPhoneSpeakerRange,
+            range: this.sharedConfig.maxPhoneSpeakerRange ?? 5,
             is_underwater: isUnderwater,
             muffle_intensity: muffleIntensity,
             is_muted: false,
@@ -940,8 +942,8 @@ export class YaCAClientModule {
         player_direction: getCamDirection(),
         player_position: convertNumberArrayToXYZ(localPos),
         player_range: localData.range,
-        player_is_underwater: IsPedSwimmingUnderWater(cache.ped),
-        player_is_muted: localData.forceMuted,
+        player_is_underwater: Boolean(IsPedSwimmingUnderWater(cache.ped)),
+        player_is_muted: localData.forceMuted ?? false,
         players_list: Array.from(players.values()),
       },
     });

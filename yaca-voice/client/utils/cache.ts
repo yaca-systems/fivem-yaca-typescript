@@ -30,10 +30,12 @@ const cache: ClientCache = new Proxy(
 );
 
 /**
- * Initializes the cache.
- * This function will update the cache every 100ms.
+ * Initializes the cache and starts updating it.
  */
 function initCache() {
+  /**
+   * This function will update the cache every 100ms.
+   */
   const updateCache = () => {
     const ped = PlayerPedId();
     cache.ped = ped;
