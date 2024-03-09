@@ -176,11 +176,6 @@ export class YaCAServerModule {
    * Register all events for the YaCA module.
    */
   registerEvents() {
-    // FiveM: player joining
-    on("playerJoining", (src: number) => {
-      this.connectToVoice(src);
-    });
-
     // FiveM: player dropped
     on("playerDropped", () => {
       this.handlePlayerDisconnect(source);
