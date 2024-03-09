@@ -121,8 +121,8 @@ export class YaCAServerRadioModule {
      * @param {number} src - The player to set the long range radio for.
      * @param {boolean} state - The new state of the long range radio.
      */
-    exports("setPlayerHadLongRange", (src: number, state: boolean) =>
-      this.setPlayerHadLongRange(src, state),
+    exports("setPlayerHasLongRange", (src: number, state: boolean) =>
+      this.setPlayerHasLongRange(src, state),
     );
   }
 
@@ -165,7 +165,7 @@ export class YaCAServerRadioModule {
    * @param src - The player to set the long range radio for.
    * @param state - The new state of the long range radio.
    */
-  setPlayerHadLongRange(src: number, state: boolean) {
+  setPlayerHasLongRange(src: number, state: boolean) {
     const player = this.serverModule.getPlayers().get(src);
     if (!player) {
       return;
@@ -188,6 +188,11 @@ export class YaCAServerRadioModule {
     }
 
     player.radioSettings.activated = state;
+
+    if (this.serverModule.sharedConfig.saltyChatBridge) {
+      player.radioSettings.hasLong = true;
+    }
+
     emit("yaca:export:enabledRadio", src, state);
   }
 
@@ -366,11 +371,8 @@ export class YaCAServerRadioModule {
   radioActiveChannelChange(src: number, channel: number) {
     const players = this.serverModule.getPlayers(),
       player = players.get(src);
-    if (!player) {
-      return;
-    }
-
     if (
+      !player ||
       isNaN(channel) ||
       channel < 1 ||
       channel > this.sharedConfig.maxRadioChannels
@@ -405,6 +407,7 @@ export class YaCAServerRadioModule {
     let targets = [];
     const targetsToSender = [],
       radioInfos: { [key: number]: { shortRange: boolean } } = {};
+
     for (const [key, values] of getPlayers) {
       if (values.muted) {
         if (key === src) {
@@ -417,6 +420,7 @@ export class YaCAServerRadioModule {
       if (key === src) {
         continue;
       }
+
       const target = players.get(key);
       if (!target || !target.radioSettings.activated) {
         continue;

@@ -201,7 +201,8 @@ export class YaCAClientRadioModule {
 
         const info = infos[cache.serverId];
         const playerCoords = GetEntityCoords(cache.ped, false);
-        const targetPed = GetPlayerPed(target);
+        const targetPlayer = GetPlayerFromServerId(target);
+        const targetPed = GetPlayerPed(targetPlayer);
         const targetCoords = GetEntityCoords(targetPed, false);
 
         if (
@@ -221,14 +222,14 @@ export class YaCAClientRadioModule {
           );
         }
 
-        state
-          ? this.playersInRadioChannel.get(channel)?.add(target)
-          : this.playersInRadioChannel.get(channel)?.delete(target);
-
-        if (info?.shortRange || !state) {
-          if (state) {
+        if (state) {
+          this.playersInRadioChannel.get(channel)?.add(target);
+          if (info?.shortRange) {
             this.playersWithShortRange.set(target, frequency);
-          } else {
+          }
+        } else {
+          this.playersInRadioChannel.get(channel)?.delete(target);
+          if (info?.shortRange) {
             this.playersWithShortRange.delete(target);
           }
         }
