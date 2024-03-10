@@ -223,6 +223,13 @@ export class YaCAClientRadioModule {
           }
 
           emit("yaca:external:isRadioReceiving", true, channel);
+
+          if (this.clientModule.sharedConfig.saltyChatBridge) {
+            this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(
+              true,
+              channel,
+            );
+          }
         } else {
           this.playersInRadioChannel.get(channel)?.delete(target);
           if (info?.shortRange) {
@@ -232,6 +239,13 @@ export class YaCAClientRadioModule {
           const inRadio = this.playersInRadioChannel.get(channel)?.size || 0;
           const state = inRadio > 0;
           emit("yaca:external:isRadioReceiving", state, channel);
+
+          if (this.clientModule.sharedConfig.saltyChatBridge) {
+            this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(
+              state,
+              channel,
+            );
+          }
         }
       },
     );
@@ -720,6 +734,13 @@ export class YaCAClientRadioModule {
           this.radioTalkingStateToPlugin(false);
         }
 
+        if (this.clientModule.sharedConfig.saltyChatBridge) {
+          this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(
+            false,
+            this.activeRadioChannel,
+          );
+        }
+
         emitNet("server:yaca:radioTalking", false);
         emit("yaca:external:isRadioTalking", false, this.activeRadioChannel);
 
@@ -754,6 +775,13 @@ export class YaCAClientRadioModule {
         false,
         false,
       );
+
+      if (this.clientModule.sharedConfig.saltyChatBridge) {
+        this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(
+          true,
+          this.activeRadioChannel,
+        );
+      }
 
       emitNet("server:yaca:radioTalking", true);
       emit("yaca:external:isRadioTalking", true, this.activeRadioChannel);

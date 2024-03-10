@@ -13,6 +13,12 @@ export class YaCAClientSaltyChatBridge {
 
   private prevPluginState: YacaResponseCode | null = null;
 
+  private isPrimarySending = false;
+  private isSecondarySending = false;
+
+  private isPrimaryReceiving = false;
+  private isSecondaryReceiving = false;
+
   /**
    * Creates an instance of the SaltyChat bridge.
    *
@@ -186,5 +192,50 @@ export class YaCAClientSaltyChatBridge {
   handleDisconnectState() {
     this.prevPluginState = null;
     emit("SaltyChat_PluginStateChanged", -1);
+  }
+
+  /**
+   * Sends the radio talking state.
+   */
+  sendRadioTalkingState() {
+    emit(
+      "SaltyChat_RadioTrafficStateChanged",
+      this.isPrimaryReceiving,
+      this.isPrimarySending,
+      this.isSecondaryReceiving,
+      this.isSecondarySending,
+    );
+  }
+
+  /**
+   * Handle radio talking state change.
+   *
+   * @param state - The state of the radio talking.
+   * @param channel - The radio channel.
+   */
+  handleRadioTalkingStateChange(state: boolean, channel: number) {
+    if (channel === 1) {
+      this.isPrimarySending = state;
+    } else {
+      this.isSecondarySending = state;
+    }
+
+    this.sendRadioTalkingState();
+  }
+
+  /**
+   * Handle radio receiving state change.
+   *
+   * @param state - The state of the radio receiving.
+   * @param channel - The radio channel.
+   */
+  handleRadioReceivingStateChange(state: boolean, channel: number) {
+    if (channel === 1) {
+      this.isPrimaryReceiving = state;
+    } else {
+      this.isSecondaryReceiving = state;
+    }
+
+    this.sendRadioTalkingState();
   }
 }
