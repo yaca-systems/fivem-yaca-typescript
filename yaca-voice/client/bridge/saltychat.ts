@@ -60,15 +60,14 @@ export class YaCAClientSaltyChatBridge {
     RegisterCommand(
       "+primaryRadio",
       () => {
-        this.clientModule.radioModule.changeActiveRadioChannel(1);
-        this.clientModule.radioModule.radioTalkingStart(true);
+        this.clientModule.radioModule.radioTalkingStart(true, 1);
       },
       false,
     );
     RegisterCommand(
       "-primaryRadio",
       () => {
-        this.clientModule.radioModule.radioTalkingStart(false);
+        this.clientModule.radioModule.radioTalkingStart(false, 1);
       },
       false,
     );
@@ -82,15 +81,14 @@ export class YaCAClientSaltyChatBridge {
     RegisterCommand(
       "+secondaryRadio",
       () => {
-        this.clientModule.radioModule.changeActiveRadioChannel(2);
-        this.clientModule.radioModule.radioTalkingStart(true);
+        this.clientModule.radioModule.radioTalkingStart(true, 2);
       },
       false,
     );
     RegisterCommand(
       "-secondaryRadio",
       () => {
-        this.clientModule.radioModule.radioTalkingStart(false);
+        this.clientModule.radioModule.radioTalkingStart(false, 2);
       },
       false,
     );

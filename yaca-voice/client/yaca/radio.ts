@@ -311,14 +311,14 @@ export class YaCAClientRadioModule {
     RegisterCommand(
       "+yaca:radioTalking",
       () => {
-        this.radioTalkingStart(true);
+        this.radioTalkingStart(true, this.activeRadioChannel);
       },
       false,
     );
     RegisterCommand(
       "-yaca:radioTalking",
       () => {
-        this.radioTalkingStart(false);
+        this.radioTalkingStart(false, this.activeRadioChannel);
       },
       false,
     );
@@ -724,9 +724,10 @@ export class YaCAClientRadioModule {
    * Starts the radio talking state.
    *
    * @param {boolean} state - The state of the radio talking.
+   * @param {number} channel - The radio channel.
    * @param {boolean} [clearPedTasks=true] - Whether to clear ped tasks. Defaults to true if not provided.
    */
-  radioTalkingStart(state: boolean, clearPedTasks = true) {
+  radioTalkingStart(state: boolean, channel: number, clearPedTasks = true) {
     if (!state) {
       if (this.radioTalking) {
         this.radioTalking = false;
@@ -737,12 +738,12 @@ export class YaCAClientRadioModule {
         if (this.clientModule.sharedConfig.saltyChatBridge) {
           this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(
             false,
-            this.activeRadioChannel,
+            channel,
           );
         }
 
         emitNet("server:yaca:radioTalking", false);
-        emit("yaca:external:isRadioTalking", false, this.activeRadioChannel);
+        emit("yaca:external:isRadioTalking", false, channel);
 
         if (clearPedTasks) {
           StopAnimTask(cache.ped, "random@arrests", "generic_radio_chatter", 4);
@@ -779,12 +780,12 @@ export class YaCAClientRadioModule {
       if (this.clientModule.sharedConfig.saltyChatBridge) {
         this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(
           true,
-          this.activeRadioChannel,
+          channel,
         );
       }
 
       emitNet("server:yaca:radioTalking", true);
-      emit("yaca:external:isRadioTalking", true, this.activeRadioChannel);
+      emit("yaca:external:isRadioTalking", true, channel);
     });
   }
 }
