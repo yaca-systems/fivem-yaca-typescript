@@ -721,7 +721,7 @@ export class YaCAClientRadioModule {
         }
 
         emitNet("server:yaca:radioTalking", false);
-        emit("yaca:external:isRadioTalking", false);
+        emit("yaca:external:isRadioTalking", false, this.activeRadioChannel);
 
         if (clearPedTasks) {
           StopAnimTask(cache.ped, "random@arrests", "generic_radio_chatter", 4);
@@ -756,7 +756,7 @@ export class YaCAClientRadioModule {
       );
 
       emitNet("server:yaca:radioTalking", true);
-      emit("yaca:external:isRadioTalking", true);
+      emit("yaca:external:isRadioTalking", true, this.activeRadioChannel);
     });
   }
 }
