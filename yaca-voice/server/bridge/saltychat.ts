@@ -118,6 +118,14 @@ export class YaCAServerSaltyChatBridge {
     saltyChatExport("SetRadioTowers", () => {
       console.warn("SetRadioTowers is not implemented in YaCA");
     });
+
+    saltyChatExport("EstablishCall", (callerId: number, targetId: number) => {
+      this.serverModule.phoneModule.callPlayer(callerId, targetId, true);
+    });
+
+    saltyChatExport("EndCall", (callerId: number, targetId: number) => {
+      this.serverModule.phoneModule.callPlayer(callerId, targetId, false);
+    });
   }
 
   /**
