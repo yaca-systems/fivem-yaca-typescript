@@ -204,6 +204,46 @@ export class YaCAClientModule {
 
   registerEvents() {
     /**
+     * Handles the "yaca:client:playerEnteredScope" server event.
+     *
+     * @param {number} target - The ID of the target.
+     */
+    onNet("yaca:client:playerEnteredScope", (target: number) => {
+      const player = this.getPlayerByID(target);
+      if (!player) {
+        return;
+      }
+
+      const frequency = this.radioModule.playersWithShortRange.get(target);
+      if (frequency) {
+        const channel = this.radioModule.findRadioChannelByFrequency(frequency);
+        if (channel) {
+          this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+        }
+      }
+    })
+
+    /**
+     * Handles the "yaca:client:playerLeftScope" server event.
+     *
+     * @param {number} target - The ID of the target.
+     */
+    onNet("yaca:client:playerLeftScope", (target: number) => {
+      const player = this.getPlayerByID(target);
+      if (!player) {
+        return;
+      }
+
+      const frequency = this.radioModule.playersWithShortRange.get(target);
+      if (frequency) {
+        const channel = this.radioModule.findRadioChannelByFrequency(frequency);
+        if (channel) {
+          this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+        }
+      }
+    })
+
+    /**
      * Handles the "onClientResourceStart" event.
      *
      * @param {string} resourceName - The name of the resource that has started.
