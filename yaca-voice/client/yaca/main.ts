@@ -218,10 +218,18 @@ export class YaCAClientModule {
       if (frequency) {
         const channel = this.radioModule.findRadioChannelByFrequency(frequency);
         if (channel) {
-          this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+          this.setPlayersCommType(
+            player,
+            YacaFilterEnum.RADIO,
+            true,
+            channel,
+            undefined,
+            CommDeviceMode.RECEIVER,
+            CommDeviceMode.SENDER,
+          );
         }
       }
-    })
+    });
 
     /**
      * Handles the "yaca:client:playerLeftScope" server event.
@@ -238,10 +246,18 @@ export class YaCAClientModule {
       if (frequency) {
         const channel = this.radioModule.findRadioChannelByFrequency(frequency);
         if (channel) {
-          this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+          this.setPlayersCommType(
+            player,
+            YacaFilterEnum.RADIO,
+            false,
+            channel,
+            undefined,
+            CommDeviceMode.RECEIVER,
+            CommDeviceMode.SENDER,
+          );
         }
       }
-    })
+    });
 
     /**
      * Handles the "onClientResourceStart" event.

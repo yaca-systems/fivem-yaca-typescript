@@ -177,28 +177,32 @@ export class YaCAServerModule {
    */
   registerEvents() {
     /* FiveM: player enters scope */
-    on('playerEnteredScope', (data: { for: string; player: string }) => {
-      const player = this.players.get(parseInt(data.for))
+    on("playerEnteredScope", (data: { for: string; player: string }) => {
+      const player = this.players.get(parseInt(data.for));
       if (!player) {
-        return
+        return;
       }
 
       if (player.radioSettings.activated) {
-        emitNet('yaca:client:playerEnteredScope', data.for, parseInt(data.player))
+        emitNet(
+          "yaca:client:playerEnteredScope",
+          data.for,
+          parseInt(data.player),
+        );
       }
-    })
+    });
 
     /* FiveM: player leaves scope */
-    on('playerLeftScope', (data: { for: string; player: string }) => {
-      const player = this.players.get(parseInt(data.for))
+    on("playerLeftScope", (data: { for: string; player: string }) => {
+      const player = this.players.get(parseInt(data.for));
       if (!player) {
-        return
+        return;
       }
 
       if (player.radioSettings.activated) {
-        emitNet('yaca:client:playerLeftScope', data.for, parseInt(data.player))
+        emitNet("yaca:client:playerLeftScope", data.for, parseInt(data.player));
       }
-    })
+    });
 
     // FiveM: player dropped
     on("playerDropped", () => {
