@@ -95,7 +95,7 @@ export class YaCAClientModule {
     initLocale(this.sharedConfig.locale);
 
     this.responseCodesToErrorMessages = {
-      OUTDATED_VERSION: locale("outdated_version"),
+      OUTDATED_VERSION: locale("outdated_plugin"),
       WRONG_TS_SERVER: locale("wrong_ts_server"),
       NOT_CONNECTED: locale("not_connected"),
       MOVE_ERROR: locale("move_error"),
@@ -427,6 +427,19 @@ export class YaCAClientModule {
         player.range = range;
       }
     });
+
+    /**
+     * Handles the "client:yaca:notification" server event.
+     *
+     * @param {string} message - The message to be sent in the notification.
+     * @param {YacaNotificationType} type - The type of the notification, e.g. error, inform, success.
+     */
+    onNet(
+      "client:yaca:notification",
+      (message: string, type: YacaNotificationType) => {
+        this.notification(message, type);
+      },
+    );
   }
 
   /**

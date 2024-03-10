@@ -19,5 +19,8 @@
   "use_salty_primary_radio": "Use primary radio",
   "use_salty_secondary_radio": "Use secondary radio",
 
-  "change_voice_range": "Change voice range"
+  "change_voice_range": "Change voice range",
+
+  "radio_not_activated": "Your radio is not activated!",
+  "radio_channel_invalid": "The radio channel is invalid!"
 }
