@@ -221,11 +221,17 @@ export class YaCAClientRadioModule {
           if (info?.shortRange) {
             this.playersWithShortRange.set(target, frequency);
           }
+
+          emit("yaca:external:isRadioReceiving", true, channel);
         } else {
           this.playersInRadioChannel.get(channel)?.delete(target);
           if (info?.shortRange) {
             this.playersWithShortRange.delete(target);
           }
+
+          const inRadio = this.playersInRadioChannel.get(channel)?.size || 0;
+          const state = inRadio > 0;
+          emit("yaca:external:isRadioReceiving", state, channel);
         }
       },
     );
