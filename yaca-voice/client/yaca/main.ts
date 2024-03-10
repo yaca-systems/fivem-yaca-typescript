@@ -227,6 +227,13 @@ export class YaCAClientModule {
             CommDeviceMode.RECEIVER,
             CommDeviceMode.SENDER,
           );
+
+          if (this.sharedConfig.saltyChatBridge) {
+            this.saltyChatBridge?.handleRadioReceivingStateChange(
+              true,
+              channel,
+            );
+          }
         }
       }
     });
@@ -255,6 +262,18 @@ export class YaCAClientModule {
             CommDeviceMode.RECEIVER,
             CommDeviceMode.SENDER,
           );
+
+          if (this.sharedConfig.saltyChatBridge) {
+            const inRadio = this.radioModule.playersInRadioChannel.get(channel);
+            if (inRadio) {
+              const inRadioArray = [...inRadio].filter((id) => id !== target);
+              const state = inRadioArray.length > 0;
+              this.saltyChatBridge?.handleRadioReceivingStateChange(
+                state,
+                channel,
+              );
+            }
+          }
         }
       }
     });
