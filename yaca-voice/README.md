@@ -360,6 +360,15 @@ The event is triggered when a player starts or stops talking on the radio.
 |-----------|--------|-----------------------|
 | state     | `bool` | the new talking state |
 
+### yaca:external:isRadioReceiving
+
+The event is triggered when a player starts or stops receiving on the radio.
+
+| Parameter | Type     | Description                                    |
+|-----------|----------|------------------------------------------------|
+| state     | `bool`   | the new receiver state                         |
+| channel   | `number` | the channel from which the player is receiving |
+
 </details>
 
 <details>
