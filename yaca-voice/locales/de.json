@@ -19,5 +19,8 @@
   "use_salty_primary_radio": "Primäres Funkgerät benutzen",
   "use_salty_secondary_radio": "Sekundäres Funkgerät benutzen",
 
-  "change_voice_range": "Sprachreichweite ändern"
+  "change_voice_range": "Sprachreichweite ändern",
+
+  "radio_not_activated": "Das Funkgerät ist nicht aktiviert!",
+  "radio_channel_invalid": "Ungültiger Funkkanal!"
 }

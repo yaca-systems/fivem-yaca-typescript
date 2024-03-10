@@ -1,5 +1,10 @@
 import { YaCAServerModule } from "yaca";
-import type { YacaServerConfig, YacaSharedConfig } from "types";
+import {
+  YacaNotificationType,
+  YacaServerConfig,
+  YacaSharedConfig,
+} from "types";
+import { locale } from "common/locale";
 
 /**
  * The server-side radio module.
@@ -211,10 +216,12 @@ export class YaCAServerRadioModule {
     }
 
     if (!player.radioSettings.activated) {
-      emitNet("ox_lib:notify", src, {
-        type: "error",
-        description: "Das Funkgerät ist aus!",
-      });
+      emitNet(
+        "client:yaca:notification",
+        src,
+        locale("radio_not_activated"),
+        YacaNotificationType.ERROR,
+      );
       return;
     }
     if (
@@ -222,10 +229,12 @@ export class YaCAServerRadioModule {
       channel < 1 ||
       channel > this.sharedConfig.maxRadioChannels
     ) {
-      emitNet("ox_lib:notify", src, {
-        type: "error",
-        description: "Fehlerhafter Funk Kanal!",
-      });
+      emitNet(
+        "client:yaca:notification",
+        src,
+        locale("radio_channel_invalid"),
+        YacaNotificationType.ERROR,
+      );
       return;
     }
 
