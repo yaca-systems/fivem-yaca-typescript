@@ -6,7 +6,7 @@ import {
   type YacaRadioSettings,
   YacaStereoMode,
 } from "types";
-import { cache, calculateDistanceVec3, clamp, requestAnimDict } from "../utils";
+import { cache, clamp, requestAnimDict } from "../utils";
 import { locale } from "common/locale";
 
 /**
@@ -200,22 +200,10 @@ export class YaCAClientRadioModule {
         }
 
         const info = infos[cache.serverId];
-        const playerCoords = GetEntityCoords(cache.ped, false);
-        const targetPlayer = GetPlayerFromServerId(target);
-
-        let distance = -1;
-        if (targetPlayer !== -1) {
-          const targetPed = GetPlayerPed(targetPlayer);
-          const targetCoords = GetEntityCoords(targetPed, false);
-
-          distance = calculateDistanceVec3(targetCoords, playerCoords);
-        }
 
         if (
           !info?.shortRange ||
-          (info?.shortRange &&
-            distance !== -1 &&
-            distance <= this.clientModule.sharedConfig.shortRadioRange)
+          (info?.shortRange && GetPlayerFromServerId(target) !== -1)
         ) {
           this.clientModule.setPlayersCommType(
             player,
