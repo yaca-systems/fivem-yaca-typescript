@@ -73,8 +73,8 @@ export type ClientCache = {
   ped: number;
   vehicle: number | false;
   seat: number | false;
-}
+};
 
 export type ServerCache = {
   resource: string;
-}
+};

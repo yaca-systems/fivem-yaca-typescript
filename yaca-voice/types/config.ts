@@ -1,5 +1,8 @@
+import { YacaBuildType } from "./enums";
+
 export interface YacaSharedConfig {
   debug: boolean;
+  buildType: YacaBuildType;
   locale: string;
   mufflingRange: number;
   unmuteDelay: number;
@@ -22,13 +25,13 @@ export interface YacaSharedConfig {
   megaphone: {
     range: number;
     allowedVehicleClasses: number[];
-  }
+  };
   saltyChatBridge: {
     enabled: boolean;
     keyBinds: {
       primaryRadio: string;
       secondaryRadio: string;
-    }
+    };
   };
 }
 

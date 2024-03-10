@@ -24,7 +24,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 # Server Config
 
 | Variable              | Type       | Description                                                                                                            |
-|-----------------------|------------|------------------------------------------------------------------------------------------------------------------------|
+| --------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
 | uniqueServerId        | `string`   | The unique Server Identifier of the Teamspeak-Server                                                                   |
 | ingameChannelId       | `number`   | The ID of the Ingame Channel                                                                                           |
 | ingameChannelPassword | `string`   | The Password used to join the Ingame Channel                                                                           |
@@ -37,6 +37,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 | Variable                                | Type       | Description                                                                                                             |
 |-----------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------|
 | debug                                   | `bool`     | Enable the debug mode to enable some debug commands                                                                     |
+| buildType                               | `number`   | `0` for release and `1` for develop (develop allows using all yaca plugin version)                                      |
 | locale                                  | `string`   | The locale that should be used preferred                                                                                |
 | mufflingRange                           | `number`   | If set to -1, the player voice range is used, all values >= 0 sets the muffling range before it gets completely cut off |
 | unmuteDelay                             | `number`   | The time before the teamspeak client is being unmuted after joining the ingame channel.                                 |
@@ -77,7 +78,7 @@ Get all voice ranges as `int[]`.
 Enables or disables the radio system.
 
 | Parameter | Type   | Description                                    |
-|-----------|--------|------------------------------------------------|
+| --------- | ------ | ---------------------------------------------- |
 | state     | `bool` | `true` to enable the radio, `false` to disable |
 
 #### `changeRadioFrequency(frequency: string)`
@@ -85,7 +86,7 @@ Enables or disables the radio system.
 Changes the radio frequency of the active channel.
 
 | Parameter | Type     | Description                                |
-|-----------|----------|--------------------------------------------|
+| --------- | -------- | ------------------------------------------ |
 | frequency | `string` | The frequency to set the active channel to |
 
 #### `changeRadioFrequencyRaw(channel: number, frequency: string)`
@@ -93,7 +94,7 @@ Changes the radio frequency of the active channel.
 Changes the radio frequency.
 
 | Parameter | Type     | Description                         |
-|-----------|----------|-------------------------------------|
+| --------- | -------- | ----------------------------------- |
 | channel   | `number` | the channel number                  |
 | frequency | `string` | the frequency to set the channel to |
 
@@ -106,7 +107,7 @@ Mutes the current active radio channel.
 Mutes a radio channel.
 
 | Parameter | Type     | Description         |
-|-----------|----------|---------------------|
+| --------- | -------- | ------------------- |
 | channel   | `number` | the channel to mute |
 
 #### `changeActiveRadioChannel(channel: number)`
@@ -114,7 +115,7 @@ Mutes a radio channel.
 Changes the active radio channel.
 
 | Parameter | Type     | Description           |
-|-----------|----------|-----------------------|
+| --------- | -------- | --------------------- |
 | channel   | `number` | the new radio channel |
 
 #### `getActiveRadioChannel(): number`
@@ -126,7 +127,7 @@ Returns the active radio channel as `number`.
 Changes the volume of the active radio channel.
 
 | Parameter | Type   | Description                    |
-|-----------|--------|--------------------------------|
+| --------- | ------ | ------------------------------ |
 | higher    | `bool` | whether to increase the volume |
 
 #### `changeRadioChannelVolumeRaw(channel: number, volume: number)`
@@ -134,7 +135,7 @@ Changes the volume of the active radio channel.
 Changes the volume of a radio channel.
 
 | Parameter | Type     | Description        |
-|-----------|----------|--------------------|
+| --------- | -------- | ------------------ |
 | channel   | `number` | the channel number |
 | volume    | `number` | the volume to set  |
 
@@ -147,7 +148,7 @@ Changes the stereo mode of the active radio channel.
 Changes the stereo mode of a radio channel.
 
 | Parameter | Type     | Description                                                   |
-|-----------|----------|---------------------------------------------------------------|
+| --------- | -------- | ------------------------------------------------------------- |
 | channel   | `number` | the channel number                                            |
 | stereo    | `string` | the stereo mode (`"MONO_LEFT"`, `"MONO_RIGHT"` or `"STEREO"`) |
 
@@ -163,7 +164,7 @@ Changes the stereo mode of a radio channel.
 Get the alive status of a player as `bool`.
 
 | Parameter | Type     | Description       |
-|-----------|----------|-------------------|
+| --------- | -------- | ----------------- |
 | source    | `number` | the player source |
 
 #### `setPlayerAliveStatus(source: number, state: bool)`
@@ -171,7 +172,7 @@ Get the alive status of a player as `bool`.
 Set the alive status of a player.
 
 | Parameter | Type     | Description         |
-|-----------|----------|---------------------|
+| --------- | -------- | ------------------- |
 | source    | `number` | the player source   |
 | state     | `bool`   | the new alive state |
 
@@ -180,7 +181,7 @@ Set the alive status of a player.
 Get the voice range of a player as `number`.
 
 | Parameter | Type     | Description       |
-|-----------|----------|-------------------|
+| --------- | -------- | ----------------- |
 | source    | `number` | the player source |
 
 #### `setPlayerVoiceRange(source: number, range: number)`
@@ -188,7 +189,7 @@ Get the voice range of a player as `number`.
 Set the voice range of a player.
 
 | Parameter | Type     | Description         |
-|-----------|----------|---------------------|
+| --------- | -------- | ------------------- |
 | source    | `number` | the player source   |
 | range     | `number` | the new voice range |
 
@@ -199,7 +200,7 @@ Set the voice range of a player.
 Returns all players in a radio frequency as `int[]`.
 
 | Parameter | Type     | Description          |
-|-----------|----------|----------------------|
+| --------- | -------- | -------------------- |
 | frequency | `string` | the frequency to get |
 
 #### `setPlayerRadioChannel(source: number, channel: number, frequency: string)`
@@ -207,7 +208,7 @@ Returns all players in a radio frequency as `int[]`.
 Sets the radio channel of a player.
 
 | Parameter | Type     | Description          |
-|-----------|----------|----------------------|
+| --------- | -------- | -------------------- |
 | source    | `number` | the player source    |
 | channel   | `number` | the channel to set   |
 | frequency | `string` | the frequency to set |
@@ -217,7 +218,7 @@ Sets the radio channel of a player.
 Returns whether a player has long range enabled as `bool`.
 
 | Parameter | Type     | Description       |
-|-----------|----------|-------------------|
+| --------- | -------- | ----------------- |
 | source    | `number` | the player source |
 
 #### `setPlayerHasLongRange(source: number, state: bool)`
@@ -225,7 +226,7 @@ Returns whether a player has long range enabled as `bool`.
 Sets the long range state of a player.
 
 | Parameter | Type     | Description          |
-|-----------|----------|----------------------|
+| --------- | -------- | -------------------- |
 | source    | `number` | the player source    |
 | state     | `bool`   | the long range state |
 
@@ -236,7 +237,7 @@ Sets the long range state of a player.
 Creates a phone call between two players.
 
 | Parameter | Type     | Description              |
-|-----------|----------|--------------------------|
+| --------- | -------- | ------------------------ |
 | source    | `number` | the player source        |
 | target    | `number` | the target player source |
 | state     | `bool`   | the state of the call    |
@@ -246,7 +247,7 @@ Creates a phone call between two players.
 Creates a phone call between two players with the old effect.
 
 | Parameter | Type     | Description              |
-|-----------|----------|--------------------------|
+| --------- | -------- | ------------------------ |
 | source    | `number` | the player source        |
 | target    | `number` | the target player source |
 | state     | `bool`   | the state of the call    |
@@ -256,7 +257,7 @@ Creates a phone call between two players with the old effect.
 Mutes the player when using the phone.
 
 | Parameter | Type     | Description       |
-|-----------|----------|-------------------|
+| --------- | -------- | ----------------- |
 | source    | `number` | the player source |
 | state     | `bool`   | the mute state    |
 
@@ -265,7 +266,7 @@ Mutes the player when using the phone.
 Enable or disable the phone speaker for a player.
 
 | Parameter | Type     | Description             |
-|-----------|----------|-------------------------|
+| --------- | -------- | ----------------------- |
 | source    | `number` | the player source       |
 | state     | `bool`   | the phone speaker state |
 
@@ -281,7 +282,7 @@ Enable or disable the phone speaker for a player.
 This event is triggered when the voice range of a player is updated.
 
 | Parameter | Type  | Description               |
-|-----------|-------|---------------------------|
+| --------- | ----- | ------------------------- |
 | range     | `int` | the newly set voice range |
 
 ### yaca:external:isTalking
@@ -289,7 +290,7 @@ This event is triggered when the voice range of a player is updated.
 The event is triggered when a player starts or stops talking.
 
 | Parameter | Type   | Description           |
-|-----------|--------|-----------------------|
+| --------- | ------ | --------------------- |
 | state     | `bool` | the new talking state |
 
 ### yaca:external:megaphoneState
@@ -297,7 +298,7 @@ The event is triggered when a player starts or stops talking.
 The event is triggered when the megaphone state of a player changes.
 
 | Parameter | Type   | Description             |
-|-----------|--------|-------------------------|
+| --------- | ------ | ----------------------- |
 | state     | `bool` | the new megaphone state |
 
 ### yaca:external:setRadioMuteState
@@ -305,7 +306,7 @@ The event is triggered when the megaphone state of a player changes.
 The event is triggered when the radio mute state of a player changes.
 
 | Parameter | Type     | Description                                 |
-|-----------|----------|---------------------------------------------|
+| --------- | -------- | ------------------------------------------- |
 | channel   | `number` | the channel where the mute state is changed |
 | state     | `bool`   | the new mute state                          |
 
@@ -314,7 +315,7 @@ The event is triggered when the radio mute state of a player changes.
 The event is triggered when the radio state of a player changes.
 
 | Parameter | Type   | Description                                                          |
-|-----------|--------|----------------------------------------------------------------------|
+| --------- | ------ | -------------------------------------------------------------------- |
 | state     | `bool` | `true` when the radio is enabled, `false` when the radio is disabled |
 
 ### yaca:external:changedActiveRadioChannel
@@ -322,7 +323,7 @@ The event is triggered when the radio state of a player changes.
 The event is triggered when the active radio channel of a player changes.
 
 | Parameter | Type     | Description                  |
-|-----------|----------|------------------------------|
+| --------- | -------- | ---------------------------- |
 | channel   | `number` | the new active radio channel |
 
 ### yaca:external:setRadioVolume
@@ -330,7 +331,7 @@ The event is triggered when the active radio channel of a player changes.
 The event is triggered when the radio volume of a player changes.
 
 | Parameter | Type     | Description           |
-|-----------|----------|-----------------------|
+| --------- | -------- | --------------------- |
 | channel   | `number` | the channel to change |
 | volume    | `number` | the new volume to set |
 
@@ -339,7 +340,7 @@ The event is triggered when the radio volume of a player changes.
 The event is triggered when the stereo mode of a radio channel changes.
 
 | Parameter | Type     | Description                                                                                   |
-|-----------|----------|-----------------------------------------------------------------------------------------------|
+| --------- | -------- | --------------------------------------------------------------------------------------------- |
 | channel   | `number` | the channel to change                                                                         |
 | stereo    | `string` | `"MONO_LEFT"` for the left ear, `"MONO_RIGHT"` for the right ear and `"STEREO"` for both ears |
 
@@ -348,7 +349,7 @@ The event is triggered when the stereo mode of a radio channel changes.
 The event is triggered when the radio frequency of a player changes.
 
 | Parameter | Type     | Description          |
-|-----------|----------|----------------------|
+| --------- | -------- | -------------------- |
 | channel   | `number` | the channel to set   |
 | frequency | `string` | the frequency to set |
 
@@ -356,9 +357,19 @@ The event is triggered when the radio frequency of a player changes.
 
 The event is triggered when a player starts or stops talking on the radio.
 
-| Parameter | Type   | Description           |
-|-----------|--------|-----------------------|
-| state     | `bool` | the new talking state |
+| Parameter | Type     | Description                                |
+| --------- | -------- | ------------------------------------------ |
+| state     | `bool`   | the new talking state                      |
+| channel   | `number` | the channel where the player is talking at |
+
+### yaca:external:isRadioReceiving
+
+The event is triggered when a player starts or stops receiving on the radio.
+
+| Parameter | Type     | Description                                    |
+| --------- | -------- | ---------------------------------------------- |
+| state     | `bool`   | the new receiver state                         |
+| channel   | `number` | the channel from which the player is receiving |
 
 </details>
 
@@ -369,8 +380,8 @@ The event is triggered when a player starts or stops talking on the radio.
 
 The event is triggered when the megaphone state of a player changes.
 
-| Parameter | Type   | Description             |
-|-----------|--------|-------------------------|
+| Parametr | Type   | Description             |
+| --------- | ------ | ----------------------- |
 | source    | `int`  | the player source       |
 | state     | `bool` | the new megaphone state |
 
@@ -379,7 +390,7 @@ The event is triggered when the megaphone state of a player changes.
 The event is triggered when a phone call is started or ended.
 
 | Parameter | Type   | Description              |
-|-----------|--------|--------------------------|
+| --------- | ------ | ------------------------ |
 | source    | `int`  | the player source        |
 | target    | `int`  | the target player source |
 | state     | `bool` | the new phone call state |
@@ -389,7 +400,7 @@ The event is triggered when a phone call is started or ended.
 The event is triggered when a phone call with the old effect is started or ended.
 
 | Parameter | Type   | Description              |
-|-----------|--------|--------------------------|
+| --------- | ------ | ------------------------ |
 | source    | `int`  | the player source        |
 | target    | `int`  | the target player source |
 | state     | `bool` | the new phone call state |
@@ -399,7 +410,7 @@ The event is triggered when a phone call with the old effect is started or ended
 The event is triggered when the phone speaker state of a player changes.
 
 | Parameter | Type   | Description                 |
-|-----------|--------|-----------------------------|
+| --------- | ------ | --------------------------- |
 | source    | `int`  | the player source           |
 | state     | `bool` | the new phone speaker state |
 
@@ -408,7 +419,7 @@ The event is triggered when the phone speaker state of a player changes.
 The event is triggered when the radio frequency of a player changes.
 
 | Parameter | Type     | Description                             |
-|-----------|----------|-----------------------------------------|
+| --------- | -------- | --------------------------------------- |
 | source    | `int`    | the player source                       |
 | channel   | `int`    | the channel where the frequency was set |
 | frequency | `string` | the frequency to set                    |
@@ -418,7 +429,7 @@ The event is triggered when the radio frequency of a player changes.
 The event is triggered when the radio mute state of a player changes.
 
 | Parameter | Type   | Description                                  |
-|-----------|--------|----------------------------------------------|
+| --------- | ------ | -------------------------------------------- |
 | source    | `int`  | the player source                            |
 | channel   | `int`  | the channel where the mute state was changed |
 | state     | `bool` | the new mute state                           |
@@ -428,7 +439,7 @@ The event is triggered when the radio mute state of a player changes.
 The event is triggered when the active radio channel of a player changes.
 
 | Parameter | Type     | Description                  |
-|-----------|----------|------------------------------|
+| --------- | -------- | ---------------------------- |
 | source    | `int`    | the player source            |
 | channel   | `number` | the new active radio channel |
 

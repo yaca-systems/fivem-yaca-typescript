@@ -1,7 +1,6 @@
 import {
   CommDeviceMode,
   DataObject,
-  YacaBuildType,
   type YacaClient,
   YacaFilterEnum,
   YacaNotificationType,
@@ -484,7 +483,7 @@ export class YaCAClientModule {
        * if the value is >= 0, you can set the max muffling range before it gets completely cut off
        */
       muffling_range: this.sharedConfig.mufflingRange ?? 2,
-      build_type: YacaBuildType.RELEASE, // 0 = Release, 1 = Debug,
+      build_type: this.sharedConfig.buildType ?? 0, // 0 = Release, 1 = Debug,
       unmute_delay: this.sharedConfig.unmuteDelay ?? 400,
       operation_mode: dataObj.useWhisper ? 1 : 0,
     });

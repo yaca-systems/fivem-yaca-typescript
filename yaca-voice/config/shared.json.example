@@ -1,5 +1,6 @@
 {
   "debug": false,
+  "buildType": 0,
   "locale": "en",
   "mufflingRange": -1,
   "unmuteDelay": 300,
