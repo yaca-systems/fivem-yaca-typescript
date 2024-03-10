@@ -202,14 +202,20 @@ export class YaCAClientRadioModule {
         const info = infos[cache.serverId];
         const playerCoords = GetEntityCoords(cache.ped, false);
         const targetPlayer = GetPlayerFromServerId(target);
-        const targetPed = GetPlayerPed(targetPlayer);
-        const targetCoords = GetEntityCoords(targetPed, false);
+
+        let distance = -1;
+        if (targetPlayer !== -1) {
+          const targetPed = GetPlayerPed(targetPlayer);
+          const targetCoords = GetEntityCoords(targetPed, false);
+
+          distance = calculateDistanceVec3(targetCoords, playerCoords);
+        }
 
         if (
           !info?.shortRange ||
           (info?.shortRange &&
-            calculateDistanceVec3(targetCoords, playerCoords) <=
-              this.clientModule.sharedConfig.shortRadioRange)
+            distance !== -1 &&
+            distance <= this.clientModule.sharedConfig.shortRadioRange)
         ) {
           this.clientModule.setPlayersCommType(
             player,
