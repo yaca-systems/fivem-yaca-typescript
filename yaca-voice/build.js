@@ -137,7 +137,7 @@ if (existsSync("config/server.json")) {
   copyFileSync("config/server.json.example", "resource/config/server.json");
 }
 copyFileSync("fxmanifest.lua", "resource/fxmanifest.lua");
-copyFileSync("README.md", "resource/README.md");
+copyFileSync("../README.md", "resource/README.md");
 copyFileSync(".yarn.installed", "resource/.yarn.installed");
 
 console.log("Resource built successfully!");
