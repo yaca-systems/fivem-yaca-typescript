@@ -1,9 +1,11 @@
 name: Build
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release (e.g. X.X.X)"
+        required: true
 
 permissions:
   contents: write
@@ -49,7 +51,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          pnpm version ${{ github.ref_name }} --git-tag-version false
+          pnpm version ${{ inputs.version }} --git-tag-version false
         working-directory: yaca-voice
 
       - name: Run build
@@ -67,17 +69,21 @@ jobs:
       - name: Update repository
         run: |
           git add .
-          git commit -am '${{ github.ref_name }}'
+          git commit -am 'chore: bump version to v${{ inputs.version }}'
           git push
 
       - name: Create Release
-        uses: 'marvinpinto/action-automatic-releases@v1.2.1'
+        uses: 'minemalox/automatic-release@v0'
         id: auto_release
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          title: '${{ env.RELEASE_VERSION }}'
+          release_version: 'v${{ inputs.version }}'
+          automatic_release_tag: true
+          title: 'v${{ inputs.version }}'
           prerelease: false
           files: yaca-voice.zip
+          ignore_authors: |
+            github-actions[bot]
 
         env:
           CI: false
