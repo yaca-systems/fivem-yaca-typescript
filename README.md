@@ -44,9 +44,9 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 | maxPhoneSpeakerRange                    | `number`   | The range in which you can here the phone speaker when active.                                                          |
 | notifications.oxLib                     | `bool`     | Enable or disable the notifications via ox_lib.                                                                         |
 | notifications.gta                       | `bool`     | Enable or disable the notifications via default gta radar notifications.                                                |
-| keyBinds.toggleRange                    | `string`   | The default keybind for changing the voice range.                                                                       |
-| keyBinds.radioTransmit                  | `string`   | The default keybind for using the radio. (not available if the saltychat bridge is enabled)                             |
-| keyBinds.megaphone                      | `string`   | The default keybinf for using the megaphone.                                                                            |
+| keyBinds.toggleRange                    | `string`   | The default keybind for changing the voice range, set to `false` to disable.                                            |
+| keyBinds.radioTransmit                  | `string`   | The default keybind for using the radio, set to `false` to disable. (not available if the saltychat bridge is enabled)  |
+| keyBinds.megaphone                      | `string`   | The default keybinf for using the megaphone, set to `false` to disable.                                                 |
 | maxRadioChannels                        | `number`   | Amount of Radio Channels available for the player.                                                                      |
 | voiceRange.defaultIndex                 | `number`   | The default voice range that should be chosen when a player connects.                                                   |
 | voiceRange.ranges                       | `number[]` | The available voice ranges which the player can change through.                                                         |
@@ -391,9 +391,9 @@ The event is triggered when a player starts or stops receiving on the radio.
 The event is triggered when the megaphone state of a player changes.
 
 | Parametr | Type   | Description             |
-| --------- | ------ | ----------------------- |
-| source    | `int`  | the player source       |
-| state     | `bool` | the new megaphone state |
+| -------- | ------ | ----------------------- |
+| source   | `int`  | the player source       |
+| state    | `bool` | the new megaphone state |
 
 ### yaca:external:phoneCall
 

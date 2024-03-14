@@ -12,9 +12,9 @@ export interface YacaSharedConfig {
     gta: boolean;
   };
   keyBinds: {
-    toggleRange: string;
-    radioTransmit: string;
-    megaphone: string;
+    toggleRange: string | false;
+    radioTransmit: string | false;
+    megaphone: string | false;
   };
   maxRadioChannels: number;
   shortRadioRange: number;
