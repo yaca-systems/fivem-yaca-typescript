@@ -742,7 +742,7 @@ export class YaCAClientRadioModule {
           );
         }
 
-        emitNet("server:yaca:radioTalking", false);
+        emitNet("server:yaca:radioTalking", false, channel);
         emit("yaca:external:isRadioTalking", false, channel);
 
         if (clearPedTasks) {
@@ -784,7 +784,7 @@ export class YaCAClientRadioModule {
         );
       }
 
-      emitNet("server:yaca:radioTalking", true);
+      emitNet("server:yaca:radioTalking", true, channel);
       emit("yaca:external:isRadioTalking", true, channel);
     });
   }

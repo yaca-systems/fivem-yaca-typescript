@@ -69,9 +69,10 @@ export class YaCAServerRadioModule {
      * Handles the "server:yaca:radioTalking" server event.
      *
      * @param {boolean} state - The state of the radio.
+     * @param {number} channel - The channel to change the talking state for.
      */
-    onNet("server:yaca:radioTalking", (state: boolean) => {
-      this.radioTalkingState(source, state);
+    onNet("server:yaca:radioTalking", (state: boolean, channel: number) => {
+      this.radioTalkingState(source, state, channel);
     });
 
     /**
@@ -398,16 +399,16 @@ export class YaCAServerRadioModule {
    *
    * @param {number} src - The player to change the talking state for.
    * @param {boolean} state - The new talking state.
+   * @param {number} channel - The channel to change the talking state for.
    */
-  radioTalkingState(src: number, state: boolean) {
+  radioTalkingState(src: number, state: boolean, channel: number) {
     const players = this.serverModule.getPlayers(),
       player = players.get(src);
     if (!player || !player.radioSettings.activated) {
       return;
     }
 
-    const radioFrequency =
-      player.radioSettings.frequencies[player.radioSettings.currentChannel];
+    const radioFrequency = player.radioSettings.frequencies[channel];
     if (!radioFrequency) {
       return;
     }
