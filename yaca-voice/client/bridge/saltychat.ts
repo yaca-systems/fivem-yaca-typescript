@@ -104,7 +104,7 @@ export class YaCAClientSaltyChatBridge {
    * Register SaltyChat exports.
    */
   registerSaltyChatExports() {
-    saltyChatExport("y", () => this.clientModule.getVoiceRange());
+    saltyChatExport("GetVoiceRange", () => this.clientModule.getVoiceRange());
 
     saltyChatExport("GetRadioChannel", (primary: boolean) => {
       const channel = primary ? 1 : 2;
