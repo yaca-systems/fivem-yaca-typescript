@@ -149,6 +149,20 @@ export class YaCAClientRadioModule {
       (channel: number, stereo: YacaStereoMode) =>
         this.changeRadioChannelStereoRaw(channel, stereo),
     );
+
+    /**
+     * Exports the `radioTalkingStart` function to the plugin.
+     * This function starts the radio talking state.
+     *
+     * @param {boolean} state - The state of the radio talking.
+     * @param {number} channel - The radio channel.
+     * @param {boolean} [clearPedTasks=true] - Whether to clear ped tasks. Defaults to true if not provided.
+     */
+    exports(
+      "radioTalkingStart",
+      (state: boolean, channel: number, clearPedTasks = true) =>
+        this.radioTalkingStart(state, channel, clearPedTasks),
+    );
   }
 
   /**
