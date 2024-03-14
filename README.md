@@ -35,7 +35,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 # Shared Config
 
 | Variable                                | Type       | Description                                                                                                             |
-|-----------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
 | debug                                   | `bool`     | Enable the debug mode to enable some debug commands                                                                     |
 | buildType                               | `number`   | `0` for release and `1` for develop (develop allows using all yaca plugin version)                                      |
 | locale                                  | `string`   | The locale that should be used preferred                                                                                |
@@ -151,6 +151,16 @@ Changes the stereo mode of a radio channel.
 | --------- | -------- | ------------------------------------------------------------- |
 | channel   | `number` | the channel number                                            |
 | stereo    | `string` | the stereo mode (`"MONO_LEFT"`, `"MONO_RIGHT"` or `"STEREO"`) |
+
+#### `radioTalkingStart(state: boolean, channel: number, clearPedTasks: boolean = true)`
+
+Starts or stops talking on the radio.
+
+| Parameter     | Type     | Description                                                       |
+| ------------- | -------- | ----------------------------------------------------------------- |
+| state         | `bool`   | `true` to start talking, `false` to stop                          |
+| channel       | `number` | the channel to talk on                                            |
+| clearPedTasks | `bool`   | `true` to clear the ped tasks, `false` to not clear the ped tasks |
 
 </details>
 

@@ -20,10 +20,10 @@
     "typecheck-client": "tsc --project client/tsconfig.json && tsc-alias -p client/tsconfig.json",
     "typecheck-server": "tsc --project server/tsconfig.json && tsc-alias -p server/tsconfig.json",
     "lint": "eslint client server types --fix",
-    "prettier": "prettier --write \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
+    "prettier": "prettier --write \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\" \"../README.md\"",
     "ci:typecheck": "pnpm run typecheck-client && pnpm run typecheck-server",
     "ci:lint": "eslint client server types",
-    "ci:prettier": "prettier --check \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
+    "ci:prettier": "prettier --check \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\" \"../README.md\"",
     "ci:build": "pnpm run typecheck && node build.js --mode=production"
   },
   "dependencies": {
