@@ -181,7 +181,14 @@ export class YaCAClientModule {
     exports("getVoiceRanges", () => this.sharedConfig.voiceRange.ranges);
   }
 
+  /**
+   * Registers the keybindings for the plugin.
+   */
   registerKeybindings() {
+    if (this.sharedConfig.keyBinds.toggleRange === false) {
+      return;
+    }
+
     /**
      * Registers the "yaca:changeVoiceRange" command and keybinding.
      * This command is used to change the voice range.

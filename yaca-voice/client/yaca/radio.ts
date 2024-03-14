@@ -322,6 +322,13 @@ export class YaCAClientRadioModule {
    * Registers the command and key mapping for the radio talking.
    */
   registerKeybinds() {
+    if (this.clientModule.sharedConfig.keyBinds.radioTransmit === false) {
+      return;
+    }
+
+    /**
+     * Registers the command and key mapping for the radio talking.
+     */
     RegisterCommand(
       "+yaca:radioTalking",
       () => {

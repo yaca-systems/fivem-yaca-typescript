@@ -60,6 +60,10 @@ export class YaCAClientMegaphoneModule {
    * Registers the command and key mapping for the megaphone.
    */
   registerKeybinds() {
+    if (this.clientModule.sharedConfig.keyBinds.megaphone === false) {
+      return;
+    }
+
     /**
      * Registers the command and key mapping for the megaphone.
      */
