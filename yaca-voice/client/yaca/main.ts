@@ -910,7 +910,7 @@ export class YaCAClientModule {
 
       let muffleIntensity = 0;
       if (
-        currentRoom !== GetRoomKeyFromEntity(player) &&
+        currentRoom !== GetRoomKeyFromEntity(playerPed) &&
         !HasEntityClearLosToEntity(cache.ped, playerPed, 17)
       ) {
         muffleIntensity = 10; // 10 is the maximum intensity
