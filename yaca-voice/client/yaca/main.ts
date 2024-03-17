@@ -850,7 +850,7 @@ export class YaCAClientModule {
   handleTalkState(payload: YacaResponse) {
     // Update state if player is muted or not
     if (payload.code === "MUTE_STATE") {
-      this.isPlayerMuted = Boolean(parseInt(payload.message));
+      this.isPlayerMuted = payload.message === "1";
       emit(
         "yaca:external:voiceRangeUpdate",
         this.isPlayerMuted ? 0 : this.getVoiceRange(),
@@ -862,7 +862,7 @@ export class YaCAClientModule {
       }
     }
 
-    const isTalking = !this.isPlayerMuted && Boolean(parseInt(payload.message));
+    const isTalking = !this.isPlayerMuted && payload.message === "1";
     if (this.isTalking !== isTalking) {
       this.isTalking = isTalking;
 
@@ -934,7 +934,8 @@ export class YaCAClientModule {
 
       const playerPos = GetEntityCoords(playerPed, false),
         playerDirection = GetEntityForwardVector(playerPed),
-        isUnderwater = Boolean(IsPedSwimmingUnderWater(playerPed));
+        // @ts-expect-error Type error in the native
+        isUnderwater = IsPedSwimmingUnderWater(playerPed) === 1;
 
       if (!playersOnPhoneSpeaker.has(remoteId)) {
         players.set(remoteId, {
@@ -1052,7 +1053,8 @@ export class YaCAClientModule {
         player_direction: getCamDirection(),
         player_position: convertNumberArrayToXYZ(localPos),
         player_range: localData.range,
-        player_is_underwater: Boolean(IsPedSwimmingUnderWater(cache.ped)),
+        // @ts-expect-error Type error in the native
+        player_is_underwater: IsPedSwimmingUnderWater(cache.ped) === 1,
         player_is_muted: localData.forceMuted ?? false,
         players_list: Array.from(players.values()),
       },
