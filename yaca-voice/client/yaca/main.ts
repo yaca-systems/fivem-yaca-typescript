@@ -806,6 +806,44 @@ export class YaCAClientModule {
   }
 
   /**
+   * Handles the phone speaker emit.
+   *
+   * @param playersToPhoneSpeaker - The players to send the phone speaker to.
+   * @param playersOnPhoneSpeaker - The players who are on phone speaker.
+   */
+  handlePhoneSpeakerEmit(playersToPhoneSpeaker: Set<number>, playersOnPhoneSpeaker: Set<number>): void {
+    if (
+      this.useWhisper &&
+      ((this.phoneModule.phoneSpeakerActive && this.phoneModule.inCall) ||
+        ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCall) && this.currentlySendingPhoneSpeakerSender.size))
+    ) {
+      const playersToNotReceivePhoneSpeaker = [...this.currentlySendingPhoneSpeakerSender].filter((playerId) => !playersToPhoneSpeaker.has(playerId)),
+        playersNeedsReceivePhoneSpeaker = [...playersToPhoneSpeaker].filter((playerId) => !this.currentlySendingPhoneSpeakerSender.has(playerId));
+
+      this.currentlySendingPhoneSpeakerSender = new Set(playersToPhoneSpeaker);
+
+      if (playersNeedsReceivePhoneSpeaker.length || playersToNotReceivePhoneSpeaker.length) {
+        emitNet("server:yaca:phoneSpeakerEmit", playersNeedsReceivePhoneSpeaker, playersToNotReceivePhoneSpeaker);
+      }
+    }
+
+    this.currentlyPhoneSpeakerApplied.forEach((playerId) => {
+      if (!playersOnPhoneSpeaker.has(playerId)) {
+        this.currentlyPhoneSpeakerApplied.delete(playerId);
+        this.setPlayersCommType(
+          this.getPlayerByID(playerId),
+          YacaFilterEnum.PHONE_SPEAKER,
+          false,
+          undefined,
+          this.sharedConfig.maxPhoneSpeakerRange,
+          CommDeviceMode.RECEIVER,
+          CommDeviceMode.SENDER,
+        );
+      }
+    });
+  }
+
+  /**
    * Calculate the players in streaming range and send them to the voice plugin.
    */
   calcPlayers() {
@@ -827,7 +865,7 @@ export class YaCAClientModule {
       }
 
       const voiceSetting = this.getPlayerByID(remoteId);
-      if (!voiceSetting?.clientId) {
+      if (!voiceSetting || !voiceSetting.clientId) {
         continue;
       }
 
@@ -855,18 +893,17 @@ export class YaCAClientModule {
         });
       }
 
+      if (calculateDistanceVec3(localPos, playerPos) > this.sharedConfig.maxPhoneSpeakerRange) {
+        continue;
+      }
+
       // Phone speaker handling - user who enabled it.
-      if (
-        this.useWhisper &&
-        this.phoneModule.phoneSpeakerActive &&
-        this.phoneModule.inCall &&
-        calculateDistanceVec3(localPos, playerPos) <= this.sharedConfig.maxPhoneSpeakerRange
-      ) {
+      if (this.useWhisper && this.phoneModule.phoneSpeakerActive && this.phoneModule.inCall) {
         playersToPhoneSpeaker.add(remoteId);
       }
 
       // Phone speaker handling.
-      if (voiceSetting.phoneCallMemberIds && calculateDistanceVec3(localPos, playerPos) <= this.sharedConfig.maxPhoneSpeakerRange) {
+      if (voiceSetting.phoneCallMemberIds) {
         for (const phoneCallMemberId of voiceSetting.phoneCallMemberIds) {
           const phoneCallMember = this.getPlayerByID(phoneCallMemberId);
           if (!phoneCallMember || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) {
@@ -901,35 +938,7 @@ export class YaCAClientModule {
       }
     }
 
-    if (
-      this.useWhisper &&
-      ((this.phoneModule.phoneSpeakerActive && this.phoneModule.inCall) ||
-        ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCall) && this.currentlySendingPhoneSpeakerSender.size))
-    ) {
-      const playersToNotReceivePhoneSpeaker = [...this.currentlySendingPhoneSpeakerSender].filter((playerId) => !playersToPhoneSpeaker.has(playerId)),
-        playersNeedsReceivePhoneSpeaker = [...playersToPhoneSpeaker].filter((playerId) => !this.currentlySendingPhoneSpeakerSender.has(playerId));
-
-      this.currentlySendingPhoneSpeakerSender = new Set(playersToPhoneSpeaker);
-
-      if (playersToNotReceivePhoneSpeaker.length || playersNeedsReceivePhoneSpeaker.length) {
-        emitNet("server:yaca:phoneSpeakerEmit", playersNeedsReceivePhoneSpeaker, playersToNotReceivePhoneSpeaker);
-      }
-    }
-
-    this.currentlyPhoneSpeakerApplied.forEach((playerId) => {
-      if (!playersOnPhoneSpeaker.has(playerId)) {
-        this.currentlyPhoneSpeakerApplied.delete(playerId);
-        this.setPlayersCommType(
-          this.getPlayerByID(playerId),
-          YacaFilterEnum.PHONE_SPEAKER,
-          false,
-          undefined,
-          this.sharedConfig.maxPhoneSpeakerRange,
-          CommDeviceMode.RECEIVER,
-          CommDeviceMode.SENDER,
-        );
-      }
-    });
+    this.handlePhoneSpeakerEmit(playersToPhoneSpeaker, playersOnPhoneSpeaker);
 
     /* Send collected data to the ts-plugin. */
     this.sendWebsocket({
