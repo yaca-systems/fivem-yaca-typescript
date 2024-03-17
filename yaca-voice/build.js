@@ -24,7 +24,6 @@ const client = {
 };
 
 const production = process.argv.includes("--mode=production");
-const buildCmd = production ? esbuild.build : esbuild.context;
 const packageJson = JSON.parse(
   readFileSync("package.json", { encoding: "utf8" }),
 );
@@ -70,39 +69,21 @@ server_script 'dist/server.js'
 );
 
 for (const context of ["client", "server"]) {
-  await buildCmd({
+  await esbuild.build({
     bundle: true,
     entryPoints: [`${context}/index.ts`],
     outfile: `dist/${context}.js`,
     keepNames: true,
+    sourcemap: production ? false : "inline",
     dropLabels: production ? ["DEV"] : undefined,
     legalComments: "inline",
     // banner: {
     //  js: `/**\n  * ${copyright}  */`,
     //},
-    plugins: production
-      ? undefined
-      : [
-          {
-            name: "rebuild",
-            setup(build) {
-              const cb = (result) => {
-                if (!result || result.errors.length === 0)
-                  console.log(`Successfully built ${context}`);
-              };
-              build.onEnd(cb);
-            },
-          },
-        ],
     ...(context === "client" ? client : server),
   })
-    .then((build) => {
-      if (production) {
-        console.log(`Successfully built ${context}`);
-        return;
-      }
-
-      build.watch();
+    .then(() => {
+      console.log(`Successfully built ${context}`);
     })
     .catch(() => {
       throw new Error(`Failed to build ${context}`);
