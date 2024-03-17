@@ -1,9 +1,5 @@
 import { YaCAServerModule } from "yaca";
-import {
-  YacaNotificationType,
-  YacaServerConfig,
-  YacaSharedConfig,
-} from "types";
+import { YacaNotificationType, YacaServerConfig, YacaSharedConfig } from "types";
 import { locale } from "common/locale";
 
 /**
@@ -49,12 +45,9 @@ export class YaCAServerRadioModule {
      * @param {number} channel - The channel to change the frequency of.
      * @param {string} frequency - The new frequency.
      */
-    onNet(
-      "server:yaca:changeRadioFrequency",
-      (channel: number, frequency: string) => {
-        this.changeRadioFrequency(source, channel, frequency);
-      },
-    );
+    onNet("server:yaca:changeRadioFrequency", (channel: number, frequency: string) => {
+      this.changeRadioFrequency(source, channel, frequency);
+    });
 
     /**
      * Handles the "server:yaca:muteRadioChannel" server event.
@@ -95,9 +88,7 @@ export class YaCAServerRadioModule {
      * @param {string} frequency - The frequency to get the players for.
      * @returns {number[]} - The players in the radio frequency.
      */
-    exports("getPlayersInRadioFrequency", (frequency: string) =>
-      this.getPlayersInRadioFrequency(frequency),
-    );
+    exports("getPlayersInRadioFrequency", (frequency: string) => this.getPlayersInRadioFrequency(frequency));
 
     /**
      * Set the radio channel for a player.
@@ -106,20 +97,14 @@ export class YaCAServerRadioModule {
      * @param {number} channel - The channel to set.
      * @param {string} frequency - The frequency to set.
      */
-    exports(
-      "setPlayerRadioChannel",
-      (src: number, channel: number, frequency: string) =>
-        this.changeRadioFrequency(src, channel, frequency),
-    );
+    exports("setPlayerRadioChannel", (src: number, channel: number, frequency: string) => this.changeRadioFrequency(src, channel, frequency));
 
     /**
      * Get if a player has long range radio.
      *
      * @param {number} src - The player to set the long range radio for.
      */
-    exports("getPlayerHasLongRange", (src: number) =>
-      this.getPlayerHasLongRange(src),
-    );
+    exports("getPlayerHasLongRange", (src: number) => this.getPlayerHasLongRange(src));
 
     /**
      * Set if a player has long range radio.
@@ -127,9 +112,7 @@ export class YaCAServerRadioModule {
      * @param {number} src - The player to set the long range radio for.
      * @param {boolean} state - The new state of the long range radio.
      */
-    exports("setPlayerHasLongRange", (src: number, state: boolean) =>
-      this.setPlayerHasLongRange(src, state),
-    );
+    exports("setPlayerHasLongRange", (src: number, state: boolean) => this.setPlayerHasLongRange(src, state));
   }
 
   /**
@@ -217,25 +200,11 @@ export class YaCAServerRadioModule {
     }
 
     if (!player.radioSettings.activated) {
-      emitNet(
-        "client:yaca:notification",
-        src,
-        locale("radio_not_activated"),
-        YacaNotificationType.ERROR,
-      );
+      emitNet("client:yaca:notification", src, locale("radio_not_activated"), YacaNotificationType.ERROR);
       return;
     }
-    if (
-      isNaN(channel) ||
-      channel < 1 ||
-      channel > this.sharedConfig.maxRadioChannels
-    ) {
-      emitNet(
-        "client:yaca:notification",
-        src,
-        locale("radio_channel_invalid"),
-        YacaNotificationType.ERROR,
-      );
+    if (isNaN(channel) || channel < 1 || channel > this.sharedConfig.maxRadioChannels) {
+      emitNet("client:yaca:notification", src, locale("radio_channel_invalid"), YacaNotificationType.ERROR);
       return;
     }
 
@@ -246,11 +215,7 @@ export class YaCAServerRadioModule {
     }
 
     if (player.radioSettings.frequencies[channel] !== frequency) {
-      this.leaveRadioFrequency(
-        src,
-        channel,
-        player.radioSettings.frequencies[channel],
-      );
+      this.leaveRadioFrequency(src, channel, player.radioSettings.frequencies[channel]);
     }
 
     // Add player to channel map, so we know who is in which channel
@@ -285,8 +250,7 @@ export class YaCAServerRadioModule {
       return;
     }
 
-    frequency =
-      frequency === "0" ? player.radioSettings.frequencies[channel] : frequency;
+    frequency = frequency === "0" ? player.radioSettings.frequencies[channel] : frequency;
 
     if (!this.radioFrequencyMap.has(frequency)) {
       return;
@@ -316,25 +280,12 @@ export class YaCAServerRadioModule {
     if (!this.serverConfig.useWhisper && playersArray.length) {
       for (const target of playersArray) {
         if (player.voicePlugin) {
-          emitNet(
-            "client:yaca:leaveRadioChannel",
-            target,
-            player.voicePlugin.clientId,
-            frequency,
-          );
+          emitNet("client:yaca:leaveRadioChannel", target, player.voicePlugin.clientId, frequency);
         }
       }
     }
     if (this.serverConfig.useWhisper) {
-      emitNet(
-        "client:yaca:radioTalking",
-        src,
-        allTargets,
-        frequency,
-        false,
-        null,
-        true,
-      );
+      emitNet("client:yaca:radioTalking", src, allTargets, frequency, false, null, true);
     }
 
     allPlayersInChannel.delete(src);
@@ -364,12 +315,7 @@ export class YaCAServerRadioModule {
 
     foundPlayer.muted = !foundPlayer.muted;
     emitNet("client:yaca:setRadioMuteState", src, channel, foundPlayer.muted);
-    emit(
-      "yaca:external:changedRadioMuteState",
-      src,
-      channel,
-      foundPlayer.muted,
-    );
+    emit("yaca:external:changedRadioMuteState", src, channel, foundPlayer.muted);
   }
 
   /**
@@ -381,12 +327,7 @@ export class YaCAServerRadioModule {
   radioActiveChannelChange(src: number, channel: number) {
     const players = this.serverModule.getPlayers(),
       player = players.get(src);
-    if (
-      !player ||
-      isNaN(channel) ||
-      channel < 1 ||
-      channel > this.sharedConfig.maxRadioChannels
-    ) {
+    if (!player || isNaN(channel) || channel < 1 || channel > this.sharedConfig.maxRadioChannels) {
       return;
     }
 
@@ -436,12 +377,8 @@ export class YaCAServerRadioModule {
         continue;
       }
 
-      const shortRange =
-        !player.radioSettings.hasLong && !target.radioSettings.hasLong;
-      if (
-        (player.radioSettings.hasLong && target.radioSettings.hasLong) ||
-        shortRange
-      ) {
+      const shortRange = !player.radioSettings.hasLong && !target.radioSettings.hasLong;
+      if ((player.radioSettings.hasLong && target.radioSettings.hasLong) || shortRange) {
         targets.push(key);
 
         radioInfos[key] = {
@@ -454,26 +391,11 @@ export class YaCAServerRadioModule {
 
     if (targets.length) {
       for (const target of targets) {
-        emitNet(
-          "client:yaca:radioTalking",
-          target,
-          src,
-          radioFrequency,
-          state,
-          radioInfos,
-        );
+        emitNet("client:yaca:radioTalking", target, src, radioFrequency, state, radioInfos);
       }
     }
     if (this.serverConfig.useWhisper) {
-      emitNet(
-        "client:yaca:radioTalking",
-        src,
-        targetsToSender,
-        radioFrequency,
-        state,
-        radioInfos,
-        true,
-      );
+      emitNet("client:yaca:radioTalking", src, targetsToSender, radioFrequency, state, radioInfos, true);
     }
   }
 }

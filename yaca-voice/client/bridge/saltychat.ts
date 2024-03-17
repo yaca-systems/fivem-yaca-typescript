@@ -71,12 +71,7 @@ export class YaCAClientSaltyChatBridge {
       },
       false,
     );
-    RegisterKeyMapping(
-      "+primaryRadio",
-      locale("use_salty_primary_radio"),
-      "keyboard",
-      this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio,
-    );
+    RegisterKeyMapping("+primaryRadio", locale("use_salty_primary_radio"), "keyboard", this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio);
 
     RegisterCommand(
       "+secondaryRadio",
@@ -108,14 +103,10 @@ export class YaCAClientSaltyChatBridge {
 
     saltyChatExport("GetRadioChannel", (primary: boolean) => {
       const channel = primary ? 1 : 2;
-      return this.clientModule.radioModule.radioChannelSettings[channel]
-        .frequency;
+      return this.clientModule.radioModule.radioChannelSettings[channel].frequency;
     });
 
-    saltyChatExport(
-      "GetRadioVolume",
-      () => this.clientModule.radioModule.radioChannelSettings[1].volume,
-    );
+    saltyChatExport("GetRadioVolume", () => this.clientModule.radioModule.radioChannelSettings[1].volume);
 
     saltyChatExport("GetRadioSpeaker", () => {
       console.warn("GetRadioSpeaker is not implemented in YaCA");
@@ -127,16 +118,10 @@ export class YaCAClientSaltyChatBridge {
       return false;
     });
 
-    saltyChatExport(
-      "SetRadioChannel",
-      (radioChannelName: string, primary: boolean) => {
-        const channel = primary ? 1 : 2;
-        this.clientModule.radioModule.changeRadioFrequencyRaw(
-          channel,
-          radioChannelName,
-        );
-      },
-    );
+    saltyChatExport("SetRadioChannel", (radioChannelName: string, primary: boolean) => {
+      const channel = primary ? 1 : 2;
+      this.clientModule.radioModule.changeRadioFrequencyRaw(channel, radioChannelName);
+    });
 
     saltyChatExport("SetRadioVolume", (volume: number) => {
       this.clientModule.radioModule.changeRadioChannelVolumeRaw(1, volume);
@@ -196,13 +181,7 @@ export class YaCAClientSaltyChatBridge {
    * Sends the radio talking state.
    */
   sendRadioTalkingState() {
-    emit(
-      "SaltyChat_RadioTrafficStateChanged",
-      this.isPrimaryReceiving,
-      this.isPrimarySending,
-      this.isSecondaryReceiving,
-      this.isSecondarySending,
-    );
+    emit("SaltyChat_RadioTrafficStateChanged", this.isPrimaryReceiving, this.isPrimarySending, this.isSecondaryReceiving, this.isSecondarySending);
   }
 
   /**

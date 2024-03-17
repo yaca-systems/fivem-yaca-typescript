@@ -38,15 +38,7 @@ export class YaCAClientPhoneModule {
 
       this.inCall = state;
 
-      this.clientModule.setPlayersCommType(
-        target,
-        YacaFilterEnum.PHONE,
-        state,
-        undefined,
-        undefined,
-        CommDeviceMode.TRANSCEIVER,
-        CommDeviceMode.TRANSCEIVER,
-      );
+      this.clientModule.setPlayersCommType(target, YacaFilterEnum.PHONE, state, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER);
     });
 
     /**
@@ -81,57 +73,44 @@ export class YaCAClientPhoneModule {
      * @param {boolean} state - The state of the phone mute.
      * @param {boolean} onCallStop - The state of the call.
      */
-    onNet(
-      "client:yaca:phoneMute",
-      (targetID: number, state: boolean, onCallStop = false) => {
-        const target = this.clientModule.getPlayerByID(targetID);
-        if (!target) {
-          return;
-        }
+    onNet("client:yaca:phoneMute", (targetID: number, state: boolean, onCallStop = false) => {
+      const target = this.clientModule.getPlayerByID(targetID);
+      if (!target) {
+        return;
+      }
 
-        target.mutedOnPhone = state;
+      target.mutedOnPhone = state;
 
-        if (onCallStop) {
-          return;
-        }
+      if (onCallStop) {
+        return;
+      }
 
-        if (
-          this.clientModule.useWhisper &&
-          target.remoteID === cache.serverId
-        ) {
+      if (this.clientModule.useWhisper && target.remoteID === cache.serverId) {
+        this.clientModule.setPlayersCommType([], YacaFilterEnum.PHONE, !state, undefined, undefined, CommDeviceMode.SENDER);
+      } else if (!this.clientModule.useWhisper) {
+        if (state) {
           this.clientModule.setPlayersCommType(
-            [],
+            target,
             YacaFilterEnum.PHONE,
-            !state,
+            false,
             undefined,
             undefined,
-            CommDeviceMode.SENDER,
+            CommDeviceMode.TRANSCEIVER,
+            CommDeviceMode.TRANSCEIVER,
           );
-        } else if (!this.clientModule.useWhisper) {
-          if (state) {
-            this.clientModule.setPlayersCommType(
-              target,
-              YacaFilterEnum.PHONE,
-              false,
-              undefined,
-              undefined,
-              CommDeviceMode.TRANSCEIVER,
-              CommDeviceMode.TRANSCEIVER,
-            );
-          } else {
-            this.clientModule.setPlayersCommType(
-              target,
-              YacaFilterEnum.PHONE,
-              true,
-              undefined,
-              undefined,
-              CommDeviceMode.TRANSCEIVER,
-              CommDeviceMode.TRANSCEIVER,
-            );
-          }
+        } else {
+          this.clientModule.setPlayersCommType(
+            target,
+            YacaFilterEnum.PHONE,
+            true,
+            undefined,
+            undefined,
+            CommDeviceMode.TRANSCEIVER,
+            CommDeviceMode.TRANSCEIVER,
+          );
         }
-      },
-    );
+      }
+    });
 
     /**
      * Handles the "client:yaca:phoneSpeaker" server event.
@@ -139,94 +118,77 @@ export class YaCAClientPhoneModule {
      * @param {number | number[]} playerIDs - The IDs of the players to be added or removed from the phone speaker.
      * @param {boolean} state - The state indicating whether to add or remove the players.
      */
-    onNet(
-      "client:yaca:playersToPhoneSpeakerEmit",
-      (playerIDs: number | number[], state: boolean) => {
-        if (!Array.isArray(playerIDs)) {
-          playerIDs = [playerIDs];
+    onNet("client:yaca:playersToPhoneSpeakerEmit", (playerIDs: number | number[], state: boolean) => {
+      if (!Array.isArray(playerIDs)) {
+        playerIDs = [playerIDs];
+      }
+
+      const applyRemovePhoneSpeaker: Set<YacaPlayerData> = new Set();
+      for (const playerID of playerIDs) {
+        const player = this.clientModule.getPlayerByID(playerID);
+        if (!player) {
+          continue;
         }
 
-        const applyRemovePhoneSpeaker: Set<YacaPlayerData> = new Set();
-        for (const playerID of playerIDs) {
-          const player = this.clientModule.getPlayerByID(playerID);
-          if (!player) {
-            continue;
-          }
+        applyRemovePhoneSpeaker.add(player);
+      }
 
-          applyRemovePhoneSpeaker.add(player);
-        }
+      if (applyRemovePhoneSpeaker.size < 1) {
+        return;
+      }
 
-        if (applyRemovePhoneSpeaker.size < 1) {
-          return;
-        }
-
-        if (state) {
-          this.clientModule.setPlayersCommType(
-            Array.from(applyRemovePhoneSpeaker),
-            YacaFilterEnum.PHONE_SPEAKER,
-            true,
-            undefined,
-            undefined,
-            CommDeviceMode.SENDER,
-            CommDeviceMode.RECEIVER,
-          );
-        } else {
-          this.clientModule.setPlayersCommType(
-            Array.from(applyRemovePhoneSpeaker),
-            YacaFilterEnum.PHONE_SPEAKER,
-            false,
-            undefined,
-            undefined,
-            CommDeviceMode.SENDER,
-            CommDeviceMode.RECEIVER,
-          );
-        }
-      },
-    );
+      if (state) {
+        this.clientModule.setPlayersCommType(
+          Array.from(applyRemovePhoneSpeaker),
+          YacaFilterEnum.PHONE_SPEAKER,
+          true,
+          undefined,
+          undefined,
+          CommDeviceMode.SENDER,
+          CommDeviceMode.RECEIVER,
+        );
+      } else {
+        this.clientModule.setPlayersCommType(
+          Array.from(applyRemovePhoneSpeaker),
+          YacaFilterEnum.PHONE_SPEAKER,
+          false,
+          undefined,
+          undefined,
+          CommDeviceMode.SENDER,
+          CommDeviceMode.RECEIVER,
+        );
+      }
+    });
   }
 
   registerStateBagHandlers() {
     /**
      * Handles the "yaca:phone" state bag change.
      */
-    AddStateBagChangeHandler(
-      "yaca:phoneSpeaker",
-      "",
-      (
-        bagName: string,
-        _: string,
-        value: object,
-        __: number,
-        replicated: boolean,
-      ) => {
-        if (replicated) {
-          return;
-        }
+    AddStateBagChangeHandler("yaca:phoneSpeaker", "", (bagName: string, _: string, value: object, __: number, replicated: boolean) => {
+      if (replicated) {
+        return;
+      }
 
-        const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId === 0) {
-          return;
-        }
+      const playerId = GetPlayerFromStateBagName(bagName);
+      if (playerId === 0) {
+        return;
+      }
 
-        const playerSource = GetPlayerServerId(playerId);
-        if (playerSource === 0) {
-          return;
-        }
+      const playerSource = GetPlayerServerId(playerId);
+      if (playerSource === 0) {
+        return;
+      }
 
-        if (playerSource === cache.serverId) {
-          this.phoneSpeakerActive = value !== null;
-        }
+      if (playerSource === cache.serverId) {
+        this.phoneSpeakerActive = value !== null;
+      }
 
-        this.removePhoneSpeakerFromEntity(playerSource);
-        if (typeof value !== "undefined") {
-          this.clientModule.setPlayerVariable(
-            playerSource,
-            "phoneCallMemberIds",
-            Array.isArray(value) ? value : [value],
-          );
-        }
-      },
-    );
+      this.removePhoneSpeakerFromEntity(playerSource);
+      if (typeof value !== "undefined") {
+        this.clientModule.setPlayerVariable(playerSource, "phoneCallMemberIds", Array.isArray(value) ? value : [value]);
+      }
+    });
   }
 
   /**
@@ -242,8 +204,7 @@ export class YaCAClientPhoneModule {
 
     const playersToSet = [];
     for (const phoneCallMemberId of entityData.phoneCallMemberIds) {
-      const phoneCallMember =
-        this.clientModule.getPlayerByID(phoneCallMemberId);
+      const phoneCallMember = this.clientModule.getPlayerByID(phoneCallMemberId);
       if (!phoneCallMember) {
         continue;
       }
@@ -251,11 +212,7 @@ export class YaCAClientPhoneModule {
       playersToSet.push(phoneCallMember);
     }
 
-    this.clientModule.setPlayersCommType(
-      playersToSet,
-      YacaFilterEnum.PHONE_SPEAKER,
-      false,
-    );
+    this.clientModule.setPlayersCommType(playersToSet, YacaFilterEnum.PHONE_SPEAKER, false);
 
     delete entityData.phoneCallMemberIds;
   }

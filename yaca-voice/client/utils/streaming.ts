@@ -43,18 +43,8 @@ async function streamingRequest(
  * @param animDict - The animation dictionary to request.
  * @param timeout - The timeout for the request.
  */
-export const requestAnimDict = (
-  animDict: string,
-  timeout?: number,
-): Promise<string> => {
-  if (!DoesAnimDictExist(animDict))
-    throw new Error(`attempted to load invalid animDict '${animDict}'`);
+export const requestAnimDict = (animDict: string, timeout?: number): Promise<string> => {
+  if (!DoesAnimDictExist(animDict)) throw new Error(`attempted to load invalid animDict '${animDict}'`);
 
-  return streamingRequest(
-    RequestAnimDict,
-    HasAnimDictLoaded,
-    "animDict",
-    animDict,
-    timeout,
-  );
+  return streamingRequest(RequestAnimDict, HasAnimDictLoaded, "animDict", animDict, timeout);
 };

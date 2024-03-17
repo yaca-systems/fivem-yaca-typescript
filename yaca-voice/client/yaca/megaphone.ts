@@ -45,10 +45,7 @@ export class YaCAClientMegaphoneModule {
       if (vehicle) {
         const vehicleClass = GetVehicleClass(vehicle);
 
-        this.canUseMegaphone =
-          this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(
-            vehicleClass,
-          );
+        this.canUseMegaphone = this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass);
       } else if (this.canUseMegaphone) {
         this.canUseMegaphone = false;
         emitNet("server:yaca:playerLeftVehicle");
@@ -81,54 +78,39 @@ export class YaCAClientMegaphoneModule {
       },
       false,
     );
-    RegisterKeyMapping(
-      "+yaca:megaphone",
-      locale("use_megaphone"),
-      "keyboard",
-      this.clientModule.sharedConfig.keyBinds.megaphone,
-    );
+    RegisterKeyMapping("+yaca:megaphone", locale("use_megaphone"), "keyboard", this.clientModule.sharedConfig.keyBinds.megaphone);
   }
 
   registerStateBagHandlers() {
     /**
      * Handles the "yaca:megaphoneactive" state bag change.
      */
-    AddStateBagChangeHandler(
-      "yaca:megaphoneactive",
-      "",
-      (
-        bagName: string,
-        _: string,
-        value: number | undefined,
-        __: number,
-        replicated: boolean,
-      ) => {
-        if (replicated) {
-          return;
-        }
+    AddStateBagChangeHandler("yaca:megaphoneactive", "", (bagName: string, _: string, value: number | undefined, __: number, replicated: boolean) => {
+      if (replicated) {
+        return;
+      }
 
-        const playerId = GetPlayerFromStateBagName(bagName);
-        if (playerId === 0) {
-          return;
-        }
+      const playerId = GetPlayerFromStateBagName(bagName);
+      if (playerId === 0) {
+        return;
+      }
 
-        const playerSource = GetPlayerServerId(playerId);
-        if (playerSource === 0) {
-          return;
-        }
+      const playerSource = GetPlayerServerId(playerId);
+      if (playerSource === 0) {
+        return;
+      }
 
-        const isOwnPlayer = playerSource === cache.serverId;
-        this.clientModule.setPlayersCommType(
-          isOwnPlayer ? [] : this.clientModule.getPlayerByID(playerSource),
-          YacaFilterEnum.MEGAPHONE,
-          typeof value !== "undefined",
-          undefined,
-          value,
-          isOwnPlayer ? CommDeviceMode.SENDER : CommDeviceMode.RECEIVER,
-          isOwnPlayer ? CommDeviceMode.RECEIVER : CommDeviceMode.SENDER,
-        );
-      },
-    );
+      const isOwnPlayer = playerSource === cache.serverId;
+      this.clientModule.setPlayersCommType(
+        isOwnPlayer ? [] : this.clientModule.getPlayerByID(playerSource),
+        YacaFilterEnum.MEGAPHONE,
+        typeof value !== "undefined",
+        undefined,
+        value,
+        isOwnPlayer ? CommDeviceMode.SENDER : CommDeviceMode.RECEIVER,
+        isOwnPlayer ? CommDeviceMode.RECEIVER : CommDeviceMode.SENDER,
+      );
+    });
   }
 
   /**
@@ -137,11 +119,7 @@ export class YaCAClientMegaphoneModule {
    * @param {boolean} [state=false] - The state of the megaphone. Defaults to false if not provided.
    */
   useMegaphone(state = false) {
-    if (
-      !cache.vehicle ||
-      !this.canUseMegaphone ||
-      state === this.lastMegaphoneState
-    ) {
+    if (!cache.vehicle || !this.canUseMegaphone || state === this.lastMegaphoneState) {
       return;
     }
 

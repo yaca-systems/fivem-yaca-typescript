@@ -61,10 +61,7 @@ export class YaCAServerMegaphoneModule {
         return;
       }
     }
-    if (
-      (!state && !playerState["yaca:megaphoneactive"]) ||
-      (state && playerState["yaca:megaphoneactive"])
-    ) {
+    if ((!state && !playerState["yaca:megaphoneactive"]) || (state && playerState["yaca:megaphoneactive"])) {
       return;
     }
 
@@ -88,11 +85,7 @@ export class YaCAServerMegaphoneModule {
         emitNet("client:yaca:setLastMegaphoneState", src, false);
       }
     } else if (state && !playerState["yaca:megaphoneactive"]) {
-      playerState.set(
-        "yaca:megaphoneactive",
-        this.sharedConfig.megaphone.range,
-        true,
-      );
+      playerState.set("yaca:megaphoneactive", this.sharedConfig.megaphone.range, true);
     }
   }
 }
