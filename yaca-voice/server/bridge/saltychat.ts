@@ -47,73 +47,37 @@ export class YaCAServerSaltyChatBridge {
       this.serverModule.getPlayerVoiceRange(netId);
     });
 
-    saltyChatExport(
-      "SetPlayerVoiceRange",
-      (netId: number, voiceRange: number) => {
-        this.serverModule.changeVoiceRange(netId, voiceRange);
-      },
-    );
+    saltyChatExport("SetPlayerVoiceRange", (netId: number, voiceRange: number) => {
+      this.serverModule.changeVoiceRange(netId, voiceRange);
+    });
 
-    saltyChatExport(
-      "AddPlayerToCall",
-      (callIdentifier: string, playerHandle: number) =>
-        this.addPlayerToCall(callIdentifier, playerHandle),
-    );
+    saltyChatExport("AddPlayerToCall", (callIdentifier: string, playerHandle: number) => this.addPlayerToCall(callIdentifier, playerHandle));
 
-    saltyChatExport(
-      "AddPlayersToCall",
-      (callIdentifier: string, playerHandles: number[]) =>
-        this.addPlayerToCall(callIdentifier, playerHandles),
-    );
+    saltyChatExport("AddPlayersToCall", (callIdentifier: string, playerHandles: number[]) => this.addPlayerToCall(callIdentifier, playerHandles));
 
-    saltyChatExport(
-      "RemovePlayerFromCall",
-      (callIdentifier: string, playerHandle: number) =>
-        this.removePlayerFromCall(callIdentifier, playerHandle),
-    );
+    saltyChatExport("RemovePlayerFromCall", (callIdentifier: string, playerHandle: number) => this.removePlayerFromCall(callIdentifier, playerHandle));
 
-    saltyChatExport(
-      "RemovePlayersFromCall",
-      (callIdentifier: string, playerHandles: number[]) =>
-        this.removePlayerFromCall(callIdentifier, playerHandles),
-    );
+    saltyChatExport("RemovePlayersFromCall", (callIdentifier: string, playerHandles: number[]) => this.removePlayerFromCall(callIdentifier, playerHandles));
 
-    saltyChatExport(
-      "SetPhoneSpeaker",
-      (playerHandle: number, toggle: boolean) => {
-        this.serverModule.phoneModule.enablePhoneSpeaker(playerHandle, toggle);
-      },
-    );
+    saltyChatExport("SetPhoneSpeaker", (playerHandle: number, toggle: boolean) => {
+      this.serverModule.phoneModule.enablePhoneSpeaker(playerHandle, toggle);
+    });
 
     saltyChatExport("SetPlayerRadioSpeaker", () => {
       console.warn("SetPlayerRadioSpeaker is not implemented in YaCA");
     });
 
-    saltyChatExport("GetPlayersInRadioChannel", (radioChannelName: string) =>
-      this.serverModule.radioModule.getPlayersInRadioFrequency(
-        radioChannelName,
-      ),
-    );
+    saltyChatExport("GetPlayersInRadioChannel", (radioChannelName: string) => this.serverModule.radioModule.getPlayersInRadioFrequency(radioChannelName));
 
-    saltyChatExport(
-      "SetPlayerRadioChannel",
-      (netId: number, radioChannelName: string, primary = true) => {
-        const channel = primary ? 1 : 2;
-        this.serverModule.radioModule.changeRadioFrequency(
-          netId,
-          channel,
-          radioChannelName,
-        );
-      },
-    );
+    saltyChatExport("SetPlayerRadioChannel", (netId: number, radioChannelName: string, primary = true) => {
+      const channel = primary ? 1 : 2;
+      this.serverModule.radioModule.changeRadioFrequency(netId, channel, radioChannelName);
+    });
 
-    saltyChatExport(
-      "RemovePlayerRadioChannel",
-      (netId: number, primary: boolean) => {
-        const channel = primary ? 1 : 2;
-        this.serverModule.radioModule.changeRadioFrequency(netId, channel, "0");
-      },
-    );
+    saltyChatExport("RemovePlayerRadioChannel", (netId: number, primary: boolean) => {
+      const channel = primary ? 1 : 2;
+      this.serverModule.radioModule.changeRadioFrequency(netId, channel, "0");
+    });
 
     saltyChatExport("SetRadioTowers", () => {
       console.warn("SetRadioTowers is not implemented in YaCA");
@@ -158,10 +122,7 @@ export class YaCAServerSaltyChatBridge {
    * @param callIdentifier - The call identifier.
    * @param playerHandle - The player handles.
    */
-  removePlayerFromCall(
-    callIdentifier: string,
-    playerHandle: number | number[],
-  ) {
+  removePlayerFromCall(callIdentifier: string, playerHandle: number | number[]) {
     if (!Array.isArray(playerHandle)) {
       playerHandle = [playerHandle];
     }
@@ -171,9 +132,7 @@ export class YaCAServerSaltyChatBridge {
       return;
     }
 
-    const nowInCall = beforeInCall?.filter(
-      (player) => !(playerHandle as number[]).includes(player),
-    );
+    const nowInCall = beforeInCall?.filter((player) => !(playerHandle as number[]).includes(player));
     this.callMap.set(callIdentifier, nowInCall);
 
     for (const player of beforeInCall) {

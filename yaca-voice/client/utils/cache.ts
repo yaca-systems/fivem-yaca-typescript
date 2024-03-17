@@ -46,11 +46,7 @@ function initCache() {
       cache.vehicle = vehicle;
 
       if (cache.seat || GetPedInVehicleSeat(vehicle, -1) !== ped) {
-        for (
-          let i = -1;
-          i < GetVehicleMaxNumberOfPassengers(vehicle) - 1;
-          i++
-        ) {
+        for (let i = -1; i < GetVehicleMaxNumberOfPassengers(vehicle) - 1; i++) {
           if (GetPedInVehicleSeat(vehicle, i) === ped) {
             cache.seat = i;
             break;
@@ -75,10 +71,7 @@ function initCache() {
  * @param cb - The callback to execute when the cache updates.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const onCache = <T = any>(
-  key: keyof ClientCache,
-  cb: (value: T) => void,
-) => {
+export const onCache = <T = any>(key: keyof ClientCache, cb: (value: T) => void) => {
   on(`yaca:cache:${key}`, cb);
 };
 

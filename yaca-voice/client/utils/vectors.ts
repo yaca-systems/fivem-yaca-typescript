@@ -4,15 +4,8 @@
  * @param firstPoint - The first point
  * @param secondPoint - The second point
  */
-export function calculateDistanceVec3(
-  firstPoint: number[],
-  secondPoint: number[],
-) {
-  return Math.sqrt(
-    (firstPoint[0] - secondPoint[0]) ** 2 +
-      (firstPoint[1] - secondPoint[1]) ** 2 +
-      (firstPoint[2] - secondPoint[2]) ** 2,
-  );
+export function calculateDistanceVec3(firstPoint: number[], secondPoint: number[]) {
+  return Math.sqrt((firstPoint[0] - secondPoint[0]) ** 2 + (firstPoint[1] - secondPoint[1]) ** 2 + (firstPoint[2] - secondPoint[2]) ** 2);
 }
 
 /**
@@ -21,14 +14,8 @@ export function calculateDistanceVec3(
  * @param firstPoint - The first point
  * @param secondPoint - The second point
  */
-export function calculateDistanceVec2(
-  firstPoint: number[],
-  secondPoint: number[],
-) {
-  return Math.sqrt(
-    (firstPoint[0] - secondPoint[0]) ** 2 +
-      (firstPoint[1] - secondPoint[1]) ** 2,
-  );
+export function calculateDistanceVec2(firstPoint: number[], secondPoint: number[]) {
+  return Math.sqrt((firstPoint[0] - secondPoint[0]) ** 2 + (firstPoint[1] - secondPoint[1]) ** 2);
 }
 
 /**

@@ -1,15 +1,6 @@
 import { cache, generateRandomName } from "utils";
-import type {
-  DataObject,
-  ServerCache,
-  YacaServerConfig,
-  YacaSharedConfig,
-} from "types";
-import {
-  YaCAServerMegaphoneModule,
-  YaCAServerPhoneModle,
-  YaCAServerRadioModule,
-} from "yaca";
+import type { DataObject, ServerCache, YacaServerConfig, YacaSharedConfig } from "types";
+import { YaCAServerMegaphoneModule, YaCAServerPhoneModle, YaCAServerRadioModule } from "yaca";
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale } from "common/locale";
 
@@ -64,13 +55,9 @@ export class YaCAServerModule {
   constructor() {
     console.log("~g~ --> YaCA: Server loaded");
 
-    this.serverConfig = JSON.parse(
-      LoadResourceFile(cache.resource, "config/server.json"),
-    );
+    this.serverConfig = JSON.parse(LoadResourceFile(cache.resource, "config/server.json"));
 
-    this.sharedConfig = JSON.parse(
-      LoadResourceFile(cache.resource, "config/shared.json"),
-    );
+    this.sharedConfig = JSON.parse(LoadResourceFile(cache.resource, "config/shared.json"));
 
     initLocale(this.sharedConfig.locale);
 
@@ -107,10 +94,7 @@ export class YaCAServerModule {
 
     this.players.set(src, {
       voiceSettings: {
-        voiceRange:
-          this.sharedConfig.voiceRange.ranges[
-            this.sharedConfig.voiceRange.defaultIndex
-          ],
+        voiceRange: this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex],
         voiceFirstConnect: false,
         forceMuted: false,
         ingameName: name,
@@ -138,9 +122,7 @@ export class YaCAServerModule {
      * @param {number} playerId - The ID of the player to get the alive status for.
      * @returns {boolean} - The alive status of the player.
      */
-    exports("getPlayerAliveStatus", (playerId: number) =>
-      this.getPlayerAliveStatus(playerId),
-    );
+    exports("getPlayerAliveStatus", (playerId: number) => this.getPlayerAliveStatus(playerId));
 
     /**
      * Set the alive status of a player.
@@ -148,9 +130,7 @@ export class YaCAServerModule {
      * @param {number} playerId - The ID of the player to set the alive status for.
      * @param {boolean} state - The new alive status.
      */
-    exports("setPlayerAliveStatus", (playerId: number, state: boolean) =>
-      this.changePlayerAliveStatus(playerId, state),
-    );
+    exports("setPlayerAliveStatus", (playerId: number, state: boolean) => this.changePlayerAliveStatus(playerId, state));
 
     /**
      * Get the voice range of a player.
@@ -158,18 +138,14 @@ export class YaCAServerModule {
      * @param {number} playerId - The ID of the player to get the voice range for.
      * @returns {number} - The voice range of the player.
      */
-    exports("getPlayerVoiceRange", (playerId: number) =>
-      this.getPlayerVoiceRange(playerId),
-    );
+    exports("getPlayerVoiceRange", (playerId: number) => this.getPlayerVoiceRange(playerId));
 
     /**
      * Set the voice range of a player.
      *
      * @param {number} playerId - The ID of the player to set the voice range for.
      */
-    exports("setPlayerVoiceRange", (playerId: number, range: number) =>
-      this.changeVoiceRange(playerId, range),
-    );
+    exports("setPlayerVoiceRange", (playerId: number, range: number) => this.changeVoiceRange(playerId, range));
   }
 
   /**
@@ -184,11 +160,7 @@ export class YaCAServerModule {
       }
 
       if (player.radioSettings.activated) {
-        emitNet(
-          "yaca:client:playerEnteredScope",
-          data.for,
-          parseInt(data.player),
-        );
+        emitNet("yaca:client:playerEnteredScope", data.for, parseInt(data.player));
       }
     });
 
@@ -339,21 +311,11 @@ export class YaCAServerModule {
     }
 
     if (!this.sharedConfig.voiceRange.ranges.includes(range)) {
-      this.changeVoiceRange(
-        src,
-        this.sharedConfig.voiceRange.ranges[
-          this.sharedConfig.voiceRange.defaultIndex
-        ],
-      );
+      this.changeVoiceRange(src, this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex]);
     }
 
     player.voiceSettings.voiceRange = range;
-    emitNet(
-      "client:yaca:changeVoiceRange",
-      -1,
-      src,
-      player.voiceSettings.voiceRange,
-    );
+    emitNet("client:yaca:changeVoiceRange", -1, src, player.voiceSettings.voiceRange);
 
     if (player.voicePlugin) {
       player.voicePlugin.range = range;
@@ -366,12 +328,7 @@ export class YaCAServerModule {
    * @param playerId - The ID of the player to get the voice range for.
    */
   getPlayerVoiceRange(playerId: number) {
-    return (
-      this.players.get(playerId)?.voiceSettings.voiceRange ??
-      this.sharedConfig.voiceRange.ranges[
-        this.sharedConfig.voiceRange.defaultIndex
-      ]
-    );
+    return this.players.get(playerId)?.voiceSettings.voiceRange ?? this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex];
   }
 
   /**

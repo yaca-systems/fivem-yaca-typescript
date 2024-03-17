@@ -10,11 +10,7 @@ const dict: Record<string, string> = {};
  * @param target - The target dictionary to flatten to.
  * @param prefix - The prefix to use.
  */
-function flattenDict(
-  source: Record<string, string | number | boolean>,
-  target: Record<string, string>,
-  prefix?: string,
-) {
+function flattenDict(source: Record<string, string | number | boolean>, target: Record<string, string>, prefix?: string) {
   for (const [key, value] of Object.entries(source)) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
 
@@ -31,10 +27,7 @@ function flattenDict(
  * @param str - The key to get the localized string for.
  * @param args - The arguments to use for string interpolation.
  */
-export const locale = (
-  str: string,
-  ...args: (string | number | boolean)[]
-): string => {
+export const locale = (str: string, ...args: (string | number | boolean)[]): string => {
   const localeStr = dict[str];
 
   if (localeStr) {
@@ -60,9 +53,7 @@ export const getLocales = () => dict;
  */
 export const initLocale = (configLocale: string) => {
   const lang = configLocale || "en";
-  let locales: typeof dict = JSON.parse(
-    LoadResourceFile(resourceName, `locales/${lang}.json`),
-  );
+  let locales: typeof dict = JSON.parse(LoadResourceFile(resourceName, `locales/${lang}.json`));
 
   if (!locales) {
     console.warn(`could not load 'locales/${lang}.json'`);
@@ -86,10 +77,7 @@ export const initLocale = (configLocale: string) => {
     if (matches) {
       for (const match of matches) {
         if (!match) break;
-        const variable = match.substring(
-          2,
-          match.length - 1,
-        ) as keyof typeof locales;
+        const variable = match.substring(2, match.length - 1) as keyof typeof locales;
         const locale: string = flattened[variable];
 
         if (locale) {

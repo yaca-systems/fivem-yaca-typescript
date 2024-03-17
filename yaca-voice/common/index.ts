@@ -13,11 +13,7 @@ export function sleep(ms: number) {
  * @param errMessage Error message to throw if the function never resolves.
  * @param {number?} timeout Error out after `~x` ms. Defaults to 1000, unless set to `false`.
  */
-export async function waitFor<T>(
-  cb: () => T,
-  errMessage?: string,
-  timeout?: null | number | false,
-): Promise<T> {
+export async function waitFor<T>(cb: () => T, errMessage?: string, timeout?: null | number | false): Promise<T> {
   let value = await cb();
 
   if (value !== undefined) return value;
@@ -38,12 +34,7 @@ export async function waitFor<T>(
       if (timeout) {
         i++;
 
-        if (i > timeout)
-          return reject(
-            new Error(
-              `${errMessage || "failed to resolve callback"} (waited ${(GetGameTimer() - start) / 1000}ms)`,
-            ),
-          );
+        if (i > timeout) return reject(new Error(`${errMessage || "failed to resolve callback"} (waited ${(GetGameTimer() - start) / 1000}ms)`));
       }
 
       value = await cb();

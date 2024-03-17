@@ -1,11 +1,5 @@
 import type { YaCAClientModule } from "yaca";
-import {
-  CommDeviceMode,
-  YacaFilterEnum,
-  YacaNotificationType,
-  type YacaRadioSettings,
-  YacaStereoMode,
-} from "types";
+import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaRadioSettings, YacaStereoMode } from "types";
 import { cache, clamp, requestAnimDict } from "../utils";
 import { locale } from "common/locale";
 
@@ -63,9 +57,7 @@ export class YaCAClientRadioModule {
      *
      * @param {string} frequency - The frequency to set.
      */
-    exports("changeRadioFrequency", (frequency: string) =>
-      this.changeRadioFrequency(frequency),
-    );
+    exports("changeRadioFrequency", (frequency: string) => this.changeRadioFrequency(frequency));
 
     /**
      * Changes the radio frequency.
@@ -73,9 +65,7 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      * @param {string} frequency - The frequency to set.
      */
-    exports("changeRadioFrequencyRaw", (channel: number, frequency: string) =>
-      this.changeRadioFrequencyRaw(channel, frequency),
-    );
+    exports("changeRadioFrequencyRaw", (channel: number, frequency: string) => this.changeRadioFrequencyRaw(channel, frequency));
 
     /**
      * Mutes the active radio channel.
@@ -88,9 +78,7 @@ export class YaCAClientRadioModule {
      *
      * @param {number} channel - The channel number.
      */
-    exports("muteRadioChannelRaw", (channel: number) =>
-      this.muteRadioChannelRaw(channel),
-    );
+    exports("muteRadioChannelRaw", (channel: number) => this.muteRadioChannelRaw(channel));
 
     /**
      * Exports the `changeActiveRadioChannel` function to the plugin.
@@ -98,9 +86,7 @@ export class YaCAClientRadioModule {
      *
      * @param {number} channel - The new radio channel.
      */
-    exports("changeActiveRadioChannel", (channel: number) =>
-      this.changeActiveRadioChannel(channel),
-    );
+    exports("changeActiveRadioChannel", (channel: number) => this.changeActiveRadioChannel(channel));
 
     /**
      * Exports the `getActiveRadioChannel` function to the plugin.
@@ -116,9 +102,7 @@ export class YaCAClientRadioModule {
      *
      * @param {boolean} higher - Whether to increase the volume.
      */
-    exports("changeRadioChannelVolume", (higher: boolean) =>
-      this.changeRadioChannelVolume(higher),
-    );
+    exports("changeRadioChannelVolume", (higher: boolean) => this.changeRadioChannelVolume(higher));
 
     /**
      * Exports the `changeRadioChannelVolumeRaw` function to the plugin.
@@ -127,9 +111,7 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      * @param {number} volume - The volume to set.
      */
-    exports("changeRadioChannelVolumeRaw", (channel: number, volume: number) =>
-      this.changeRadioChannelVolumeRaw(channel, volume),
-    );
+    exports("changeRadioChannelVolumeRaw", (channel: number, volume: number) => this.changeRadioChannelVolumeRaw(channel, volume));
 
     /**
      * Exports the `changeRadioChannelStereo` function to the plugin.
@@ -144,11 +126,7 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      * @param {YacaStereoMode} stereo - The stereo mode to set.
      */
-    exports(
-      "changeRadioChannelStereoRaw",
-      (channel: number, stereo: YacaStereoMode) =>
-        this.changeRadioChannelStereoRaw(channel, stereo),
-    );
+    exports("changeRadioChannelStereoRaw", (channel: number, stereo: YacaStereoMode) => this.changeRadioChannelStereoRaw(channel, stereo));
 
     /**
      * Exports the `radioTalkingStart` function to the plugin.
@@ -158,11 +136,7 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The radio channel.
      * @param {boolean} [clearPedTasks=true] - Whether to clear ped tasks. Defaults to true if not provided.
      */
-    exports(
-      "radioTalkingStart",
-      (state: boolean, channel: number, clearPedTasks = true) =>
-        this.radioTalkingStart(state, channel, clearPedTasks),
-    );
+    exports("radioTalkingStart", (state: boolean, channel: number, clearPedTasks = true) => this.radioTalkingStart(state, channel, clearPedTasks));
   }
 
   /**
@@ -189,80 +163,54 @@ export class YaCAClientRadioModule {
      * @param {boolean} infos.shortRange - The state of the short range.
      * @param {boolean} self - The state of the player.
      */
-    onNet(
-      "client:yaca:radioTalking",
-      (
-        target: number,
-        frequency: string,
-        state: boolean,
-        infos: { shortRange: boolean }[],
-        self = false,
-      ) => {
-        if (self) {
-          this.radioTalkingStateToPluginWithWhisper(state, target);
-          return;
+    onNet("client:yaca:radioTalking", (target: number, frequency: string, state: boolean, infos: { shortRange: boolean }[], self = false) => {
+      if (self) {
+        this.radioTalkingStateToPluginWithWhisper(state, target);
+        return;
+      }
+
+      const channel = this.findRadioChannelByFrequency(frequency);
+      if (!channel) {
+        return;
+      }
+
+      const player = this.clientModule.getPlayerByID(target);
+      if (!player) {
+        return;
+      }
+
+      const info = infos[cache.serverId];
+
+      if (!info?.shortRange || (info?.shortRange && GetPlayerFromServerId(target) !== -1)) {
+        this.clientModule.setPlayersCommType(player, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+      }
+
+      if (state) {
+        this.playersInRadioChannel.get(channel)?.add(target);
+        if (info?.shortRange) {
+          this.playersWithShortRange.set(target, frequency);
         }
 
-        const channel = this.findRadioChannelByFrequency(frequency);
-        if (!channel) {
-          return;
+        emit("yaca:external:isRadioReceiving", true, channel);
+
+        if (this.clientModule.sharedConfig.saltyChatBridge) {
+          this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
+        }
+      } else {
+        this.playersInRadioChannel.get(channel)?.delete(target);
+        if (info?.shortRange) {
+          this.playersWithShortRange.delete(target);
         }
 
-        const player = this.clientModule.getPlayerByID(target);
-        if (!player) {
-          return;
+        const inRadio = this.playersInRadioChannel.get(channel)?.size || 0;
+        const state = inRadio > 0;
+        emit("yaca:external:isRadioReceiving", state, channel);
+
+        if (this.clientModule.sharedConfig.saltyChatBridge) {
+          this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(state, channel);
         }
-
-        const info = infos[cache.serverId];
-
-        if (
-          !info?.shortRange ||
-          (info?.shortRange && GetPlayerFromServerId(target) !== -1)
-        ) {
-          this.clientModule.setPlayersCommType(
-            player,
-            YacaFilterEnum.RADIO,
-            state,
-            channel,
-            undefined,
-            CommDeviceMode.RECEIVER,
-            CommDeviceMode.SENDER,
-          );
-        }
-
-        if (state) {
-          this.playersInRadioChannel.get(channel)?.add(target);
-          if (info?.shortRange) {
-            this.playersWithShortRange.set(target, frequency);
-          }
-
-          emit("yaca:external:isRadioReceiving", true, channel);
-
-          if (this.clientModule.sharedConfig.saltyChatBridge) {
-            this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(
-              true,
-              channel,
-            );
-          }
-        } else {
-          this.playersInRadioChannel.get(channel)?.delete(target);
-          if (info?.shortRange) {
-            this.playersWithShortRange.delete(target);
-          }
-
-          const inRadio = this.playersInRadioChannel.get(channel)?.size || 0;
-          const state = inRadio > 0;
-          emit("yaca:external:isRadioReceiving", state, channel);
-
-          if (this.clientModule.sharedConfig.saltyChatBridge) {
-            this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(
-              state,
-              channel,
-            );
-          }
-        }
-      },
-    );
+      }
+    });
 
     /**
      * Handles the "client:yaca:setRadioMuteState" server event.
@@ -270,14 +218,11 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      * @param {boolean} state - The state of the radio mute.
      */
-    onNet(
-      "client:yaca:setRadioMuteState",
-      (channel: number, state: boolean) => {
-        this.radioChannelSettings[channel].muted = state;
-        emit("yaca:external:setRadioMuteState", channel, state);
-        this.disableRadioFromPlayerInChannel(channel);
-      },
-    );
+    onNet("client:yaca:setRadioMuteState", (channel: number, state: boolean) => {
+      this.radioChannelSettings[channel].muted = state;
+      emit("yaca:external:setRadioMuteState", channel, state);
+      this.disableRadioFromPlayerInChannel(channel);
+    });
 
     /**
      * Handles the "client:yaca:leaveRadioChannel" server event.
@@ -285,37 +230,34 @@ export class YaCAClientRadioModule {
      * @param {number | number[]} client_ids - The IDs of the clients.
      * @param {string} frequency - The frequency of the radio.
      */
-    onNet(
-      "client:yaca:leaveRadioChannel",
-      (client_ids: number | number[], frequency: string) => {
-        if (!Array.isArray(client_ids)) {
-          client_ids = [client_ids];
-        }
+    onNet("client:yaca:leaveRadioChannel", (client_ids: number | number[], frequency: string) => {
+      if (!Array.isArray(client_ids)) {
+        client_ids = [client_ids];
+      }
 
-        const channel = this.findRadioChannelByFrequency(frequency);
-        if (!channel) {
-          return;
-        }
+      const channel = this.findRadioChannelByFrequency(frequency);
+      if (!channel) {
+        return;
+      }
 
-        const playerData = this.clientModule.getPlayerByID(cache.serverId);
-        if (!playerData || !playerData.clientId) {
-          return;
-        }
+      const playerData = this.clientModule.getPlayerByID(cache.serverId);
+      if (!playerData || !playerData.clientId) {
+        return;
+      }
 
-        if (client_ids.includes(playerData.clientId)) {
-          this.setRadioFrequency(channel, "0");
-        }
+      if (client_ids.includes(playerData.clientId)) {
+        this.setRadioFrequency(channel, "0");
+      }
 
-        this.clientModule.sendWebsocket({
-          base: { request_type: "INGAME" },
-          comm_device_left: {
-            comm_type: YacaFilterEnum.RADIO,
-            client_ids,
-            channel,
-          },
-        });
-      },
-    );
+      this.clientModule.sendWebsocket({
+        base: { request_type: "INGAME" },
+        comm_device_left: {
+          comm_type: YacaFilterEnum.RADIO,
+          client_ids,
+          channel,
+        },
+      });
+    });
   }
 
   /**
@@ -343,12 +285,7 @@ export class YaCAClientRadioModule {
       },
       false,
     );
-    RegisterKeyMapping(
-      "+yaca:radioTalking",
-      locale("use_radio"),
-      "keyboard",
-      this.clientModule.sharedConfig.keyBinds.radioTransmit,
-    );
+    RegisterKeyMapping("+yaca:radioTalking", locale("use_radio"), "keyboard", this.clientModule.sharedConfig.keyBinds.radioTransmit);
   }
 
   /**
@@ -366,11 +303,7 @@ export class YaCAClientRadioModule {
       emitNet("server:yaca:enableRadio", state);
 
       if (!state) {
-        for (
-          let i = 1;
-          i <= this.clientModule.sharedConfig.maxRadioChannels;
-          i++
-        ) {
+        for (let i = 1; i <= this.clientModule.sharedConfig.maxRadioChannels; i++) {
           this.disableRadioFromPlayerInChannel(i);
         }
       }
@@ -394,11 +327,7 @@ export class YaCAClientRadioModule {
       return;
     }
 
-    emitNet(
-      "server:yaca:changeRadioFrequency",
-      this.activeRadioChannel,
-      frequency,
-    );
+    emitNet("server:yaca:changeRadioFrequency", this.activeRadioChannel, frequency);
   }
 
   /**
@@ -461,10 +390,7 @@ export class YaCAClientRadioModule {
   changeRadioChannelVolume(higher: boolean) {
     const channel = this.activeRadioChannel,
       oldVolume = this.radioChannelSettings[channel].volume;
-    this.changeRadioChannelVolumeRaw(
-      channel,
-      oldVolume + (higher ? 0.17 : -0.17),
-    );
+    this.changeRadioChannelVolumeRaw(channel, oldVolume + (higher ? 0.17 : -0.17));
   }
 
   /**
@@ -474,11 +400,7 @@ export class YaCAClientRadioModule {
    * @param {number} volume - The volume to set.
    */
   changeRadioChannelVolumeRaw(channel: number, volume: number) {
-    if (
-      !this.clientModule.isPluginInitialized() ||
-      !this.radioEnabled ||
-      this.radioChannelSettings[channel].frequency === "0"
-    ) {
+    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled || this.radioChannelSettings[channel].frequency === "0") {
       return;
     }
 
@@ -490,28 +412,17 @@ export class YaCAClientRadioModule {
       return;
     }
 
-    if (
-      this.radioChannelSettings[channel].volume === 0 ||
-      (oldVolume === 0 && this.radioChannelSettings[channel].volume > 0)
-    ) {
+    if (this.radioChannelSettings[channel].volume === 0 || (oldVolume === 0 && this.radioChannelSettings[channel].volume > 0)) {
       emitNet("server:yaca:muteRadioChannel", channel);
     }
 
     // Prevent duplicate update, cuz mute has its own update
     if (this.radioChannelSettings[channel].volume > 0) {
-      emit(
-        "yaca:external:setRadioVolume",
-        channel,
-        this.radioChannelSettings[channel].volume,
-      );
+      emit("yaca:external:setRadioVolume", channel, this.radioChannelSettings[channel].volume);
     }
 
     // Send update to voice plugin
-    this.clientModule.setCommDeviceVolume(
-      YacaFilterEnum.RADIO,
-      this.radioChannelSettings[channel].volume,
-      channel,
-    );
+    this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, this.radioChannelSettings[channel].volume, channel);
   }
 
   /**
@@ -527,40 +438,19 @@ export class YaCAClientRadioModule {
     switch (this.radioChannelSettings[channel].stereo) {
       case YacaStereoMode.STEREO:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT);
-        emit(
-          "yaca:external:setRadioChannelStereo",
-          channel,
-          YacaStereoMode.MONO_LEFT,
-        );
-        this.clientModule.notification(
-          locale("changed_stereo_mode", channel, locale("left_ear")),
-          YacaNotificationType.INFO,
-        );
+        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_LEFT);
+        this.clientModule.notification(locale("changed_stereo_mode", channel, locale("left_ear")), YacaNotificationType.INFO);
         return;
       case YacaStereoMode.MONO_LEFT:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_RIGHT);
-        emit(
-          "yaca:external:setRadioChannelStereo",
-          channel,
-          YacaStereoMode.MONO_RIGHT,
-        );
-        this.clientModule.notification(
-          locale("changed_stereo_mode", channel, locale("right_ear")),
-          YacaNotificationType.INFO,
-        );
+        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_RIGHT);
+        this.clientModule.notification(locale("changed_stereo_mode", channel, locale("right_ear")), YacaNotificationType.INFO);
         return;
       default:
       case YacaStereoMode.MONO_RIGHT:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.STEREO);
-        emit(
-          "yaca:external:setRadioChannelStereo",
-          channel,
-          YacaStereoMode.STEREO,
-        );
-        this.clientModule.notification(
-          locale("changed_stereo_mode", channel, locale("both_ears")),
-          YacaNotificationType.INFO,
-        );
+        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.STEREO);
+        this.clientModule.notification(locale("changed_stereo_mode", channel, locale("both_ears")), YacaNotificationType.INFO);
         return;
     }
   }
@@ -578,11 +468,7 @@ export class YaCAClientRadioModule {
 
     this.radioChannelSettings[channel].stereo = stereo;
 
-    this.clientModule.setCommDeviceStereomode(
-      YacaFilterEnum.RADIO,
-      stereo,
-      channel,
-    );
+    this.clientModule.setCommDeviceStereomode(YacaFilterEnum.RADIO, stereo, channel);
   }
 
   /**
@@ -602,11 +488,7 @@ export class YaCAClientRadioModule {
       const { volume } = this.radioChannelSettings[i],
         { stereo } = this.radioChannelSettings[i];
 
-      this.clientModule.setCommDeviceStereomode(
-        YacaFilterEnum.RADIO,
-        stereo,
-        i,
-      );
+      this.clientModule.setCommDeviceStereomode(YacaFilterEnum.RADIO, stereo, i);
       this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, volume, i);
     }
   }
@@ -617,12 +499,7 @@ export class YaCAClientRadioModule {
    * @param {boolean} state - The state of the player talking on the radio.
    */
   radioTalkingStateToPlugin(state: boolean) {
-    this.clientModule.setPlayersCommType(
-      this.clientModule.getPlayerByID(cache.serverId),
-      YacaFilterEnum.RADIO,
-      state,
-      this.activeRadioChannel,
-    );
+    this.clientModule.setPlayersCommType(this.clientModule.getPlayerByID(cache.serverId), YacaFilterEnum.RADIO, state, this.activeRadioChannel);
   }
 
   /**
@@ -631,10 +508,7 @@ export class YaCAClientRadioModule {
    * @param state - The state of the player talking on the radio.
    * @param targets - The IDs of the targets.
    */
-  radioTalkingStateToPluginWithWhisper(
-    state: boolean,
-    targets: number | number[],
-  ) {
+  radioTalkingStateToPluginWithWhisper(state: boolean, targets: number | number[]) {
     if (!Array.isArray(targets)) {
       targets = [targets];
     }
@@ -729,15 +603,7 @@ export class YaCAClientRadioModule {
     }
 
     if (targets.length) {
-      this.clientModule.setPlayersCommType(
-        targets,
-        YacaFilterEnum.RADIO,
-        false,
-        channel,
-        undefined,
-        CommDeviceMode.RECEIVER,
-        CommDeviceMode.SENDER,
-      );
+      this.clientModule.setPlayersCommType(targets, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
     }
   }
 
@@ -757,10 +623,7 @@ export class YaCAClientRadioModule {
         }
 
         if (this.clientModule.sharedConfig.saltyChatBridge) {
-          this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(
-            false,
-            channel,
-          );
+          this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(false, channel);
         }
 
         emitNet("server:yaca:radioTalking", false, channel);
@@ -784,25 +647,10 @@ export class YaCAClientRadioModule {
     }
 
     requestAnimDict("random@arrests").then(() => {
-      TaskPlayAnim(
-        cache.ped,
-        "random@arrests",
-        "generic_radio_chatter",
-        3,
-        -4,
-        -1,
-        49,
-        0.0,
-        false,
-        false,
-        false,
-      );
+      TaskPlayAnim(cache.ped, "random@arrests", "generic_radio_chatter", 3, -4, -1, 49, 0.0, false, false, false);
 
       if (this.clientModule.sharedConfig.saltyChatBridge) {
-        this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(
-          true,
-          channel,
-        );
+        this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(true, channel);
       }
 
       emitNet("server:yaca:radioTalking", true, channel);

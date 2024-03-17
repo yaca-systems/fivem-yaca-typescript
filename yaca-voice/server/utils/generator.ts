@@ -87,10 +87,7 @@ export function getRandomString(pattern: string, length?: number): string {
  * @param src The ID of the player.
  * @param nameSet The set of names to check against.
  */
-export function generateRandomName(
-  src: number,
-  nameSet: Set<string>,
-): string | undefined {
+export function generateRandomName(src: number, nameSet: Set<string>): string | undefined {
   let name: string | undefined;
   for (let i = 0; i < 10; i++) {
     let generatedName = `[${src}] - ${getRandomString("...............", 15)}`;
@@ -103,9 +100,7 @@ export function generateRandomName(
   }
 
   if (!name) {
-    console.error(
-      `YaCA: Couldn't generate a random name for player ${GetPlayerName(src.toString())} (ID: ${src}).`,
-    );
+    console.error(`YaCA: Couldn't generate a random name for player ${GetPlayerName(src.toString())} (ID: ${src}).`);
   }
 
   return name;

@@ -19,31 +19,22 @@ export class WebSocket extends EventEmitter {
     RegisterNuiCallbackType("YACA_OnConnected");
     RegisterNuiCallbackType("YACA_OnDisconnected");
 
-    on(
-      "__cfx_nui:YACA_OnMessage",
-      (data: object, cb: (data: unknown) => void) => {
-        this.emit("message", data);
-        cb({});
-      },
-    );
+    on("__cfx_nui:YACA_OnMessage", (data: object, cb: (data: unknown) => void) => {
+      this.emit("message", data);
+      cb({});
+    });
 
-    on(
-      "__cfx_nui:YACA_OnConnected",
-      (_: unknown, cb: (data: unknown) => void) => {
-        this.readyState = 1;
-        this.emit("open");
-        cb({});
-      },
-    );
+    on("__cfx_nui:YACA_OnConnected", (_: unknown, cb: (data: unknown) => void) => {
+      this.readyState = 1;
+      this.emit("open");
+      cb({});
+    });
 
-    on(
-      "__cfx_nui:YACA_OnDisconnected",
-      (data: { code: number; reason: string }, cb: (data: unknown) => void) => {
-        this.readyState = 3;
-        this.emit("close", data.code, data.reason);
-        cb({});
-      },
-    );
+    on("__cfx_nui:YACA_OnDisconnected", (data: { code: number; reason: string }, cb: (data: unknown) => void) => {
+      this.readyState = 3;
+      this.emit("close", data.code, data.reason);
+      cb({});
+    });
   }
 
   /**
