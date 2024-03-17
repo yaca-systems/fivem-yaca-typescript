@@ -4,7 +4,6 @@ export interface YacaSharedConfig {
   debug: boolean;
   buildType: YacaBuildType;
   locale: string;
-  mufflingRange: number;
   unmuteDelay: number;
   maxPhoneSpeakerRange: number;
   notifications: {
@@ -32,6 +31,13 @@ export interface YacaSharedConfig {
       primaryRadio: string;
       secondaryRadio: string;
     };
+  };
+  vehicleMuffling: boolean;
+  mufflingRange: number;
+  mufflingIntensities: {
+    differentRoom: number;
+    bothCarsClosed: number;
+    oneCarClosed: number;
   };
 }
 

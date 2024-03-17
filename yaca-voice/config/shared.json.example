@@ -2,7 +2,6 @@
   "debug": false,
   "buildType": 0,
   "locale": "en",
-  "mufflingRange": -1,
   "unmuteDelay": 300,
   "maxPhoneSpeakerRange": 5,
   "notifications": {
@@ -17,11 +16,23 @@
   "maxRadioChannels": 6,
   "voiceRange": {
     "defaultIndex": 2,
-    "ranges": [1, 3, 8, 15, 20, 25, 30, 40]
+    "ranges": [
+      1,
+      3,
+      8,
+      15,
+      20,
+      25,
+      30,
+      40
+    ]
   },
   "megaphone": {
     "range": 30,
-    "allowedVehicleClasses": [18, 19]
+    "allowedVehicleClasses": [
+      18,
+      19
+    ]
   },
   "saltyChatBridge": {
     "enabled": true,
@@ -29,5 +40,12 @@
       "primaryRadio": "N",
       "secondaryRadio": "CAPITAL"
     }
+  },
+  "vehicleMuffling": true,
+  "mufflingRange": -1,
+  "mufflingIntensities": {
+    "differentRoom": 10,
+    "bothCarsClosed": 10,
+    "oneCarClosed": 6
   }
 }

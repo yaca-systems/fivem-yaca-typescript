@@ -779,6 +779,33 @@ export class YaCAClientModule {
   }
 
   /**
+   * Get the muffle intensity for the nearby player.
+   *
+   * @param {number} nearbyPlayerPed - The nearby player ped.
+   * @param {number} ownCurrentRoom - The current room the client is in.
+   * @param {boolean} ownVehicleHasOpening - The opening state ot the vehicle the client is in.
+   */
+  getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean) {
+    if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
+      return this.sharedConfig.mufflingIntensities.differentRoom ?? 10;
+    } else if (this.sharedConfig.vehicleMuffling ?? true) {
+      const playerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false);
+
+      if (cache.vehicle !== playerVehicle) {
+        const playerVehicleHasOpening = playerVehicle === 0 || vehicleHasOpening(playerVehicle);
+
+        if (!ownVehicleHasOpening && !playerVehicleHasOpening) {
+          return this.sharedConfig.mufflingIntensities.bothCarsClosed ?? 10;
+        } else if (!ownVehicleHasOpening || !playerVehicleHasOpening) {
+          return this.sharedConfig.mufflingIntensities.oneCarClosed ?? 10;
+        }
+      }
+    }
+
+    return 0;
+  }
+
+  /**
    * Calculate the players in streaming range and send them to the voice plugin.
    */
   calcPlayers() {
@@ -809,22 +836,7 @@ export class YaCAClientModule {
         continue;
       }
 
-      let muffleIntensity = 0;
-      if (currentRoom !== GetRoomKeyFromEntity(playerPed) && !HasEntityClearLosToEntity(cache.ped, playerPed, 17)) {
-        muffleIntensity = 10; // 10 is the maximum intensity
-      } else {
-        const playerVehicle = GetVehiclePedIsIn(playerPed, false);
-
-        if (cache.vehicle !== playerVehicle) {
-          const playerVehicleHasOpening = playerVehicle === 0 || vehicleHasOpening(playerVehicle);
-
-          if (!hasVehicleOpening && !playerVehicleHasOpening) {
-            muffleIntensity = 10;
-          } else if (!hasVehicleOpening || !playerVehicleHasOpening) {
-            muffleIntensity = 6;
-          }
-        }
-      }
+      const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening);
 
       const playerPos = GetEntityCoords(playerPed, false),
         playerDirection = GetEntityForwardVector(playerPed),
