@@ -15,14 +15,13 @@
   "scripts": {
     "prepare": "cd .. && husky yaca-voice/.husky",
     "build": "pnpm run typecheck && node build.js --mode=production",
-    "watch": "node build.js",
+    "dev": "pnpm run typecheck && node build.js",
     "typecheck": "pnpm run typecheck-client && pnpm run typecheck-server",
     "typecheck-client": "tsc --project client/tsconfig.json && tsc-alias -p client/tsconfig.json",
     "typecheck-server": "tsc --project server/tsconfig.json && tsc-alias -p server/tsconfig.json",
-    "lint": "eslint client server types --fix",
+    "lint": "eslint client server common types --fix",
     "prettier": "prettier --write \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\" \"../README.md\"",
-    "ci:typecheck": "pnpm run typecheck-client && pnpm run typecheck-server",
-    "ci:lint": "eslint client server types",
+    "ci:lint": "eslint client server common types",
     "ci:prettier": "prettier --check \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\" \"../README.md\"",
     "ci:build": "pnpm run typecheck && node build.js --mode=production"
   },
