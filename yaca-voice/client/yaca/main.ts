@@ -16,6 +16,7 @@ import {
   convertNumberArrayToXYZ,
   getCamDirection,
   clamp,
+  vehicleHasOpening,
 } from "utils";
 import {
   YaCAClientIntercomModule,
@@ -890,6 +891,8 @@ export class YaCAClientModule {
       currentRoom = GetRoomKeyFromEntity(cache.ped),
       playersToPhoneSpeaker: Set<number> = new Set(),
       playersOnPhoneSpeaker: Set<number> = new Set(),
+      hasVehicleOpening =
+        cache.vehicle === false || vehicleHasOpening(cache.vehicle),
       localData = this.getPlayerByID(cache.serverId);
     if (!localData) {
       return;
@@ -914,6 +917,19 @@ export class YaCAClientModule {
         !HasEntityClearLosToEntity(cache.ped, playerPed, 17)
       ) {
         muffleIntensity = 10; // 10 is the maximum intensity
+      } else {
+        const playerVehicle = GetVehiclePedIsIn(playerPed, false);
+
+        if (cache.vehicle !== playerVehicle) {
+          const playerVehicleHasOpening =
+            playerVehicle === 0 || vehicleHasOpening(playerVehicle);
+
+          if (!hasVehicleOpening && !playerVehicleHasOpening) {
+            muffleIntensity = 10;
+          } else if (!hasVehicleOpening || !playerVehicleHasOpening) {
+            muffleIntensity = 6;
+          }
+        }
       }
 
       const playerPos = GetEntityCoords(playerPed, false),

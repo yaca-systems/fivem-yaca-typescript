@@ -4,6 +4,7 @@ export * from "./vectors";
 export * from "./websocket";
 export * from "./cache";
 export * from "./streaming";
+export * from "./vehicle";
 
 /**
  * Clamps a value between a minimum and maximum value.
