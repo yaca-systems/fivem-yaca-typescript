@@ -214,7 +214,7 @@ export class YaCAClientPhoneModule {
         }
 
         if (playerSource === cache.serverId) {
-          this.phoneSpeakerActive = Boolean(value);
+          this.phoneSpeakerActive = value !== null;
         }
 
         this.removePhoneSpeakerFromEntity(playerSource);
