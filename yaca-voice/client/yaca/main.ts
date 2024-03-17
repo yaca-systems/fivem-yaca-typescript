@@ -910,6 +910,9 @@ export class YaCAClientModule {
       }
 
       const playerPed = GetPlayerPed(player);
+      if (playerPed <= 0) {
+        continue;
+      }
 
       let muffleIntensity = 0;
       if (
@@ -957,7 +960,7 @@ export class YaCAClientModule {
         calculateDistanceVec3(localPos, playerPos) <=
           this.sharedConfig.maxPhoneSpeakerRange
       ) {
-        playersToPhoneSpeaker.add(player.remoteID);
+        playersToPhoneSpeaker.add(remoteId);
       }
 
       // Phone speaker handling.
