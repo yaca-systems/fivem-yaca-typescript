@@ -25,7 +25,14 @@
       25,
       30,
       40
-    ]
+    ],
+    "markerColor": {
+        "enabled": true,
+        "r": 0,
+        "g": 255,
+        "b": 0,
+        "a": 50
+    }
   },
   "megaphone": {
     "range": 30,

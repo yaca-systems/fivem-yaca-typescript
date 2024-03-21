@@ -20,6 +20,13 @@ export interface YacaSharedConfig {
   voiceRange: {
     defaultIndex: number;
     ranges: number[];
+    markerColor: {
+      enabled: boolean;
+      r: number;
+      g: number;
+      b: number;
+      a: number;
+    };
   };
   megaphone: {
     range: number;
