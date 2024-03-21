@@ -26,6 +26,7 @@ export interface YacaSharedConfig {
       g: number;
       b: number;
       a: number;
+      duration: number;
     };
   };
   megaphone: {
