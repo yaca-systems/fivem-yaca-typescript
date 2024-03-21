@@ -571,6 +571,7 @@ export class YaCAClientModule {
       const green = this.sharedConfig.voiceRange.markerColor?.g ?? 255;
       const blue = this.sharedConfig.voiceRange.markerColor?.b ?? 0;
       const alpha = this.sharedConfig.voiceRange.markerColor?.a ?? 50;
+      const duration = this.sharedConfig.voiceRange.markerColor?.duration ?? 1000;
 
       this.visualVoiceRangeTimeout = setTimeout(() => {
         if (this.visualVoiceRangeTick) {
@@ -579,7 +580,7 @@ export class YaCAClientModule {
         }
 
         this.visualVoiceRangeTimeout = null;
-      }, 1000);
+      }, duration);
 
       this.visualVoiceRangeTick = setInterval(() => {
         const entity = cache.vehicle || cache.ped,
