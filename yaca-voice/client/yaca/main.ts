@@ -565,48 +565,56 @@ export class YaCAClientModule {
 
     const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] || 1;
 
-    this.visualVoiceRangeTimeout = setTimeout(() => {
-      if (this.visualVoiceRangeTick) {
-        clearInterval(this.visualVoiceRangeTick);
-        this.visualVoiceRangeTick = null;
-      }
+    const isMarkerEnable = this.sharedConfig.voiceRange.markerColor?.enabled ?? true;
+    if (isMarkerEnable) {
+      const red = this.sharedConfig.voiceRange.markerColor?.r ?? 0;
+      const green = this.sharedConfig.voiceRange.markerColor?.g ?? 255;
+      const blue = this.sharedConfig.voiceRange.markerColor?.b ?? 0;
+      const alpha = this.sharedConfig.voiceRange.markerColor?.a ?? 50;
 
-      this.visualVoiceRangeTimeout = null;
-    }, 1000);
+      this.visualVoiceRangeTimeout = setTimeout(() => {
+        if (this.visualVoiceRangeTick) {
+          clearInterval(this.visualVoiceRangeTick);
+          this.visualVoiceRangeTick = null;
+        }
 
-    this.visualVoiceRangeTick = setInterval(() => {
-      const entity = cache.vehicle || cache.ped,
-        pos = GetEntityCoords(entity, false),
-        posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98;
+        this.visualVoiceRangeTimeout = null;
+      }, 1000);
 
-      DrawMarker(
-        1,
-        pos[0],
-        pos[1],
-        posZ,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        voiceRange * 2,
-        voiceRange * 2,
-        1,
-        0,
-        255,
-        0,
-        50,
-        false,
-        true,
-        2,
-        true,
-        // @ts-expect-error Type error in the native
-        null,
-        null,
-        false,
-      );
-    });
+      this.visualVoiceRangeTick = setInterval(() => {
+        const entity = cache.vehicle || cache.ped,
+          pos = GetEntityCoords(entity, false),
+          posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98;
+
+        DrawMarker(
+          1,
+          pos[0],
+          pos[1],
+          posZ,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          voiceRange * 2,
+          voiceRange * 2,
+          1,
+          red,
+          green,
+          blue,
+          alpha,
+          false,
+          true,
+          2,
+          true,
+          // @ts-expect-error Type error in the native
+          null,
+          null,
+          false,
+        );
+      });
+    }
 
     emitNet("server:yaca:changeVoiceRange", voiceRange);
   }
