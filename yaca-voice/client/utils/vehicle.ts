@@ -53,15 +53,20 @@ export function hasDoor(vehicle: number, doorId: number): boolean {
  * @returns {boolean} - Whether the vehicle has an opening.
  */
 export function vehicleHasOpening(vehicle: number): boolean {
+  const doors = [];
   for (let i = 0; i < 6; i++) {
     if (i === 4 || !hasDoor(vehicle, i)) continue;
+    doors.push(i);
+  }
 
-    const doorAngle = GetVehicleDoorAngleRatio(vehicle, i);
+  if (doors.length === 0) return true;
+  for (const door of doors) {
+    const doorAngle = GetVehicleDoorAngleRatio(vehicle, door);
     if (doorAngle > 0) {
       return true;
     }
 
-    if (IsVehicleDoorDamaged(vehicle, i)) {
+    if (IsVehicleDoorDamaged(vehicle, door)) {
       return true;
     }
   }
