@@ -796,7 +796,7 @@ export class YaCAClientModule {
    */
   getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean) {
     if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
-      return this.sharedConfig.mufflingIntensities.differentRoom ?? 10;
+      return this.sharedConfig.mufflingIntensities?.differentRoom ?? 10;
     } else if (this.sharedConfig.vehicleMuffling ?? true) {
       const playerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false);
 
@@ -804,9 +804,9 @@ export class YaCAClientModule {
         const playerVehicleHasOpening = playerVehicle === 0 || vehicleHasOpening(playerVehicle);
 
         if (!ownVehicleHasOpening && !playerVehicleHasOpening) {
-          return this.sharedConfig.mufflingIntensities.bothCarsClosed ?? 10;
+          return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
         } else if (!ownVehicleHasOpening || !playerVehicleHasOpening) {
-          return this.sharedConfig.mufflingIntensities.oneCarClosed ?? 10;
+          return this.sharedConfig.mufflingIntensities?.oneCarClosed ?? 10;
         }
       }
     }
