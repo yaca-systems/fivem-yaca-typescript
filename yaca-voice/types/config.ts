@@ -46,6 +46,7 @@ export interface YacaSharedConfig {
     differentRoom: number;
     bothCarsClosed: number;
     oneCarClosed: number;
+    megaPhoneInCar: number;
   };
 }
 
