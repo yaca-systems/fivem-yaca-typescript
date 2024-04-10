@@ -42,6 +42,7 @@ export interface YacaSharedConfig {
   };
   vehicleMuffling: boolean;
   mufflingRange: number;
+  mufflingVehicleWhitelist: string[];
   mufflingIntensities: {
     differentRoom: number;
     bothCarsClosed: number;

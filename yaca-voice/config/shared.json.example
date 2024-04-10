@@ -51,6 +51,7 @@
   },
   "vehicleMuffling": true,
   "mufflingRange": -1,
+  "mufflingVehicleWhitelist": [],
   "mufflingIntensities": {
     "differentRoom": 10,
     "bothCarsClosed": 10,
