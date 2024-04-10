@@ -54,6 +54,7 @@
   "mufflingIntensities": {
     "differentRoom": 10,
     "bothCarsClosed": 10,
-    "oneCarClosed": 6
+    "oneCarClosed": 6,
+    "megaPhoneInCar": 6
   }
 }

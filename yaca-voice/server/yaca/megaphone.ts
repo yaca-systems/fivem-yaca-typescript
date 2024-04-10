@@ -80,7 +80,7 @@ export class YaCAServerMegaphoneModule {
     const playerState = Player(src).state;
 
     if (!state && playerState["yaca:megaphoneactive"]) {
-      playerState.set("yaca:megaphoneactive", null, true);
+      playerState.set("yaca:megaphoneactive", undefined, true);
       if (forced) {
         emitNet("client:yaca:setLastMegaphoneState", src, false);
       }

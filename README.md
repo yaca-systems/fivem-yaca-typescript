@@ -65,6 +65,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 | mufflingIntensities.differentRoom       | `number`   | Adjusts how much a nearby player is muffles when they are in a different room and not in line of sight. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                        |
 | mufflingIntensities.bothCarsClosed      | `number`   | Adjusts how much a nearby player is muffled when themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.        |
 | mufflingIntensities.oneCarClosed        | `number`   | Adjusts how much a nearby player is muffled when either themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling. |
+| mufflingIntensities.megaPhoneInCar      | `number`   | Adjusts how much a nearby player is muffled when the player is using the megaphone and the nearby player is in a car. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.          |
 
 # Exports
 

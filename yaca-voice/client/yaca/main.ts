@@ -794,19 +794,25 @@ export class YaCAClientModule {
    * @param {number} ownCurrentRoom - The current room the client is in.
    * @param {boolean} ownVehicleHasOpening - The opening state ot the vehicle the client is in.
    */
-  getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean) {
+  getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean, nearbyUsesMegaphone: boolean = false) {
     if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
       return this.sharedConfig.mufflingIntensities?.differentRoom ?? 10;
     } else if (this.sharedConfig.vehicleMuffling ?? true) {
-      const playerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false);
+      const nearbyPlayerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false);
 
-      if (cache.vehicle !== playerVehicle) {
-        const playerVehicleHasOpening = playerVehicle === 0 || vehicleHasOpening(playerVehicle);
+      if (cache.vehicle !== nearbyPlayerVehicle) {
+        const nearbyPlayerVehicleHasOpening = nearbyPlayerVehicle === 0 || vehicleHasOpening(nearbyPlayerVehicle);
 
-        if (!ownVehicleHasOpening && !playerVehicleHasOpening) {
-          return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
-        } else if (!ownVehicleHasOpening || !playerVehicleHasOpening) {
-          return this.sharedConfig.mufflingIntensities?.oneCarClosed ?? 10;
+        if (nearbyUsesMegaphone) {
+          if (!ownVehicleHasOpening) {
+            return this.sharedConfig.mufflingIntensities?.megaPhoneInCar ?? 6;
+          }
+        } else {
+          if (!ownVehicleHasOpening && !nearbyPlayerVehicleHasOpening) {
+            return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
+          } else if (!ownVehicleHasOpening || !nearbyPlayerVehicleHasOpening) {
+            return this.sharedConfig.mufflingIntensities?.oneCarClosed ?? 6;
+          }
         }
       }
     }
@@ -883,7 +889,10 @@ export class YaCAClientModule {
         continue;
       }
 
-      const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening);
+      const playerState = Player(remoteId).state;
+      const isMegaphoneActive = typeof playerState["yaca:megaphoneactive"] !== "undefined";
+
+      const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening, isMegaphoneActive);
 
       const playerPos = GetEntityCoords(playerPed, false),
         playerDirection = GetEntityForwardVector(playerPed),
