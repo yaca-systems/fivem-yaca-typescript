@@ -570,6 +570,11 @@ export class YaCAClientModule {
 
     const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] || 1;
 
+    const isNotificationEnabled = this.sharedConfig.voiceRange.sendNotification ?? true;
+    if (isNotificationEnabled) {
+      this.notification(locale("voice_range_changed", voiceRange), YacaNotificationType.INFO);
+    }
+
     const isMarkerEnable = this.sharedConfig.voiceRange.markerColor?.enabled ?? true;
     if (isMarkerEnable) {
       const red = this.sharedConfig.voiceRange.markerColor?.r ?? 0;

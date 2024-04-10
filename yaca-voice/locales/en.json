@@ -20,6 +20,7 @@
   "use_salty_secondary_radio": "Use secondary radio",
 
   "change_voice_range": "Change voice range",
+  "voice_range_changed": "Voice range changed to %s meters.",
 
   "radio_not_activated": "Your radio is not activated!",
   "radio_channel_invalid": "The radio channel is invalid!"
