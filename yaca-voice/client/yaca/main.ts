@@ -24,6 +24,7 @@ import { cache } from "../utils";
 export class YaCAClientModule {
   websocket: WebSocket;
   sharedConfig: YacaSharedConfig;
+  mufflingVehicleWhitelistHash: Set<number> = new Set();
   allPlayers: Map<number, YacaPlayerData> = new Map();
   firstConnect = true;
 
@@ -78,6 +79,10 @@ export class YaCAClientModule {
   constructor() {
     this.sharedConfig = JSON.parse(LoadResourceFile(cache.resource, "config/shared.json"));
     initLocale(this.sharedConfig.locale);
+
+    for (const vehicleModel of this.sharedConfig.mufflingVehicleWhitelist ?? []) {
+      this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel));
+    }
 
     this.responseCodesToErrorMessages = {
       OUTDATED_VERSION: locale("outdated_plugin"),
@@ -793,15 +798,18 @@ export class YaCAClientModule {
    * @param {number} nearbyPlayerPed - The nearby player ped.
    * @param {number} ownCurrentRoom - The current room the client is in.
    * @param {boolean} ownVehicleHasOpening - The opening state ot the vehicle the client is in.
+   * @param {boolean} nearbyUsesMegaphone - The state if the nearby player uses a megaphone.
    */
-  getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean, nearbyUsesMegaphone: boolean = false) {
+  getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean, nearbyUsesMegaphone = false) {
     if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
       return this.sharedConfig.mufflingIntensities?.differentRoom ?? 10;
     } else if (this.sharedConfig.vehicleMuffling ?? true) {
       const nearbyPlayerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false);
+      const ownVehicleId = cache.vehicle || 0;
 
-      if (cache.vehicle !== nearbyPlayerVehicle) {
-        const nearbyPlayerVehicleHasOpening = nearbyPlayerVehicle === 0 || vehicleHasOpening(nearbyPlayerVehicle);
+      if (ownVehicleId !== nearbyPlayerVehicle) {
+        const nearbyPlayerVehicleHasOpening =
+          nearbyPlayerVehicle === 0 || this.mufflingVehicleWhitelistHash.has(GetEntityModel(nearbyPlayerVehicle)) || vehicleHasOpening(nearbyPlayerVehicle);
 
         if (nearbyUsesMegaphone) {
           if (!ownVehicleHasOpening) {
@@ -867,7 +875,7 @@ export class YaCAClientModule {
       currentRoom = GetRoomKeyFromEntity(cache.ped),
       playersToPhoneSpeaker: Set<number> = new Set(),
       playersOnPhoneSpeaker: Set<number> = new Set(),
-      hasVehicleOpening = cache.vehicle === false || vehicleHasOpening(cache.vehicle),
+      hasVehicleOpening = cache.vehicle === false || this.mufflingVehicleWhitelistHash.has(GetEntityModel(cache.vehicle)) || vehicleHasOpening(cache.vehicle),
       localData = this.getPlayerByID(cache.serverId);
     if (!localData) {
       return;
