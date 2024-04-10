@@ -9,6 +9,7 @@ export interface YacaSharedConfig {
   notifications: {
     oxLib: boolean;
     gta: boolean;
+    own: boolean;
   };
   keyBinds: {
     toggleRange: string | false;

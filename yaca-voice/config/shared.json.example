@@ -5,8 +5,9 @@
   "unmuteDelay": 300,
   "maxPhoneSpeakerRange": 5,
   "notifications": {
-    "oxLib": true,
-    "gta": true
+    "oxLib": false,
+    "gta": true,
+    "own": false
   },
   "keyBinds": {
     "toggleRange": "Z",
