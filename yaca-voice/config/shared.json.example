@@ -26,6 +26,7 @@
       30,
       40
     ],
+    "sendNotification": false
     "markerColor": {
         "enabled": true,
         "r": 0,
