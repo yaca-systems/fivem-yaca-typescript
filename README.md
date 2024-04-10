@@ -389,14 +389,27 @@ The event is triggered when a player starts or stops talking on the radio.
 
 The event is triggered when a player starts or stops receiving on the radio.
 
-| Parameter | Type     | Description                                    |
-| --------- | -------- | ---------------------------------------------- |
-| state     | `bool`   | the new receiver state                         |
-| channel   | `number` | the channel from which the player is receiving |
 | Parameter | Type      | Description                                    |
 | --------- | --------- | ---------------------------------------------- |
 | state     | `boolean` | the new receiver state                         |
 | channel   | `number`  | the channel from which the player is receiving |
+
+### yaca:external:notification
+
+The event is triggered when a notification should be shown.
+
+| Parameter | Type     | Description                                                  |
+| --------- | -------- | ------------------------------------------------------------ |
+| message   | `string` | the message to show                                          |
+| type      | `string` | the type of the message (`"inform"`, `"error"`, `"success"`) |
+
+Example for custom notification:
+
+```lua
+AddEventHandler('yaca:external:notification', function (message, type)
+  -- Call your Notifications System here.
+end)
+```
 
 </details>
 

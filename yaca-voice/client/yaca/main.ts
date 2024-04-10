@@ -57,7 +57,7 @@ export class YaCAClientModule {
    * @param {YacaNotificationType} type - The type of the notification, e.g. error, inform, success.
    */
   notification(message: string, type: YacaNotificationType) {
-    if (this.sharedConfig.notifications.oxLib) {
+    if (this.sharedConfig.notifications?.oxLib) {
       emit("ox_lib:notify", {
         id: "yaca",
         title: "YaCA",
@@ -66,13 +66,17 @@ export class YaCAClientModule {
       });
     }
 
-    if (this.sharedConfig.notifications.gta) {
+    if (this.sharedConfig.notifications?.gta) {
       BeginTextCommandThefeedPost("STRING");
       AddTextComponentSubstringPlayerName(`YaCA: ${message}`);
       if (type === YacaNotificationType.ERROR) {
         ThefeedSetNextPostBackgroundColor(6);
       }
       EndTextCommandThefeedPostTicker(false, false);
+    }
+
+    if (this.sharedConfig.notifications?.own) {
+      emit("yaca:external:notification", message, type);
     }
   }
 
