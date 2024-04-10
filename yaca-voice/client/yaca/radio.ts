@@ -36,7 +36,7 @@ export class YaCAClientRadioModule {
     this.registerExports();
     this.registerEvents();
 
-    if (!this.clientModule.sharedConfig.saltyChatBridge) {
+    if (!this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
       this.registerKeybinds();
     }
   }
@@ -193,7 +193,7 @@ export class YaCAClientRadioModule {
 
         emit("yaca:external:isRadioReceiving", true, channel);
 
-        if (this.clientModule.sharedConfig.saltyChatBridge) {
+        if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
           this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
         }
       } else {
@@ -206,7 +206,7 @@ export class YaCAClientRadioModule {
         const state = inRadio > 0;
         emit("yaca:external:isRadioReceiving", state, channel);
 
-        if (this.clientModule.sharedConfig.saltyChatBridge) {
+        if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
           this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(state, channel);
         }
       }
@@ -569,7 +569,7 @@ export class YaCAClientRadioModule {
     emit("yaca:external:setRadioFrequency", channel, frequency);
 
     // SaltyChat bridge
-    if (this.clientModule.sharedConfig.saltyChatBridge) {
+    if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
       const { frequency } = this.radioChannelSettings[channel];
       const saltyFrequency = frequency === "0" ? null : frequency;
       emit("SaltyChat_RadioChannelChanged", saltyFrequency, channel === 1);
@@ -622,7 +622,7 @@ export class YaCAClientRadioModule {
           this.radioTalkingStateToPlugin(false);
         }
 
-        if (this.clientModule.sharedConfig.saltyChatBridge) {
+        if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
           this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(false, channel);
         }
 
@@ -649,7 +649,7 @@ export class YaCAClientRadioModule {
     requestAnimDict("random@arrests").then(() => {
       TaskPlayAnim(cache.ped, "random@arrests", "generic_radio_chatter", 3, -4, -1, 49, 0.0, false, false, false);
 
-      if (this.clientModule.sharedConfig.saltyChatBridge) {
+      if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
         this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(true, channel);
       }
 
