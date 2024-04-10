@@ -139,7 +139,7 @@ export class YaCAClientModule {
       SetPlayerTalkingOverride(playerId, value);
     });
 
-    if (this.sharedConfig.saltyChatBridge) {
+    if (this.sharedConfig.saltyChatBridge?.enabled) {
       this.sharedConfig.maxRadioChannels = 2;
       this.saltyChatBridge = new YaCAClientSaltyChatBridge(this);
     }
@@ -203,7 +203,7 @@ export class YaCAClientModule {
         if (channel) {
           this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
 
-          if (this.sharedConfig.saltyChatBridge) {
+          if (this.sharedConfig.saltyChatBridge?.enabled) {
             this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
           }
         }
@@ -227,7 +227,7 @@ export class YaCAClientModule {
         if (channel) {
           this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
 
-          if (this.sharedConfig.saltyChatBridge) {
+          if (this.sharedConfig.saltyChatBridge?.enabled) {
             const inRadio = this.radioModule.playersInRadioChannel.get(channel);
             if (inRadio) {
               const inRadioArray = [...inRadio].filter((id) => id !== target);
@@ -363,7 +363,7 @@ export class YaCAClientModule {
       if (target === cache.serverId && !this.isPlayerMuted) {
         emit("yaca:external:voiceRangeUpdate", range);
         // SaltyChat bridge
-        if (this.sharedConfig.saltyChatBridge) {
+        if (this.sharedConfig.saltyChatBridge?.enabled) {
           emit("SaltyChat_VoiceRangeChanged", range.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
         }
       }
@@ -777,7 +777,7 @@ export class YaCAClientModule {
       emit("yaca:external:voiceRangeUpdate", this.isPlayerMuted ? 0 : this.getVoiceRange());
 
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge) {
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
         emit("SaltyChat_MicStateChanged", this.isPlayerMuted);
       }
     }
@@ -795,7 +795,7 @@ export class YaCAClientModule {
       emit("yaca:external:isTalking", isTalking);
 
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge) {
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
         emit("SaltyChat_TalkStateChanged", isTalking);
       }
     }
