@@ -10,15 +10,14 @@ using [yaca.systems](https://yaca.systems/) today!
 
 Before you start, make sure you have OneSync enabled and your server artifacts are up to date.
 
-1. Download and install the lastest [release of ox_lib](https://github.com/overextended/ox_lib/releases/latest).
-2. Download and install the latest [release](https://github.com/yaca-systems/fivem-yaca-typescript/releases) of this
+1. Download and install the latest [release](https://github.com/yaca-systems/fivem-yaca-typescript/releases) of this
    resource.
-3. Add `start yaca-voice` into your `server.cfg`.
-4. Open `config/server.json` and adjust
-   the [variables](https://github.com/yaca-systems/fivem-yaca-typescript/blob/dev/README.md#server-config) to your
+2. Add `start yaca-voice` into your `server.cfg`.
+3. Open `config/server.json` and adjust
+   the [variables](https://github.com/yaca-systems/fivem-yaca-typescript/blob/main/README.md#server-config) to your
    needs.
-5. Open `config/shared.json` and adjust
-   the [variables](https://github.com/yaca-systems/fivem-yaca-typescript/blob/dev/README.md#shared-config) to your
+4. Open `config/shared.json` and adjust
+   the [variables](https://github.com/yaca-systems/fivem-yaca-typescript/blob/main/README.md#shared-config) to your
    needs.
 
 # Server Config
