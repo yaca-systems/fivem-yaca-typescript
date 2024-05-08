@@ -185,7 +185,7 @@ export class YaCAClientPhoneModule {
       }
 
       this.removePhoneSpeakerFromEntity(playerSource);
-      if (typeof value !== "undefined") {
+      if (value !== null) {
         this.clientModule.setPlayerVariable(playerSource, "phoneCallMemberIds", Array.isArray(value) ? value : [value]);
       }
     });
