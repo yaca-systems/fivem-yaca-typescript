@@ -1,4 +1,5 @@
 import { YaCAServerModule } from "yaca";
+import { MUTE_ON_PHONE_STATE_NAME, PHONE_SPEAKER_STATE_NAME } from "common/const";
 
 /**
  * The phone module for the server.
@@ -108,9 +109,8 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the call.
    */
   callPlayer(src: number, target: number, state: boolean) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src),
-      targetPlayer = players.get(target);
+    const player = this.serverModule.getPlayer(src);
+    const targetPlayer = this.serverModule.getPlayer(target);
     if (!player || !targetPlayer) {
       return;
     }
@@ -125,11 +125,11 @@ export class YaCAServerPhoneModle {
       player.voiceSettings.inCallWith.push(target);
       targetPlayer.voiceSettings.inCallWith.push(src);
 
-      if (playerState["yaca:phoneSpeaker"]) {
+      if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, true);
       }
 
-      if (targetState["yaca:phoneSpeaker"]) {
+      if (targetState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(target, true);
       }
     } else {
@@ -139,11 +139,11 @@ export class YaCAServerPhoneModle {
       player.voiceSettings.inCallWith = player.voiceSettings.inCallWith.filter((id) => id !== target);
       targetPlayer.voiceSettings.inCallWith = targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
 
-      if (playerState["yaca:phoneSpeaker"]) {
+      if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, false);
       }
 
-      if (targetState["yaca:phoneSpeaker"]) {
+      if (targetState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(target, false);
       }
     }
@@ -159,9 +159,8 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the call.
    */
   callPlayerOldEffect(src: number, target: number, state: boolean) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src),
-      targetPlayer = players.get(target);
+    const player = this.serverModule.getPlayer(src);
+    const targetPlayer = this.serverModule.getPlayer(target);
     if (!player || !targetPlayer) {
       return;
     }
@@ -176,11 +175,11 @@ export class YaCAServerPhoneModle {
       player.voiceSettings.inCallWith.push(target);
       targetPlayer.voiceSettings.inCallWith.push(src);
 
-      if (playerState["yaca:phoneSpeaker"]) {
+      if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, true);
       }
 
-      if (targetState["yaca:phoneSpeaker"]) {
+      if (targetState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(target, true);
       }
     } else {
@@ -190,11 +189,11 @@ export class YaCAServerPhoneModle {
       player.voiceSettings.inCallWith = player.voiceSettings.inCallWith.filter((id: number) => id !== target);
       targetPlayer.voiceSettings.inCallWith = targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
 
-      if (playerState["yaca:phoneSpeaker"]) {
+      if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, false);
       }
 
-      if (targetState["yaca:phoneSpeaker"]) {
+      if (targetState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(target, false);
       }
     }
@@ -210,13 +209,17 @@ export class YaCAServerPhoneModle {
    * @param {boolean} [onCallStop=false] - Whether the call has stopped. Defaults to false if not provided.
    */
   muteOnPhone(src: number, state: boolean, onCallStop = false) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src);
+    const player = this.serverModule.getPlayer(src);
     if (!player) {
       return;
     }
 
-    player.voiceSettings.mutedOnPhone = state;
+    const playerState = Player(src).state;
+    if (!playerState[PHONE_SPEAKER_STATE_NAME]) {
+      return;
+    }
+
+    playerState.set(MUTE_ON_PHONE_STATE_NAME, state, true);
     emitNet("client:yaca:phoneMute", -1, src, state, onCallStop);
     emit("yaca:external:phoneMute", src, state);
   }
@@ -228,8 +231,7 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the phone speaker.
    */
   enablePhoneSpeaker(src: number, state: boolean) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src);
+    const player = this.serverModule.getPlayer(src);
     if (!player) {
       return;
     }

@@ -1,0 +1,17 @@
+const VOICE_RANGE_STATE_NAME = "yacaVoiceRange";
+const FORCE_MUTED_STATE_NAME = "yacaForceMuted";
+const MEGAPHONE_STATE_NAME = "yacaMegaphone";
+const PHONE_SPEAKER_STATE_NAME = "yacaPhoneSpeaker";
+const MUTE_ON_PHONE_STATE_NAME = "yacaMuteOnPhone";
+const CLIENT_ID_STATE_NAME = "yacaClientID";
+const LIP_SYNC_STATE_NAME = "yacaLipSync";
+
+export {
+  VOICE_RANGE_STATE_NAME,
+  FORCE_MUTED_STATE_NAME,
+  MEGAPHONE_STATE_NAME,
+  PHONE_SPEAKER_STATE_NAME,
+  MUTE_ON_PHONE_STATE_NAME,
+  CLIENT_ID_STATE_NAME,
+  LIP_SYNC_STATE_NAME,
+};

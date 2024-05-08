@@ -1,5 +1,6 @@
-import { CommDeviceMode, YacaFilterEnum, YacaPlayerData } from "types";
+import { CommDeviceMode, YacaFilterEnum } from "types";
 import { YaCAClientModule } from "yaca";
+import { CLIENT_ID_STATE_NAME } from "common/const";
 
 /**
  * The intercom module for the client.
@@ -33,13 +34,10 @@ export class YaCAClientIntercomModule {
         playerIDs = [playerIDs];
       }
 
-      const playersToAddRemove: Set<YacaPlayerData> = new Set();
+      const playersToAddRemove: Set<number> = new Set();
       for (const playerID of playerIDs) {
-        const player = this.clientModule.getPlayerByID(playerID);
-        if (!player) {
-          continue;
-        }
-        playersToAddRemove.add(player);
+        const playerState = Player(playerID).state;
+        playersToAddRemove.add(playerState[CLIENT_ID_STATE_NAME]);
       }
 
       if (playersToAddRemove.size < 1) {

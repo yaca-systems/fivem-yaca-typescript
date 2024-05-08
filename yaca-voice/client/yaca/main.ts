@@ -4,7 +4,6 @@ import {
   type YacaClient,
   YacaFilterEnum,
   YacaNotificationType,
-  YacaPlayerData,
   type YacaProtocol,
   YacaResponse,
   type YacaSharedConfig,
@@ -15,6 +14,14 @@ import { YaCAClientIntercomModule, YaCAClientMegaphoneModule, YaCAClientPhoneMod
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale, locale } from "common/locale";
 import { cache } from "../utils";
+import {
+  CLIENT_ID_STATE_NAME,
+  FORCE_MUTED_STATE_NAME,
+  LIP_SYNC_STATE_NAME,
+  MEGAPHONE_STATE_NAME,
+  MUTE_ON_PHONE_STATE_NAME,
+  VOICE_RANGE_STATE_NAME,
+} from "common/const";
 
 /**
  * The YaCA client module.
@@ -25,7 +32,6 @@ export class YaCAClientModule {
   websocket: WebSocket;
   sharedConfig: YacaSharedConfig;
   mufflingVehicleWhitelistHash: Set<number> = new Set();
-  allPlayers: Map<number, YacaPlayerData> = new Map();
   firstConnect = true;
 
   radioModule: YaCAClientRadioModule;
@@ -192,16 +198,21 @@ export class YaCAClientModule {
      * @param {number} target - The ID of the target.
      */
     onNet("yaca:client:playerEnteredScope", (target: number) => {
-      const player = this.getPlayerByID(target);
-      if (!player) {
-        return;
-      }
+      const playerState = Player(target).state;
 
       const frequency = this.radioModule.playersWithShortRange.get(target);
       if (frequency) {
         const channel = this.radioModule.findRadioChannelByFrequency(frequency);
         if (channel) {
-          this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+          this.setPlayersCommType(
+            playerState[CLIENT_ID_STATE_NAME],
+            YacaFilterEnum.RADIO,
+            true,
+            channel,
+            undefined,
+            CommDeviceMode.RECEIVER,
+            CommDeviceMode.SENDER,
+          );
 
           if (this.sharedConfig.saltyChatBridge?.enabled) {
             this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
@@ -216,16 +227,21 @@ export class YaCAClientModule {
      * @param {number} target - The ID of the target.
      */
     onNet("yaca:client:playerLeftScope", (target: number) => {
-      const player = this.getPlayerByID(target);
-      if (!player) {
-        return;
-      }
+      const playerState = Player(target).state;
 
       const frequency = this.radioModule.playersWithShortRange.get(target);
       if (frequency) {
         const channel = this.radioModule.findRadioChannelByFrequency(frequency);
         if (channel) {
-          this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+          this.setPlayersCommType(
+            playerState[CLIENT_ID_STATE_NAME],
+            YacaFilterEnum.RADIO,
+            false,
+            channel,
+            undefined,
+            CommDeviceMode.RECEIVER,
+            CommDeviceMode.SENDER,
+          );
 
           if (this.sharedConfig.saltyChatBridge?.enabled) {
             const inRadio = this.radioModule.playersInRadioChannel.get(channel);
@@ -302,75 +318,17 @@ export class YaCAClientModule {
     });
 
     /**
-     * Handles the "client:yaca:disconnect" server event.
-     *
-     * @param {number} remoteId - The remote ID of the player to be disconnected.
-     *
-     */
-    onNet("client:yaca:disconnect", (remoteId: number) => {
-      this.allPlayers.delete(remoteId);
-    });
-
-    /**
-     * Handles the "client:yaca:addPlayers" server event.
-     *
-     * @param {DataObject | DataObject[]} dataObjects - The data object or objects to be added.
-     */
-    onNet("client:yaca:addPlayers", (dataObjects: DataObject | DataObject[]) => {
-      if (!Array.isArray(dataObjects)) {
-        dataObjects = [dataObjects];
-      }
-
-      for (const dataObj of dataObjects) {
-        if (!dataObj || typeof dataObj.range === "undefined" || typeof dataObj.clientId === "undefined" || typeof dataObj.playerId === "undefined") {
-          continue;
-        }
-
-        const currentData = this.getPlayerByID(dataObj.playerId);
-
-        this.allPlayers.set(dataObj.playerId, {
-          remoteID: dataObj.playerId,
-          clientId: dataObj.clientId,
-          forceMuted: dataObj.forceMuted || false,
-          range: dataObj.range,
-          isTalking: false,
-          phoneCallMemberIds: currentData?.phoneCallMemberIds || undefined,
-          mutedOnPhone: dataObj.mutedOnPhone || false,
-        });
-      }
-    });
-
-    /**
-     * Handles the "client:yaca:muteTarget" server event.
-     *
-     * @param {number} target - The target to be muted.
-     * @param {boolean} muted - The mute status.
-     */
-    onNet("client:yaca:muteTarget", (target: number, muted: boolean) => {
-      const player = this.getPlayerByID(target);
-      if (player) {
-        player.forceMuted = muted;
-      }
-    });
-
-    /**
      * Handles the "client:yaca:changeVoiceRange" server event.
      *
      * @param {number} target - The target whose voice range is to be changed.
      * @param {number} range - The new voice range.
      */
-    onNet("client:yaca:changeVoiceRange", (target: number, range: number) => {
-      if (target === cache.serverId) {
-        emit("yaca:external:voiceRangeUpdate", range);
-        // SaltyChat bridge
-        if (this.sharedConfig.saltyChatBridge?.enabled) {
-          emit("SaltyChat_VoiceRangeChanged", range.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
-        }
-      }
+    onNet("client:yaca:changedOwnVoiceRange", (range: number) => {
+      emit("yaca:external:voiceRangeUpdate", range);
 
-      const player = this.getPlayerByID(target);
-      if (player) {
-        player.range = range;
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
+        emit("SaltyChat_VoiceRangeChanged", range.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
       }
     });
 
@@ -383,15 +341,6 @@ export class YaCAClientModule {
     onNet("client:yaca:notification", (message: string, type: YacaNotificationType) => {
       this.notification(message, type);
     });
-  }
-
-  /**
-   * Get the player by remote ID.
-   *
-   * @param remoteId The remote ID of the player.
-   */
-  getPlayerByID(remoteId: number) {
-    return this.allPlayers.get(remoteId);
   }
 
   /**
@@ -434,13 +383,14 @@ export class YaCAClientModule {
    * @returns {boolean} Returns true if the plugin is initialized, false otherwise.
    */
   isPluginInitialized(silent = false): boolean {
-    const inited = Boolean(this.getPlayerByID(cache.serverId));
+    const playerState = LocalPlayer.state;
+    const initialized = playerState[CLIENT_ID_STATE_NAME] !== null;
 
-    if (!inited && !silent) {
+    if (!initialized && !silent) {
       this.notification(locale("plugin_not_initialized"), YacaNotificationType.ERROR);
     }
 
-    return inited;
+    return initialized;
   }
 
   /**
@@ -517,24 +467,6 @@ export class YaCAClientModule {
     }
 
     this.notification(message, YacaNotificationType.ERROR);
-  }
-
-  /**
-   * Sets a variable for a player.
-   *
-   * @param {string} player - The player for whom the variable is to be set.
-   * @param {string} variable - The name of the variable.
-   * @param {*} value - The value to be set for the variable.
-   */
-  setPlayerVariable(player: number, variable: string, value: unknown) {
-    const currentData = this.getPlayerByID(player);
-
-    if (!currentData) {
-      this.allPlayers.set(player, {});
-    }
-
-    // @ts-expect-error Object cannot be undefined
-    this.getPlayerByID(player)[variable] = value;
   }
 
   /**
@@ -661,7 +593,7 @@ export class YaCAClientModule {
    * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
    */
   setPlayersCommType(
-    players: YacaPlayerData | (YacaPlayerData | undefined)[] | undefined,
+    players: number[] | number,
     type: YacaFilterEnum,
     state: boolean,
     channel?: number,
@@ -676,7 +608,7 @@ export class YaCAClientModule {
     const clientIds: YacaClient[] = [];
     if (typeof ownMode !== "undefined") {
       clientIds.push({
-        client_id: this.getPlayerByID(cache.serverId)?.clientId,
+        client_id: LocalPlayer.state[CLIENT_ID_STATE_NAME],
         mode: ownMode,
       });
     }
@@ -687,7 +619,7 @@ export class YaCAClientModule {
       }
 
       clientIds.push({
-        client_id: player.clientId,
+        client_id: player,
         mode: otherPlayersMode,
       });
     }
@@ -790,7 +722,7 @@ export class YaCAClientModule {
 
       SetPlayerTalkingOverride(cache.playerId, isTalking);
       PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
-      LocalPlayer.state.set("yaca:lipsync", isTalking, true);
+      LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true);
 
       emit("yaca:external:isTalking", isTalking);
 
@@ -873,9 +805,11 @@ export class YaCAClientModule {
 
     this.currentlyPhoneSpeakerApplied.forEach((playerId) => {
       if (!playersOnPhoneSpeaker.has(playerId)) {
+        const playerState = Player(playerId).state;
+
         this.currentlyPhoneSpeakerApplied.delete(playerId);
         this.setPlayersCommType(
-          this.getPlayerByID(playerId),
+          playerState[CLIENT_ID_STATE_NAME],
           YacaFilterEnum.PHONE_SPEAKER,
           false,
           undefined,
@@ -897,8 +831,8 @@ export class YaCAClientModule {
       playersToPhoneSpeaker: Set<number> = new Set(),
       playersOnPhoneSpeaker: Set<number> = new Set(),
       hasVehicleOpening = cache.vehicle === false || this.mufflingVehicleWhitelistHash.has(GetEntityModel(cache.vehicle)) || vehicleHasOpening(cache.vehicle),
-      localData = this.getPlayerByID(cache.serverId);
-    if (!localData) {
+      localPlayerState = LocalPlayer.state;
+    if (!localPlayerState[CLIENT_ID_STATE_NAME]) {
       return;
     }
 
@@ -908,19 +842,17 @@ export class YaCAClientModule {
         continue;
       }
 
-      const voiceSetting = this.getPlayerByID(remoteId);
-      if (!voiceSetting || !voiceSetting.clientId) {
-        continue;
-      }
-
       const playerPed = GetPlayerPed(player);
       if (playerPed <= 0) {
         continue;
       }
 
       const playerState = Player(remoteId).state;
-      const isMegaphoneActive = playerState["yaca:megaphoneactive"] !== null;
+      if (!playerState[CLIENT_ID_STATE_NAME]) {
+        continue;
+      }
 
+      const isMegaphoneActive = playerState[MEGAPHONE_STATE_NAME] !== null;
       const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening, isMegaphoneActive);
 
       const playerPos = GetEntityCoords(playerPed, false),
@@ -930,13 +862,13 @@ export class YaCAClientModule {
 
       if (!playersOnPhoneSpeaker.has(remoteId)) {
         players.set(remoteId, {
-          client_id: voiceSetting.clientId,
+          client_id: playerState[CLIENT_ID_STATE_NAME],
           position: convertNumberArrayToXYZ(playerPos),
           direction: convertNumberArrayToXYZ(playerDirection),
-          range: voiceSetting.range,
+          range: playerState[VOICE_RANGE_STATE_NAME],
           is_underwater: isUnderwater,
           muffle_intensity: muffleIntensity,
-          is_muted: voiceSetting.forceMuted,
+          is_muted: playerState[FORCE_MUTED_STATE_NAME],
         });
       }
 
@@ -949,17 +881,18 @@ export class YaCAClientModule {
         playersToPhoneSpeaker.add(remoteId);
       }
 
-      // Phone speaker handling.
-      if (voiceSetting.phoneCallMemberIds) {
-        for (const phoneCallMemberId of voiceSetting.phoneCallMemberIds) {
-          const phoneCallMember = this.getPlayerByID(phoneCallMemberId);
-          if (!phoneCallMember || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) {
+      const phoneCallMemberIds = this.phoneModule.phoneCallMemberIds.get(remoteId);
+      if (phoneCallMemberIds) {
+        for (const phoneCallMemberId of phoneCallMemberIds) {
+          const phoneCallMemberState = Player(phoneCallMemberId).state;
+
+          if (!phoneCallMemberState || phoneCallMemberState[MUTE_ON_PHONE_STATE_NAME] || phoneCallMemberState[FORCE_MUTED_STATE_NAME]) {
             continue;
           }
 
           players.delete(phoneCallMemberId);
           players.set(phoneCallMemberId, {
-            client_id: phoneCallMember.clientId,
+            client_id: phoneCallMemberState[CLIENT_ID_STATE_NAME],
             position: convertNumberArrayToXYZ(playerPos),
             direction: convertNumberArrayToXYZ(playerDirection),
             range: this.sharedConfig.maxPhoneSpeakerRange ?? 5,
@@ -971,7 +904,7 @@ export class YaCAClientModule {
           playersOnPhoneSpeaker.add(phoneCallMemberId);
 
           this.setPlayersCommType(
-            phoneCallMember,
+            phoneCallMemberState[CLIENT_ID_STATE_NAME],
             YacaFilterEnum.PHONE_SPEAKER,
             true,
             undefined,
@@ -993,10 +926,10 @@ export class YaCAClientModule {
       player: {
         player_direction: getCamDirection(),
         player_position: convertNumberArrayToXYZ(localPos),
-        player_range: localData.range,
+        player_range: localPlayerState[VOICE_RANGE_STATE_NAME],
         // @ts-expect-error Type error in the native
         player_is_underwater: IsPedSwimmingUnderWater(cache.ped) === 1,
-        player_is_muted: localData.forceMuted ?? false,
+        player_is_muted: localPlayerState[FORCE_MUTED_STATE_NAME] ?? false,
         players_list: Array.from(players.values()),
       },
     });

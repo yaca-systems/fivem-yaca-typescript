@@ -2,6 +2,7 @@ import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaRadioSettings, YacaStereoMode } from "types";
 import { cache, clamp, requestAnimDict } from "../utils";
 import { locale } from "common/locale";
+import { CLIENT_ID_STATE_NAME } from "common/const";
 
 /**
  * The radio module for the client.
@@ -174,15 +175,23 @@ export class YaCAClientRadioModule {
         return;
       }
 
-      const player = this.clientModule.getPlayerByID(target);
-      if (!player) {
+      const playerState = Player(target).state;
+      if (!playerState[CLIENT_ID_STATE_NAME]) {
         return;
       }
 
       const info = infos[cache.serverId];
 
       if (!info?.shortRange || (info?.shortRange && GetPlayerFromServerId(target) !== -1)) {
-        this.clientModule.setPlayersCommType(player, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+        this.clientModule.setPlayersCommType(
+          playerState[CLIENT_ID_STATE_NAME],
+          YacaFilterEnum.RADIO,
+          state,
+          channel,
+          undefined,
+          CommDeviceMode.RECEIVER,
+          CommDeviceMode.SENDER,
+        );
       }
 
       if (state) {
@@ -240,12 +249,12 @@ export class YaCAClientRadioModule {
         return;
       }
 
-      const playerData = this.clientModule.getPlayerByID(cache.serverId);
-      if (!playerData || !playerData.clientId) {
+      const playerState = LocalPlayer.state;
+      if (!playerState[CLIENT_ID_STATE_NAME]) {
         return;
       }
 
-      if (client_ids.includes(playerData.clientId)) {
+      if (client_ids.includes(playerState[CLIENT_ID_STATE_NAME])) {
         this.setRadioFrequency(channel, "0");
       }
 
@@ -499,7 +508,8 @@ export class YaCAClientRadioModule {
    * @param {boolean} state - The state of the player talking on the radio.
    */
   radioTalkingStateToPlugin(state: boolean) {
-    this.clientModule.setPlayersCommType(this.clientModule.getPlayerByID(cache.serverId), YacaFilterEnum.RADIO, state, this.activeRadioChannel);
+    const localState = LocalPlayer.state;
+    this.clientModule.setPlayersCommType(localState[CLIENT_ID_STATE_NAME], YacaFilterEnum.RADIO, state, this.activeRadioChannel);
   }
 
   /**
@@ -513,18 +523,18 @@ export class YaCAClientRadioModule {
       targets = [targets];
     }
 
-    const comDeviceTargets = [];
+    const comDeviceTargets = new Set<number>();
     for (const target of targets) {
-      const player = this.clientModule.getPlayerByID(target);
-      if (!player) {
+      const playerState = Player(target).state;
+      if (!playerState[CLIENT_ID_STATE_NAME]) {
         continue;
       }
 
-      comDeviceTargets.push(player);
+      comDeviceTargets.add(playerState[CLIENT_ID_STATE_NAME]);
     }
 
     this.clientModule.setPlayersCommType(
-      comDeviceTargets,
+      Array.from(comDeviceTargets),
       YacaFilterEnum.RADIO,
       state,
       this.activeRadioChannel,
@@ -591,19 +601,27 @@ export class YaCAClientRadioModule {
       return;
     }
 
-    const targets = [];
+    const targets = new Set<number>();
     for (const playerId of players) {
-      const player = this.clientModule.getPlayerByID(playerId);
-      if (!player || !player.remoteID) {
+      const playerState = Player(playerId).state;
+      if (!playerState[CLIENT_ID_STATE_NAME]) {
         continue;
       }
 
-      targets.push(player);
-      players.delete(player.remoteID);
+      targets.add(playerState[CLIENT_ID_STATE_NAME]);
+      players.delete(playerState[CLIENT_ID_STATE_NAME]);
     }
 
-    if (targets.length) {
-      this.clientModule.setPlayersCommType(targets, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+    if (targets.size) {
+      this.clientModule.setPlayersCommType(
+        Array.from(targets),
+        YacaFilterEnum.RADIO,
+        false,
+        channel,
+        undefined,
+        CommDeviceMode.RECEIVER,
+        CommDeviceMode.SENDER,
+      );
     }
   }
 

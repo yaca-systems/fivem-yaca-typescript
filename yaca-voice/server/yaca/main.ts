@@ -4,17 +4,15 @@ import { YaCAServerMegaphoneModule, YaCAServerPhoneModle, YaCAServerRadioModule 
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale } from "common/locale";
 import { checkVersion } from "../utils/versioncheck";
+import { CLIENT_ID_STATE_NAME, FORCE_MUTED_STATE_NAME, MUTE_ON_PHONE_STATE_NAME, VOICE_RANGE_STATE_NAME } from "common/const";
 
 /**
  * The player data type for YaCA.
  */
 export type YaCAPlayer = {
   voiceSettings: {
-    voiceRange: number;
     voiceFirstConnect: boolean;
-    forceMuted: boolean;
     ingameName: string;
-    mutedOnPhone: boolean;
     inCallWith: number[];
   };
   radioSettings: {
@@ -22,13 +20,6 @@ export type YaCAPlayer = {
     currentChannel: number;
     hasLong: boolean;
     frequencies: { [key: number]: string };
-  };
-  voicePlugin?: {
-    clientId: number;
-    forceMuted: boolean;
-    range: number;
-    playerId: number;
-    mutedOnPhone: boolean;
   };
 };
 
@@ -57,7 +48,6 @@ export class YaCAServerModule {
     console.log("~g~ --> YaCA: Server loaded");
 
     this.serverConfig = JSON.parse(LoadResourceFile(cache.resource, "config/server.json"));
-
     this.sharedConfig = JSON.parse(LoadResourceFile(cache.resource, "config/shared.json"));
 
     initLocale(this.sharedConfig.locale);
@@ -87,6 +77,15 @@ export class YaCAServerModule {
   }
 
   /**
+   * Get a player by ID.
+   *
+   * @param playerId - The ID of the player to get.
+   */
+  getPlayer(playerId: number): YaCAPlayer | undefined {
+    return this.players.get(playerId);
+  }
+
+  /**
    * Initialize the player on first connect.
    *
    * @param {number} src - The source-id of the player to initialize.
@@ -97,13 +96,15 @@ export class YaCAServerModule {
       return;
     }
 
+    const playerState = Player(src).state;
+    playerState.set(FORCE_MUTED_STATE_NAME, false, true);
+    playerState.set(MUTE_ON_PHONE_STATE_NAME, false, true);
+    playerState.set(VOICE_RANGE_STATE_NAME, this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex], true);
+
     this.players.set(src, {
       voiceSettings: {
-        voiceRange: this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex],
         voiceFirstConnect: false,
-        forceMuted: false,
         ingameName: name,
-        mutedOnPhone: false,
         inCallWith: [],
       },
       radioSettings: {
@@ -225,15 +226,13 @@ export class YaCAServerModule {
 
     this.nameSet.delete(player.voiceSettings?.ingameName);
 
-    const allFrequences = this.radioModule.radioFrequencyMap;
-    for (const [key, value] of allFrequences) {
+    const allFrequencies = this.radioModule.radioFrequencyMap;
+    for (const [key, value] of allFrequencies) {
       value.delete(src);
       if (!value.size) {
         this.radioModule.radioFrequencyMap.delete(key);
       }
     }
-
-    emitNet("client:yaca:disconnect", -1, src);
   }
 
   /**
@@ -252,17 +251,9 @@ export class YaCAServerModule {
    * @param {boolean} alive - The new alive status.
    */
   changePlayerAliveStatus(src: number, alive: boolean) {
-    const player = this.players.get(src);
-    if (!player) {
-      return;
-    }
+    const playerState = Player(src).state;
 
-    player.voiceSettings.forceMuted = !alive;
-    emitNet("client:yaca:muteTarget", -1, src, !alive);
-
-    if (player.voicePlugin) {
-      player.voicePlugin.forceMuted = !alive;
-    }
+    playerState.set(FORCE_MUTED_STATE_NAME, !alive, true);
   }
 
   /**
@@ -271,7 +262,9 @@ export class YaCAServerModule {
    * @param playerId - The ID of the player to get the alive status for.
    */
   getPlayerAliveStatus(playerId: number) {
-    return this.players.get(playerId)?.voiceSettings.forceMuted ?? false;
+    const playerState = Player(playerId).state;
+
+    return playerState[FORCE_MUTED_STATE_NAME] ?? false;
   }
 
   /**
@@ -310,8 +303,8 @@ export class YaCAServerModule {
    * @param {number} range - The new voice range.
    */
   changeVoiceRange(src: number, range: number) {
-    const player = this.players.get(src);
-    if (!player) {
+    const playerState = Player(src).state;
+    if (playerState[CLIENT_ID_STATE_NAME]) {
       return;
     }
 
@@ -319,12 +312,8 @@ export class YaCAServerModule {
       this.changeVoiceRange(src, this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex]);
     }
 
-    player.voiceSettings.voiceRange = range;
-    emitNet("client:yaca:changeVoiceRange", -1, src, player.voiceSettings.voiceRange);
-
-    if (player.voicePlugin) {
-      player.voicePlugin.range = range;
-    }
+    playerState.set(VOICE_RANGE_STATE_NAME, range, true);
+    emitNet("client:yaca:changedOwnVoiceRange", src, range);
   }
 
   /**
@@ -333,7 +322,8 @@ export class YaCAServerModule {
    * @param playerId - The ID of the player to get the voice range for.
    */
   getPlayerVoiceRange(playerId: number) {
-    return this.players.get(playerId)?.voiceSettings.voiceRange ?? this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex];
+    const playerState = Player(playerId).state;
+    return playerState[VOICE_RANGE_STATE_NAME] ?? this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex];
   }
 
   /**
@@ -374,30 +364,7 @@ export class YaCAServerModule {
       return;
     }
 
-    player.voicePlugin = {
-      clientId,
-      forceMuted: player.voiceSettings.forceMuted,
-      range: player.voiceSettings.voiceRange,
-      playerId: src,
-      mutedOnPhone: player.voiceSettings.mutedOnPhone,
-    };
-
-    emitNet("client:yaca:addPlayers", -1, player.voicePlugin);
-
-    const allPlayersData = [];
-    for (const playerSource of getPlayers()) {
-      const playerServer = this.players.get(parseInt(playerSource));
-      if (!playerServer) {
-        continue;
-      }
-
-      if (!playerServer.voicePlugin || parseInt(playerSource) === src) {
-        continue;
-      }
-
-      allPlayersData.push(playerServer.voicePlugin);
-    }
-
-    emitNet("client:yaca:addPlayers", src, allPlayersData);
+    const playerState = Player(src).state;
+    playerState.set(CLIENT_ID_STATE_NAME, clientId, true);
   }
 }

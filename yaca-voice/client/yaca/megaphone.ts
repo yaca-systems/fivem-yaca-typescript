@@ -2,6 +2,7 @@ import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum } from "types";
 import { locale } from "common/locale";
 import { cache, onCache } from "utils";
+import { CLIENT_ID_STATE_NAME, MEGAPHONE_STATE_NAME } from "common/const";
 
 /**
  * The megaphone module for the client.
@@ -85,7 +86,7 @@ export class YaCAClientMegaphoneModule {
     /**
      * Handles the "yaca:megaphoneactive" state bag change.
      */
-    AddStateBagChangeHandler("yaca:megaphoneactive", "", (bagName: string, _: string, value: number | undefined, __: number, replicated: boolean) => {
+    AddStateBagChangeHandler(MEGAPHONE_STATE_NAME, "", (bagName: string, _: string, value: number | undefined, __: number, replicated: boolean) => {
       if (replicated) {
         return;
       }
@@ -102,7 +103,7 @@ export class YaCAClientMegaphoneModule {
 
       const isOwnPlayer = playerSource === cache.serverId;
       this.clientModule.setPlayersCommType(
-        isOwnPlayer ? [] : this.clientModule.getPlayerByID(playerSource),
+        isOwnPlayer ? [] : Player(playerSource).state[CLIENT_ID_STATE_NAME],
         YacaFilterEnum.MEGAPHONE,
         typeof value !== "undefined",
         undefined,
