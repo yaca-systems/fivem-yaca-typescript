@@ -39,7 +39,7 @@ writeFileSync(
 
 writeFileSync(
   "fxmanifest.lua",
-  `fx_version 'bodacious'
+  `fx_version 'cerulean'
 game 'gta5'
 
 name '${packageJson.name}'
