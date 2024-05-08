@@ -836,7 +836,7 @@ export class YaCAClientModule {
 
     const nearbyPlayerVehicleModel = GetEntityModel(nearbyPlayerVehicle);
     const nearbyPlayerVehicleHasOpening =
-      nearbyPlayerVehicle === 0 || this.mufflingVehicleWhitelistHash.has(GetEntityModel(nearbyPlayerVehicleModel)) || vehicleHasOpening(nearbyPlayerVehicle);
+      nearbyPlayerVehicle === 0 || this.mufflingVehicleWhitelistHash.has(nearbyPlayerVehicleModel) || vehicleHasOpening(nearbyPlayerVehicle);
 
     if (!ownVehicleHasOpening && !nearbyPlayerVehicleHasOpening) {
       return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
