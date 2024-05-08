@@ -360,7 +360,7 @@ export class YaCAClientModule {
      * @param {number} range - The new voice range.
      */
     onNet("client:yaca:changeVoiceRange", (target: number, range: number) => {
-      if (target === cache.serverId && !this.isPlayerMuted) {
+      if (target === cache.serverId) {
         emit("yaca:external:voiceRangeUpdate", range);
         // SaltyChat bridge
         if (this.sharedConfig.saltyChatBridge?.enabled) {
