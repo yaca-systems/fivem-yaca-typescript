@@ -307,6 +307,14 @@ This event is triggered when the voice range of a player is updated.
 | --------- | ----- | ------------------------- |
 | range     | `int` | the newly set voice range |
 
+### yaca:external:muteStateChanged
+
+The event is triggered when the mute state of a player changes.
+
+| Parameter | Type      | Description             |
+| --------- | --------- | ----------------------- |
+| state     | `boolean` | the new mute state      |
+
 ### yaca:external:isTalking
 
 The event is triggered when a player starts or stops talking.

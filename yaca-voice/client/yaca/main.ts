@@ -774,7 +774,7 @@ export class YaCAClientModule {
     // Update state if player is muted or not
     if (payload.code === "MUTE_STATE") {
       this.isPlayerMuted = payload.message === "1";
-      emit("yaca:external:voiceRangeUpdate", this.isPlayerMuted ? 0 : this.getVoiceRange());
+      emit("yaca:external:muteStateChanged", this.isPlayerMuted);
 
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge?.enabled) {
