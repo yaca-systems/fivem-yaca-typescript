@@ -119,6 +119,7 @@ export class YaCAServerPhoneModle {
     emitNet("client:yaca:phone", src, target, state);
 
     const playerState = Player(src).state;
+    const targetState = Player(target).state;
 
     if (state) {
       player.voiceSettings.inCallWith.push(target);
@@ -126,6 +127,10 @@ export class YaCAServerPhoneModle {
 
       if (playerState["yaca:phoneSpeaker"]) {
         this.enablePhoneSpeaker(src, true);
+      }
+
+      if (targetState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(target, true);
       }
     } else {
       this.muteOnPhone(src, false, true);
@@ -136,6 +141,10 @@ export class YaCAServerPhoneModle {
 
       if (playerState["yaca:phoneSpeaker"]) {
         this.enablePhoneSpeaker(src, false);
+      }
+
+      if (targetState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(target, false);
       }
     }
 
@@ -161,6 +170,7 @@ export class YaCAServerPhoneModle {
     emitNet("client:yaca:phoneOld", src, target, state);
 
     const playerState = Player(src).state;
+    const targetState = Player(target).state;
 
     if (state) {
       player.voiceSettings.inCallWith.push(target);
@@ -168,6 +178,10 @@ export class YaCAServerPhoneModle {
 
       if (playerState["yaca:phoneSpeaker"]) {
         this.enablePhoneSpeaker(src, true);
+      }
+
+      if (targetState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(target, true);
       }
     } else {
       this.muteOnPhone(src, false, true);
@@ -178,6 +192,10 @@ export class YaCAServerPhoneModle {
 
       if (playerState["yaca:phoneSpeaker"]) {
         this.enablePhoneSpeaker(src, false);
+      }
+
+      if (targetState["yaca:phoneSpeaker"]) {
+        this.enablePhoneSpeaker(target, false);
       }
     }
 
