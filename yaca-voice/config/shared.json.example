@@ -1,5 +1,6 @@
 {
   "debug": false,
+  "versionCheck": true,
   "buildType": 0,
   "locale": "en",
   "unmuteDelay": 300,
