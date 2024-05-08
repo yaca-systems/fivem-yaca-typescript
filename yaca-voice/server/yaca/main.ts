@@ -3,6 +3,7 @@ import type { DataObject, ServerCache, YacaServerConfig, YacaSharedConfig } from
 import { YaCAServerMegaphoneModule, YaCAServerPhoneModle, YaCAServerRadioModule } from "yaca";
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale } from "common/locale";
+import { checkVersion } from "../utils/versioncheck";
 
 /**
  * The player data type for YaCA.
@@ -71,6 +72,10 @@ export class YaCAServerModule {
     if (this.sharedConfig.saltyChatBridge?.enabled) {
       this.sharedConfig.maxRadioChannels = 2;
       this.saltChatBridge = new YaCAServerSaltyChatBridge(this);
+    }
+
+    if (this.sharedConfig.versionCheck ?? true) {
+      checkVersion().then();
     }
   }
 
