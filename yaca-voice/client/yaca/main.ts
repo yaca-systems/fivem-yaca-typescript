@@ -812,26 +812,38 @@ export class YaCAClientModule {
   getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean, nearbyUsesMegaphone = false) {
     if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
       return this.sharedConfig.mufflingIntensities?.differentRoom ?? 10;
-    } else if (this.sharedConfig.vehicleMuffling ?? true) {
-      const nearbyPlayerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false);
-      const ownVehicleId = cache.vehicle || 0;
+    }
 
-      if (ownVehicleId !== nearbyPlayerVehicle) {
-        const nearbyPlayerVehicleHasOpening =
-          nearbyPlayerVehicle === 0 || this.mufflingVehicleWhitelistHash.has(GetEntityModel(nearbyPlayerVehicle)) || vehicleHasOpening(nearbyPlayerVehicle);
+    const vehicleMuffling = this.sharedConfig.vehicleMuffling ?? true;
+    if (!vehicleMuffling) {
+      return 0;
+    }
 
-        if (nearbyUsesMegaphone) {
-          if (!ownVehicleHasOpening) {
-            return this.sharedConfig.mufflingIntensities?.megaPhoneInCar ?? 6;
-          }
-        } else {
-          if (!ownVehicleHasOpening && !nearbyPlayerVehicleHasOpening) {
-            return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
-          } else if (!ownVehicleHasOpening || !nearbyPlayerVehicleHasOpening) {
-            return this.sharedConfig.mufflingIntensities?.oneCarClosed ?? 6;
-          }
-        }
+    const nearbyPlayerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false);
+    const ownVehicleId = cache.vehicle || 0;
+
+    if (ownVehicleId === nearbyPlayerVehicle) {
+      return 0;
+    }
+
+    if (nearbyUsesMegaphone) {
+      if (ownVehicleHasOpening) {
+        return 0;
+      } else {
+        return this.sharedConfig.mufflingIntensities?.megaPhoneInCar ?? 6;
       }
+    }
+
+    const nearbyPlayerVehicleModel = GetEntityModel(nearbyPlayerVehicle);
+    const nearbyPlayerVehicleHasOpening =
+      nearbyPlayerVehicle === 0 || this.mufflingVehicleWhitelistHash.has(GetEntityModel(nearbyPlayerVehicleModel)) || vehicleHasOpening(nearbyPlayerVehicle);
+
+    if (!ownVehicleHasOpening && !nearbyPlayerVehicleHasOpening) {
+      return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
+    }
+
+    if (!ownVehicleHasOpening || !nearbyPlayerVehicleHasOpening) {
+      return this.sharedConfig.mufflingIntensities?.oneCarClosed ?? 5;
     }
 
     return 0;
@@ -907,7 +919,7 @@ export class YaCAClientModule {
       }
 
       const playerState = Player(remoteId).state;
-      const isMegaphoneActive = typeof playerState["yaca:megaphoneactive"] !== "undefined";
+      const isMegaphoneActive = playerState["yaca:megaphoneactive"] !== null;
 
       const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening, isMegaphoneActive);
 
