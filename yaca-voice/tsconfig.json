@@ -17,10 +17,8 @@
     "noUnusedLocals": true,
     "skipLibCheck": true,
     "declaration": true,
-    "noEmit": false,
-    "emitDeclarationOnly": true,
-    "removeComments": true,
-    "outDir": "./dist/"
+    "noEmit": true,
+    "removeComments": true
   },
   "include": ["./", "./types/"]
 }
