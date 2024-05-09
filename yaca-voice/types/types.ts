@@ -78,3 +78,13 @@ export type ClientCache = {
 export type ServerCache = {
   resource: string;
 };
+
+export type YacaPluginPlayerData = {
+  client_id: number;
+  position: { x: number; y: number; z: number };
+  direction: { x: number; y: number; z: number };
+  range: number;
+  is_underwater: boolean;
+  muffle_intensity: number;
+  is_muted: boolean;
+};

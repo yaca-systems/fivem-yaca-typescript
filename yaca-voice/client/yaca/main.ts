@@ -5,6 +5,7 @@ import {
   YacaFilterEnum,
   YacaNotificationType,
   YacaPlayerData,
+  type YacaPluginPlayerData,
   type YacaProtocol,
   YacaResponse,
   type YacaSharedConfig,
@@ -891,16 +892,19 @@ export class YaCAClientModule {
    * Calculate the players in streaming range and send them to the voice plugin.
    */
   calcPlayers() {
-    const players = new Map(),
+    const localData = this.getPlayerByID(cache.serverId);
+
+    if (!localData) {
+      return;
+    }
+
+    const players = new Map<number, YacaPluginPlayerData>(),
       localPos = GetEntityCoords(cache.ped, false),
       currentRoom = GetRoomKeyFromEntity(cache.ped),
       playersToPhoneSpeaker: Set<number> = new Set(),
       playersOnPhoneSpeaker: Set<number> = new Set(),
       hasVehicleOpening = cache.vehicle === false || this.mufflingVehicleWhitelistHash.has(GetEntityModel(cache.vehicle)) || vehicleHasOpening(cache.vehicle),
-      localData = this.getPlayerByID(cache.serverId);
-    if (!localData) {
-      return;
-    }
+      phoneSpeakerRange = this.sharedConfig.maxPhoneSpeakerRange ?? 5;
 
     for (const player of GetActivePlayers()) {
       const remoteId = GetPlayerServerId(player);
@@ -933,14 +937,14 @@ export class YaCAClientModule {
           client_id: voiceSetting.clientId,
           position: convertNumberArrayToXYZ(playerPos),
           direction: convertNumberArrayToXYZ(playerDirection),
-          range: voiceSetting.range,
+          range: voiceSetting.range ?? 0,
           is_underwater: isUnderwater,
           muffle_intensity: muffleIntensity,
-          is_muted: voiceSetting.forceMuted,
+          is_muted: voiceSetting.forceMuted ?? false,
         });
       }
 
-      if (calculateDistanceVec3(localPos, playerPos) > this.sharedConfig.maxPhoneSpeakerRange) {
+      if (calculateDistanceVec3(localPos, playerPos) > phoneSpeakerRange) {
         continue;
       }
 
@@ -953,7 +957,7 @@ export class YaCAClientModule {
       if (voiceSetting.phoneCallMemberIds) {
         for (const phoneCallMemberId of voiceSetting.phoneCallMemberIds) {
           const phoneCallMember = this.getPlayerByID(phoneCallMemberId);
-          if (!phoneCallMember || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) {
+          if (!phoneCallMember || !phoneCallMember.clientId || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) {
             continue;
           }
 
@@ -962,7 +966,7 @@ export class YaCAClientModule {
             client_id: phoneCallMember.clientId,
             position: convertNumberArrayToXYZ(playerPos),
             direction: convertNumberArrayToXYZ(playerDirection),
-            range: this.sharedConfig.maxPhoneSpeakerRange ?? 5,
+            range: phoneSpeakerRange,
             is_underwater: isUnderwater,
             muffle_intensity: muffleIntensity,
             is_muted: false,
@@ -975,7 +979,7 @@ export class YaCAClientModule {
             YacaFilterEnum.PHONE_SPEAKER,
             true,
             undefined,
-            this.sharedConfig.maxPhoneSpeakerRange,
+            phoneSpeakerRange,
             CommDeviceMode.RECEIVER,
             CommDeviceMode.SENDER,
           );
