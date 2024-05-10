@@ -303,17 +303,18 @@ Enable or disable the phone speaker for a player.
 
 This event is triggered when the voice range of a player is updated.
 
-| Parameter | Type  | Description               |
-| --------- | ----- | ------------------------- |
-| range     | `int` | the newly set voice range |
+| Parameter  | Type  | Description               |
+|------------|-------|---------------------------|
+| range      | `int` | the newly set voice range |
+| rangeIndex | `int` | the index of the range    |
 
 ### yaca:external:muteStateChanged
 
 The event is triggered when the mute state of a player changes.
 
-| Parameter | Type      | Description             |
-| --------- | --------- | ----------------------- |
-| state     | `boolean` | the new mute state      |
+| Parameter | Type      | Description        |
+| --------- | --------- | ------------------ |
+| state     | `boolean` | the new mute state |
 
 ### yaca:external:isTalking
 

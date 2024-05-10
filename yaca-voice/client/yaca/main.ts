@@ -38,6 +38,7 @@ export class YaCAClientModule {
   saltyChatBridge?: YaCAClientSaltyChatBridge;
 
   canChangeVoiceRange = true;
+  defaultVoiceRange: number;
   rangeIndex: number;
   rangeInterval: CitizenTimer | null = null;
   visualVoiceRangeTimeout: CitizenTimer | null = null;
@@ -85,6 +86,8 @@ export class YaCAClientModule {
   constructor() {
     this.sharedConfig = JSON.parse(LoadResourceFile(cache.resource, "config/shared.json"));
     initLocale(this.sharedConfig.locale);
+
+    this.defaultVoiceRange = this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex] ?? 1;
 
     for (const vehicleModel of this.sharedConfig.mufflingVehicleWhitelist ?? []) {
       this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel));
@@ -357,8 +360,8 @@ export class YaCAClientModule {
      *
      * @param {number} range - The new voice range.
      */
-    onNet("client:yaca:changeOwnVoiceRange", (range: number) => {
-      emit("yaca:external:voiceRangeUpdate", range);
+    onNet("client:yaca:changeVoiceRange", (range: number) => {
+      emit("yaca:external:voiceRangeUpdate", range, this.rangeIndex);
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge?.enabled) {
         emit("SaltyChat_VoiceRangeChanged", range.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
@@ -534,7 +537,7 @@ export class YaCAClientModule {
    * @returns {number} The current voice range.
    */
   getVoiceRange(): number {
-    return LocalPlayer.state[VOICE_RANGE_STATE_NAME];
+    return LocalPlayer.state[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange;
   }
 
   /**
@@ -557,13 +560,11 @@ export class YaCAClientModule {
 
     this.rangeIndex += 1;
 
-    if (this.rangeIndex < 1) {
-      this.rangeIndex = this.sharedConfig.voiceRange.ranges.length - 1;
-    } else if (this.rangeIndex > this.sharedConfig.voiceRange.ranges.length - 1) {
+    if (this.rangeIndex > this.sharedConfig.voiceRange.ranges.length - 1) {
       this.rangeIndex = 0;
     }
 
-    const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] || 1;
+    const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1;
 
     const isNotificationEnabled = this.sharedConfig.voiceRange.sendNotification ?? true;
     if (isNotificationEnabled) {
@@ -622,7 +623,13 @@ export class YaCAClientModule {
       });
     }
 
-    emitNet("server:yaca:changeVoiceRange", voiceRange);
+    LocalPlayer.state.set(VOICE_RANGE_STATE_NAME, voiceRange, true);
+
+    emit("yaca:external:voiceRangeUpdate", voiceRange, this.rangeIndex);
+    // SaltyChat bridge
+    if (this.sharedConfig.saltyChatBridge?.enabled) {
+      emit("SaltyChat_VoiceRangeChanged", voiceRange.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
+    }
   }
 
   /**
@@ -889,13 +896,14 @@ export class YaCAClientModule {
     }
 
     const players = new Map<number, YacaPluginPlayerData>(),
+      playersToPhoneSpeaker = new Set<number>(),
+      playersOnPhoneSpeaker = new Set<number>(),
       localPos = GetEntityCoords(cache.ped, false),
       currentRoom = GetRoomKeyFromEntity(cache.ped),
-      playersToPhoneSpeaker: Set<number> = new Set(),
-      playersOnPhoneSpeaker: Set<number> = new Set(),
       hasVehicleOpening = cache.vehicle === false || this.mufflingVehicleWhitelistHash.has(GetEntityModel(cache.vehicle)) || vehicleHasOpening(cache.vehicle),
       phoneSpeakerRange = this.sharedConfig.maxPhoneSpeakerRange ?? 5,
-      localState = LocalPlayer.state;
+      localState = LocalPlayer.state,
+      ownVoiceRange = localState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange;
 
     for (const player of GetActivePlayers()) {
       const remoteId = GetPlayerServerId(player);
@@ -915,6 +923,7 @@ export class YaCAClientModule {
 
       const playerState = Player(remoteId).state;
       const isMegaphoneActive = playerState[MEGAPHONE_STATE_NAME] !== null;
+      const playerRange = playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange;
 
       const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening, isMegaphoneActive);
 
@@ -928,7 +937,7 @@ export class YaCAClientModule {
           client_id: voiceSetting.clientId,
           position: convertNumberArrayToXYZ(playerPos),
           direction: convertNumberArrayToXYZ(playerDirection),
-          range: playerState[VOICE_RANGE_STATE_NAME] ?? 0,
+          range: playerRange,
           is_underwater: isUnderwater,
           muffle_intensity: muffleIntensity,
           is_muted: voiceSetting.forceMuted ?? false,
@@ -988,7 +997,7 @@ export class YaCAClientModule {
       player: {
         player_direction: getCamDirection(),
         player_position: convertNumberArrayToXYZ(localPos),
-        player_range: localState[VOICE_RANGE_STATE_NAME],
+        player_range: ownVoiceRange,
         // @ts-expect-error Type error in the native
         player_is_underwater: IsPedSwimmingUnderWater(cache.ped) === 1,
         player_is_muted: localData.forceMuted ?? false,
