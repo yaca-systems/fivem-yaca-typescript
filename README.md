@@ -210,10 +210,10 @@ Get the voice range of a player as `number`.
 
 Set the voice range of a player.
 
-| Parameter | Type     | Description         |
-| --------- | -------- | ------------------- |
-| source    | `number` | the player source   |
-| range     | `number` | the new voice range |
+| Parameter | Type     | Description                                                               |
+|-----------|----------|---------------------------------------------------------------------------|
+| source    | `number` | the player source                                                         |
+| range     | `number` | The new voice range. Defaults to the default voice range if not provided. |
 
 ### Radio
 
