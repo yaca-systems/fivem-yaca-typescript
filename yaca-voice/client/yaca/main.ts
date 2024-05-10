@@ -189,11 +189,11 @@ export class YaCAClientModule {
 
   registerEvents() {
     /**
-     * Handles the "yaca:client:playerEnteredScope" server event.
+     * Handles the "onPlayerJoining" server event.
      *
      * @param {number} target - The ID of the target.
      */
-    onNet("yaca:client:playerEnteredScope", (target: number) => {
+    onNet("onPlayerJoining", (target: number) => {
       const player = this.getPlayerByID(target);
       if (!player) {
         return;
@@ -213,11 +213,11 @@ export class YaCAClientModule {
     });
 
     /**
-     * Handles the "yaca:client:playerLeftScope" server event.
+     * Handles the "onPlayerDropped" server event.
      *
      * @param {number} target - The ID of the target.
      */
-    onNet("yaca:client:playerLeftScope", (target: number) => {
+    onNet("onPlayerDropped", (target: number) => {
       const player = this.getPlayerByID(target);
       if (!player) {
         return;
