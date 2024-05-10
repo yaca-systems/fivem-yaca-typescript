@@ -800,6 +800,23 @@ export class YaCAClientModule {
   }
 
   /**
+   * Checks if the vehicle has an opening.
+   *
+   * @param vehicle - The vehicle to check.
+   */
+  checkIfVehicleHasOpening(vehicle: number | false) {
+    if (!vehicle) {
+      return true;
+    }
+
+    if (this.mufflingVehicleWhitelistHash.has(GetEntityModel(vehicle))) {
+      return true;
+    }
+
+    return vehicleHasOpening(vehicle);
+  }
+
+  /**
    * Get the muffle intensity for the nearby player.
    *
    * @param {number} nearbyPlayerPed - The nearby player ped.
@@ -832,9 +849,7 @@ export class YaCAClientModule {
       }
     }
 
-    const nearbyPlayerVehicleModel = GetEntityModel(nearbyPlayerVehicle);
-    const nearbyPlayerVehicleHasOpening =
-      nearbyPlayerVehicle === 0 || this.mufflingVehicleWhitelistHash.has(nearbyPlayerVehicleModel) || vehicleHasOpening(nearbyPlayerVehicle);
+    const nearbyPlayerVehicleHasOpening = this.checkIfVehicleHasOpening(nearbyPlayerVehicle);
 
     if (!ownVehicleHasOpening && !nearbyPlayerVehicleHasOpening) {
       return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
@@ -890,7 +905,6 @@ export class YaCAClientModule {
    */
   calcPlayers() {
     const localData = this.getPlayerByID(cache.serverId);
-
     if (!localData) {
       return;
     }
@@ -900,7 +914,7 @@ export class YaCAClientModule {
       playersOnPhoneSpeaker = new Set<number>(),
       localPos = GetEntityCoords(cache.ped, false),
       currentRoom = GetRoomKeyFromEntity(cache.ped),
-      hasVehicleOpening = cache.vehicle === false || this.mufflingVehicleWhitelistHash.has(GetEntityModel(cache.vehicle)) || vehicleHasOpening(cache.vehicle),
+      hasVehicleOpening = this.checkIfVehicleHasOpening(cache.vehicle),
       phoneSpeakerRange = this.sharedConfig.maxPhoneSpeakerRange ?? 5;
 
     for (const player of GetActivePlayers()) {
