@@ -40,6 +40,8 @@ export class YaCAServerModule {
   nameSet: Set<string> = new Set();
   players: Map<number, YaCAPlayer> = new Map();
 
+  defaultVoiceRange: number;
+
   serverConfig: YacaServerConfig;
   sharedConfig: YacaSharedConfig;
 
@@ -60,6 +62,8 @@ export class YaCAServerModule {
     this.sharedConfig = JSON.parse(LoadResourceFile(cache.resource, "config/shared.json"));
 
     initLocale(this.sharedConfig.locale);
+
+    this.defaultVoiceRange = this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex] ?? 1;
 
     this.phoneModule = new YaCAServerPhoneModle(this);
     this.radioModule = new YaCAServerRadioModule(this);
@@ -97,7 +101,7 @@ export class YaCAServerModule {
     }
 
     const playerState = Player(src).state;
-    playerState.set(VOICE_RANGE_STATE_NAME, this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex], true);
+    playerState.set(VOICE_RANGE_STATE_NAME, this.defaultVoiceRange, true);
 
     this.players.set(src, {
       voiceSettings: {
@@ -171,11 +175,6 @@ export class YaCAServerModule {
     // YaCA: connect to voice when NUI is ready
     onNet("server:yaca:nuiReady", () => {
       this.connectToVoice(source);
-    });
-
-    // YaCA: voice range toggle
-    onNet("server:yaca:changeVoiceRange", (range: number) => {
-      this.changeVoiceRange(source, range);
     });
 
     // YaCA:successful voice connection and client-id sync
@@ -284,17 +283,13 @@ export class YaCAServerModule {
    * Change the voice range of a player.
    *
    * @param {number} src - The source-id of the player to change the voice range for.
-   * @param {number} range - The new voice range.
+   * @param {number} range - A valid index from the voice range array. If the index is invalid, the default range will be used.
    */
   changeVoiceRange(src: number, range: number) {
     const playerState = Player(src).state;
 
-    if (!this.sharedConfig.voiceRange.ranges.includes(range)) {
-      this.changeVoiceRange(src, this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex]);
-    }
-
     playerState.set(VOICE_RANGE_STATE_NAME, range, true);
-    emitNet("client:yaca:changeOwnVoiceRange", src, range);
+    emitNet("client:yaca:changeVoiceRange", src, range);
   }
 
   /**
@@ -304,7 +299,7 @@ export class YaCAServerModule {
    */
   getPlayerVoiceRange(playerId: number) {
     const playerState = Player(playerId).state;
-    return playerState[VOICE_RANGE_STATE_NAME] ?? this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex];
+    return playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange;
   }
 
   /**
