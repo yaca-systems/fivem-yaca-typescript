@@ -15,8 +15,8 @@ export class YaCAClientRadioModule {
   radioChannelSettings: { [key: number]: YacaRadioSettings } = {};
   radioInitialized = false;
   activeRadioChannel = 1;
-  playersWithShortRange = new Map();
-  playersInRadioChannel: Map<number, Set<number>> = new Map();
+  playersWithShortRange = new Map<number, string>();
+  playersInRadioChannel = new Map<number, Set<number>>();
 
   defaultRadioSettings: YacaRadioSettings = {
     frequency: "0",

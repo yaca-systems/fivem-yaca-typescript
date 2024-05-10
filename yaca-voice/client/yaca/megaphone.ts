@@ -2,6 +2,7 @@ import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum } from "types";
 import { locale } from "common/locale";
 import { cache, onCache } from "utils";
+import { MEGAPHONE_STATE_NAME } from "common/consts";
 
 /**
  * The megaphone module for the client.
@@ -83,9 +84,9 @@ export class YaCAClientMegaphoneModule {
 
   registerStateBagHandlers() {
     /**
-     * Handles the "yaca:megaphoneactive" state bag change.
+     * Handles the megaphone state bag change.
      */
-    AddStateBagChangeHandler("yaca:megaphoneactive", "", (bagName: string, _: string, value: number | undefined, __: number, replicated: boolean) => {
+    AddStateBagChangeHandler(MEGAPHONE_STATE_NAME, "", (bagName: string, _: string, value: number | undefined, __: number, replicated: boolean) => {
       if (replicated) {
         return;
       }

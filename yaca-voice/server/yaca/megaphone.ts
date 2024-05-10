@@ -1,5 +1,6 @@
 import { YacaSharedConfig } from "types";
 import { YaCAServerModule } from "yaca";
+import { MEGAPHONE_STATE_NAME } from "common/consts";
 
 /**
  * The server-side megaphone module.
@@ -51,7 +52,7 @@ export class YaCAServerMegaphoneModule {
       playerPed = GetPlayerPed(src.toString()),
       playerVehicle = GetVehiclePedIsIn(playerPed, false);
 
-    if (playerVehicle === 0 && playerState["yaca:megaphoneactive"]) {
+    if (playerVehicle === 0 && playerState[MEGAPHONE_STATE_NAME]) {
       return;
     }
     if (playerVehicle !== 0) {
@@ -61,7 +62,7 @@ export class YaCAServerMegaphoneModule {
         return;
       }
     }
-    if ((!state && !playerState["yaca:megaphoneactive"]) || (state && playerState["yaca:megaphoneactive"])) {
+    if ((!state && !playerState[MEGAPHONE_STATE_NAME]) || (state && playerState[MEGAPHONE_STATE_NAME])) {
       return;
     }
 
@@ -79,13 +80,13 @@ export class YaCAServerMegaphoneModule {
   changeMegaphoneState(src: number, state: boolean, forced = false) {
     const playerState = Player(src).state;
 
-    if (!state && playerState["yaca:megaphoneactive"]) {
-      playerState.set("yaca:megaphoneactive", undefined, true);
+    if (!state && playerState[MEGAPHONE_STATE_NAME]) {
+      playerState.set(MEGAPHONE_STATE_NAME, undefined, true);
       if (forced) {
         emitNet("client:yaca:setLastMegaphoneState", src, false);
       }
-    } else if (state && !playerState["yaca:megaphoneactive"]) {
-      playerState.set("yaca:megaphoneactive", this.sharedConfig.megaphone.range, true);
+    } else if (state && !playerState[MEGAPHONE_STATE_NAME]) {
+      playerState.set(MEGAPHONE_STATE_NAME, this.sharedConfig.megaphone.range, true);
     }
   }
 }

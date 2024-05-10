@@ -1,0 +1,5 @@
+const MEGAPHONE_STATE_NAME = "yacaMegaphone";
+const PHONE_SPEAKER_STATE_NAME = "yacaPhoneSpeaker";
+const LIP_SYNC_STATE_NAME = "yacaLipSync";
+
+export { MEGAPHONE_STATE_NAME, PHONE_SPEAKER_STATE_NAME, LIP_SYNC_STATE_NAME };
