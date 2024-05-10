@@ -24,13 +24,10 @@ export interface YacaPlayerData {
   clientId?: number;
   forceMuted?: boolean;
   mutedOnPhone?: boolean;
-  range?: number;
-  isTalking?: boolean;
   phoneCallMemberIds?: number[];
 }
 
 export interface DataObject {
-  range?: number;
   clientId?: number;
   playerId?: number;
   forceMuted?: boolean;

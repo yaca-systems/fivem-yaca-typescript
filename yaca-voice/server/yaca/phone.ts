@@ -1,5 +1,5 @@
 import { YaCAServerModule } from "yaca";
-import { PHONE_SPEAKER_STATE_NAME } from "common/consts";
+import { PHONE_SPEAKER_STATE_NAME } from "common/constants";
 
 /**
  * The phone module for the server.
