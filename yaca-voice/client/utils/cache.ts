@@ -7,12 +7,13 @@ const playerId = PlayerId();
  */
 const cache: ClientCache = new Proxy(
   {
-    serverId: GetPlayerServerId(playerId),
     playerId,
-    resource: GetCurrentResourceName(),
+    serverId: GetPlayerServerId(playerId),
     ped: PlayerPedId(),
     vehicle: false,
     seat: false,
+    resource: GetCurrentResourceName(),
+    game: GetGameName() as "fivem" | "redm",
   },
   {
     set(target: ClientCache, key: keyof ClientCache, value: never) {

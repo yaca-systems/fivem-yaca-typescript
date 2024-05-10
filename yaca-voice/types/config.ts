@@ -10,6 +10,7 @@ export interface YacaSharedConfig {
   notifications: {
     oxLib: boolean;
     gta: boolean;
+    redm: boolean;
     own: boolean;
   };
   keyBinds: {
@@ -34,13 +35,14 @@ export interface YacaSharedConfig {
   };
   megaphone: {
     range: number;
+    automaticVehicleDetection: boolean;
     allowedVehicleClasses: number[];
   };
   saltyChatBridge: {
     enabled: boolean;
     keyBinds: {
-      primaryRadio: string;
-      secondaryRadio: string;
+      primaryRadio: string | false;
+      secondaryRadio: string | false;
     };
   };
   vehicleMuffling: boolean;

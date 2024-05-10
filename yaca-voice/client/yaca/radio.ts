@@ -1,6 +1,6 @@
 import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from "types";
-import { cache, clamp, requestAnimDict } from "../utils";
+import { cache, clamp, registerRdrKeyBind, requestAnimDict } from "../utils";
 import { locale } from "common/locale";
 
 /**
@@ -37,7 +37,11 @@ export class YaCAClientRadioModule {
     this.registerEvents();
 
     if (!this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
-      this.registerKeybinds();
+      if (this.clientModule.isFiveM) {
+        this.registerKeybinds();
+      } else {
+        this.registerRdrKeybinds();
+      }
     }
   }
 
@@ -286,6 +290,22 @@ export class YaCAClientRadioModule {
       false,
     );
     RegisterKeyMapping("+yaca:radioTalking", locale("use_radio"), "keyboard", this.clientModule.sharedConfig.keyBinds.radioTransmit);
+  }
+
+  registerRdrKeybinds() {
+    if (this.clientModule.sharedConfig.keyBinds.radioTransmit === false) {
+      return;
+    }
+
+    registerRdrKeyBind(
+      this.clientModule.sharedConfig.keyBinds.radioTransmit,
+      () => {
+        this.radioTalkingStart(true, this.activeRadioChannel);
+      },
+      () => {
+        this.radioTalkingStart(false, this.activeRadioChannel);
+      },
+    );
   }
 
   /**

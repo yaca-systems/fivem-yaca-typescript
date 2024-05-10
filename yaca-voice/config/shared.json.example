@@ -8,6 +8,7 @@
   "notifications": {
     "oxLib": false,
     "gta": true,
+    "redm": false,
     "own": false
   },
   "keyBinds": {
@@ -40,6 +41,7 @@
   },
   "megaphone": {
     "range": 30,
+    "automaticVehicleDetection": true,
     "allowedVehicleClasses": [
       18,
       19

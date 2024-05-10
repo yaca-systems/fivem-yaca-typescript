@@ -1,7 +1,7 @@
 import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum } from "types";
 import { locale } from "common/locale";
-import { cache, onCache } from "utils";
+import { cache, onCache, registerRdrKeyBind } from "utils";
 import { MEGAPHONE_STATE_NAME } from "common/constants";
 
 /**
@@ -22,7 +22,12 @@ export class YaCAClientMegaphoneModule {
     this.clientModule = clientModule;
 
     this.registerEvents();
-    this.registerKeybinds();
+    if (this.clientModule.isFiveM) {
+      this.registerKeybinds();
+    } else if (this.clientModule.isRedM) {
+      this.registerRdrKeybinds();
+    }
+    this.registerExports();
     this.registerStateBagHandlers();
   }
 
@@ -36,22 +41,25 @@ export class YaCAClientMegaphoneModule {
       this.lastMegaphoneState = state;
     });
 
-    /**
-     * Checks if the player can use the megaphone when they enter a vehicle.
-     * If they can, it sets the `canUseMegaphone` property to `true`.
-     * If they can't, it sets the `canUseMegaphone` property to `false`.
-     * If the player is not in a vehicle, it sets the `canUseMegaphone` property to `false` and emits the "server:yaca:playerLeftVehicle" event.
-     */
-    onCache<number | false>("vehicle", (vehicle) => {
-      if (vehicle) {
-        const vehicleClass = GetVehicleClass(vehicle);
+    const autoDetect = this.clientModule.sharedConfig.megaphone.automaticVehicleDetection ?? true;
+    if (this.clientModule.isFiveM && autoDetect) {
+      /**
+       * Checks if the player can use the megaphone when they enter a vehicle.
+       * If they can, it sets the `canUseMegaphone` property to `true`.
+       * If they can't, it sets the `canUseMegaphone` property to `false`.
+       * If the player is not in a vehicle, it sets the `canUseMegaphone` property to `false` and emits the "server:yaca:playerLeftVehicle" event.
+       */
+      onCache<number | false>("vehicle", (vehicle) => {
+        if (vehicle) {
+          const vehicleClass = GetVehicleClass(vehicle);
 
-        this.canUseMegaphone = this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass);
-      } else if (this.canUseMegaphone) {
-        this.canUseMegaphone = false;
-        emitNet("server:yaca:playerLeftVehicle");
-      }
-    });
+          this.canUseMegaphone = this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass);
+        } else if (this.canUseMegaphone) {
+          this.canUseMegaphone = false;
+          emitNet("server:yaca:playerLeftVehicle");
+        }
+      });
+    }
   }
 
   /**
@@ -80,6 +88,38 @@ export class YaCAClientMegaphoneModule {
       false,
     );
     RegisterKeyMapping("+yaca:megaphone", locale("use_megaphone"), "keyboard", this.clientModule.sharedConfig.keyBinds.megaphone);
+  }
+
+  registerRdrKeybinds() {
+    if (this.clientModule.sharedConfig.keyBinds.megaphone === false) {
+      return;
+    }
+
+    /**
+     * Registers the command and key mapping for the megaphone.
+     */
+    registerRdrKeyBind(this.clientModule.sharedConfig.keyBinds.megaphone, () => {
+      this.useMegaphone(!this.lastMegaphoneState);
+    });
+  }
+
+  registerExports() {
+    /**
+     * Gets the `canUseMegaphone` property.
+     *
+     * @returns {boolean} - The `canUseMegaphone` property.
+     */
+    exports("getCanUseMegaphone", () => {
+      return this.canUseMegaphone;
+    });
+
+    exports("setCanUseMegaphone", (state: boolean) => {
+      this.canUseMegaphone = state;
+
+      if (!state && this.lastMegaphoneState) {
+        emitNet("server:yaca:playerLeftVehicle");
+      }
+    });
   }
 
   registerStateBagHandlers() {
@@ -125,7 +165,7 @@ export class YaCAClientMegaphoneModule {
     }
 
     this.lastMegaphoneState = !this.lastMegaphoneState;
-    emitNet("server:yaca:useMegaphone", state);
+    emitNet("server:yaca:useMegaphone", state, this.clientModule.isRedM);
     emit("yaca:external:megaphoneState", state);
   }
 }

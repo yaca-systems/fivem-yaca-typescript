@@ -11,7 +11,17 @@ import {
   type YacaSharedConfig,
   YacaStereoMode,
 } from "types";
-import { WebSocket, calculateDistanceVec3, convertNumberArrayToXYZ, getCamDirection, clamp, vehicleHasOpening } from "utils";
+import {
+  WebSocket,
+  calculateDistanceVec3,
+  convertNumberArrayToXYZ,
+  getCamDirection,
+  clamp,
+  vehicleHasOpening,
+  displayRdrNotification,
+  registerRdrKeyBind,
+  playRdrFacialAnim,
+} from "utils";
 import { YaCAClientIntercomModule, YaCAClientMegaphoneModule, YaCAClientPhoneModule, YaCAClientRadioModule, localLipSyncAnimations } from "yaca";
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale, locale } from "common/locale";
@@ -53,6 +63,9 @@ export class YaCAClientModule {
 
   responseCodesToErrorMessages: Record<string, string | undefined>;
 
+  isFiveM = cache.game === "fivem";
+  isRedM = cache.game === "redm";
+
   /**
    * Sends a radar notification.
    *
@@ -70,12 +83,24 @@ export class YaCAClientModule {
     }
 
     if (this.sharedConfig.notifications?.gta) {
-      BeginTextCommandThefeedPost("STRING");
-      AddTextComponentSubstringPlayerName(`YaCA: ${message}`);
-      if (type === YacaNotificationType.ERROR) {
-        ThefeedSetNextPostBackgroundColor(6);
+      if (this.isFiveM) {
+        BeginTextCommandThefeedPost("STRING");
+        AddTextComponentSubstringPlayerName(`YaCA: ${message}`);
+        if (type === YacaNotificationType.ERROR) {
+          ThefeedSetNextPostBackgroundColor(6);
+        }
+        EndTextCommandThefeedPostTicker(false, false);
+      } else {
+        console.warn("[YaCA] GTA notification is only available in FiveM.");
       }
-      EndTextCommandThefeedPostTicker(false, false);
+    }
+
+    if (this.sharedConfig.notifications?.redm) {
+      if (this.isRedM) {
+        displayRdrNotification(`YaCA: ${message}`, 2000);
+      } else {
+        console.warn("[YaCA] RedM notification is only available in RedM.");
+      }
     }
 
     if (this.sharedConfig.notifications?.own) {
@@ -89,8 +114,10 @@ export class YaCAClientModule {
 
     this.defaultVoiceRange = this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex] ?? 1;
 
-    for (const vehicleModel of this.sharedConfig.mufflingVehicleWhitelist ?? []) {
-      this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel));
+    if (this.isFiveM) {
+      for (const vehicleModel of this.sharedConfig.mufflingVehicleWhitelist ?? []) {
+        this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel));
+      }
     }
 
     this.responseCodesToErrorMessages = {
@@ -120,7 +147,11 @@ export class YaCAClientModule {
 
     this.registerExports();
     this.registerEvents();
-    this.registerKeybindings();
+    if (this.isFiveM) {
+      this.registerKeybindings();
+    } else if (this.isRedM) {
+      this.registerRdrKeybindings();
+    }
 
     this.intercomModule = new YaCAClientIntercomModule(this);
     this.megaphoneModule = new YaCAClientMegaphoneModule(this);
@@ -190,59 +221,71 @@ export class YaCAClientModule {
     RegisterKeyMapping("yaca:changeVoiceRange", locale("change_voice_range"), "keyboard", this.sharedConfig.keyBinds.toggleRange);
   }
 
-  registerEvents() {
-    /**
-     * Handles the "onPlayerJoining" server event.
-     *
-     * @param {number} target - The ID of the target.
-     */
-    onNet("onPlayerJoining", (target: number) => {
-      const player = this.getPlayerByID(target);
-      if (!player) {
-        return;
-      }
+  registerRdrKeybindings() {
+    if (this.sharedConfig.keyBinds.toggleRange === false) {
+      return;
+    }
 
-      const frequency = this.radioModule.playersWithShortRange.get(target);
-      if (frequency) {
-        const channel = this.radioModule.findRadioChannelByFrequency(frequency);
-        if (channel) {
-          this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-
-          if (this.sharedConfig.saltyChatBridge?.enabled) {
-            this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
-          }
-        }
-      }
+    registerRdrKeyBind(this.sharedConfig.keyBinds.toggleRange, () => {
+      this.changeVoiceRange();
     });
+  }
 
-    /**
-     * Handles the "onPlayerDropped" server event.
-     *
-     * @param {number} target - The ID of the target.
-     */
-    onNet("onPlayerDropped", (target: number) => {
-      const player = this.getPlayerByID(target);
-      if (!player) {
-        return;
-      }
+  registerEvents() {
+    if (this.isFiveM) {
+      /**
+       * Handles the "onPlayerJoining" server event.
+       *
+       * @param {number} target - The ID of the target.
+       */
+      onNet("onPlayerJoining", (target: number) => {
+        const player = this.getPlayerByID(target);
+        if (!player) {
+          return;
+        }
 
-      const frequency = this.radioModule.playersWithShortRange.get(target);
-      if (frequency) {
-        const channel = this.radioModule.findRadioChannelByFrequency(frequency);
-        if (channel) {
-          this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+        const frequency = this.radioModule?.playersWithShortRange.get(target);
+        if (frequency) {
+          const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
+          if (channel) {
+            this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
 
-          if (this.sharedConfig.saltyChatBridge?.enabled) {
-            const inRadio = this.radioModule.playersInRadioChannel.get(channel);
-            if (inRadio) {
-              const inRadioArray = [...inRadio].filter((id) => id !== target);
-              const state = inRadioArray.length > 0;
-              this.saltyChatBridge?.handleRadioReceivingStateChange(state, channel);
+            if (this.sharedConfig.saltyChatBridge?.enabled) {
+              this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
             }
           }
         }
-      }
-    });
+      });
+
+      /**
+       * Handles the "onPlayerDropped" server event.
+       *
+       * @param {number} target - The ID of the target.
+       */
+      onNet("onPlayerDropped", (target: number) => {
+        const player = this.getPlayerByID(target);
+        if (!player) {
+          return;
+        }
+
+        const frequency = this.radioModule?.playersWithShortRange.get(target);
+        if (frequency) {
+          const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
+          if (channel) {
+            this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+
+            if (this.sharedConfig.saltyChatBridge?.enabled) {
+              const inRadio = this.radioModule?.playersInRadioChannel.get(channel);
+              if (inRadio) {
+                const inRadioArray = [...inRadio].filter((id) => id !== target);
+                const state = inRadioArray.length > 0;
+                this.saltyChatBridge?.handleRadioReceivingStateChange(state, channel);
+              }
+            }
+          }
+        }
+      });
+    }
 
     /**
      * Handles the "onClientResourceStart" event.
@@ -428,13 +471,13 @@ export class YaCAClientModule {
    * @returns {boolean} Returns true if the plugin is initialized, false otherwise.
    */
   isPluginInitialized(silent = false): boolean {
-    const inited = Boolean(this.getPlayerByID(cache.serverId));
+    const initialized = Boolean(this.getPlayerByID(cache.serverId));
 
-    if (!inited && !silent) {
+    if (!initialized && !silent) {
       this.notification(locale("plugin_not_initialized"), YacaNotificationType.ERROR);
     }
 
-    return inited;
+    return initialized;
   }
 
   /**
@@ -458,7 +501,7 @@ export class YaCAClientModule {
    *
    * @param {string} payload - The response from the voice plugin.
    */
-  handleResponse(payload: string) {
+  async handleResponse(payload: string) {
     if (!payload) {
       return;
     }
@@ -498,7 +541,7 @@ export class YaCAClientModule {
     }
 
     if (parsedPayload.code === "TALK_STATE" || parsedPayload.code === "MUTE_STATE") {
-      this.handleTalkState(parsedPayload);
+      await this.handleTalkState(parsedPayload);
       return;
     }
 
@@ -594,7 +637,7 @@ export class YaCAClientModule {
           posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98;
 
         DrawMarker(
-          1,
+          this.isFiveM ? 1 : 0x94fdae17,
           pos[0],
           pos[1],
           posZ,
@@ -768,7 +811,7 @@ export class YaCAClientModule {
    *
    * @param {YacaResponse} payload - The response from teamspeak.
    */
-  handleTalkState(payload: YacaResponse) {
+  async handleTalkState(payload: YacaResponse) {
     // Update state if player is muted or not
     if (payload.code === "MUTE_STATE") {
       this.isPlayerMuted = payload.message === "1";
@@ -787,7 +830,11 @@ export class YaCAClientModule {
       const animationData = localLipSyncAnimations[isTalking ? "true" : "false"];
 
       SetPlayerTalkingOverride(cache.playerId, isTalking);
-      PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
+      if (this.isFiveM) {
+        PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
+      } else if (this.isRedM) {
+        await playRdrFacialAnim(cache.ped, animationData.name, animationData.dict);
+      }
       LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true);
 
       emit("yaca:external:isTalking", isTalking);
@@ -830,7 +877,7 @@ export class YaCAClientModule {
     }
 
     const vehicleMuffling = this.sharedConfig.vehicleMuffling ?? true;
-    if (!vehicleMuffling) {
+    if (this.isRedM || !vehicleMuffling) {
       return 0;
     }
 
@@ -914,8 +961,12 @@ export class YaCAClientModule {
       playersOnPhoneSpeaker = new Set<number>(),
       localPos = GetEntityCoords(cache.ped, false),
       currentRoom = GetRoomKeyFromEntity(cache.ped),
-      hasVehicleOpening = this.checkIfVehicleHasOpening(cache.vehicle),
       phoneSpeakerRange = this.sharedConfig.maxPhoneSpeakerRange ?? 5;
+
+    let hasVehicleOpening = true;
+    if (this.isFiveM) {
+      hasVehicleOpening = this.checkIfVehicleHasOpening(cache.vehicle);
+    }
 
     for (const player of GetActivePlayers()) {
       const remoteId = GetPlayerServerId(player);

@@ -30,8 +30,8 @@ export class YaCAServerMegaphoneModule {
      *
      * @param {boolean} state - The state of the megaphone effect.
      */
-    onNet("server:yaca:useMegaphone", (state: boolean) => {
-      this.playerUseMegaphone(source, state);
+    onNet("server:yaca:useMegaphone", (state: boolean, isRdr: boolean) => {
+      this.playerUseMegaphone(source, state, isRdr);
     });
   }
 
@@ -40,24 +40,28 @@ export class YaCAServerMegaphoneModule {
    *
    * @param {number} src - The source-id of the player to apply the megaphone effect to.
    * @param {boolean} state - The state of the megaphone effect.
+   * @param {boolean} isRdr - Whether the game is RDR.
    */
-  playerUseMegaphone(src: number, state: boolean) {
+  playerUseMegaphone(src: number, state: boolean, isRdr: boolean) {
     const player = this.serverModule.getPlayer(src);
     if (!player) {
       return;
     }
 
-    const playerState = Player(src).state,
-      playerPed = GetPlayerPed(src.toString()),
-      playerVehicle = GetVehiclePedIsIn(playerPed, false);
+    const playerState = Player(src).state;
 
-    if (playerVehicle === 0 && !playerState[MEGAPHONE_STATE_NAME]) {
-      return;
-    }
+    if (!isRdr) {
+      const playerPed = GetPlayerPed(src.toString()),
+        playerVehicle = GetVehiclePedIsIn(playerPed, false);
 
-    if (playerVehicle !== 0) {
-      if (GetPedInVehicleSeat(playerVehicle, -1) !== playerPed && GetPedInVehicleSeat(playerVehicle, 0) !== playerPed) {
+      if (playerVehicle === 0 && !playerState[MEGAPHONE_STATE_NAME]) {
         return;
+      }
+
+      if (playerVehicle !== 0) {
+        if (GetPedInVehicleSeat(playerVehicle, -1) !== playerPed && GetPedInVehicleSeat(playerVehicle, 0) !== playerPed) {
+          return;
+        }
       }
     }
 
