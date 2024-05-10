@@ -14,6 +14,12 @@ export async function playRdrFacialAnim(ped: number, animDict: string, animName:
   SetFacialIdleAnimOverride(ped, animDict, animName);
 }
 
+/**
+ * Display a notification in RDR.
+ *
+ * @param text - The text to display.
+ * @param duration - The duration to display the notification for.
+ */
 export const displayRdrNotification = (text: string, duration: number) => {
   // @ts-expect-error VarString is a redm native
   const str = VarString(10, "LITERAL_STRING", text);
@@ -27,6 +33,13 @@ export const displayRdrNotification = (text: string, duration: number) => {
   Citizen.invokeNative("0x049D5C615BD38BAD", struct1, struct2, 1);
 };
 
+/**
+ * Register a keybind for RDR.
+ *
+ * @param key - The key to bind.
+ * @param onPressed - The function to call when the key is pressed.
+ * @param onReleased - The function to call when the key is released.
+ */
 export const registerRdrKeyBind = (key: string, onPressed?: () => void, onReleased?: () => void) => {
   const keyHash = REDM_KEY_TO_HASH[key];
 

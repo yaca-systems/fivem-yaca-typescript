@@ -292,6 +292,10 @@ export class YaCAClientRadioModule {
     RegisterKeyMapping("+yaca:radioTalking", locale("use_radio"), "keyboard", this.clientModule.sharedConfig.keyBinds.radioTransmit);
   }
 
+  /**
+   * Registers the keybindings for the radio talking.
+   * This is only available in RedM.
+   */
   registerRdrKeybinds() {
     if (this.clientModule.sharedConfig.keyBinds.radioTransmit === false) {
       return;

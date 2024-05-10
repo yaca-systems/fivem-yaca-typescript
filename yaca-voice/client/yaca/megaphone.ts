@@ -64,6 +64,7 @@ export class YaCAClientMegaphoneModule {
 
   /**
    * Registers the command and key mapping for the megaphone.
+   * This is only available in FiveM.
    */
   registerKeybinds() {
     if (this.clientModule.sharedConfig.keyBinds.megaphone === false) {
@@ -90,6 +91,10 @@ export class YaCAClientMegaphoneModule {
     RegisterKeyMapping("+yaca:megaphone", locale("use_megaphone"), "keyboard", this.clientModule.sharedConfig.keyBinds.megaphone);
   }
 
+  /**
+   * Registers the keybindings for the megaphone.
+   * This is only available in RedM.
+   */
   registerRdrKeybinds() {
     if (this.clientModule.sharedConfig.keyBinds.megaphone === false) {
       return;

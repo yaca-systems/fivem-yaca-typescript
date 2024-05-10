@@ -58,7 +58,8 @@ export class YaCAClientSaltyChatBridge {
   }
 
   /**
-   * Register SaltyChat key binds.
+   * Register the keybindings for the saltychat bridge.
+   * This is for FiveM.
    */
   registerSaltyChatKeyBinds() {
     if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio !== false) {
@@ -103,6 +104,10 @@ export class YaCAClientSaltyChatBridge {
     }
   }
 
+  /**
+   * Register the keybindings for the saltychat bridge.
+   * This is for RedM.
+   */
   registerSaltyChatRdrKeyBinds() {
     if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio !== false) {
       registerRdrKeyBind(

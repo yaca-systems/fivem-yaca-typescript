@@ -201,6 +201,7 @@ export class YaCAClientModule {
 
   /**
    * Registers the keybindings for the plugin.
+   * This is only available in FiveM.
    */
   registerKeybindings() {
     if (this.sharedConfig.keyBinds.toggleRange === false) {
@@ -221,16 +222,26 @@ export class YaCAClientModule {
     RegisterKeyMapping("yaca:changeVoiceRange", locale("change_voice_range"), "keyboard", this.sharedConfig.keyBinds.toggleRange);
   }
 
+  /**
+   * Registers the keybindings for RedM.
+   * This is only available in RedM.
+   */
   registerRdrKeybindings() {
     if (this.sharedConfig.keyBinds.toggleRange === false) {
       return;
     }
 
+    /**
+     * Registers the keybinding for changing the voice Range.
+     */
     registerRdrKeyBind(this.sharedConfig.keyBinds.toggleRange, () => {
       this.changeVoiceRange();
     });
   }
 
+  /**
+   * Registers the events for the plugin.
+   */
   registerEvents() {
     /**
      * Handles the "onPlayerJoining" server event.
