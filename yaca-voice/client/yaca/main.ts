@@ -232,60 +232,58 @@ export class YaCAClientModule {
   }
 
   registerEvents() {
-    if (this.isFiveM) {
-      /**
-       * Handles the "onPlayerJoining" server event.
-       *
-       * @param {number} target - The ID of the target.
-       */
-      onNet("onPlayerJoining", (target: number) => {
-        const player = this.getPlayerByID(target);
-        if (!player) {
-          return;
+    /**
+     * Handles the "onPlayerJoining" server event.
+     *
+     * @param {number} target - The ID of the target.
+     */
+    onNet("onPlayerJoining", (target: number) => {
+      const player = this.getPlayerByID(target);
+      if (!player) {
+        return;
+      }
+
+      const frequency = this.radioModule?.playersWithShortRange.get(target);
+      if (frequency) {
+        const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
+        if (channel) {
+          this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+
+          if (this.sharedConfig.saltyChatBridge?.enabled) {
+            this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
+          }
         }
+      }
+    });
 
-        const frequency = this.radioModule?.playersWithShortRange.get(target);
-        if (frequency) {
-          const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
-          if (channel) {
-            this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+    /**
+     * Handles the "onPlayerDropped" server event.
+     *
+     * @param {number} target - The ID of the target.
+     */
+    onNet("onPlayerDropped", (target: number) => {
+      const player = this.getPlayerByID(target);
+      if (!player) {
+        return;
+      }
 
-            if (this.sharedConfig.saltyChatBridge?.enabled) {
-              this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
+      const frequency = this.radioModule?.playersWithShortRange.get(target);
+      if (frequency) {
+        const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
+        if (channel) {
+          this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
+
+          if (this.sharedConfig.saltyChatBridge?.enabled) {
+            const inRadio = this.radioModule?.playersInRadioChannel.get(channel);
+            if (inRadio) {
+              const inRadioArray = [...inRadio].filter((id) => id !== target);
+              const state = inRadioArray.length > 0;
+              this.saltyChatBridge?.handleRadioReceivingStateChange(state, channel);
             }
           }
         }
-      });
-
-      /**
-       * Handles the "onPlayerDropped" server event.
-       *
-       * @param {number} target - The ID of the target.
-       */
-      onNet("onPlayerDropped", (target: number) => {
-        const player = this.getPlayerByID(target);
-        if (!player) {
-          return;
-        }
-
-        const frequency = this.radioModule?.playersWithShortRange.get(target);
-        if (frequency) {
-          const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
-          if (channel) {
-            this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-
-            if (this.sharedConfig.saltyChatBridge?.enabled) {
-              const inRadio = this.radioModule?.playersInRadioChannel.get(channel);
-              if (inRadio) {
-                const inRadioArray = [...inRadio].filter((id) => id !== target);
-                const state = inRadioArray.length > 0;
-                this.saltyChatBridge?.handleRadioReceivingStateChange(state, channel);
-              }
-            }
-          }
-        }
-      });
-    }
+      }
+    });
 
     /**
      * Handles the "onClientResourceStart" event.
