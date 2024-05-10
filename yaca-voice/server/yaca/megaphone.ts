@@ -1,6 +1,6 @@
 import { YacaSharedConfig } from "types";
 import { YaCAServerModule } from "yaca";
-import { MEGAPHONE_STATE_NAME } from "common/consts";
+import { MEGAPHONE_STATE_NAME } from "common/constants";
 
 /**
  * The server-side megaphone module.

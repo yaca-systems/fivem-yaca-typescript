@@ -4,13 +4,13 @@ import { YaCAServerMegaphoneModule, YaCAServerPhoneModle, YaCAServerRadioModule 
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale } from "common/locale";
 import { checkVersion } from "../utils/versioncheck";
+import { VOICE_RANGE_STATE_NAME } from "common/constants";
 
 /**
  * The player data type for YaCA.
  */
 export type YaCAPlayer = {
   voiceSettings: {
-    voiceRange: number;
     voiceFirstConnect: boolean;
     forceMuted: boolean;
     ingameName: string;
@@ -24,10 +24,9 @@ export type YaCAPlayer = {
     frequencies: { [key: number]: string };
   };
   voicePlugin?: {
+    playerId: number;
     clientId: number;
     forceMuted: boolean;
-    range: number;
-    playerId: number;
     mutedOnPhone: boolean;
   };
 };
@@ -97,9 +96,11 @@ export class YaCAServerModule {
       return;
     }
 
+    const playerState = Player(src).state;
+    playerState.set(VOICE_RANGE_STATE_NAME, this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex], true);
+
     this.players.set(src, {
       voiceSettings: {
-        voiceRange: this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex],
         voiceFirstConnect: false,
         forceMuted: false,
         ingameName: name,
@@ -310,21 +311,14 @@ export class YaCAServerModule {
    * @param {number} range - The new voice range.
    */
   changeVoiceRange(src: number, range: number) {
-    const player = this.players.get(src);
-    if (!player) {
-      return;
-    }
+    const playerState = Player(src).state;
 
     if (!this.sharedConfig.voiceRange.ranges.includes(range)) {
       this.changeVoiceRange(src, this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex]);
     }
 
-    player.voiceSettings.voiceRange = range;
-    emitNet("client:yaca:changeVoiceRange", -1, src, player.voiceSettings.voiceRange);
-
-    if (player.voicePlugin) {
-      player.voicePlugin.range = range;
-    }
+    playerState.set(VOICE_RANGE_STATE_NAME, range, true);
+    emitNet("client:yaca:changeOwnVoiceRange", src, range);
   }
 
   /**
@@ -333,7 +327,8 @@ export class YaCAServerModule {
    * @param playerId - The ID of the player to get the voice range for.
    */
   getPlayerVoiceRange(playerId: number) {
-    return this.players.get(playerId)?.voiceSettings.voiceRange ?? this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex];
+    const playerState = Player(playerId).state;
+    return playerState[VOICE_RANGE_STATE_NAME] ?? this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex];
   }
 
   /**
@@ -375,10 +370,9 @@ export class YaCAServerModule {
     }
 
     player.voicePlugin = {
+      playerId: src,
       clientId,
       forceMuted: player.voiceSettings.forceMuted,
-      range: player.voiceSettings.voiceRange,
-      playerId: src,
       mutedOnPhone: player.voiceSettings.mutedOnPhone,
     };
 

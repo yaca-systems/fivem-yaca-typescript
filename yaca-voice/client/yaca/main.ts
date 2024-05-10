@@ -16,7 +16,7 @@ import { YaCAClientIntercomModule, YaCAClientMegaphoneModule, YaCAClientPhoneMod
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale, locale } from "common/locale";
 import { cache } from "../utils";
-import { LIP_SYNC_STATE_NAME, MEGAPHONE_STATE_NAME } from "common/consts";
+import { LIP_SYNC_STATE_NAME, MEGAPHONE_STATE_NAME, VOICE_RANGE_STATE_NAME } from "common/constants";
 
 /**
  * The YaCA client module.
@@ -323,7 +323,7 @@ export class YaCAClientModule {
       }
 
       for (const dataObj of dataObjects) {
-        if (!dataObj || typeof dataObj.range === "undefined" || typeof dataObj.clientId === "undefined" || typeof dataObj.playerId === "undefined") {
+        if (!dataObj || typeof dataObj.clientId === "undefined" || typeof dataObj.playerId === "undefined") {
           continue;
         }
 
@@ -353,23 +353,15 @@ export class YaCAClientModule {
     });
 
     /**
-     * Handles the "client:yaca:changeVoiceRange" server event.
+     * Handles the "client:yaca:changeOwnVoiceRange" server event.
      *
-     * @param {number} target - The target whose voice range is to be changed.
      * @param {number} range - The new voice range.
      */
-    onNet("client:yaca:changeVoiceRange", (target: number, range: number) => {
-      if (target === cache.serverId) {
-        emit("yaca:external:voiceRangeUpdate", range);
-        // SaltyChat bridge
-        if (this.sharedConfig.saltyChatBridge?.enabled) {
-          emit("SaltyChat_VoiceRangeChanged", range.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
-        }
-      }
-
-      const player = this.getPlayerByID(target);
-      if (player) {
-        player.range = range;
+    onNet("client:yaca:changeOwnVoiceRange", (range: number) => {
+      emit("yaca:external:voiceRangeUpdate", range);
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
+        emit("SaltyChat_VoiceRangeChanged", range.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
       }
     });
 
@@ -542,7 +534,7 @@ export class YaCAClientModule {
    * @returns {number} The current voice range.
    */
   getVoiceRange(): number {
-    return this.sharedConfig.voiceRange.ranges[this.rangeIndex];
+    return LocalPlayer.state[VOICE_RANGE_STATE_NAME];
   }
 
   /**
@@ -902,7 +894,8 @@ export class YaCAClientModule {
       playersToPhoneSpeaker: Set<number> = new Set(),
       playersOnPhoneSpeaker: Set<number> = new Set(),
       hasVehicleOpening = cache.vehicle === false || this.mufflingVehicleWhitelistHash.has(GetEntityModel(cache.vehicle)) || vehicleHasOpening(cache.vehicle),
-      phoneSpeakerRange = this.sharedConfig.maxPhoneSpeakerRange ?? 5;
+      phoneSpeakerRange = this.sharedConfig.maxPhoneSpeakerRange ?? 5,
+      localState = LocalPlayer.state;
 
     for (const player of GetActivePlayers()) {
       const remoteId = GetPlayerServerId(player);
@@ -935,7 +928,7 @@ export class YaCAClientModule {
           client_id: voiceSetting.clientId,
           position: convertNumberArrayToXYZ(playerPos),
           direction: convertNumberArrayToXYZ(playerDirection),
-          range: voiceSetting.range ?? 0,
+          range: playerState[VOICE_RANGE_STATE_NAME] ?? 0,
           is_underwater: isUnderwater,
           muffle_intensity: muffleIntensity,
           is_muted: voiceSetting.forceMuted ?? false,
@@ -995,7 +988,7 @@ export class YaCAClientModule {
       player: {
         player_direction: getCamDirection(),
         player_position: convertNumberArrayToXYZ(localPos),
-        player_range: localData.range,
+        player_range: localState[VOICE_RANGE_STATE_NAME],
         // @ts-expect-error Type error in the native
         player_is_underwater: IsPedSwimmingUnderWater(cache.ped) === 1,
         player_is_muted: localData.forceMuted ?? false,

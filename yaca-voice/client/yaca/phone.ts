@@ -1,7 +1,7 @@
 import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData } from "types";
 import { cache } from "../utils";
-import { PHONE_SPEAKER_STATE_NAME } from "common/consts";
+import { PHONE_SPEAKER_STATE_NAME } from "common/constants";
 
 /**
  * The phone module for the client.

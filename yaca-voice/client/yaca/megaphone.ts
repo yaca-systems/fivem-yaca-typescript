@@ -2,7 +2,7 @@ import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum } from "types";
 import { locale } from "common/locale";
 import { cache, onCache } from "utils";
-import { MEGAPHONE_STATE_NAME } from "common/consts";
+import { MEGAPHONE_STATE_NAME } from "common/constants";
 
 /**
  * The megaphone module for the client.
