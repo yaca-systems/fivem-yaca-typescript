@@ -1,20 +1,5 @@
-import { cache } from "../utils";
-
-let localLipSyncAnimations: Record<string, { name: string; dict: string }>;
-
-if (cache.game === "redm") {
-  localLipSyncAnimations = {
-    true: {
-      name: "face_human@gen_male@base",
-      dict: "mood_talking_normal",
-    },
-    false: {
-      name: "face_human@gen_male@base",
-      dict: "mood_normal",
-    },
-  };
-} else {
-  localLipSyncAnimations = {
+const localLipSyncAnimations: Record<"fivem" | "redm", Record<string, { name: string; dict: string }>> = {
+  fivem: {
     true: {
       name: "mic_chatter",
       dict: "mp_facial",
@@ -23,8 +8,18 @@ if (cache.game === "redm") {
       name: "mood_normal_1",
       dict: "facials@gen_male@variations@normal",
     },
-  };
-}
+  },
+  redm: {
+    true: {
+      name: "face_human@gen_male@base",
+      dict: "mood_talking_normal",
+    },
+    false: {
+      name: "face_human@gen_male@base",
+      dict: "mood_normal",
+    },
+  },
+};
 
 const REDM_KEY_TO_HASH: Record<string, number | null> = {
   // Letters

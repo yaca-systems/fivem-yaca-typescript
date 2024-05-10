@@ -827,7 +827,7 @@ export class YaCAClientModule {
     if (this.isTalking !== isTalking) {
       this.isTalking = isTalking;
 
-      const animationData = localLipSyncAnimations[isTalking ? "true" : "false"];
+      const animationData = localLipSyncAnimations[cache.game][isTalking ? "true" : "false"];
 
       SetPlayerTalkingOverride(cache.playerId, isTalking);
       if (this.isFiveM) {
