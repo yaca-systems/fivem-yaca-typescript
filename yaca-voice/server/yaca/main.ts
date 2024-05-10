@@ -283,12 +283,12 @@ export class YaCAServerModule {
    * Change the voice range of a player.
    *
    * @param {number} src - The source-id of the player to change the voice range for.
-   * @param {number} range - A valid index from the voice range array. If the index is invalid, the default range will be used.
+   * @param {number} range - The new voice range. Defaults to the default voice range if not provided.
    */
-  changeVoiceRange(src: number, range: number) {
+  changeVoiceRange(src: number, range?: number) {
     const playerState = Player(src).state;
 
-    playerState.set(VOICE_RANGE_STATE_NAME, range, true);
+    playerState.set(VOICE_RANGE_STATE_NAME, range ?? this.defaultVoiceRange, true);
     emitNet("client:yaca:changeVoiceRange", src, range);
   }
 
