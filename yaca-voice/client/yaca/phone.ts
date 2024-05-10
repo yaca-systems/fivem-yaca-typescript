@@ -1,6 +1,7 @@
 import type { YaCAClientModule } from "yaca";
 import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData } from "types";
 import { cache } from "../utils";
+import { PHONE_SPEAKER_STATE_NAME } from "common/consts";
 
 /**
  * The phone module for the client.
@@ -165,7 +166,7 @@ export class YaCAClientPhoneModule {
     /**
      * Handles the "yaca:phone" state bag change.
      */
-    AddStateBagChangeHandler("yaca:phoneSpeaker", "", (bagName: string, _: string, value: object, __: number, replicated: boolean) => {
+    AddStateBagChangeHandler(PHONE_SPEAKER_STATE_NAME, "", (bagName: string, _: string, value: object, __: number, replicated: boolean) => {
       if (replicated) {
         return;
       }

@@ -16,6 +16,7 @@ import { YaCAClientIntercomModule, YaCAClientMegaphoneModule, YaCAClientPhoneMod
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale, locale } from "common/locale";
 import { cache } from "../utils";
+import { LIP_SYNC_STATE_NAME, MEGAPHONE_STATE_NAME } from "common/consts";
 
 /**
  * The YaCA client module.
@@ -124,10 +125,10 @@ export class YaCAClientModule {
     this.radioModule = new YaCAClientRadioModule(this);
 
     /**
-     * Add a state bag change handler for the "yaca:lipsync" state bag.
+     * Add a state bag change handler for the lip sync state bag.
      * Which is used to override the talking state of the player.
      */
-    AddStateBagChangeHandler("yaca:lipsync", "", (bagName: string, _: string, value: boolean, __: number, replicated: boolean) => {
+    AddStateBagChangeHandler(LIP_SYNC_STATE_NAME, "", (bagName: string, _: string, value: boolean, __: number, replicated: boolean) => {
       if (replicated) {
         return;
       }
@@ -244,7 +245,6 @@ export class YaCAClientModule {
      * Handles the "onClientResourceStart" event.
      *
      * @param {string} resourceName - The name of the resource that has started.
-     *
      */
     on("onResourceStop", (resourceName: string) => {
       if (GetCurrentResourceName() !== resourceName) {
@@ -333,8 +333,6 @@ export class YaCAClientModule {
           remoteID: dataObj.playerId,
           clientId: dataObj.clientId,
           forceMuted: dataObj.forceMuted || false,
-          range: dataObj.range,
-          isTalking: false,
           phoneCallMemberIds: currentData?.phoneCallMemberIds || undefined,
           mutedOnPhone: dataObj.mutedOnPhone || false,
         });
@@ -791,7 +789,7 @@ export class YaCAClientModule {
 
       SetPlayerTalkingOverride(cache.playerId, isTalking);
       PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
-      LocalPlayer.state.set("yaca:lipsync", isTalking, true);
+      LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true);
 
       emit("yaca:external:isTalking", isTalking);
 
@@ -923,7 +921,7 @@ export class YaCAClientModule {
       }
 
       const playerState = Player(remoteId).state;
-      const isMegaphoneActive = playerState["yaca:megaphoneactive"] !== null;
+      const isMegaphoneActive = playerState[MEGAPHONE_STATE_NAME] !== null;
 
       const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening, isMegaphoneActive);
 
