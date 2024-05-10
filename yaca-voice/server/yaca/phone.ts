@@ -99,6 +99,20 @@ export class YaCAServerPhoneModle {
      * @param {boolean} state - The state of the phone speaker.
      */
     exports("enablePhoneSpeaker", (src: number, state: boolean) => this.enablePhoneSpeaker(src, state));
+
+    /**
+     * Is player in a phone call.
+     *
+     * @param {number} src - The source-id of the player to check.
+     */
+    exports("isPlayerInCall", (src: number) => {
+      const player = this.serverModule.players.get(src);
+      if (!player) {
+        return false;
+      }
+
+      return player.voiceSettings.inCallWith.length > 0;
+    });
   }
 
   /**
