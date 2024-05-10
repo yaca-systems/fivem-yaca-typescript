@@ -174,6 +174,12 @@ Starts or stops talking on the radio.
 | channel       | `number`  | the channel to talk on                                            |
 | clearPedTasks | `boolean` | `true` to clear the ped tasks, `false` to not clear the ped tasks |
 
+### Phone
+
+#### `isInCall(): boolean`
+
+Returns whether the player is in a phone call as a `boolean`.
+
 </details>
 
 <details>
@@ -292,6 +298,14 @@ Enable or disable the phone speaker for a player.
 | source    | `number`  | the player source       |
 | state     | `boolean` | the phone speaker state |
 
+
+#### `isPlayerInCall(source: number): bool`
+
+Returns whether a player is in a phone call as `bool`.
+
+| Parameter | Type     | Description       |
+| --------- | -------- | ----------------- |
+| source    | `number` | the player source |
 </details>
 
 # Events

@@ -21,6 +21,7 @@ export class YaCAClientPhoneModule {
     this.clientModule = clientModule;
 
     this.registerEvents();
+    this.registerExports();
     this.registerStateBagHandlers();
   }
 
@@ -160,6 +161,16 @@ export class YaCAClientPhoneModule {
         );
       }
     });
+  }
+
+  registerExports() {
+    /**
+     * Exports the "isInCall" function.
+     * This function returns whether the player is in a phone call.
+     *
+     * @returns {boolean} - Whether the player is in a phone call.
+     */
+    exports("isInCall", () => this.inCall);
   }
 
   registerStateBagHandlers() {
