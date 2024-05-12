@@ -105,13 +105,13 @@ export class YaCAServerPhoneModle {
      *
      * @param {number} src - The source-id of the player to check.
      */
-    exports("isPlayerInCall", (src: number) => {
+    exports("isPlayerInCall", (src: number): [boolean, number[]] => {
       const player = this.serverModule.players.get(src);
       if (!player) {
-        return false;
+        return [false, []];
       }
 
-      return player.voiceSettings.inCallWith.length > 0;
+      return [player.voiceSettings.inCallWith.length > 0, player.voiceSettings.inCallWith];
     });
   }
 

@@ -299,9 +299,9 @@ Enable or disable the phone speaker for a player.
 | state     | `boolean` | the phone speaker state |
 
 
-#### `isPlayerInCall(source: number): bool`
+#### `isPlayerInCall(source: number): [bool, number[]]`
 
-Returns whether a player is in a phone call as `bool`.
+Returns whether a player is in a phone call as `[bool, number[]]`.
 
 | Parameter | Type     | Description       |
 | --------- | -------- | ----------------- |
