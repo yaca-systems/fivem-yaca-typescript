@@ -871,8 +871,8 @@ export class YaCAClientModule {
   handlePhoneSpeakerEmit(playersToPhoneSpeaker: Set<number>, playersOnPhoneSpeaker: Set<number>): void {
     if (
       this.useWhisper &&
-      ((this.phoneModule.phoneSpeakerActive && this.phoneModule.inCall) ||
-        ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCall) && this.currentlySendingPhoneSpeakerSender.size))
+      ((this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) ||
+        ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCallWith.size) && this.currentlySendingPhoneSpeakerSender.size))
     ) {
       const playersToNotReceivePhoneSpeaker = [...this.currentlySendingPhoneSpeakerSender].filter((playerId) => !playersToPhoneSpeaker.has(playerId)),
         playersNeedsReceivePhoneSpeaker = [...playersToPhoneSpeaker].filter((playerId) => !this.currentlySendingPhoneSpeakerSender.has(playerId));
@@ -965,7 +965,7 @@ export class YaCAClientModule {
       }
 
       // Phone speaker handling - user who enabled it.
-      if (this.useWhisper && this.phoneModule.phoneSpeakerActive && this.phoneModule.inCall) {
+      if (this.useWhisper && this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) {
         playersToPhoneSpeaker.add(remoteId);
       }
 
