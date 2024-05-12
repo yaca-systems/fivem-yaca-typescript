@@ -1,5 +1,5 @@
 import type { YaCAClientModule } from "yaca";
-import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaRadioSettings, YacaStereoMode } from "types";
+import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from "types";
 import { cache, clamp, requestAnimDict } from "../utils";
 import { locale } from "common/locale";
 
@@ -485,8 +485,7 @@ export class YaCAClientRadioModule {
         this.playersInRadioChannel.set(i, new Set());
       }
 
-      const { volume } = this.radioChannelSettings[i],
-        { stereo } = this.radioChannelSettings[i];
+      const { volume, stereo } = this.radioChannelSettings[i];
 
       this.clientModule.setCommDeviceStereomode(YacaFilterEnum.RADIO, stereo, i);
       this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, volume, i);
@@ -582,16 +581,12 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The channel number.
    */
   disableRadioFromPlayerInChannel(channel: number) {
-    if (!this.playersInRadioChannel.has(channel)) {
-      return;
-    }
-
     const players = this.playersInRadioChannel.get(channel);
-    if (!players?.size) {
+    if (!players || !players.size) {
       return;
     }
 
-    const targets = [];
+    const targets: YacaPlayerData[] = [];
     for (const playerId of players) {
       const player = this.clientModule.getPlayerByID(playerId);
       if (!player || !player.remoteID) {
