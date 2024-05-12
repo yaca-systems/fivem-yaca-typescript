@@ -123,9 +123,8 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the call.
    */
   callPlayer(src: number, target: number, state: boolean) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src),
-      targetPlayer = players.get(target);
+    const player = this.serverModule.getPlayer(src),
+      targetPlayer = this.serverModule.getPlayer(target);
     if (!player || !targetPlayer) {
       return;
     }
@@ -174,9 +173,8 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the call.
    */
   callPlayerOldEffect(src: number, target: number, state: boolean) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src),
-      targetPlayer = players.get(target);
+    const player = this.serverModule.getPlayer(src),
+      targetPlayer = this.serverModule.getPlayer(target);
     if (!player || !targetPlayer) {
       return;
     }
@@ -225,8 +223,7 @@ export class YaCAServerPhoneModle {
    * @param {boolean} [onCallStop=false] - Whether the call has stopped. Defaults to false if not provided.
    */
   muteOnPhone(src: number, state: boolean, onCallStop = false) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src);
+    const player = this.serverModule.getPlayer(src);
     if (!player) {
       return;
     }
@@ -243,8 +240,7 @@ export class YaCAServerPhoneModle {
    * @param {boolean} state - The state of the phone speaker.
    */
   enablePhoneSpeaker(src: number, state: boolean) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src);
+    const player = this.serverModule.getPlayer(src);
     if (!player) {
       return;
     }

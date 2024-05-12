@@ -90,6 +90,13 @@ export class YaCAServerModule {
   }
 
   /**
+   * Get the player data for a specific player.
+   */
+  getPlayer(playerId: number): YaCAPlayer | undefined {
+    return this.players.get(playerId);
+  }
+
+  /**
    * Initialize the player on first connect.
    *
    * @param {number} src - The source-id of the player to initialize.
@@ -201,8 +208,8 @@ export class YaCAServerModule {
 
     this.nameSet.delete(player.voiceSettings?.ingameName);
 
-    const allFrequences = this.radioModule.radioFrequencyMap;
-    for (const [key, value] of allFrequences) {
+    const allFrequencies = this.radioModule.radioFrequencyMap;
+    for (const [key, value] of allFrequencies) {
       value.delete(src);
       if (!value.size) {
         this.radioModule.radioFrequencyMap.delete(key);
