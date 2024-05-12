@@ -42,8 +42,7 @@ export class YaCAServerMegaphoneModule {
    * @param {boolean} state - The state of the megaphone effect.
    */
   playerUseMegaphone(src: number, state: boolean) {
-    const players = this.serverModule.getPlayers(),
-      player = players.get(src);
+    const player = this.serverModule.getPlayer(src);
     if (!player) {
       return;
     }
