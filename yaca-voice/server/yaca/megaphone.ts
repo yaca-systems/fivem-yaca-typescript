@@ -51,16 +51,16 @@ export class YaCAServerMegaphoneModule {
       playerPed = GetPlayerPed(src.toString()),
       playerVehicle = GetVehiclePedIsIn(playerPed, false);
 
-    if (playerVehicle === 0 && playerState[MEGAPHONE_STATE_NAME]) {
+    if (playerVehicle === 0 && !playerState[MEGAPHONE_STATE_NAME]) {
       return;
     }
+
     if (playerVehicle !== 0) {
-      const playerSeatDriver = GetPedInVehicleSeat(playerVehicle, -1),
-        playerSeatPassenger = GetPedInVehicleSeat(playerVehicle, 0);
-      if (playerSeatDriver !== playerPed && playerSeatPassenger !== playerPed) {
+      if (GetPedInVehicleSeat(playerVehicle, -1) !== playerPed && GetPedInVehicleSeat(playerVehicle, 0) !== playerPed) {
         return;
       }
     }
+
     if ((!state && !playerState[MEGAPHONE_STATE_NAME]) || (state && playerState[MEGAPHONE_STATE_NAME])) {
       return;
     }
