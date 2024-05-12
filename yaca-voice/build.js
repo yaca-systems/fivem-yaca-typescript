@@ -6,8 +6,8 @@ import {
   copyFileSync,
   mkdirSync,
   cpSync,
+  rmSync
 } from "fs";
-import { rmSync } from "node:fs";
 
 /** @type {import('esbuild').BuildOptions} */
 const server = {
@@ -64,6 +64,8 @@ files {
 
 client_script 'dist/client.js'
 server_script 'dist/server.js'
+
+provide 'saltychat'
 
 `,
 );
