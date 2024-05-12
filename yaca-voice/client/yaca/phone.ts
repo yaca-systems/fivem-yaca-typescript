@@ -9,7 +9,7 @@ import { PHONE_SPEAKER_STATE_NAME } from "common/constants";
 export class YaCAClientPhoneModule {
   clientModule: YaCAClientModule;
 
-  inCall = false;
+  inCallWith = new Set<number>();
   phoneSpeakerActive = false;
 
   /**
@@ -38,7 +38,11 @@ export class YaCAClientPhoneModule {
         return;
       }
 
-      this.inCall = state;
+      if (state) {
+        this.inCallWith.add(targetID);
+      } else {
+        this.inCallWith.delete(targetID);
+      }
 
       this.clientModule.setPlayersCommType(target, YacaFilterEnum.PHONE, state, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER);
     });
@@ -55,7 +59,11 @@ export class YaCAClientPhoneModule {
         return;
       }
 
-      this.inCall = state;
+      if (state) {
+        this.inCallWith.add(targetID);
+      } else {
+        this.inCallWith.delete(targetID);
+      }
 
       this.clientModule.setPlayersCommType(
         target,
@@ -170,7 +178,7 @@ export class YaCAClientPhoneModule {
      *
      * @returns {boolean} - Whether the player is in a phone call.
      */
-    exports("isInCall", () => this.inCall);
+    exports("isInCall", () => this.inCallWith.size > 0);
   }
 
   registerStateBagHandlers() {
