@@ -570,7 +570,7 @@ export class YaCAClientRadioModule {
     // SaltyChat bridge
     if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
       const { frequency } = this.radioChannelSettings[channel];
-      const saltyFrequency = frequency === "0" ? null : frequency;
+      const saltyFrequency = frequency === "0" ? "" : frequency;
       emit("SaltyChat_RadioChannelChanged", saltyFrequency, channel === 1);
     }
   }
