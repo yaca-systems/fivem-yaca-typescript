@@ -8,7 +8,7 @@ import { saltyChatExport } from "common/bridge";
 export class YaCAServerSaltyChatBridge {
   serverModule: YaCAServerModule;
 
-  callMap: Map<string, number[]> = new Map();
+  private callMap = new Map<string, Set<number>>();
 
   /**
    * Creates an instance of the SaltyChat bridge.
@@ -103,13 +103,21 @@ export class YaCAServerSaltyChatBridge {
       playerHandle = [playerHandle];
     }
 
-    const beforeInCall = this.callMap.get(callIdentifier) ?? [],
-      nowInCall = beforeInCall.concat(playerHandle);
-    this.callMap.set(callIdentifier, nowInCall);
+    const currentlyInCall = this.callMap.get(callIdentifier) ?? new Set<number>();
+    const newInCall = new Set<number>();
 
-    for (const player of nowInCall) {
-      for (const otherPlayer of nowInCall) {
-        if (player !== otherPlayer && !beforeInCall.includes(otherPlayer)) {
+    for (const player of playerHandle) {
+      if (!currentlyInCall.has(player)) {
+        currentlyInCall.add(player);
+        newInCall.add(player);
+      }
+    }
+
+    this.callMap.set(callIdentifier, currentlyInCall);
+
+    for (const player of currentlyInCall) {
+      for (const otherPlayer of newInCall) {
+        if (player !== otherPlayer) {
           this.serverModule.phoneModule.callPlayer(player, otherPlayer, true);
         }
       }
@@ -132,12 +140,21 @@ export class YaCAServerSaltyChatBridge {
       return;
     }
 
-    const nowInCall = beforeInCall?.filter((player) => !(playerHandle as number[]).includes(player));
+    const nowInCall = new Set<number>(beforeInCall);
+
+    const removedFromCall = new Set<number>();
+    for (const player of playerHandle) {
+      if (beforeInCall.has(player)) {
+        nowInCall.delete(player);
+        removedFromCall.add(player);
+      }
+    }
+
     this.callMap.set(callIdentifier, nowInCall);
 
-    for (const player of beforeInCall) {
+    for (const player of removedFromCall) {
       for (const otherPlayer of beforeInCall) {
-        if (player !== otherPlayer && !nowInCall.includes(otherPlayer)) {
+        if (player !== otherPlayer) {
           this.serverModule.phoneModule.callPlayer(player, otherPlayer, false);
         }
       }
