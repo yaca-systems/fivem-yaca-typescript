@@ -3,7 +3,7 @@
   "versionCheck": true,
   "buildType": 0,
   "locale": "en",
-  "unmuteDelay": 300,
+  "unmuteDelay": 400,
   "maxPhoneSpeakerRange": 5,
   "notifications": {
     "oxLib": false,
@@ -30,12 +30,12 @@
     ],
     "sendNotification": false,
     "markerColor": {
-        "enabled": true,
-        "r": 0,
-        "g": 255,
-        "b": 0,
-        "a": 50,
-        "duration": 1000
+      "enabled": true,
+      "r": 0,
+      "g": 255,
+      "b": 0,
+      "a": 50,
+      "duration": 1000
     }
   },
   "megaphone": {
