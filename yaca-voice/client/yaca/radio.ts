@@ -12,7 +12,7 @@ export class YaCAClientRadioModule {
   radioFrequencySet = false;
   radioEnabled = false;
   radioTalking = false;
-  radioChannelSettings: { [key: number]: YacaRadioSettings } = {};
+  radioChannelSettings: Record<number, YacaRadioSettings> = {};
   radioInitialized = false;
   activeRadioChannel = 1;
   playersWithShortRange = new Map<number, string>();

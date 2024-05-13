@@ -21,7 +21,7 @@ export type YaCAPlayer = {
     activated: boolean;
     currentChannel: number;
     hasLong: boolean;
-    frequencies: { [key: number]: string };
+    frequencies: Record<number, string>;
   };
   voicePlugin?: {
     playerId: number;

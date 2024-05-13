@@ -26,8 +26,8 @@ import { LIP_SYNC_STATE_NAME, MEGAPHONE_STATE_NAME, VOICE_RANGE_STATE_NAME } fro
 export class YaCAClientModule {
   websocket: WebSocket;
   sharedConfig: YacaSharedConfig;
-  mufflingVehicleWhitelistHash: Set<number> = new Set();
-  allPlayers: Map<number, YacaPlayerData> = new Map();
+  mufflingVehicleWhitelistHash = new Set<number>();
+  allPlayers = new Map<number, YacaPlayerData>();
   firstConnect = true;
 
   radioModule: YaCAClientRadioModule;
@@ -51,7 +51,7 @@ export class YaCAClientModule {
   currentlyPhoneSpeakerApplied: Set<number> = new Set();
   currentlySendingPhoneSpeakerSender: Set<number> = new Set();
 
-  responseCodesToErrorMessages: { [key: string]: string | undefined };
+  responseCodesToErrorMessages: Record<string, string | undefined>;
 
   /**
    * Sends a radar notification.
