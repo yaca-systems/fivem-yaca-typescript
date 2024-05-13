@@ -15,7 +15,7 @@ export type YaCAPlayer = {
     forceMuted: boolean;
     ingameName: string;
     mutedOnPhone: boolean;
-    inCallWith: number[];
+    inCallWith: Set<number>;
   };
   radioSettings: {
     activated: boolean;
@@ -83,13 +83,6 @@ export class YaCAServerModule {
   }
 
   /**
-   * Get all registered players.
-   */
-  getPlayers(): Map<number, YaCAPlayer> {
-    return this.players;
-  }
-
-  /**
    * Get the player data for a specific player.
    */
   getPlayer(playerId: number): YaCAPlayer | undefined {
@@ -116,7 +109,7 @@ export class YaCAServerModule {
         forceMuted: false,
         ingameName: name,
         mutedOnPhone: false,
-        inCallWith: [],
+        inCallWith: new Set<number>(),
       },
       radioSettings: {
         activated: false,
