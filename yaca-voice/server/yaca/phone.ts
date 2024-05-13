@@ -47,20 +47,18 @@ export class YaCAServerPhoneModle {
         if (enableForTargets?.includes(callTarget)) {
           enableWhisperReceive.push(callTarget);
         }
+
         if (disableForTargets?.includes(callTarget)) {
           disableWhisperReceive.push(callTarget);
         }
       });
 
-      if (enableWhisperReceive.length) {
-        for (const target of enableWhisperReceive) {
-          emitNet("client:yaca:playersToPhoneSpeakerEmit", target, enableForTargets, true);
-        }
+      for (const target of enableWhisperReceive) {
+        emitNet("client:yaca:playersToPhoneSpeakerEmit", target, enableForTargets, true);
       }
-      if (disableWhisperReceive.length) {
-        for (const target of disableWhisperReceive) {
-          emitNet("client:yaca:playersToPhoneSpeakerEmit", target, disableForTargets, false);
-        }
+
+      for (const target of disableWhisperReceive) {
+        emitNet("client:yaca:playersToPhoneSpeakerEmit", target, disableForTargets, false);
       }
     });
   }
@@ -111,7 +109,7 @@ export class YaCAServerPhoneModle {
         return [false, []];
       }
 
-      return [player.voiceSettings.inCallWith.length > 0, player.voiceSettings.inCallWith];
+      return [player.voiceSettings.inCallWith.size > 0, [...player.voiceSettings.inCallWith]];
     });
   }
 
@@ -136,8 +134,8 @@ export class YaCAServerPhoneModle {
     const targetState = Player(target).state;
 
     if (state) {
-      player.voiceSettings.inCallWith.push(target);
-      targetPlayer.voiceSettings.inCallWith.push(src);
+      player.voiceSettings.inCallWith.add(target);
+      targetPlayer.voiceSettings.inCallWith.add(src);
 
       if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, true);
@@ -150,8 +148,8 @@ export class YaCAServerPhoneModle {
       this.muteOnPhone(src, false, true);
       this.muteOnPhone(target, false, true);
 
-      player.voiceSettings.inCallWith = player.voiceSettings.inCallWith.filter((id) => id !== target);
-      targetPlayer.voiceSettings.inCallWith = targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
+      player.voiceSettings.inCallWith.delete(target);
+      targetPlayer.voiceSettings.inCallWith.delete(src);
 
       if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, false);
@@ -186,8 +184,8 @@ export class YaCAServerPhoneModle {
     const targetState = Player(target).state;
 
     if (state) {
-      player.voiceSettings.inCallWith.push(target);
-      targetPlayer.voiceSettings.inCallWith.push(src);
+      player.voiceSettings.inCallWith.add(target);
+      targetPlayer.voiceSettings.inCallWith.add(src);
 
       if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, true);
@@ -200,8 +198,8 @@ export class YaCAServerPhoneModle {
       this.muteOnPhone(src, false, true);
       this.muteOnPhone(target, false, true);
 
-      player.voiceSettings.inCallWith = player.voiceSettings.inCallWith.filter((id: number) => id !== target);
-      targetPlayer.voiceSettings.inCallWith = targetPlayer.voiceSettings.inCallWith.filter((id) => id !== src);
+      player.voiceSettings.inCallWith.delete(target);
+      targetPlayer.voiceSettings.inCallWith.delete(src);
 
       if (playerState[PHONE_SPEAKER_STATE_NAME]) {
         this.enablePhoneSpeaker(src, false);
@@ -247,8 +245,8 @@ export class YaCAServerPhoneModle {
 
     const playerState = Player(src).state;
 
-    if (state && player.voiceSettings.inCallWith.length) {
-      playerState.set(PHONE_SPEAKER_STATE_NAME, player.voiceSettings.inCallWith, true);
+    if (state && player.voiceSettings.inCallWith.size) {
+      playerState.set(PHONE_SPEAKER_STATE_NAME, Array.from(player.voiceSettings.inCallWith), true);
       emit("yaca:external:phoneSpeaker", src, true);
     } else {
       playerState.set(PHONE_SPEAKER_STATE_NAME, null, true);
