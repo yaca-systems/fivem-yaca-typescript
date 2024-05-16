@@ -58,11 +58,9 @@ function initCache() {
       cache.vehicle = false;
       cache.seat = false;
     }
-
-    setTimeout(updateCache, 100);
   };
 
-  updateCache();
+  setInterval(updateCache, 100);
 }
 
 /**
