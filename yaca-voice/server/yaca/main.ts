@@ -167,11 +167,6 @@ export class YaCAServerModule {
       this.handlePlayerDisconnect(source);
     });
 
-    // YaCA: player left vehicle
-    onNet("server:yaca:playerLeftVehicle", () => {
-      this.handlePlayerLeftVehicle(source);
-    });
-
     // YaCA: connect to voice when NUI is ready
     onNet("server:yaca:nuiReady", () => {
       this.connectToVoice(source);
@@ -210,15 +205,6 @@ export class YaCAServerModule {
     }
 
     emitNet("client:yaca:disconnect", -1, src);
-  }
-
-  /**
-   * Handle various cases if player left a vehicle.
-   *
-   * @param {number} src - The source-id of the player who left the vehicle.
-   */
-  handlePlayerLeftVehicle(src: number) {
-    this.megaphoneModule.changeMegaphoneState(src, false, true);
   }
 
   /**
