@@ -49,15 +49,15 @@ export class YaCAClientMegaphoneModule {
        * If they can't, it sets the `canUseMegaphone` property to `false`.
        * If the player is not in a vehicle, it sets the `canUseMegaphone` property to `false` and emits the "server:yaca:playerLeftVehicle" event.
        */
-      onCache<number | false>("vehicle", (vehicle) => {
-        if (vehicle) {
-          const vehicleClass = GetVehicleClass(vehicle);
-
-          this.canUseMegaphone = this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass);
-        } else if (this.canUseMegaphone) {
+      onCache<number | false>("seat", (seat) => {
+        if (!seat || seat > 0 || !cache.vehicle) {
           this.canUseMegaphone = false;
           emitNet("server:yaca:playerLeftVehicle");
+          return;
         }
+
+        const vehicleClass = GetVehicleClass(cache.vehicle);
+        this.canUseMegaphone = this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass);
       });
     }
   }
