@@ -170,7 +170,7 @@ export class YaCAClientMegaphoneModule {
     }
 
     this.lastMegaphoneState = !this.lastMegaphoneState;
-    emitNet("server:yaca:useMegaphone", state, this.clientModule.isRedM);
+    emitNet("server:yaca:useMegaphone", state);
     emit("yaca:external:megaphoneState", state);
   }
 }
