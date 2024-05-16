@@ -33,6 +33,13 @@ export class YaCAServerMegaphoneModule {
     onNet("server:yaca:useMegaphone", (state: boolean) => {
       this.playerUseMegaphone(source, state);
     });
+
+    /**
+     * Handles the "server:yaca:playerLeftVehicle" event.
+     */
+    onNet("server:yaca:playerLeftVehicle", () => {
+      this.changeMegaphoneState(source, false, true);
+    });
   }
 
   /**
