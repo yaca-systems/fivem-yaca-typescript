@@ -1,6 +1,6 @@
 import type { YaCAClientModule } from "../yaca";
 import { YacaResponseCode } from "types";
-import { cache } from "../utils";
+import { cache, registerRdrKeyBind } from "../utils";
 import { sleep } from "common/index";
 import { locale } from "common/locale";
 import { saltyChatExport } from "common/bridge";
@@ -27,9 +27,13 @@ export class YaCAClientSaltyChatBridge {
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule;
 
-    this.registerSaltyChatKeyBinds();
+    if (this.clientModule.isFiveM) {
+      this.registerSaltyChatKeyBinds();
+    } else if (this.clientModule.isRedM) {
+      this.registerSaltyChatRdrKeyBinds();
+    }
     this.registerSaltyChatExports();
-    this.enableRadio();
+    this.enableRadio().then();
 
     console.log("[YaCA] SaltyChat bridge loaded");
 
@@ -54,45 +58,80 @@ export class YaCAClientSaltyChatBridge {
   }
 
   /**
-   * Register SaltyChat key binds.
+   * Register the keybindings for the saltychat bridge.
+   * This is for FiveM.
    */
   registerSaltyChatKeyBinds() {
-    RegisterCommand(
-      "+primaryRadio",
-      () => {
-        this.clientModule.radioModule.radioTalkingStart(true, 1);
-      },
-      false,
-    );
-    RegisterCommand(
-      "-primaryRadio",
-      () => {
-        this.clientModule.radioModule.radioTalkingStart(false, 1);
-      },
-      false,
-    );
-    RegisterKeyMapping("+primaryRadio", locale("use_salty_primary_radio"), "keyboard", this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio);
+    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio !== false) {
+      RegisterCommand(
+        "+primaryRadio",
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(true, 1);
+        },
+        false,
+      );
+      RegisterCommand(
+        "-primaryRadio",
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(false, 1);
+        },
+        false,
+      );
+      RegisterKeyMapping("+primaryRadio", locale("use_salty_primary_radio"), "keyboard", this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio);
+    }
 
-    RegisterCommand(
-      "+secondaryRadio",
-      () => {
-        this.clientModule.radioModule.radioTalkingStart(true, 2);
-      },
-      false,
-    );
-    RegisterCommand(
-      "-secondaryRadio",
-      () => {
-        this.clientModule.radioModule.radioTalkingStart(false, 2);
-      },
-      false,
-    );
-    RegisterKeyMapping(
-      "+secondaryRadio",
-      locale("use_salty_secondary_radio"),
-      "keyboard",
-      this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio,
-    );
+    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio !== false) {
+      RegisterCommand(
+        "+secondaryRadio",
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(true, 2);
+        },
+        false,
+      );
+      RegisterCommand(
+        "-secondaryRadio",
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(false, 2);
+        },
+        false,
+      );
+      RegisterKeyMapping(
+        "+secondaryRadio",
+        locale("use_salty_secondary_radio"),
+        "keyboard",
+        this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio,
+      );
+    }
+  }
+
+  /**
+   * Register the keybindings for the saltychat bridge.
+   * This is for RedM.
+   */
+  registerSaltyChatRdrKeyBinds() {
+    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio !== false) {
+      registerRdrKeyBind(
+        this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio,
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(true, 1);
+        },
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(false, 1);
+        },
+      );
+    }
+
+    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio !== false) {
+      registerRdrKeyBind(
+        this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio,
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(true, 2);
+        },
+        () => {
+          this.clientModule.radioModule.radioTalkingStart(false, 2);
+        },
+      );
+    }
   }
 
   /**
@@ -113,7 +152,9 @@ export class YaCAClientSaltyChatBridge {
       return currentFrequency;
     });
 
-    saltyChatExport("GetRadioVolume", () => this.clientModule.radioModule.radioChannelSettings[1].volume);
+    saltyChatExport("GetRadioVolume", () => {
+      return this.clientModule.radioModule.radioChannelSettings[1].volume;
+    });
 
     saltyChatExport("GetRadioSpeaker", () => {
       console.warn("GetRadioSpeaker is not implemented in YaCA");

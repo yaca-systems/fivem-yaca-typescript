@@ -2,7 +2,7 @@
   "name": "yaca-voice",
   "version": "1.9.0",
   "type": "module",
-  "description": "YACA Voice Integration for FiveM",
+  "description": "YACA Voice Integration for FiveM & RedM",
   "author": "MineMalox & LuftigerLuca",
   "repository": {
     "type": "git",

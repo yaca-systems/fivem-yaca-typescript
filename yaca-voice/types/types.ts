@@ -70,6 +70,7 @@ export type ClientCache = {
   ped: number;
   vehicle: number | false;
   seat: number | false;
+  game: "fivem" | "redm";
 };
 
 export type ServerCache = {
