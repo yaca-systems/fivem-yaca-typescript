@@ -35,7 +35,7 @@
     "@citizenfx/server": "latest",
     "@eslint/js": "^8.57.0",
     "@types/events": "^3.0.3",
-    "@types/node": "^20.12.10",
+    "@types/node": "^20.12.12",
     "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "husky": "^9.0.11",
@@ -43,7 +43,7 @@
     "lint-staged": "^15.2.2",
     "prettier": "3.2.5",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.8.0"
+    "typescript-eslint": "^7.9.0"
   },
   "engines": {
     "node": ">=16.9.1"
@@ -56,5 +56,6 @@
     "*.{json,yml,yaml,md}": [
       "prettier --write --log-level=warn"
     ]
-  }
+  },
+  "packageManager": "pnpm@9.1.1+sha512.14e915759c11f77eac07faba4d019c193ec8637229e62ec99eefb7cf3c3b75c64447882b7c485142451ee3a6b408059cdfb7b7fa0341b975f12d0f7629c71195"
 }
