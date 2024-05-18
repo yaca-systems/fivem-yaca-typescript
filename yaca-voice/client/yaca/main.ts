@@ -297,12 +297,12 @@ export class YaCAClientModule {
     });
 
     /**
-     * Handles the "onClientResourceStart" event.
+     * Handles the "onResourceStop" event.
      *
      * @param {string} resourceName - The name of the resource that has started.
      */
     on("onResourceStop", (resourceName: string) => {
-      if (GetCurrentResourceName() !== resourceName) {
+      if (cache.resource !== resourceName) {
         return;
       }
 
@@ -402,9 +402,9 @@ export class YaCAClientModule {
      */
     onNet("client:yaca:muteTarget", (target: number, muted: boolean) => {
       const player = this.getPlayerByID(target);
-      if (player) {
-        player.forceMuted = muted;
-      }
+      if (!player) return;
+
+      player.forceMuted = muted;
     });
 
     /**
@@ -500,9 +500,7 @@ export class YaCAClientModule {
       return;
     }
 
-    if (this.websocket.readyState === 1) {
-      this.websocket.send(msg);
-    }
+    this.websocket.send(msg);
   }
 
   /**
@@ -705,7 +703,7 @@ export class YaCAClientModule {
   /**
    * Set the communication type for the given players.
    *
-   * @param {YacaPlayerData | (YacaPlayerData | undefined)[] | undefined} players - The player or players for whom the communication type is to be set.
+   * @param {YacaPlayerData | YacaPlayerData[]} players - The player or players for whom the communication type is to be set.
    * @param {YacaFilterEnum} type - The type of communication.
    * @param {boolean} state - The state of the communication.
    * @param {number} channel - The channel for the communication. Optional.
@@ -714,7 +712,7 @@ export class YaCAClientModule {
    * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
    */
   setPlayersCommType(
-    players: YacaPlayerData | (YacaPlayerData | undefined)[] | undefined,
+    players: YacaPlayerData | YacaPlayerData[] = [],
     type: YacaFilterEnum,
     state: boolean,
     channel?: number,
@@ -771,7 +769,7 @@ export class YaCAClientModule {
    * @param {number} volume - The volume to be set.
    * @param {number} channel - The channel for the communication.
    */
-  setCommDeviceVolume(type: YacaFilterEnum, volume: number, channel: number) {
+  setCommDeviceVolume(type: YacaFilterEnum, volume: number, channel?: number) {
     if (!YaCAClientModule.isCommTypeValid(type)) {
       return;
     }
@@ -798,7 +796,7 @@ export class YaCAClientModule {
    * @param {YacaStereoMode} mode - The stereo mode to be set.
    * @param {number} channel - The channel for the communication.
    */
-  setCommDeviceStereomode(type: YacaFilterEnum, mode: YacaStereoMode, channel: number) {
+  setCommDeviceStereoMode(type: YacaFilterEnum, mode: YacaStereoMode, channel?: number) {
     if (!YaCAClientModule.isCommTypeValid(type)) {
       return;
     }
