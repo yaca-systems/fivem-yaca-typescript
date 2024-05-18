@@ -23,7 +23,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 # Server Config
 
 | Variable              | Type       | Description                                                                                                            |
-|-----------------------|------------|------------------------------------------------------------------------------------------------------------------------|
+| --------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
 | uniqueServerId        | `string`   | The unique Server Identifier of the Teamspeak-Server                                                                   |
 | ingameChannelId       | `number`   | The ID of the Ingame Channel                                                                                           |
 | ingameChannelPassword | `string`   | The Password used to join the Ingame Channel                                                                           |
@@ -34,7 +34,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 # Shared Config
 
 | Variable                                | Type       | Description                                                                                                                                                                                                              | FiveM/RedM |
-|-----------------------------------------|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| --------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
 | debug                                   | `boolean`  | Enable the debug mode to enable some debug commands.                                                                                                                                                                     | Both       |
 | versionCheck                            | `boolean`  | Enable/Disable the automatic version check.                                                                                                                                                                              | Both       |
 | buildType                               | `number`   | `0` for release and `1` for develop (develop allows using all yaca plugin version)                                                                                                                                       | Both       |
@@ -114,7 +114,7 @@ Changes the radio frequency of the active channel.
 Changes the radio frequency.
 
 | Parameter | Type     | Description                                                                           |
-|-----------| -------- |---------------------------------------------------------------------------------------|
+| --------- | -------- | ------------------------------------------------------------------------------------- |
 | channel?  | `number` | the channel number. Defaults to the current active channel when no channel is passed. |
 | frequency | `string` | the frequency to set the channel to                                                   |
 
@@ -123,28 +123,28 @@ Changes the radio frequency.
 Returns the frequency of a radio channel as `string`.
 
 | Parameter | Type     | Description                                                                           |
-|-----------| -------- |---------------------------------------------------------------------------------------|
+| --------- | -------- | ------------------------------------------------------------------------------------- |
 | channel?  | `number` | the channel number. Defaults to the current active channel when no channel is passed. |
 
-#### `muteRadioChannel(): bool`
+#### `muteRadioChannel()`
 
-Mutes the current active radio channel. Returns whether the operation was successful as `bool`.
+Mutes the current active radio channel.
 
-#### `muteRadioChannelRaw(channel: number): bool`
+#### `muteRadioChannelRaw(channel: number):ol`
 
-Mutes a radio channel. Returns whether the operation was successful as `bool`.
+Mutes a radio channel.
 
-| Parameter | Type     | Description         |
-|-----------| -------- | ------------------- |
+| Parameter | Type     | Description                                                                            |
+| --------- | -------- | -------------------------------------------------------------------------------------- |
 | channel?  | `number` | the channel to mute. Defaults to the current active channel when no channel is passed. |
 
 #### `isRadioChannelMuted(channel: number): boolean`
 
 Returns whether a radio channel is muted as `boolean`.
 
-| Parameter | Type     | Description         |
-| --------- | -------- | ------------------- |
-| channel   | `number` | the channel number  |
+| Parameter | Type     | Description        |
+| --------- | -------- | ------------------ |
+| channel   | `number` | the channel number |
 
 #### `changeActiveRadioChannel(channel: number): bool`
 
@@ -179,9 +179,9 @@ Changes the volume of a radio channel. Returns whether the operation was success
 
 Returns the volume of a radio channel as `number`.
 
-| Parameter | Type     | Description         |
-| --------- | -------- | ------------------- |
-| channel   | `number` | the channel number  |
+| Parameter | Type     | Description        |
+| --------- | -------- | ------------------ |
+| channel   | `number` | the channel number |
 
 #### `changeRadioChannelStereo(): bool`
 
@@ -200,9 +200,9 @@ Changes the stereo mode of a radio channel. Returns whether the operation was su
 
 Returns the stereo mode of a radio channel as `string`.
 
-| Parameter | Type     | Description         |
-| --------- | -------- | ------------------- |
-| channel   | `number` | the channel number  |
+| Parameter | Type     | Description        |
+| --------- | -------- | ------------------ |
+| channel   | `number` | the channel number |
 
 #### `radioTalkingStart(state: boolean, channel: number, clearPedTasks: boolean = true)`
 
@@ -257,7 +257,7 @@ Get the voice range of a player as `number`.
 Set the voice range of a player.
 
 | Parameter | Type     | Description                                                               |
-|-----------|----------|---------------------------------------------------------------------------|
+| --------- | -------- | ------------------------------------------------------------------------- |
 | source    | `number` | the player source                                                         |
 | range     | `number` | The new voice range. Defaults to the default voice range if not provided. |
 
@@ -345,6 +345,7 @@ Returns whether a player is in a phone call as `[bool, number[]]`.
 | Parameter | Type     | Description       |
 | --------- | -------- | ----------------- |
 | source    | `number` | the player source |
+
 </details>
 
 # Events
@@ -356,16 +357,16 @@ Returns whether a player is in a phone call as `[bool, number[]]`.
 
 The event is triggered when the plugin is initialized.
 
-| Parameter  | Type  | Description                                  |
-|------------|-------|----------------------------------------------|
-| clientId   | `int` | the client id of the local user in teamspeak |
+| Parameter | Type  | Description                                  |
+| --------- | ----- | -------------------------------------------- |
+| clientId  | `int` | the client id of the local user in teamspeak |
 
 ### yaca:external:voiceRangeUpdate
 
 This event is triggered when the voice range of a player is updated.
 
 | Parameter  | Type  | Description               |
-|------------|-------|---------------------------|
+| ---------- | ----- | ------------------------- |
 | range      | `int` | the newly set voice range |
 | rangeIndex | `int` | the index of the range    |
 
