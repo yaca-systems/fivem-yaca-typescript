@@ -361,7 +361,7 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The channel number.
    * @param {string} frequency - The frequency to set.
    */
-  changeRadioFrequencyRaw(channel: number, frequency: string) {
+  changeRadioFrequencyRaw(channel: number = this.activeRadioChannel, frequency: string) {
     if (!this.clientModule.isPluginInitialized()) {
       return;
     }
@@ -373,23 +373,23 @@ export class YaCAClientRadioModule {
    * Mute the active radio channel.
    */
   muteRadioChannel() {
-    this.muteRadioChannelRaw(this.activeRadioChannel);
+    return this.muteRadioChannelRaw();
   }
 
   /**
    * Mute a radio channel.
    *
-   * @param {number} channel - The channel to mute.
+   * @param {number} channel - The channel to mute. Defaults to the current active channel.
    */
-  muteRadioChannelRaw(channel: number) {
+  muteRadioChannelRaw(channel: number = this.activeRadioChannel) {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
-      return;
+      return false;
     }
 
     const channelSettings = this.radioChannelSettings.get(channel);
 
     if (!channelSettings) {
-      return;
+      return false;
     }
 
     if (channelSettings.frequency === "0") {
@@ -419,23 +419,27 @@ export class YaCAClientRadioModule {
    * Change the active radio channel.
    *
    * @param {number} channel - The new radio channel.
+   * @returns {boolean} Whether the channel was changed.
    */
-  changeActiveRadioChannel(channel: number) {
+  changeActiveRadioChannel(channel: number): boolean {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
-      return;
+      return false;
     }
 
     emitNet("server:yaca:changeActiveRadioChannel", channel);
     emit("yaca:external:changedActiveRadioChannel", channel);
     this.activeRadioChannel = channel;
+
+    return true;
   }
 
   /**
    * Change the volume of the active radio channel.
    *
    * @param {boolean} higher - Whether to increase the volume.
+   * @returns {boolean} Whether the volume was changed.
    */
-  changeRadioChannelVolume(higher: boolean) {
+  changeRadioChannelVolume(higher: boolean): boolean {
     const channel = this.activeRadioChannel;
     const radioSettings = this.radioChannelSettings.get(channel);
 
@@ -444,23 +448,24 @@ export class YaCAClientRadioModule {
     }
 
     const oldVolume = radioSettings.volume;
-    this.changeRadioChannelVolumeRaw(channel, oldVolume + (higher ? 0.17 : -0.17));
+    return this.changeRadioChannelVolumeRaw(channel, oldVolume + (higher ? 0.17 : -0.17));
   }
 
   /**
    * Change the volume of a radio channel.
    *
-   * @param {number} channel - The channel number.
+   * @param {number} channel - The channel number. Defaults to the active channel.
    * @param {number} volume - The volume to set.
+   * @returns {boolean} Whether the volume was changed.
    */
-  changeRadioChannelVolumeRaw(channel: number, volume: number) {
+  changeRadioChannelVolumeRaw(channel: number = this.activeRadioChannel, volume: number): boolean {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
-      return;
+      return false;
     }
 
     const channelSettings = this.radioChannelSettings.get(channel);
     if (!channelSettings) {
-      return;
+      return false;
     }
 
     const oldVolume = channelSettings.volume;
@@ -468,7 +473,7 @@ export class YaCAClientRadioModule {
 
     // Prevent event emit spams, if nothing changed
     if (oldVolume === channelSettings.volume) {
-      return;
+      return true;
     }
 
     if (channelSettings.volume === 0 || (oldVolume === 0 && channelSettings.volume > 0)) {
@@ -482,61 +487,70 @@ export class YaCAClientRadioModule {
 
     // Send update to voice plugin
     this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, channelSettings.volume, channel);
+    return true;
   }
 
   /**
    * Change the stereo mode for the active radio channel.
+   *
+   * @param channel - The channel number. Defaults to the active channel.
+   * @returns {boolean} Whether the stereo mode was changed.
    */
-  changeRadioChannelStereo() {
-    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
-      return;
-    }
-
-    const channel = this.activeRadioChannel;
+  changeRadioChannelStereo(channel: number = this.activeRadioChannel): boolean {
     const channelSettings = this.radioChannelSettings.get(channel);
 
     if (!channelSettings) {
-      return;
+      return false;
     }
 
     switch (channelSettings.stereo) {
       case YacaStereoMode.STEREO:
-        this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT);
-        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_LEFT);
-        this.clientModule.notification(locale("changed_stereo_mode", channel, locale("left_ear")), YacaNotificationType.INFO);
-        return;
+        if (this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT)) {
+          this.clientModule.notification(locale("changed_stereo_mode", channel, locale("left_ear")), YacaNotificationType.INFO);
+          return true;
+        }
+        break;
       case YacaStereoMode.MONO_LEFT:
-        this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_RIGHT);
-        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_RIGHT);
-        this.clientModule.notification(locale("changed_stereo_mode", channel, locale("right_ear")), YacaNotificationType.INFO);
-        return;
+        if (this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_RIGHT)) {
+          this.clientModule.notification(locale("changed_stereo_mode", channel, locale("right_ear")), YacaNotificationType.INFO);
+          return true;
+        }
+        break;
       default:
       case YacaStereoMode.MONO_RIGHT:
-        this.changeRadioChannelStereoRaw(channel, YacaStereoMode.STEREO);
-        emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.STEREO);
-        this.clientModule.notification(locale("changed_stereo_mode", channel, locale("both_ears")), YacaNotificationType.INFO);
-        return;
+        if (this.changeRadioChannelStereoRaw(channel, YacaStereoMode.STEREO)) {
+          this.clientModule.notification(locale("changed_stereo_mode", channel, locale("both_ears")), YacaNotificationType.INFO);
+          return true;
+        }
+        break;
     }
+
+    return false;
   }
 
   /**
    * Change the stereo mode for a radio channel.
    *
-   * @param channel - The channel number.
+   * @param channel - The channel number. Defaults to the active channel.
    * @param stereo - The stereo mode to set.
+   * @returns {boolean} Whether the stereo mode was changed.
    */
-  changeRadioChannelStereoRaw(channel: number, stereo: YacaStereoMode) {
+  changeRadioChannelStereoRaw(channel: number = this.activeRadioChannel, stereo: YacaStereoMode): boolean {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
-      return;
+      return false;
     }
 
     const channelSettings = this.radioChannelSettings.get(channel);
     if (!channelSettings) {
-      return;
+      return false;
     }
 
     channelSettings.stereo = stereo;
     this.clientModule.setCommDeviceStereoMode(YacaFilterEnum.RADIO, stereo, channel);
+
+    emit("yaca:external:setRadioChannelStereo", channel, stereo.toString());
+
+    return true;
   }
 
   /**
