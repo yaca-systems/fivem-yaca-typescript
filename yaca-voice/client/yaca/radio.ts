@@ -56,6 +56,13 @@ export class YaCAClientRadioModule {
     exports("enableRadio", (state: boolean) => this.enableRadio(state));
 
     /**
+     * Returns the state of the radio system.
+     *
+     * @returns {boolean} The state of the radio system.
+     */
+    exports("isRadioEnabled", () => this.radioEnabled);
+
+    /**
      * Changes the radio frequency of the active channel.
      *
      * @param {string} frequency - The frequency to set.
@@ -71,6 +78,14 @@ export class YaCAClientRadioModule {
     exports("changeRadioFrequencyRaw", (channel: number, frequency: string) => this.changeRadioFrequencyRaw(channel, frequency));
 
     /**
+     * Returns the radio frequency of a channel.
+     *
+     * @param {number} channel - The channel number.
+     * @returns {string} The frequency of the channel.
+     */
+    exports("getRadioFrequency", (channel: number) => this.getRadioFrequency(channel));
+
+    /**
      * Mutes the active radio channel.
      */
     exports("muteRadioChannel", () => this.muteRadioChannel());
@@ -82,6 +97,11 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      */
     exports("muteRadioChannelRaw", (channel: number) => this.muteRadioChannelRaw(channel));
+
+    /**
+     * Returns the mute state of a radio channel.
+     */
+    exports("isRadioChannelMuted", (channel: number = this.activeRadioChannel) => this.isRadioChannelMuted(channel));
 
     /**
      * Exports the `changeActiveRadioChannel` function to the plugin.
@@ -117,6 +137,14 @@ export class YaCAClientRadioModule {
     exports("changeRadioChannelVolumeRaw", (channel: number, volume: number) => this.changeRadioChannelVolumeRaw(channel, volume));
 
     /**
+     * Returns the volume of a radio channel.
+     *
+     * @param {number} channel - The channel number.
+     * @returns {number} The volume of the channel.
+     */
+    exports("getRadioChannelVolume", (channel: number) => this.getRadioChannelVolume(channel));
+
+    /**
      * Exports the `changeRadioChannelStereo` function to the plugin.
      * This function changes the stereo mode for the active radio channel.
      */
@@ -130,6 +158,14 @@ export class YaCAClientRadioModule {
      * @param {YacaStereoMode} stereo - The stereo mode to set.
      */
     exports("changeRadioChannelStereoRaw", (channel: number, stereo: YacaStereoMode) => this.changeRadioChannelStereoRaw(channel, stereo));
+
+    /**
+     * Returns the stereo mode of a radio channel.
+     *
+     * @param {number} channel - The channel number.
+     * @returns {YacaStereoMode} The stereo mode of the channel.
+     */
+    exports("getRadioChannelStereo", (channel: number) => this.getRadioChannelStereo(channel));
 
     /**
      * Exports the `radioTalkingStart` function to the plugin.
@@ -370,6 +406,22 @@ export class YaCAClientRadioModule {
   }
 
   /**
+   * Get the radio frequency of a channel.
+   *
+   * @param channel - The channel number.
+   * @returns {string} The frequency of the channel.
+   */
+  getRadioFrequency(channel: number = this.activeRadioChannel): string {
+    const channelData = this.radioChannelSettings.get(channel);
+
+    if (!channelData) {
+      return "0";
+    }
+
+    return channelData.frequency;
+  }
+
+  /**
    * Mute the active radio channel.
    */
   muteRadioChannel() {
@@ -491,6 +543,22 @@ export class YaCAClientRadioModule {
   }
 
   /**
+   * Get the volume of a radio channel.
+   *
+   * @param channel - The channel number. Defaults to the active channel.
+   * @returns {number} The volume of the channel. If the channel does not exist, it will return 0.
+   */
+  getRadioChannelVolume(channel: number = this.activeRadioChannel): number {
+    const channelData = this.radioChannelSettings.get(channel);
+
+    if (!channelData) {
+      return 0;
+    }
+
+    return channelData.volume;
+  }
+
+  /**
    * Change the stereo mode for the active radio channel.
    *
    * @param channel - The channel number. Defaults to the active channel.
@@ -551,6 +619,22 @@ export class YaCAClientRadioModule {
     emit("yaca:external:setRadioChannelStereo", channel, stereo.toString());
 
     return true;
+  }
+
+  /**
+   * Get the stereo mode of a radio channel.
+   *
+   * @param channel - The channel number. Defaults to the active channel.
+   * @returns {string} The stereo mode of the channel.
+   */
+  getRadioChannelStereo(channel: number = this.activeRadioChannel): string {
+    const channelData = this.radioChannelSettings.get(channel);
+
+    if (!channelData) {
+      return YacaStereoMode.STEREO.toString();
+    }
+
+    return channelData.stereo.toString();
   }
 
   /**
