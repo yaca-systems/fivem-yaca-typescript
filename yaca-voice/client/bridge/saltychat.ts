@@ -143,7 +143,7 @@ export class YaCAClientSaltyChatBridge {
     saltyChatExport("GetRadioChannel", (primary: boolean) => {
       const channel = primary ? 1 : 2;
 
-      const currentFrequency = this.clientModule.radioModule.radioChannelSettings[channel].frequency;
+      const currentFrequency = this.clientModule.radioModule.radioChannelSettings.get(channel)?.frequency ?? "0";
 
       if (currentFrequency === "0") {
         return "";
@@ -153,7 +153,7 @@ export class YaCAClientSaltyChatBridge {
     });
 
     saltyChatExport("GetRadioVolume", () => {
-      return this.clientModule.radioModule.radioChannelSettings[1].volume;
+      return this.clientModule.radioModule.radioChannelSettings.get(1)?.volume ?? 0;
     });
 
     saltyChatExport("GetRadioSpeaker", () => {
