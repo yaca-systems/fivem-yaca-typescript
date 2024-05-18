@@ -167,13 +167,13 @@ export class YaCAClientRadioModule {
      * @param {boolean} self - The state of the player.
      */
     onNet("client:yaca:radioTalking", (target: number, frequency: string, state: boolean, infos: { shortRange: boolean }[], self = false) => {
-      if (self) {
-        this.radioTalkingStateToPluginWithWhisper(state, target);
+      const channel = this.findRadioChannelByFrequency(frequency);
+      if (!channel) {
         return;
       }
 
-      const channel = this.findRadioChannelByFrequency(frequency);
-      if (!channel) {
+      if (self) {
+        this.radioTalkingStateToPluginWithWhisper(state, target, channel);
         return;
       }
 
@@ -564,9 +564,10 @@ export class YaCAClientRadioModule {
    * Sends an event to the plugin when a player starts or stops talking on the radio.
    *
    * @param {boolean} state - The state of the player talking on the radio.
+   * @param {number} channel - The channel number.
    */
-  radioTalkingStateToPlugin(state: boolean) {
-    this.clientModule.setPlayersCommType(this.clientModule.getPlayerByID(cache.serverId), YacaFilterEnum.RADIO, state, this.activeRadioChannel);
+  radioTalkingStateToPlugin(state: boolean, channel: number) {
+    this.clientModule.setPlayersCommType(this.clientModule.getPlayerByID(cache.serverId), YacaFilterEnum.RADIO, state, channel);
   }
 
   /**
@@ -574,8 +575,9 @@ export class YaCAClientRadioModule {
    *
    * @param state - The state of the player talking on the radio.
    * @param targets - The IDs of the targets.
+   * @param channel - The channel number.
    */
-  radioTalkingStateToPluginWithWhisper(state: boolean, targets: number | number[]) {
+  radioTalkingStateToPluginWithWhisper(state: boolean, targets: number | number[], channel: number) {
     if (!Array.isArray(targets)) {
       targets = [targets];
     }
@@ -590,15 +592,7 @@ export class YaCAClientRadioModule {
       comDeviceTargets.push(player);
     }
 
-    this.clientModule.setPlayersCommType(
-      comDeviceTargets,
-      YacaFilterEnum.RADIO,
-      state,
-      this.activeRadioChannel,
-      undefined,
-      CommDeviceMode.SENDER,
-      CommDeviceMode.RECEIVER,
-    );
+    this.clientModule.setPlayersCommType(comDeviceTargets, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.SENDER, CommDeviceMode.RECEIVER);
   }
 
   /**
@@ -682,7 +676,7 @@ export class YaCAClientRadioModule {
       if (this.talkingInChannels.has(channel)) {
         this.talkingInChannels.delete(channel);
         if (!this.clientModule.useWhisper) {
-          this.radioTalkingStateToPlugin(false);
+          this.radioTalkingStateToPlugin(false, channel);
         }
 
         if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
@@ -707,7 +701,7 @@ export class YaCAClientRadioModule {
 
     this.talkingInChannels.add(channel);
     if (!this.clientModule.useWhisper) {
-      this.radioTalkingStateToPlugin(true);
+      this.radioTalkingStateToPlugin(true, channel);
     }
 
     requestAnimDict("random@arrests").then(() => {
