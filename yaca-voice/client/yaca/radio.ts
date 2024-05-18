@@ -12,7 +12,7 @@ export class YaCAClientRadioModule {
   radioFrequencySet = false;
   radioEnabled = false;
   radioTalking = false;
-  radioChannelSettings: Record<number, YacaRadioSettings> = {};
+  radioChannelSettings = new Map<number, YacaRadioSettings>();
   radioInitialized = false;
   activeRadioChannel = 1;
   playersWithShortRange = new Map<number, string>();
@@ -223,7 +223,13 @@ export class YaCAClientRadioModule {
      * @param {boolean} state - The state of the radio mute.
      */
     onNet("client:yaca:setRadioMuteState", (channel: number, state: boolean) => {
-      this.radioChannelSettings[channel].muted = state;
+      const channelSettings = this.radioChannelSettings.get(channel);
+
+      if (!channelSettings) {
+        return;
+      }
+
+      channelSettings.muted = state;
       emit("yaca:external:setRadioMuteState", channel, state);
       this.disableRadioFromPlayerInChannel(channel);
     });
@@ -347,11 +353,7 @@ export class YaCAClientRadioModule {
    * @param {string} frequency - The new frequency.
    */
   changeRadioFrequency(frequency: string) {
-    if (!this.clientModule.isPluginInitialized()) {
-      return;
-    }
-
-    emitNet("server:yaca:changeRadioFrequency", this.activeRadioChannel, frequency);
+    this.changeRadioFrequencyRaw(this.activeRadioChannel, frequency);
   }
 
   /**
@@ -385,10 +387,33 @@ export class YaCAClientRadioModule {
       return;
     }
 
-    if (this.radioChannelSettings[channel].frequency === "0") {
+    const channelSettings = this.radioChannelSettings.get(channel);
+
+    if (!channelSettings) {
       return;
     }
+
+    if (channelSettings.frequency === "0") {
+      return;
+    }
+
     emitNet("server:yaca:muteRadioChannel", channel);
+  }
+
+  /**
+   * Check if a radio channel is muted.
+   *
+   * @param channel - The channel number. Defaults to the active channel.
+   * @returns {boolean} Whether the channel is muted. If the channel does not exist, it will return true.
+   */
+  isRadioChannelMuted(channel: number = this.activeRadioChannel): boolean {
+    const channelData = this.radioChannelSettings.get(channel);
+
+    if (!channelData) {
+      return true;
+    }
+
+    return channelData.muted;
   }
 
   /**
@@ -412,8 +437,14 @@ export class YaCAClientRadioModule {
    * @param {boolean} higher - Whether to increase the volume.
    */
   changeRadioChannelVolume(higher: boolean) {
-    const channel = this.activeRadioChannel,
-      oldVolume = this.radioChannelSettings[channel].volume;
+    const channel = this.activeRadioChannel;
+    const radioSettings = this.radioChannelSettings.get(channel);
+
+    if (!radioSettings) {
+      return false;
+    }
+
+    const oldVolume = radioSettings.volume;
     this.changeRadioChannelVolumeRaw(channel, oldVolume + (higher ? 0.17 : -0.17));
   }
 
@@ -424,29 +455,34 @@ export class YaCAClientRadioModule {
    * @param {number} volume - The volume to set.
    */
   changeRadioChannelVolumeRaw(channel: number, volume: number) {
-    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled || this.radioChannelSettings[channel].frequency === "0") {
+    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
       return;
     }
 
-    const oldVolume = this.radioChannelSettings[channel].volume;
-    this.radioChannelSettings[channel].volume = clamp(volume, 0, 1);
+    const channelSettings = this.radioChannelSettings.get(channel);
+    if (!channelSettings) {
+      return;
+    }
+
+    const oldVolume = channelSettings.volume;
+    channelSettings.volume = clamp(volume, 0, 1);
 
     // Prevent event emit spams, if nothing changed
-    if (oldVolume === this.radioChannelSettings[channel].volume) {
+    if (oldVolume === channelSettings.volume) {
       return;
     }
 
-    if (this.radioChannelSettings[channel].volume === 0 || (oldVolume === 0 && this.radioChannelSettings[channel].volume > 0)) {
+    if (channelSettings.volume === 0 || (oldVolume === 0 && channelSettings.volume > 0)) {
       emitNet("server:yaca:muteRadioChannel", channel);
     }
 
     // Prevent duplicate update, cuz mute has its own update
-    if (this.radioChannelSettings[channel].volume > 0) {
-      emit("yaca:external:setRadioVolume", channel, this.radioChannelSettings[channel].volume);
+    if (channelSettings.volume > 0) {
+      emit("yaca:external:setRadioVolume", channel, channelSettings.volume);
     }
 
     // Send update to voice plugin
-    this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, this.radioChannelSettings[channel].volume, channel);
+    this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, channelSettings.volume, channel);
   }
 
   /**
@@ -458,8 +494,13 @@ export class YaCAClientRadioModule {
     }
 
     const channel = this.activeRadioChannel;
+    const channelSettings = this.radioChannelSettings.get(channel);
 
-    switch (this.radioChannelSettings[channel].stereo) {
+    if (!channelSettings) {
+      return;
+    }
+
+    switch (channelSettings.stereo) {
       case YacaStereoMode.STEREO:
         this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT);
         emit("yaca:external:setRadioChannelStereo", channel, YacaStereoMode.MONO_LEFT);
@@ -490,9 +531,13 @@ export class YaCAClientRadioModule {
       return;
     }
 
-    this.radioChannelSettings[channel].stereo = stereo;
+    const channelSettings = this.radioChannelSettings.get(channel);
+    if (!channelSettings) {
+      return;
+    }
 
-    this.clientModule.setCommDeviceStereomode(YacaFilterEnum.RADIO, stereo, channel);
+    channelSettings.stereo = stereo;
+    this.clientModule.setCommDeviceStereoMode(YacaFilterEnum.RADIO, stereo, channel);
   }
 
   /**
@@ -500,18 +545,18 @@ export class YaCAClientRadioModule {
    */
   initRadioSettings() {
     for (let i = 1; i <= this.clientModule.sharedConfig.maxRadioChannels; i++) {
-      if (!this.radioChannelSettings[i]) {
-        this.radioChannelSettings[i] = {
+      if (!this.radioChannelSettings.has(i)) {
+        this.radioChannelSettings.set(i, {
           ...this.defaultRadioSettings,
-        };
+        });
       }
       if (!this.playersInRadioChannel.has(i)) {
         this.playersInRadioChannel.set(i, new Set());
       }
 
-      const { volume, stereo } = this.radioChannelSettings[i];
+      const { volume, stereo } = this.radioChannelSettings.get(i) ?? this.defaultRadioSettings;
 
-      this.clientModule.setCommDeviceStereomode(YacaFilterEnum.RADIO, stereo, i);
+      this.clientModule.setCommDeviceStereoMode(YacaFilterEnum.RADIO, stereo, i);
       this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, volume, i);
     }
   }
@@ -561,18 +606,16 @@ export class YaCAClientRadioModule {
    * Finds a radio channel by a given frequency.
    *
    * @param {string} frequency - The frequency to search for.
-   * @returns {number | undefined} The channel number if found, undefined otherwise.
+   * @returns {number | null} The channel number if found, null otherwise.
    */
-  findRadioChannelByFrequency(frequency: string): number | undefined {
-    let foundChannel;
-    for (const [channel, data] of Object.entries(this.radioChannelSettings)) {
+  findRadioChannelByFrequency(frequency: string): number | null {
+    for (const [channel, data] of this.radioChannelSettings) {
       if (data.frequency === frequency) {
-        foundChannel = parseInt(channel);
-        break;
+        return channel;
       }
     }
 
-    return foundChannel;
+    return null;
   }
 
   /**
@@ -584,17 +627,21 @@ export class YaCAClientRadioModule {
   setRadioFrequency(channel: number, frequency: string) {
     this.radioFrequencySet = true;
 
-    if (this.radioChannelSettings[channel].frequency !== frequency) {
+    const channelSettings = this.radioChannelSettings.get(channel);
+    if (!channelSettings) {
+      return false;
+    }
+
+    if (channelSettings.frequency !== frequency) {
       this.disableRadioFromPlayerInChannel(channel);
     }
 
-    this.radioChannelSettings[channel].frequency = frequency;
+    channelSettings.frequency = frequency;
     emit("yaca:external:setRadioFrequency", channel, frequency);
 
     // SaltyChat bridge
     if (this.clientModule.sharedConfig.saltyChatBridge?.enabled) {
-      const { frequency } = this.radioChannelSettings[channel];
-      const saltyFrequency = frequency === "0" ? "" : frequency;
+      const saltyFrequency = channelSettings.frequency === "0" ? "" : channelSettings.frequency;
       emit("SaltyChat_RadioChannelChanged", saltyFrequency, channel === 1);
     }
   }
@@ -656,7 +703,8 @@ export class YaCAClientRadioModule {
       return;
     }
 
-    if (!this.radioEnabled || !this.radioFrequencySet || this.radioTalking) {
+    const channelSettings = this.radioChannelSettings.get(channel);
+    if (!this.radioEnabled || channelSettings?.frequency === "0" || this.radioTalking) {
       return;
     }
 
