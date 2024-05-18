@@ -9,9 +9,8 @@ import { locale } from "common/locale";
 export class YaCAClientRadioModule {
   clientModule: YaCAClientModule;
 
-  radioFrequencySet = false;
   radioEnabled = false;
-  radioTalking = false;
+  talkingInChannels = new Set<number>();
   radioChannelSettings = new Map<number, YacaRadioSettings>();
   radioInitialized = false;
   activeRadioChannel = 1;
@@ -625,8 +624,6 @@ export class YaCAClientRadioModule {
    * @param frequency - The frequency to set.
    */
   setRadioFrequency(channel: number, frequency: string) {
-    this.radioFrequencySet = true;
-
     const channelSettings = this.radioChannelSettings.get(channel);
     if (!channelSettings) {
       return false;
@@ -682,8 +679,8 @@ export class YaCAClientRadioModule {
    */
   radioTalkingStart(state: boolean, channel: number, clearPedTasks = true) {
     if (!state) {
-      if (this.radioTalking) {
-        this.radioTalking = false;
+      if (this.talkingInChannels.has(channel)) {
+        this.talkingInChannels.delete(channel);
         if (!this.clientModule.useWhisper) {
           this.radioTalkingStateToPlugin(false);
         }
@@ -704,11 +701,11 @@ export class YaCAClientRadioModule {
     }
 
     const channelSettings = this.radioChannelSettings.get(channel);
-    if (!this.radioEnabled || channelSettings?.frequency === "0" || this.radioTalking) {
+    if (!this.radioEnabled || channelSettings?.frequency === "0" || this.talkingInChannels.has(channel)) {
       return;
     }
 
-    this.radioTalking = true;
+    this.talkingInChannels.add(channel);
     if (!this.clientModule.useWhisper) {
       this.radioTalkingStateToPlugin(true);
     }
