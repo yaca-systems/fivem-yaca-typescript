@@ -97,6 +97,10 @@ Enables or disables the radio system.
 | --------- | --------- | ---------------------------------------------- |
 | state     | `boolean` | `true` to enable the radio, `false` to disable |
 
+#### `isRadioEnabled(): boolean`
+
+Returns whether the radio system is enabled as `boolean`.
+
 #### `changeRadioFrequency(frequency: string)`
 
 Changes the radio frequency of the active channel.
@@ -114,6 +118,14 @@ Changes the radio frequency.
 | channel?  | `number` | the channel number. Defaults to the current active channel when no channel is passed. |
 | frequency | `string` | the frequency to set the channel to                                                   |
 
+#### `getRadioFrequency(channel: number): string`
+
+Returns the frequency of a radio channel as `string`.
+
+| Parameter | Type     | Description                                                                           |
+|-----------| -------- |---------------------------------------------------------------------------------------|
+| channel?  | `number` | the channel number. Defaults to the current active channel when no channel is passed. |
+
 #### `muteRadioChannel(): bool`
 
 Mutes the current active radio channel. Returns whether the operation was successful as `bool`.
@@ -125,6 +137,14 @@ Mutes a radio channel. Returns whether the operation was successful as `bool`.
 | Parameter | Type     | Description         |
 |-----------| -------- | ------------------- |
 | channel?  | `number` | the channel to mute. Defaults to the current active channel when no channel is passed. |
+
+#### `isRadioChannelMuted(channel: number): boolean`
+
+Returns whether a radio channel is muted as `boolean`.
+
+| Parameter | Type     | Description         |
+| --------- | -------- | ------------------- |
+| channel   | `number` | the channel number  |
 
 #### `changeActiveRadioChannel(channel: number): bool`
 
@@ -155,6 +175,14 @@ Changes the volume of a radio channel. Returns whether the operation was success
 | channel   | `number` | the channel number |
 | volume    | `number` | the volume to set  |
 
+#### `getRadioChannelVolume(channel: number): number`
+
+Returns the volume of a radio channel as `number`.
+
+| Parameter | Type     | Description         |
+| --------- | -------- | ------------------- |
+| channel   | `number` | the channel number  |
+
 #### `changeRadioChannelStereo(): bool`
 
 Changes the stereo mode of the active radio channel. Returns whether the operation was successful as `bool`.
@@ -167,6 +195,14 @@ Changes the stereo mode of a radio channel. Returns whether the operation was su
 | --------- | -------- | ------------------------------------------------------------- |
 | channel   | `number` | the channel number                                            |
 | stereo    | `string` | the stereo mode (`"MONO_LEFT"`, `"MONO_RIGHT"` or `"STEREO"`) |
+
+#### `getRadioChannelStereo(channel: number): string`
+
+Returns the stereo mode of a radio channel as `string`.
+
+| Parameter | Type     | Description         |
+| --------- | -------- | ------------------- |
+| channel   | `number` | the channel number  |
 
 #### `radioTalkingStart(state: boolean, channel: number, clearPedTasks: boolean = true)`
 
