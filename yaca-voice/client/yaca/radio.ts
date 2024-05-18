@@ -425,7 +425,7 @@ export class YaCAClientRadioModule {
    * Mute the active radio channel.
    */
   muteRadioChannel() {
-    return this.muteRadioChannelRaw();
+    this.muteRadioChannelRaw();
   }
 
   /**
@@ -435,13 +435,13 @@ export class YaCAClientRadioModule {
    */
   muteRadioChannelRaw(channel: number = this.activeRadioChannel) {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
-      return false;
+      return;
     }
 
     const channelSettings = this.radioChannelSettings.get(channel);
 
     if (!channelSettings) {
-      return false;
+      return;
     }
 
     if (channelSettings.frequency === "0") {
@@ -722,7 +722,7 @@ export class YaCAClientRadioModule {
   setRadioFrequency(channel: number, frequency: string) {
     const channelSettings = this.radioChannelSettings.get(channel);
     if (!channelSettings) {
-      return false;
+      return;
     }
 
     if (channelSettings.frequency !== frequency) {
