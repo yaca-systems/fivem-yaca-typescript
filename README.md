@@ -302,7 +302,6 @@ Enable or disable the phone speaker for a player.
 | source    | `number`  | the player source       |
 | state     | `boolean` | the phone speaker state |
 
-
 #### `isPlayerInCall(source: number): [bool, number[]]`
 
 Returns whether a player is in a phone call as `[bool, number[]]`.
@@ -316,6 +315,14 @@ Returns whether a player is in a phone call as `[bool, number[]]`.
 
 <details>
 <summary style="font-size: x-large">Client</summary>
+
+### yaca:external:pluginInitialized
+
+The event is triggered when the plugin is initialized.
+
+| Parameter  | Type  | Description                                  |
+|------------|-------|----------------------------------------------|
+| clientId   | `int` | the client id of the local user in teamspeak |
 
 ### yaca:external:voiceRangeUpdate
 

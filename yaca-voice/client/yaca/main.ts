@@ -530,7 +530,8 @@ export class YaCAClientModule {
 
     if (parsedPayload.code === "OK") {
       if (parsedPayload.requestType === "JOIN") {
-        emitNet("server:yaca:addPlayer", parseInt(parsedPayload.message));
+        const clientId = parseInt(parsedPayload.message);
+        emitNet("server:yaca:addPlayer", clientId);
 
         if (this.rangeInterval) {
           clearInterval(this.rangeInterval);
@@ -543,6 +544,8 @@ export class YaCAClientModule {
         if (this.radioModule.radioInitialized) {
           this.radioModule.initRadioSettings();
         }
+
+        emit("yaca:external:pluginInitialized", clientId);
         return;
       }
 
