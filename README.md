@@ -79,11 +79,11 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 
 ### General
 
-#### `getVoiceRange()`
+#### `getVoiceRange(): int`
 
 Get the current voice range of the player as `int`.
 
-#### `getVoiceRanges()`
+#### `getVoiceRanges(): int[]`
 
 Get all voice ranges as `int[]`.
 
@@ -109,26 +109,26 @@ Changes the radio frequency of the active channel.
 
 Changes the radio frequency.
 
-| Parameter | Type     | Description                         |
-| --------- | -------- | ----------------------------------- |
-| channel   | `number` | the channel number                  |
-| frequency | `string` | the frequency to set the channel to |
+| Parameter | Type     | Description                                                                           |
+|-----------| -------- |---------------------------------------------------------------------------------------|
+| channel?  | `number` | the channel number. Defaults to the current active channel when no channel is passed. |
+| frequency | `string` | the frequency to set the channel to                                                   |
 
-#### `muteRadioChannel()`
+#### `muteRadioChannel(): bool`
 
-Mutes the current active radio channel.
+Mutes the current active radio channel. Returns whether the operation was successful as `bool`.
 
-#### `muteRadioChannelRaw(channel: number)`
+#### `muteRadioChannelRaw(channel: number): bool`
 
-Mutes a radio channel.
+Mutes a radio channel. Returns whether the operation was successful as `bool`.
 
 | Parameter | Type     | Description         |
-| --------- | -------- | ------------------- |
-| channel   | `number` | the channel to mute |
+|-----------| -------- | ------------------- |
+| channel?  | `number` | the channel to mute. Defaults to the current active channel when no channel is passed. |
 
-#### `changeActiveRadioChannel(channel: number)`
+#### `changeActiveRadioChannel(channel: number): bool`
 
-Changes the active radio channel.
+Changes the active radio channel. Returns whether the operation was successful as `bool`.
 
 | Parameter | Type     | Description           |
 | --------- | -------- | --------------------- |
@@ -138,30 +138,30 @@ Changes the active radio channel.
 
 Returns the active radio channel as `number`.
 
-#### `changeRadioChannelVolume(higher: boolean)`
+#### `changeRadioChannelVolume(higher: boolean): bool`
 
-Changes the volume of the active radio channel.
+Changes the volume of the active radio channel. Returns whether the operation was successful as `bool`.
 
 | Parameter | Type      | Description                    |
 | --------- | --------- | ------------------------------ |
 | higher    | `boolean` | whether to increase the volume |
 
-#### `changeRadioChannelVolumeRaw(channel: number, volume: number)`
+#### `changeRadioChannelVolumeRaw(channel: number, volume: number): bool`
 
-Changes the volume of a radio channel.
+Changes the volume of a radio channel. Returns whether the operation was successful as `bool`.
 
 | Parameter | Type     | Description        |
 | --------- | -------- | ------------------ |
 | channel   | `number` | the channel number |
 | volume    | `number` | the volume to set  |
 
-#### `changeRadioChannelStereo`
+#### `changeRadioChannelStereo(): bool`
 
-Changes the stereo mode of the active radio channel.
+Changes the stereo mode of the active radio channel. Returns whether the operation was successful as `bool`.
 
-#### `changeRadioChannelStereoRaw(channel: number, stereo: string)`
+#### `changeRadioChannelStereoRaw(channel: number, stereo: string): bool`
 
-Changes the stereo mode of a radio channel.
+Changes the stereo mode of a radio channel. Returns whether the operation was successful as `bool`.
 
 | Parameter | Type     | Description                                                   |
 | --------- | -------- | ------------------------------------------------------------- |
