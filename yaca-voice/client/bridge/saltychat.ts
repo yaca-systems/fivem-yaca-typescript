@@ -170,12 +170,12 @@ export class YaCAClientSaltyChatBridge {
       const channel = primary ? 1 : 2;
       const newRadioChannelName = radioChannelName === "" ? "0" : radioChannelName;
 
-      this.clientModule.radioModule.changeRadioFrequencyRaw(channel, newRadioChannelName);
+      this.clientModule.radioModule.changeRadioFrequencyRaw(newRadioChannelName, channel);
     });
 
     saltyChatExport("SetRadioVolume", (volume: number) => {
-      this.clientModule.radioModule.changeRadioChannelVolumeRaw(1, volume);
-      this.clientModule.radioModule.changeRadioChannelVolumeRaw(2, volume);
+      this.clientModule.radioModule.changeRadioChannelVolumeRaw(volume, 1);
+      this.clientModule.radioModule.changeRadioChannelVolumeRaw(volume, 2);
     });
 
     saltyChatExport("SetRadioSpeaker", () => {
