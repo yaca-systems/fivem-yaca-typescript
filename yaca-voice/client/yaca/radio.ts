@@ -373,12 +373,12 @@ export class YaCAClientRadioModule {
         }
       }
 
-      emit("yaca:external:isRadioEnabled", state);
-
       if (state && !this.radioInitialized) {
         this.radioInitialized = true;
         this.initRadioSettings();
       }
+
+      emit("yaca:external:isRadioEnabled", state);
     }
   }
 
