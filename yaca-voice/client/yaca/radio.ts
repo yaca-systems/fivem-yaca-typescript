@@ -67,7 +67,7 @@ export class YaCAClientRadioModule {
      *
      * @param {string} frequency - The frequency to set.
      */
-    exports("changeRadioFrequency", (frequency: string) => this.changeRadioFrequency(frequency));
+    exports("changeRadioFrequency", (frequency: string) => this.changeRadioFrequencyRaw(frequency));
 
     /**
      * Changes the radio frequency.
@@ -75,7 +75,7 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      * @param {string} frequency - The frequency to set.
      */
-    exports("changeRadioFrequencyRaw", (channel: number, frequency: string) => this.changeRadioFrequencyRaw(channel, frequency));
+    exports("changeRadioFrequencyRaw", (channel: number, frequency: string) => this.changeRadioFrequencyRaw(frequency, channel));
 
     /**
      * Returns the radio frequency of a channel.
@@ -134,7 +134,7 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      * @param {number} volume - The volume to set.
      */
-    exports("changeRadioChannelVolumeRaw", (channel: number, volume: number) => this.changeRadioChannelVolumeRaw(channel, volume));
+    exports("changeRadioChannelVolumeRaw", (channel: number, volume: number) => this.changeRadioChannelVolumeRaw(volume, channel));
 
     /**
      * Returns the volume of a radio channel.
@@ -157,7 +157,7 @@ export class YaCAClientRadioModule {
      * @param {number} channel - The channel number.
      * @param {YacaStereoMode} stereo - The stereo mode to set.
      */
-    exports("changeRadioChannelStereoRaw", (channel: number, stereo: YacaStereoMode) => this.changeRadioChannelStereoRaw(channel, stereo));
+    exports("changeRadioChannelStereoRaw", (channel: number, stereo: YacaStereoMode) => this.changeRadioChannelStereoRaw(stereo, channel));
 
     /**
      * Returns the stereo mode of a radio channel.
@@ -383,21 +383,12 @@ export class YaCAClientRadioModule {
   }
 
   /**
-   * Change the radio frequency ot the current active channel.
-   *
-   * @param {string} frequency - The new frequency.
-   */
-  changeRadioFrequency(frequency: string) {
-    this.changeRadioFrequencyRaw(this.activeRadioChannel, frequency);
-  }
-
-  /**
    * Change the radio frequency.
    *
    * @param {number} channel - The channel number.
    * @param {string} frequency - The frequency to set.
    */
-  changeRadioFrequencyRaw(channel: number = this.activeRadioChannel, frequency: string) {
+  changeRadioFrequencyRaw(frequency: string, channel: number = this.activeRadioChannel) {
     if (!this.clientModule.isPluginInitialized()) {
       return;
     }
@@ -500,7 +491,7 @@ export class YaCAClientRadioModule {
     }
 
     const oldVolume = radioSettings.volume;
-    return this.changeRadioChannelVolumeRaw(channel, oldVolume + (higher ? 0.17 : -0.17));
+    return this.changeRadioChannelVolumeRaw(oldVolume + (higher ? 0.17 : -0.17), channel);
   }
 
   /**
@@ -510,7 +501,7 @@ export class YaCAClientRadioModule {
    * @param {number} volume - The volume to set.
    * @returns {boolean} Whether the volume was changed.
    */
-  changeRadioChannelVolumeRaw(channel: number = this.activeRadioChannel, volume: number): boolean {
+  changeRadioChannelVolumeRaw(volume: number, channel: number = this.activeRadioChannel): boolean {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
       return false;
     }
@@ -573,20 +564,20 @@ export class YaCAClientRadioModule {
 
     switch (channelSettings.stereo) {
       case YacaStereoMode.STEREO:
-        if (this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_LEFT)) {
+        if (this.changeRadioChannelStereoRaw(YacaStereoMode.MONO_LEFT, channel)) {
           this.clientModule.notification(locale("changed_stereo_mode", channel, locale("left_ear")), YacaNotificationType.INFO);
           return true;
         }
         break;
       case YacaStereoMode.MONO_LEFT:
-        if (this.changeRadioChannelStereoRaw(channel, YacaStereoMode.MONO_RIGHT)) {
+        if (this.changeRadioChannelStereoRaw(YacaStereoMode.MONO_RIGHT, channel)) {
           this.clientModule.notification(locale("changed_stereo_mode", channel, locale("right_ear")), YacaNotificationType.INFO);
           return true;
         }
         break;
       default:
       case YacaStereoMode.MONO_RIGHT:
-        if (this.changeRadioChannelStereoRaw(channel, YacaStereoMode.STEREO)) {
+        if (this.changeRadioChannelStereoRaw(YacaStereoMode.STEREO, channel)) {
           this.clientModule.notification(locale("changed_stereo_mode", channel, locale("both_ears")), YacaNotificationType.INFO);
           return true;
         }
@@ -603,7 +594,7 @@ export class YaCAClientRadioModule {
    * @param stereo - The stereo mode to set.
    * @returns {boolean} Whether the stereo mode was changed.
    */
-  changeRadioChannelStereoRaw(channel: number = this.activeRadioChannel, stereo: YacaStereoMode): boolean {
+  changeRadioChannelStereoRaw(stereo: YacaStereoMode, channel: number = this.activeRadioChannel): boolean {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
       return false;
     }
