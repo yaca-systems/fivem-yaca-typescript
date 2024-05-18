@@ -651,10 +651,14 @@ export class YaCAClientRadioModule {
         this.playersInRadioChannel.set(i, new Set());
       }
 
-      const { volume, stereo } = this.radioChannelSettings.get(i) ?? this.defaultRadioSettings;
+      const { volume, stereo, frequency } = this.radioChannelSettings.get(i) ?? this.defaultRadioSettings;
 
       this.clientModule.setCommDeviceStereoMode(YacaFilterEnum.RADIO, stereo, i);
       this.clientModule.setCommDeviceVolume(YacaFilterEnum.RADIO, volume, i);
+
+      if (frequency !== "0") {
+        emitNet("server:yaca:changeRadioFrequency", i, frequency);
+      }
     }
   }
 
