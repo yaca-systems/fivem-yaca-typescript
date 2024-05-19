@@ -1,3 +1,5 @@
+import { roundFloat } from "./index";
+
 /**
  * Calculate the distance between two points in 3D space
  *
@@ -29,8 +31,8 @@ export function convertNumberArrayToXYZ(array: number[]): {
   z: number;
 } {
   return {
-    x: array[0],
-    y: array[1],
-    z: array[2],
+    x: roundFloat(array[0]),
+    y: roundFloat(array[1]),
+    z: roundFloat(array[2]),
   };
 }
