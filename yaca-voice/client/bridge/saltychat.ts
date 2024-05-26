@@ -11,6 +11,7 @@ import { saltyChatExport } from "common/bridge";
 export class YaCAClientSaltyChatBridge {
   private clientModule: YaCAClientModule;
 
+  private currentPluginState = -1;
   private prevPluginState: YacaResponseCode | null = null;
 
   private isPrimarySending = false;
@@ -185,6 +186,10 @@ export class YaCAClientSaltyChatBridge {
     saltyChatExport("SetMicClick", () => {
       console.warn("SetMicClick is not implemented in YaCA");
     });
+
+    saltyChatExport("GetPluginState", () => {
+      return this.currentPluginState;
+    });
   }
 
   /**
@@ -217,6 +222,7 @@ export class YaCAClientSaltyChatBridge {
 
     this.prevPluginState = response;
     emit("SaltyChat_PluginStateChanged", state);
+    this.currentPluginState = state;
   }
 
   /**
@@ -225,6 +231,7 @@ export class YaCAClientSaltyChatBridge {
   handleDisconnectState() {
     this.prevPluginState = null;
     emit("SaltyChat_PluginStateChanged", -1);
+    this.currentPluginState = -1;
   }
 
   /**
