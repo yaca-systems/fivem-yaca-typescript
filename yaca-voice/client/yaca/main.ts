@@ -712,7 +712,7 @@ export class YaCAClientModule {
    * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
    */
   setPlayersCommType(
-    players: YacaPlayerData | YacaPlayerData[] = [],
+    players: YacaPlayerData | YacaPlayerData[],
     type: YacaFilterEnum,
     state: boolean,
     channel?: number,
@@ -941,11 +941,17 @@ export class YaCAClientModule {
       }
     }
 
-    this.currentlyPhoneSpeakerApplied.forEach((playerId) => {
+    for (const playerId of this.currentlyPhoneSpeakerApplied) {
       if (!playersOnPhoneSpeaker.has(playerId)) {
         this.currentlyPhoneSpeakerApplied.delete(playerId);
+        const player = this.getPlayerByID(playerId);
+
+        if (!player) {
+          continue;
+        }
+
         this.setPlayersCommType(
-          this.getPlayerByID(playerId),
+          player,
           YacaFilterEnum.PHONE_SPEAKER,
           false,
           undefined,
@@ -954,7 +960,7 @@ export class YaCAClientModule {
           CommDeviceMode.SENDER,
         );
       }
-    });
+    }
   }
 
   /**

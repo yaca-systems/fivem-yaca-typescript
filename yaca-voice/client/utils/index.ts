@@ -27,7 +27,7 @@ export function clamp(value: number, min = 0, max = 1) {
  *
  * @returns {number} The rounded number.
  */
-export function roundFloat(num: number, decimalPlaces: number = 2): number {
+export function roundFloat(num: number, decimalPlaces = 2): number {
   return parseFloat(num.toFixed(decimalPlaces));
 }
 
