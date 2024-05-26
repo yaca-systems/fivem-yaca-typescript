@@ -50,7 +50,7 @@ export class YaCAClientMegaphoneModule {
        * If the player is not in a vehicle, it sets the `canUseMegaphone` property to `false` and emits the "server:yaca:playerLeftVehicle" event.
        */
       onCache<number | false>("seat", (seat) => {
-        if (!seat || seat > 0 || !cache.vehicle) {
+        if (seat === false || seat > 0 || !cache.vehicle) {
           this.canUseMegaphone = false;
           emitNet("server:yaca:playerLeftVehicle");
           return;
