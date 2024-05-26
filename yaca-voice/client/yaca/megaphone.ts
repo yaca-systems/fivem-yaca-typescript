@@ -146,16 +146,32 @@ export class YaCAClientMegaphoneModule {
         return;
       }
 
-      const isOwnPlayer = playerSource === cache.serverId;
-      this.clientModule.setPlayersCommType(
-        isOwnPlayer ? [] : this.clientModule.getPlayerByID(playerSource),
-        YacaFilterEnum.MEGAPHONE,
-        typeof value !== "undefined",
-        undefined,
-        value,
-        isOwnPlayer ? CommDeviceMode.SENDER : CommDeviceMode.RECEIVER,
-        isOwnPlayer ? CommDeviceMode.RECEIVER : CommDeviceMode.SENDER,
-      );
+      if (playerSource === cache.serverId) {
+        this.clientModule.setPlayersCommType(
+          [],
+          YacaFilterEnum.MEGAPHONE,
+          typeof value !== "undefined",
+          undefined,
+          value,
+          CommDeviceMode.SENDER,
+          CommDeviceMode.RECEIVER,
+        );
+      } else {
+        const player = this.clientModule.getPlayerByID(playerSource);
+        if (!player) {
+          return;
+        }
+
+        this.clientModule.setPlayersCommType(
+          player,
+          YacaFilterEnum.MEGAPHONE,
+          typeof value !== "undefined",
+          undefined,
+          value,
+          CommDeviceMode.RECEIVER,
+          CommDeviceMode.SENDER,
+        );
+      }
     });
   }
 

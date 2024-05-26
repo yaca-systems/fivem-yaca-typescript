@@ -660,7 +660,13 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The channel number.
    */
   radioTalkingStateToPlugin(state: boolean, channel: number) {
-    this.clientModule.setPlayersCommType(this.clientModule.getPlayerByID(cache.serverId), YacaFilterEnum.RADIO, state, channel);
+    const player = this.clientModule.getPlayerByID(cache.serverId);
+
+    if (!player) {
+      return;
+    }
+
+    this.clientModule.setPlayersCommType(player, YacaFilterEnum.RADIO, state, channel);
   }
 
   /**
