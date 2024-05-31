@@ -35,30 +35,27 @@ export class YaCAServerPhoneModle {
         return;
       }
 
-      const enableWhisperReceive: number[] = [],
-        disableWhisperReceive: number[] = [];
+      const sendTo = new Set<number>();
 
-      player.voiceSettings.inCallWith.forEach((callTarget) => {
+      for (const callTarget of player.voiceSettings.inCallWith) {
         const target = this.serverModule.players.get(callTarget);
         if (!target) {
-          return;
+          continue;
         }
 
-        if (enableForTargets?.includes(callTarget)) {
-          enableWhisperReceive.push(callTarget);
-        }
-
-        if (disableForTargets?.includes(callTarget)) {
-          disableWhisperReceive.push(callTarget);
-        }
-      });
-
-      for (const target of enableWhisperReceive) {
-        emitNet("client:yaca:playersToPhoneSpeakerEmit", target, enableForTargets, true);
+        sendTo.add(callTarget);
       }
 
-      for (const target of disableWhisperReceive) {
-        emitNet("client:yaca:playersToPhoneSpeakerEmit", target, disableForTargets, false);
+      if (enableForTargets && enableForTargets.length) {
+        for (const target of sendTo) {
+          emitNet("client:yaca:playersToPhoneSpeakerEmit", target, enableForTargets, true);
+        }
+      }
+
+      if (disableForTargets && disableForTargets.length) {
+        for (const target of sendTo) {
+          emitNet("client:yaca:playersToPhoneSpeakerEmit", target, disableForTargets, false);
+        }
       }
     });
   }
