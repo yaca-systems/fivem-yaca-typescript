@@ -5,13 +5,13 @@ import { REDM_KEY_TO_HASH } from "../yaca";
  * Play a facial animation on a ped.
  *
  * @param ped - The ped to play the facial animation on.
- * @param animDict - The animation dictionary to use.
  * @param animName - The animation name to use.
+ * @param animDict - The animation dictionary to use.
  */
-export async function playRdrFacialAnim(ped: number, animDict: string, animName: string) {
-  await requestAnimDict(animDict, 1000);
-
-  SetFacialIdleAnimOverride(ped, animDict, animName);
+export function playRdrFacialAnim(ped: number, animName: string, animDict: string) {
+  requestAnimDict(animDict, 10000).then(() => {
+    SetFacialIdleAnimOverride(ped, animName, animDict);
+  });
 }
 
 /**

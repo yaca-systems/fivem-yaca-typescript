@@ -11,12 +11,12 @@ const localLipSyncAnimations: Record<"fivem" | "redm", Record<string, { name: st
   },
   redm: {
     true: {
-      name: "face_human@gen_male@base",
-      dict: "mood_talking_normal",
+      name: "mood_talking_normal",
+      dict: "face_human@gen_male@base",
     },
     false: {
-      name: "face_human@gen_male@base",
-      dict: "mood_normal",
+      name: "mood_normal",
+      dict: "face_human@gen_male@base",
     },
   },
 };

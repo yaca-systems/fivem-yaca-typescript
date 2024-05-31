@@ -822,9 +822,11 @@ export class YaCAClientModule {
    * @param {YacaResponse} payload - The response from teamspeak.
    */
   async handleTalkState(payload: YacaResponse) {
+    const messageState = payload.message === "1";
+
     // Update state if player is muted or not
     if (payload.code === "MUTE_STATE") {
-      this.isPlayerMuted = payload.message === "1";
+      this.isPlayerMuted = messageState;
       emit("yaca:external:muteStateChanged", this.isPlayerMuted);
 
       // SaltyChat bridge
@@ -833,7 +835,7 @@ export class YaCAClientModule {
       }
     }
 
-    const isTalking = !this.isPlayerMuted && payload.message === "1";
+    const isTalking = !this.isPlayerMuted && messageState;
     if (this.isTalking !== isTalking) {
       this.isTalking = isTalking;
 
@@ -843,7 +845,7 @@ export class YaCAClientModule {
       if (this.isFiveM) {
         PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
       } else if (this.isRedM) {
-        await playRdrFacialAnim(cache.ped, animationData.name, animationData.dict);
+        playRdrFacialAnim(cache.ped, animationData.name, animationData.dict);
       }
       LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true);
 
