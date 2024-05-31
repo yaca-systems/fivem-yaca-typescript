@@ -46,13 +46,13 @@ export class YaCAServerPhoneModle {
         sendTo.add(callTarget);
       }
 
-      if (enableForTargets && enableForTargets.length) {
+      if (enableForTargets?.length) {
         for (const target of sendTo) {
           emitNet("client:yaca:playersToPhoneSpeakerEmit", target, enableForTargets, true);
         }
       }
 
-      if (disableForTargets && disableForTargets.length) {
+      if (disableForTargets?.length) {
         for (const target of sendTo) {
           emitNet("client:yaca:playersToPhoneSpeakerEmit", target, disableForTargets, false);
         }
