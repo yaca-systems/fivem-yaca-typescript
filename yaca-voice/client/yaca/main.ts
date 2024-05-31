@@ -508,7 +508,7 @@ export class YaCAClientModule {
    *
    * @param {string} payload - The response from the voice plugin.
    */
-  async handleResponse(payload: string) {
+  handleResponse(payload: string) {
     if (!payload) {
       return;
     }
@@ -551,7 +551,7 @@ export class YaCAClientModule {
     }
 
     if (parsedPayload.code === "TALK_STATE" || parsedPayload.code === "MUTE_STATE") {
-      await this.handleTalkState(parsedPayload);
+      this.handleTalkState(parsedPayload);
       return;
     }
 
@@ -821,7 +821,7 @@ export class YaCAClientModule {
    *
    * @param {YacaResponse} payload - The response from teamspeak.
    */
-  async handleTalkState(payload: YacaResponse) {
+  handleTalkState(payload: YacaResponse) {
     const messageState = payload.message === "1";
 
     // Update state if player is muted or not
