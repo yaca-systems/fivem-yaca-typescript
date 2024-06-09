@@ -446,7 +446,7 @@ export class YaCAClientModule {
    * @param {DataObject} dataObj - The data object to initialize the plugin with.
    */
   initRequest(dataObj: DataObject) {
-    if (!dataObj || !dataObj.suid || typeof dataObj.chid !== "number" || !dataObj.deChid || !dataObj.ingameName || !dataObj.channelPassword) {
+    if (!dataObj || !dataObj.suid || typeof dataObj.chid !== "number" || !dataObj.deChid || !dataObj.ingameName || typeof dataObj.channelPassword == "undefined") {
       console.log("[YACA-Websocket]: Error while initializing plugin");
       this.notification(locale("connect_error"), YacaNotificationType.ERROR);
       return;
