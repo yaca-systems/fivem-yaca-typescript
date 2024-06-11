@@ -20,10 +20,10 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.8385-1
+        version: 2.0.8502-1
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.8385-1
+        version: 2.0.8502-1
       '@eslint/js':
         specifier: ^8.57.0
         version: 8.57.0
@@ -47,7 +47,7 @@ importers:
         version: 0.13.0
       lint-staged:
         specifier: ^15.2.5
-        version: 15.2.5
+        version: 15.2.6
       prettier:
         specifier: 3.3.0
         version: 3.3.0
@@ -60,11 +60,11 @@ importers:
 
 packages:
 
-  '@citizenfx/client@2.0.8385-1':
-    resolution: {integrity: sha512-1Nq1Tcmh++H0lnnP//slB1qc7w0CLZjEz/UzR3UGcAWYmkjTuwBDpjiunkgIdKvUGeetquFwaonjG4SLXUpiyg==}
+  '@citizenfx/client@2.0.8502-1':
+    resolution: {integrity: sha512-lZ3a1I4A116b5r+eUZSvhHADOSWySEKITA4BJbqPFmZ1kC/Lr+uCFLFGoH9jxMU0FRE4gyVvkbmTbjWhREBgQQ==}
 
-  '@citizenfx/server@2.0.8385-1':
-    resolution: {integrity: sha512-nddQV9DBDbatKv2qfMwu2kZOYsqQ/lzBh49F64SFKkcUL8z4G1S9PSETuaDH3kCXXC/d+R7ZFDaSk2ykdscaIw==}
+  '@citizenfx/server@2.0.8502-1':
+    resolution: {integrity: sha512-RxWj2sWzLjpA1r2JE+QajIb2btsyoPFu+AXuIq/z5BDaCcBHxpZxHMj1l4lewgqgZTzpsolyI+lbGHixS8Lldw==}
 
   '@esbuild/aix-ppc64@0.21.4':
     resolution: {integrity: sha512-Zrm+B33R4LWPLjDEVnEqt2+SLTATlru1q/xYKVn8oVTbiRBGmK2VIMoIYGJDGyftnGaC788IuzGFAlb7IQ0Y8A==}
@@ -225,6 +225,7 @@ packages:
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
+    deprecated: Use @eslint/config-array instead
 
   '@humanwhocodes/module-importer@1.0.1':
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
@@ -232,6 +233,7 @@ packages:
 
   '@humanwhocodes/object-schema@2.0.3':
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
+    deprecated: Use @eslint/object-schema instead
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -657,12 +659,12 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  lilconfig@3.1.1:
-    resolution: {integrity: sha512-O18pf7nyvHTckunPWCV1XUNXU1piu01y2b7ATJ0ppkUkk8ocqVWBrYjJBCwHDjD/ZWcfyrA0P4gKhzWGi5EINQ==}
+  lilconfig@3.1.2:
+    resolution: {integrity: sha512-eop+wDAvpItUys0FWkHIKeC9ybYrTGbU41U5K7+bttZZeohvnY7M9dZ5kB21GNWiFT2q1OoPTvncPCgSOVO5ow==}
     engines: {node: '>=14'}
 
-  lint-staged@15.2.5:
-    resolution: {integrity: sha512-j+DfX7W9YUvdzEZl3Rk47FhDF6xwDBV5wwsCPw6BwWZVPYJemusQmvb9bRsW23Sqsaa+vRloAWogbK4BUuU2zA==}
+  lint-staged@15.2.6:
+    resolution: {integrity: sha512-M/3PdijFXT/A5lnbSK3EQNLbIIrkE00JZaD39r7t4kfFOqT1Ly9LgSZSMMtvQ3p2/C8Nyj/ou0vkNHmEwqoB8g==}
     engines: {node: '>=18.12.0'}
     hasBin: true
 
@@ -942,8 +944,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  yaml@2.4.2:
-    resolution: {integrity: sha512-B3VqDZ+JAg1nZpaEmWtTXUlBneoGx6CPM9b0TENK6aoSu5t73dItudwdgmi6tHlIZZId4dZ9skcAQ2UbcyAeVA==}
+  yaml@2.4.5:
+    resolution: {integrity: sha512-aBx2bnqDzVOyNKfsysjA2ms5ZlnjSAW2eG3/L5G/CSujfjLJTJsEw1bGw8kCf04KodQWk1pxlGnZ56CRxiawmg==}
     engines: {node: '>= 14'}
     hasBin: true
 
@@ -953,9 +955,9 @@ packages:
 
 snapshots:
 
-  '@citizenfx/client@2.0.8385-1': {}
+  '@citizenfx/client@2.0.8502-1': {}
 
-  '@citizenfx/server@2.0.8385-1': {}
+  '@citizenfx/server@2.0.8502-1': {}
 
   '@esbuild/aix-ppc64@0.21.4':
     optional: true
@@ -1527,20 +1529,20 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  lilconfig@3.1.1: {}
+  lilconfig@3.1.2: {}
 
-  lint-staged@15.2.5:
+  lint-staged@15.2.6:
     dependencies:
       chalk: 5.3.0
       commander: 12.1.0
       debug: 4.3.5
       execa: 8.0.1
-      lilconfig: 3.1.1
+      lilconfig: 3.1.2
       listr2: 8.2.1
       micromatch: 4.0.7
       pidtree: 0.6.0
       string-argv: 0.3.2
-      yaml: 2.4.2
+      yaml: 2.4.5
     transitivePeerDependencies:
       - supports-color
 
@@ -1777,6 +1779,6 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  yaml@2.4.2: {}
+  yaml@2.4.5: {}
 
   yocto-queue@0.1.0: {}
