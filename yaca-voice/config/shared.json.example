@@ -56,7 +56,10 @@
   },
   "vehicleMuffling": true,
   "mufflingRange": -1,
-  "mufflingVehicleWhitelist": [],
+  "mufflingVehicleWhitelist": [
+    "gauntlet6",
+    "draugur"
+  ],
   "mufflingIntensities": {
     "differentRoom": 10,
     "bothCarsClosed": 10,
