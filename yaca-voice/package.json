@@ -36,7 +36,7 @@
     "@eslint/js": "^8.57.0",
     "@types/events": "^3.0.3",
     "@types/node": "^20.13.0",
-    "esbuild": "^0.21.4",
+    "esbuild": "^0.23.0",
     "eslint": "^8.57.0",
     "husky": "^9.0.11",
     "install": "^0.13.0",
