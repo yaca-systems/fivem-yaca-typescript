@@ -63,4 +63,5 @@ export interface YacaServerConfig {
   defaultChannelId: number;
   useWhisper: boolean;
   excludeChannels: number[];
+  userNamePattern: string;
 }
