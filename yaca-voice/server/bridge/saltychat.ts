@@ -71,7 +71,9 @@ export class YaCAServerSaltyChatBridge {
 
     saltyChatExport("SetPlayerRadioChannel", (netId: number, radioChannelName: string, primary = true) => {
       const channel = primary ? 1 : 2;
-      this.serverModule.radioModule.changeRadioFrequency(netId, channel, radioChannelName);
+      const newRadioChannelName = radioChannelName === "" ? "0" : radioChannelName;
+
+      this.serverModule.radioModule.changeRadioFrequency(netId, channel, newRadioChannelName);
     });
 
     saltyChatExport("RemovePlayerRadioChannel", (netId: number, primary: boolean) => {
