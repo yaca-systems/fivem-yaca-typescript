@@ -26,7 +26,7 @@
     "ci:build": "pnpm run typecheck && node build.js --mode=production"
   },
   "dependencies": {
-    "events": "^3.3.0",
+    "eventemitter2": "^6.4.9",
     "fast-printf": "^1.6.9",
     "node-fetch": "^3.3.2"
   },
@@ -35,15 +35,15 @@
     "@citizenfx/server": "latest",
     "@eslint/js": "^8.57.0",
     "@types/events": "^3.0.3",
-    "@types/node": "^20.13.0",
-    "esbuild": "^0.21.4",
+    "@types/node": "^20.14.10",
+    "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
     "husky": "^9.0.11",
     "install": "^0.13.0",
-    "lint-staged": "^15.2.5",
+    "lint-staged": "^15.2.7",
     "prettier": "3.3.0",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^7.11.0"
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^7.15.0"
   },
   "engines": {
     "node": ">=16.9.1"
@@ -57,5 +57,5 @@
       "prettier --write --log-level=warn"
     ]
   },
-  "packageManager": "pnpm@9.1.4+sha512.9df9cf27c91715646c7d675d1c9c8e41f6fce88246f1318c1aa6a1ed1aeb3c4f032fcdf4ba63cc69c4fe6d634279176b5358727d8f2cc1e65b65f43ce2f8bfb0"
+  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a"
 }
