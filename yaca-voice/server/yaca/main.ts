@@ -95,7 +95,7 @@ export class YaCAServerModule {
    * @param {number} src - The source-id of the player to initialize.
    */
   connectToVoice(src: number) {
-    const name = generateRandomName(src, this.nameSet);
+    const name = generateRandomName(src, this.nameSet, this.serverConfig.userNamePattern ?? "[{serverid}] {guid}");
     if (!name) {
       return;
     }
@@ -253,7 +253,7 @@ export class YaCAServerModule {
     }
 
     if (!isFirstConnect) {
-      const name = generateRandomName(src, this.nameSet);
+      const name = generateRandomName(src, this.nameSet, this.serverConfig.userNamePattern ?? "[{serverid}] {guid}");
       if (!name) {
         return;
       }

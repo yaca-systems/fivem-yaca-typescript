@@ -4,5 +4,6 @@
   "ingameChannelPassword": "",
   "defaultChannelId": 1,
   "useWhisper": false,
-  "excludeChannels": []
+  "excludeChannels": [],
+  "userNamePattern": "[{serverid}] {guid}"
 }

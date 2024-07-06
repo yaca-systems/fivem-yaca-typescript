@@ -22,14 +22,15 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 
 # Server Config
 
-| Variable              | Type       | Description                                                                                                            |
-| --------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
-| uniqueServerId        | `string`   | The unique Server Identifier of the Teamspeak-Server                                                                   |
-| ingameChannelId       | `number`   | The ID of the Ingame Channel                                                                                           |
-| ingameChannelPassword | `string`   | The Password used to join the Ingame Channel                                                                           |
-| defaultChannelId      | `number`   | The ID of the Channel where a players should be moved to when leaving Ingame                                           |
-| useWhisper            | `boolean`  | If you want to use the Whisper functions of TeamSpeak, if set to `false` it mutes and unmutes the players              |
-| excludeChannels       | `number[]` | The channels that should be able to join while being Ingame without instantly being moved back into the Ingame channel |
+| Variable              | Type       | Description                                                                                                                                                                                                                                                        |
+| --------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| uniqueServerId        | `string`   | The unique Server Identifier of the Teamspeak-Server                                                                                                                                                                                                               |
+| ingameChannelId       | `number`   | The ID of the Ingame Channel                                                                                                                                                                                                                                       |
+| ingameChannelPassword | `string`   | The Password used to join the Ingame Channel                                                                                                                                                                                                                       |
+| defaultChannelId      | `number`   | The ID of the Channel where a players should be moved to when leaving Ingame                                                                                                                                                                                       |
+| useWhisper            | `boolean`  | If you want to use the Whisper functions of TeamSpeak, if set to `false` it mutes and unmutes the players                                                                                                                                                          |
+| excludeChannels       | `number[]` | The channels that should be able to join while being Ingame without instantly being moved back into the Ingame channel                                                                                                                                             |
+| userNamePattern       | `string`   | The pattern that is used to generate the username. Following placeholders will be replaced: `{serverid}` with the Ingame-ID of the player, `{playername}` with the steam/fivem name of the player and `{guid}` with a string containing random letters and digits. |
 
 # Shared Config
 
