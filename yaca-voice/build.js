@@ -29,15 +29,6 @@ const packageJson = JSON.parse(
 );
 
 writeFileSync(
-  ".yarn.installed",
-  new Date().toLocaleString("en-AU", {
-    timeZone: "UTC",
-    timeStyle: "long",
-    dateStyle: "full",
-  }),
-);
-
-writeFileSync(
   "fxmanifest.lua",
   `fx_version 'cerulean'
 games { 'gta5', 'rdr3' }
@@ -122,6 +113,5 @@ if (existsSync("config/server.json")) {
 }
 copyFileSync("fxmanifest.lua", "resource/fxmanifest.lua");
 copyFileSync("../README.md", "resource/README.md");
-copyFileSync(".yarn.installed", "resource/.yarn.installed");
 
 console.log("Resource built successfully!");
