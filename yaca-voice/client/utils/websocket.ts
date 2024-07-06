@@ -1,10 +1,10 @@
-import { EventEmitter } from "events";
 import { sleep } from "common/index";
+import EventEmitter2 from "eventemitter2";
 
 /**
  * The WebSocket class handles the communication between the nui and the client.
  */
-export class WebSocket extends EventEmitter {
+export class WebSocket extends EventEmitter2 {
   public readyState = 0;
   nuiReady = false;
   initialized = false;
@@ -62,12 +62,12 @@ export class WebSocket extends EventEmitter {
       return;
     }
 
-    const nuiMessage = JSON.stringify({
-      action: "command",
-      data,
-    });
-
-    SendNuiMessage(nuiMessage);
+    SendNuiMessage(
+      JSON.stringify({
+        action: "command",
+        data,
+      }),
+    );
   }
 
   /**
