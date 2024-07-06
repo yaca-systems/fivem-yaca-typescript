@@ -205,6 +205,7 @@ export class YaCAServerRadioModule {
       emitNet("client:yaca:notification", src, locale("radio_not_activated"), YacaNotificationType.ERROR);
       return;
     }
+
     if (isNaN(channel) || channel < 1 || channel > this.sharedConfig.maxRadioChannels) {
       emitNet("client:yaca:notification", src, locale("radio_channel_invalid"), YacaNotificationType.ERROR);
       return;

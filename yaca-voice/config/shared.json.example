@@ -58,7 +58,11 @@
   "mufflingRange": -1,
   "mufflingVehicleWhitelist": [
     "gauntlet6",
-    "draugur"
+    "draugur",
+    "bodhi2",
+    "vagrant",
+    "outlaw",
+    "trophytruck"
   ],
   "mufflingIntensities": {
     "differentRoom": 10,
