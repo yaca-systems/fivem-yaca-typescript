@@ -1,5 +1,6 @@
 import { YaCAServerModule } from "yaca";
 import { PHONE_SPEAKER_STATE_NAME } from "common/constants";
+import { YacaFilterEnum } from "types";
 
 /**
  * The phone module for the server.
@@ -77,7 +78,7 @@ export class YaCAServerPhoneModle {
      * @param {number} target - The player who is being called.
      * @param {boolean} state - The state of the call.
      */
-    exports("callPlayerOldEffect", (src: number, target: number, state: boolean) => this.callPlayerOldEffect(src, target, state));
+    exports("callPlayerOldEffect", (src: number, target: number, state: boolean) => this.callPlayer(src, target, state, YacaFilterEnum.PHONE_HISTORICAL));
 
     /**
      * Mute a player during a phone call.
@@ -116,16 +117,17 @@ export class YaCAServerPhoneModle {
    * @param {number} src - The player who is making the call.
    * @param {number} target - The player who is being called.
    * @param {boolean} state - The state of the call.
+   * @param {YacaFilterEnum} filter - The filter to use for the call. Defaults to PHONE if not provided.
    */
-  callPlayer(src: number, target: number, state: boolean) {
+  callPlayer(src: number, target: number, state: boolean, filter: YacaFilterEnum = YacaFilterEnum.PHONE) {
     const player = this.serverModule.getPlayer(src),
       targetPlayer = this.serverModule.getPlayer(target);
     if (!player || !targetPlayer) {
       return;
     }
 
-    emitNet("client:yaca:phone", target, src, state);
-    emitNet("client:yaca:phone", src, target, state);
+    emitNet("client:yaca:phone", target, src, state, filter);
+    emitNet("client:yaca:phone", src, target, state, filter);
 
     const playerState = Player(src).state;
     const targetState = Player(target).state;
@@ -157,57 +159,7 @@ export class YaCAServerPhoneModle {
       }
     }
 
-    emit("yaca:external:phoneCall", src, target, state);
-  }
-
-  /**
-   * Apply the old effect to a player during a call.
-   *
-   * @param {number} src - The player to apply the old effect to.
-   * @param {number} target - The player on the other end of the call.
-   * @param {boolean} state - The state of the call.
-   */
-  callPlayerOldEffect(src: number, target: number, state: boolean) {
-    const player = this.serverModule.getPlayer(src),
-      targetPlayer = this.serverModule.getPlayer(target);
-    if (!player || !targetPlayer) {
-      return;
-    }
-
-    emitNet("client:yaca:phoneOld", target, src, state);
-    emitNet("client:yaca:phoneOld", src, target, state);
-
-    const playerState = Player(src).state;
-    const targetState = Player(target).state;
-
-    if (state) {
-      player.voiceSettings.inCallWith.add(target);
-      targetPlayer.voiceSettings.inCallWith.add(src);
-
-      if (playerState[PHONE_SPEAKER_STATE_NAME]) {
-        this.enablePhoneSpeaker(src, true);
-      }
-
-      if (targetState[PHONE_SPEAKER_STATE_NAME]) {
-        this.enablePhoneSpeaker(target, true);
-      }
-    } else {
-      this.muteOnPhone(src, false, true);
-      this.muteOnPhone(target, false, true);
-
-      player.voiceSettings.inCallWith.delete(target);
-      targetPlayer.voiceSettings.inCallWith.delete(src);
-
-      if (playerState[PHONE_SPEAKER_STATE_NAME]) {
-        this.enablePhoneSpeaker(src, false);
-      }
-
-      if (targetState[PHONE_SPEAKER_STATE_NAME]) {
-        this.enablePhoneSpeaker(target, false);
-      }
-    }
-
-    emit("yaca:external:phoneCallOldEffect", src, target, state);
+    emit("yaca:external:phoneCall", src, target, state, filter);
   }
 
   /**

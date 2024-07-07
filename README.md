@@ -500,21 +500,12 @@ The event is triggered when the megaphone state of a player changes.
 
 The event is triggered when a phone call is started or ended.
 
-| Parameter | Type      | Description              |
-| --------- | --------- | ------------------------ |
-| source    | `int`     | the player source        |
-| target    | `int`     | the target player source |
-| state     | `boolean` | the new phone call state |
-
-### yaca:external:phoneCallOldEffect
-
-The event is triggered when a phone call with the old effect is started or ended.
-
-| Parameter | Type      | Description              |
-| --------- | --------- | ------------------------ |
-| source    | `int`     | the player source        |
-| target    | `int`     | the target player source |
-| state     | `boolean` | the new phone call state |
+| Parameter | Type             | Description                                                                     |
+|-----------|------------------|---------------------------------------------------------------------------------|
+| source    | `int`            | the player source                                                               |
+| target    | `int`            | the target player source                                                        |
+| state     | `boolean`        | the new phone call state                                                        |
+| filter    | `YacaFilterEnum` | the used filter for the phone call, can be either `PHONE` or `PHONE_HISTORICAL` |
 
 ### yaca:external:phoneSpeaker
 
