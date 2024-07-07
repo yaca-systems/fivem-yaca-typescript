@@ -1,4 +1,4 @@
-import * as crypto from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 /**
  * Generate a random name and insert it into the database.
@@ -16,7 +16,7 @@ export function generateRandomName(src: number, nameSet: Set<string>, namePatter
     let generatedName = namePattern;
     generatedName = generatedName.replace("{serverid}", src.toString());
     generatedName = generatedName.replace("{playername}", playerName);
-    generatedName = generatedName.replace("{guid}", crypto.randomUUID().replace(/-/g, ""));
+    generatedName = generatedName.replace("{guid}", randomUUID().replace(/-/g, ""));
     generatedName = generatedName.slice(0, 30);
 
     if (!nameSet.has(generatedName)) {
