@@ -17,6 +17,8 @@ export class YaCAClientRadioModule {
   playersWithShortRange = new Map<number, string>();
   playersInRadioChannel = new Map<number, Set<number>>();
 
+  radioOnCooldown = false;
+
   defaultRadioSettings: YacaRadioSettings = {
     frequency: "0",
     muted: false,
@@ -791,6 +793,18 @@ export class YaCAClientRadioModule {
       }
 
       return;
+    }
+
+    if (this.clientModule.sharedConfig.radioAntiSpamCooldown) {
+      if (this.radioOnCooldown) {
+        return;
+      }
+
+      this.radioOnCooldown = true;
+
+      setTimeout(() => {
+        this.radioOnCooldown = false;
+      }, this.clientModule.sharedConfig.radioAntiSpamCooldown);
     }
 
     const channelSettings = this.radioChannelSettings.get(channel);
