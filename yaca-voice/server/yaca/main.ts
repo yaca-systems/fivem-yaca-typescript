@@ -337,12 +337,13 @@ export class YaCAServerModule {
 
     const allPlayersData = [];
     for (const playerSource of getPlayers()) {
-      const playerServer = this.players.get(parseInt(playerSource));
+      const intPlayerSource = parseInt(playerSource);
+      const playerServer = this.players.get(intPlayerSource);
       if (!playerServer) {
         continue;
       }
 
-      if (!playerServer.voicePlugin || parseInt(playerSource) === src) {
+      if (!playerServer.voicePlugin || intPlayerSource === src) {
         continue;
       }
 

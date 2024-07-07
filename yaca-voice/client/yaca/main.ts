@@ -365,6 +365,7 @@ export class YaCAClientModule {
      */
     onNet("client:yaca:disconnect", (remoteId: number) => {
       this.allPlayers.delete(remoteId);
+      this.phoneModule.handleDisconnect(remoteId);
     });
 
     /**
@@ -377,6 +378,7 @@ export class YaCAClientModule {
         dataObjects = [dataObjects];
       }
 
+      const newPlayers: number[] = [];
       for (const dataObj of dataObjects) {
         if (!dataObj || typeof dataObj.clientId === "undefined" || typeof dataObj.playerId === "undefined") {
           continue;
@@ -391,7 +393,11 @@ export class YaCAClientModule {
           phoneCallMemberIds: currentData?.phoneCallMemberIds || undefined,
           mutedOnPhone: dataObj.mutedOnPhone || false,
         });
+
+        newPlayers.push(dataObj.playerId);
       }
+
+      this.phoneModule.reestablishCalls(newPlayers);
     });
 
     /**

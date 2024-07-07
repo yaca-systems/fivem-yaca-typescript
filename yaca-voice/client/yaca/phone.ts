@@ -29,51 +29,15 @@ export class YaCAClientPhoneModule {
     /**
      * Handles the "client:yaca:phone" server event.
      *
-     * @param {number} targetID - The ID of the target.
+     * @param {number | number[]} targetIDs - The ID of the target.
      * @param {boolean} state - The state of the phone.
      */
-    onNet("client:yaca:phone", (targetID: number, state: boolean) => {
-      const target = this.clientModule.getPlayerByID(targetID);
-      if (!target) {
-        return;
+    onNet("client:yaca:phone", (targetIDs: number | number[], state: boolean, filter: YacaFilterEnum = YacaFilterEnum.PHONE) => {
+      if (!Array.isArray(targetIDs)) {
+        targetIDs = [targetIDs];
       }
 
-      if (state) {
-        this.inCallWith.add(targetID);
-      } else {
-        this.inCallWith.delete(targetID);
-      }
-
-      this.clientModule.setPlayersCommType(target, YacaFilterEnum.PHONE, state, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER);
-    });
-
-    /**
-     * Handles the "client:yaca:phoneOld" server event.
-     *
-     * @param {number} targetID - The ID of the target.
-     * @param {boolean} state - The state of the phone.
-     */
-    onNet("client:yaca:phoneOld", (targetID: number, state: boolean) => {
-      const target = this.clientModule.getPlayerByID(targetID);
-      if (!target) {
-        return;
-      }
-
-      if (state) {
-        this.inCallWith.add(targetID);
-      } else {
-        this.inCallWith.delete(targetID);
-      }
-
-      this.clientModule.setPlayersCommType(
-        target,
-        YacaFilterEnum.PHONE_HISTORICAL,
-        state,
-        undefined,
-        undefined,
-        CommDeviceMode.TRANSCEIVER,
-        CommDeviceMode.TRANSCEIVER,
-      );
+      this.enablePhoneCall(targetIDs, state, filter);
     });
 
     /**
@@ -235,5 +199,76 @@ export class YaCAClientPhoneModule {
     this.clientModule.setPlayersCommType(playersToSet, YacaFilterEnum.PHONE_SPEAKER, false);
 
     delete entityData.phoneCallMemberIds;
+  }
+
+  /**
+   * Handles the disconnection of a player from a phone call.
+   *
+   * @param {number} targetID - The ID of the target.
+   */
+  handleDisconnect(targetID: number) {
+    this.inCallWith.delete(targetID);
+  }
+
+  /**
+   * Reestablishes a phone call with a target, when a player has restarted the voice plugin.
+   *
+   * @param {number | number[]} targetIDs - The IDs of the targets.
+   */
+  reestablishCalls(targetIDs: number | number[]) {
+    if (!this.inCallWith.size) {
+      return;
+    }
+
+    if (!Array.isArray(targetIDs)) {
+      targetIDs = [targetIDs];
+    }
+
+    if (!targetIDs.length) {
+      return;
+    }
+
+    const targetsToReestablish = [];
+    for (const targetId of targetIDs) {
+      if (this.inCallWith.has(targetId)) {
+        targetsToReestablish.push(targetId);
+      }
+    }
+
+    if (targetsToReestablish.length) {
+      this.enablePhoneCall(targetsToReestablish, true, YacaFilterEnum.PHONE);
+    }
+  }
+
+  /**
+   * Enables or disables a phone call.
+   *
+   * @param {number[]} targetIDs - The IDs of the targets.
+   * @param {boolean} state - The state of the phone call.
+   * @param {YacaFilterEnum} filter - The filter to use.
+   */
+  enablePhoneCall(targetIDs: number[], state: boolean, filter: YacaFilterEnum = YacaFilterEnum.PHONE) {
+    if (!targetIDs.length) {
+      return;
+    }
+
+    const commTargets = [];
+    for (const targetID of targetIDs) {
+      const target = this.clientModule.getPlayerByID(targetID);
+      if (!target) {
+        if (!state) this.inCallWith.delete(targetID);
+        continue;
+      }
+
+      if (state) {
+        this.inCallWith.add(targetID);
+      } else {
+        this.inCallWith.delete(targetID);
+      }
+
+      commTargets.push(target);
+    }
+
+    this.clientModule.setPlayersCommType(commTargets, filter, state, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER);
   }
 }
