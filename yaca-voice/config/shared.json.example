@@ -70,5 +70,6 @@
     "bothCarsClosed": 10,
     "oneCarClosed": 6,
     "megaPhoneInCar": 6
-  }
+  },
+  "radioAntiSpamCooldown": false
 }

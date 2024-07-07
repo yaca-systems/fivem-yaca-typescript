@@ -54,6 +54,7 @@ export interface YacaSharedConfig {
     oneCarClosed: number;
     megaPhoneInCar: number;
   };
+  radioAntiSpamCooldown: number;
 }
 
 export interface YacaServerConfig {
