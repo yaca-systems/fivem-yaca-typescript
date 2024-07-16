@@ -35,7 +35,7 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 # Shared Config
 
 | Variable                                | Type            | Description                                                                                                                                                                                                              | FiveM/RedM |
-| --------------------------------------- |-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| --------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
 | debug                                   | `boolean`       | Enable the debug mode to enable some debug commands.                                                                                                                                                                     | Both       |
 | versionCheck                            | `boolean`       | Enable/Disable the automatic version check.                                                                                                                                                                              | Both       |
 | buildType                               | `number`        | `0` for release and `1` for develop (develop allows using all yaca plugin version)                                                                                                                                       | Both       |
@@ -502,7 +502,7 @@ The event is triggered when the megaphone state of a player changes.
 The event is triggered when a phone call is started or ended.
 
 | Parameter | Type             | Description                                                                     |
-|-----------|------------------|---------------------------------------------------------------------------------|
+| --------- | ---------------- | ------------------------------------------------------------------------------- |
 | source    | `int`            | the player source                                                               |
 | target    | `int`            | the target player source                                                        |
 | state     | `boolean`        | the new phone call state                                                        |
