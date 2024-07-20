@@ -1,5 +1,5 @@
 import type { YaCAClientModule } from "../yaca";
-import { YacaResponseCode } from "types";
+import { YacaPluginStates } from "types";
 import { cache, registerRdrKeyBind } from "../utils";
 import { sleep } from "common/index";
 import { locale } from "common/locale";
@@ -12,15 +12,12 @@ export class YaCAClientSaltyChatBridge {
   private clientModule: YaCAClientModule;
 
   private currentPluginState = -1;
-  private prevPluginState: YacaResponseCode | null = null;
 
   private isPrimarySending = false;
   private isSecondarySending = false;
 
   private isPrimaryReceiving = false;
   private isSecondaryReceiving = false;
-
-  private inSwissChannel = false;
 
   /**
    * Creates an instance of the SaltyChat bridge.
@@ -199,63 +196,32 @@ export class YaCAClientSaltyChatBridge {
    *
    * @param response - The last response code.
    */
-  handleChangePluginState(response: YacaResponseCode) {
-    if (this.prevPluginState === response) {
-      return;
-    }
+  handleChangePluginState(response: YacaPluginStates) {
     let state = 0;
 
     switch (response) {
-      case "OK":
-        state = this.inSwissChannel ? 3 : 2;
+      case YacaPluginStates.IN_EXCLUDED_CHANNEL:
+        state = 3;
         break;
-      case "MOVE_ERROR":
-      case "OUTDATED_VERSION":
-      case "WAIT_GAME_INIT":
+      case YacaPluginStates.IN_INGAME_CHANNEL:
+        state = 2;
+        break;
+      case YacaPluginStates.CONNECTED:
         state = 1;
         break;
-      case "WRONG_TS_SERVER":
-      case "NOT_CONNECTED":
+      case YacaPluginStates.WRONG_TS_SERVER:
+      case YacaPluginStates.OUTDATED_VERSION:
         state = 0;
+        break;
+      case YacaPluginStates.NOT_CONNECTED:
+        state = -1;
         break;
       default:
         return;
     }
 
-    this.prevPluginState = response;
     emit("SaltyChat_PluginStateChanged", state);
     this.currentPluginState = state;
-  }
-
-  /**
-   * Handles the websocket disconnect.
-   */
-  handleDisconnectState() {
-    this.prevPluginState = null;
-    emit("SaltyChat_PluginStateChanged", -1);
-    this.currentPluginState = -1;
-  }
-
-  /**
-   * Handles the teamspeek channel move.
-   * This is used to determine if the player is in the swiss channel.
-   *
-   * @param channel - The channel the player moved to.
-   */
-  handleMovedChannel(channel: "INGAME_CHANNEL" | "EXCLUDED_CHANNEL") {
-    if (this.prevPluginState !== "OK") {
-      return;
-    }
-
-    this.inSwissChannel = channel === "EXCLUDED_CHANNEL";
-
-    if (this.inSwissChannel) {
-      this.currentPluginState = 3;
-      emit("SaltyChat_PluginStateChanged", 3);
-    } else {
-      this.currentPluginState = 2;
-      emit("SaltyChat_PluginStateChanged", 2);
-    }
   }
 
   /**
