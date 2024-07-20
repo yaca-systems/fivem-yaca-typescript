@@ -8,6 +8,7 @@ import {
   type YacaPluginPlayerData,
   type YacaProtocol,
   YacaResponse,
+  YacaResponseCode,
   type YacaSharedConfig,
   YacaStereoMode,
 } from "types";
@@ -65,6 +66,8 @@ export class YaCAClientModule {
 
   isFiveM = cache.game === "fivem";
   isRedM = cache.game === "redm";
+
+  lastPluginState: YacaResponseCode;
 
   /**
    * Sends a radar notification.
@@ -535,8 +538,13 @@ export class YaCAClientModule {
       return;
     }
 
-    if (this.saltyChatBridge) {
-      this.saltyChatBridge.handleChangePluginState(parsedPayload.code);
+    if (parsedPayload.code !== this.lastPluginState && parsedPayload.code !== "HEARTBEAT") {
+      this.lastPluginState = parsedPayload.code;
+      emit("yaca:external:pluginStateChanged", parsedPayload.code);
+
+      if (this.saltyChatBridge) {
+        this.saltyChatBridge.handleChangePluginState(parsedPayload.code);
+      }
     }
 
     if (parsedPayload.code === "OK") {

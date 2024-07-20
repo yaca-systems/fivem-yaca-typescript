@@ -363,6 +363,18 @@ The event is triggered when the plugin is initialized.
 | --------- | ----- | -------------------------------------------- |
 | clientId  | `int` | the client id of the local user in teamspeak |
 
+### yaca:external:pluginStateChanged
+
+The event is triggered when the plugin state changes.
+
+| Parameter | Type     | Description                                  |
+| --------- | -------- | -------------------------------------------- |
+| state     | `string` | the current plugin state, as explained below |
+
+The state can be one of the following:
+
+TODO: Add states
+
 ### yaca:external:voiceRangeUpdate
 
 This event is triggered when the voice range of a player is updated.

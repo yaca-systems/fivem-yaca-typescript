@@ -12,7 +12,6 @@ export class YaCAClientSaltyChatBridge {
   private clientModule: YaCAClientModule;
 
   private currentPluginState = -1;
-  private prevPluginState: YacaResponseCode | null = null;
 
   private isPrimarySending = false;
   private isSecondarySending = false;
@@ -198,9 +197,6 @@ export class YaCAClientSaltyChatBridge {
    * @param response - The last response code.
    */
   handleChangePluginState(response: YacaResponseCode) {
-    if (this.prevPluginState === response) {
-      return;
-    }
     let state = 0;
 
     switch (response) {
@@ -220,7 +216,6 @@ export class YaCAClientSaltyChatBridge {
         return;
     }
 
-    this.prevPluginState = response;
     emit("SaltyChat_PluginStateChanged", state);
     this.currentPluginState = state;
   }
@@ -229,7 +224,6 @@ export class YaCAClientSaltyChatBridge {
    * Handles the websocket disconnect.
    */
   handleDisconnectState() {
-    this.prevPluginState = null;
     emit("SaltyChat_PluginStateChanged", -1);
     this.currentPluginState = -1;
   }
