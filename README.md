@@ -106,6 +106,19 @@ Get the sound mute state of the player as `boolean`.
 
 Get the sound disabled state of the player as `boolean`.
 
+#### `getPluginState(): string`
+
+Get the current plugin state as `string`.
+
+The state can be one of the following:
+
+- `"NOT_CONNECTED"`: The plugin is not connected
+- `"CONNECTED`: The plugin is connected
+- `"OUTDATED_VERSION"`: The plugin is not the version set in the dashboard
+- `"WRONG_TS_SERVER"`: The user is connected to the wrong Teamspeak server
+- `"IN_INGAME_CHANNEL"`: The user is in the ingame channel
+- `"IN_EXCLUDED_CHANNEL"`: The user is in an excluded channel
+
 ### Radio
 
 #### `enableRadio(state: boolean)`
@@ -379,6 +392,23 @@ The event is triggered when the plugin is initialized.
 | Parameter | Type  | Description                                  |
 | --------- | ----- | -------------------------------------------- |
 | clientId  | `int` | the client id of the local user in teamspeak |
+
+### yaca:external:pluginStateChanged
+
+The event is triggered when the plugin state changes.
+
+| Parameter | Type     | Description                                  |
+| --------- | -------- | -------------------------------------------- |
+| state     | `string` | the current plugin state, as explained below |
+
+The state can be one of the following:
+
+- `"NOT_CONNECTED"`: The plugin is not connected
+- `"CONNECTED`: The plugin is connected
+- `"OUTDATED_VERSION"`: The plugin is not the version set in the dashboard
+- `"WRONG_TS_SERVER"`: The user is connected to the wrong Teamspeak server
+- `"IN_INGAME_CHANNEL"`: The user is in the ingame channel
+- `"IN_EXCLUDED_CHANNEL"`: The user is in an excluded channel
 
 ### yaca:external:voiceRangeUpdate
 

@@ -6,6 +6,7 @@ import {
   YacaNotificationType,
   YacaPlayerData,
   type YacaPluginPlayerData,
+  YacaPluginStates,
   type YacaProtocol,
   YacaResponse,
   type YacaSharedConfig,
@@ -71,6 +72,26 @@ export class YaCAClientModule {
   isFiveM = cache.game === "fivem";
   isRedM = cache.game === "redm";
   useLocalLipSync = false;
+
+  private currentPluginState: YacaPluginStates = YacaPluginStates.NOT_CONNECTED;
+
+  /**
+   * Sets the current plugin state and emits an event.
+   *
+   * @param state - The new plugin state.
+   */
+  setCurrentPluginState(state: YacaPluginStates) {
+    if (this.currentPluginState === state) {
+      return;
+    }
+
+    this.currentPluginState = state;
+    emit("yaca:external:pluginStateChanged", state);
+
+    if (this.saltyChatBridge) {
+      this.saltyChatBridge.handleChangePluginState(state);
+    }
+  }
 
   /**
    * Sends a radar notification.
@@ -236,6 +257,13 @@ export class YaCAClientModule {
      * @returns {boolean}
      */
     exports("getSoundDisabledState", () => this.isSoundDisabled);
+
+    /**
+     * Get the plugin state.
+     *
+     * @returns {YacaPluginStates} The current plugin state.
+     */
+    exports("getPluginState", () => this.currentPluginState);
   }
 
   /**
@@ -369,13 +397,14 @@ export class YaCAClientModule {
         });
 
         this.websocket.on("close", (code: number, reason: string) => {
+          this.setCurrentPluginState(YacaPluginStates.NOT_CONNECTED);
+
           console.error("[YACA-Websocket]: client disconnected", code, reason);
-          if (this.saltyChatBridge) {
-            this.saltyChatBridge.handleDisconnectState();
-          }
         });
 
         this.websocket.on("open", () => {
+          this.setCurrentPluginState(YacaPluginStates.CONNECTED);
+
           if (this.firstConnect) {
             this.initRequest(dataObj);
             this.firstConnect = false;
@@ -590,62 +619,60 @@ export class YaCAClientModule {
       return;
     }
 
-    if (this.saltyChatBridge) {
-      this.saltyChatBridge.handleChangePluginState(parsedPayload.code);
-    }
+    switch (parsedPayload.code) {
+      case "OK":
+        if (parsedPayload.requestType === "JOIN") {
+          const clientId = parseInt(parsedPayload.message);
+          emitNet("server:yaca:addPlayer", clientId);
 
-    if (parsedPayload.code === "OK") {
-      if (parsedPayload.requestType === "JOIN") {
-        const clientId = parseInt(parsedPayload.message);
-        emitNet("server:yaca:addPlayer", clientId);
+          if (this.rangeInterval) {
+            clearInterval(this.rangeInterval);
+            this.rangeInterval = null;
+          }
 
-        if (this.rangeInterval) {
-          clearInterval(this.rangeInterval);
-          this.rangeInterval = null;
+          this.rangeInterval = setInterval(this.calcPlayers.bind(this), 250);
+
+          // Set radio settings on reconnect only, else on first opening
+          if (this.radioModule.radioInitialized) {
+            this.radioModule.initRadioSettings();
+          }
+
+          emit("yaca:external:pluginInitialized", clientId);
+          return;
         }
 
-        this.rangeInterval = setInterval(this.calcPlayers.bind(this), 250);
-
-        // Set radio settings on reconnect only, else on first opening
-        if (this.radioModule.radioInitialized) {
-          this.radioModule.initRadioSettings();
+        return;
+      case "TALK_STATE":
+        this.handleTalkState(parsedPayload);
+        return;
+      case "SOUND_STATE":
+        this.handleSoundState(parsedPayload);
+        return;
+      case "OTHER_TALK_STATE":
+        this.handleOtherTalkState(parsedPayload);
+        return;
+      case "MOVED_CHANNEL":
+        if (parsedPayload.message !== "INGAME_CHANNEL" && parsedPayload.message !== "EXCLUDED_CHANNEL") {
+          console.error("[YaCA-Websocket]: Unknown channel type: ", parsedPayload.message);
+          return;
         }
 
-        emit("yaca:external:pluginInitialized", clientId);
+        if (parsedPayload.message === "INGAME_CHANNEL") {
+          this.setCurrentPluginState(YacaPluginStates.IN_INGAME_CHANNEL);
+        } else {
+          this.setCurrentPluginState(YacaPluginStates.IN_EXCLUDED_CHANNEL);
+        }
+
+        emit("yaca:external:channelChanged", parsedPayload.message);
         return;
-      }
+      case "WRONG_TS_SERVER":
+        this.setCurrentPluginState(YacaPluginStates.WRONG_TS_SERVER);
+        break;
+      case "OUTDATED_VERSION":
+        this.setCurrentPluginState(YacaPluginStates.OUTDATED_VERSION);
+        break;
 
-      return;
-    }
-
-    if (parsedPayload.code === "TALK_STATE") {
-      this.handleTalkState(parsedPayload);
-      return;
-    }
-
-    if (parsedPayload.code === "SOUND_STATE") {
-      this.handleSoundState(parsedPayload);
-      return;
-    }
-
-    if (parsedPayload.code === "OTHER_TALK_STATE") {
-      this.handleOtherTalkState(parsedPayload);
-      return;
-    }
-
-    if (parsedPayload.code === "MOVED_CHANNEL") {
-      if (parsedPayload.message !== "INGAME_CHANNEL" && parsedPayload.message !== "EXCLUDED_CHANNEL") {
-        console.error("[YaCA-Websocket]: Unknown channel type: ", parsedPayload.message);
-        return;
-      }
-
-      emit("yaca:external:channelChanged", parsedPayload.message);
-
-      if (this.saltyChatBridge) {
-        this.saltyChatBridge.handleMovedChannel(parsedPayload.message);
-      }
-
-      return;
+      // no default
     }
 
     const message = this.responseCodesToErrorMessages[parsedPayload.code] ?? "Unknown error!";
