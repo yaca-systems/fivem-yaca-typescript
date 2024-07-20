@@ -373,7 +373,11 @@ The event is triggered when the plugin state changes.
 
 The state can be one of the following:
 
-TODO: Add states
+- `"OUTDATED_VERSION"`: The plugin is outdated
+- `"WRONG_TS_SERVER`: The user is not connected to the correct Teamspeak server
+- `"MOVE_ERROR"`: The user could not be moved to the correct channel
+- `"WAIT_GAME_INIT"`: The user is waiting for the game to be initialized
+- `"OK"`: The plugin is working correctly
 
 ### yaca:external:voiceRangeUpdate
 
