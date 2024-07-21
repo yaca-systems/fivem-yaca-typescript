@@ -20,10 +20,10 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.8965-1
+        version: 2.0.8981-1
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.8965-1
+        version: 2.0.8981-1
       '@eslint/js':
         specifier: ^8.57.0
         version: 8.57.0
@@ -41,7 +41,7 @@ importers:
         version: 8.57.0
       husky:
         specifier: ^9.0.11
-        version: 9.1.0
+        version: 9.1.1
       lint-staged:
         specifier: ^15.2.7
         version: 15.2.7
@@ -57,11 +57,11 @@ importers:
 
 packages:
 
-  '@citizenfx/client@2.0.8965-1':
-    resolution: {integrity: sha512-ScuFyWyBaCTK4DKOkDN8wQHsqbcuzkdFULWbbSfSbtzODyCRPM5x9E8pESa9G5LThZNlX/Xj/G8PuLeoqjvAIg==}
+  '@citizenfx/client@2.0.8981-1':
+    resolution: {integrity: sha512-w987nRoSrWDMuucfIPJZ9fJkVpEvKQDxfHdbKtzJD7DObu9er94qCzEZJWkCxKEdhvHKPyQ5j5HvvpPClBXgtQ==}
 
-  '@citizenfx/server@2.0.8965-1':
-    resolution: {integrity: sha512-npAYaA9wqnydrjnIddQfCM2Y544GTImhcrd0W1GH+gcdl/8lZrh+Ot4mWUf0/WeYfmGDQoeFg+9ytos4mIR/zA==}
+  '@citizenfx/server@2.0.8981-1':
+    resolution: {integrity: sha512-5RsJR/YQDw5gxJG6ogCjbYFn2MDlLHT4logw0ugNIGPKCM+YhqJnamHVJ1aXvV3qjg1FumfdmSLRelyJ64LRrQ==}
 
   '@esbuild/aix-ppc64@0.23.0':
     resolution: {integrity: sha512-3sG8Zwa5fMcA9bgqB8AfWPQ+HFke6uD3h1s3RIwUNK8EG7a4buxvuFTs3j1IMs2NXAk9F30C/FF4vxRgQCcmoQ==}
@@ -582,8 +582,8 @@ packages:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
 
-  husky@9.1.0:
-    resolution: {integrity: sha512-8XCjbomYTGdNF2h50dio3T3zghmZ9f/ZNzr99YwSkvDdhEjJGs5qzy8tbFx+SG8yCx2wn9nMVfZxVrr/yT8gNQ==}
+  husky@9.1.1:
+    resolution: {integrity: sha512-fCqlqLXcBnXa/TJXmT93/A36tJsjdJkibQ1MuIiFyCCYUlpYpIaj2mv1w+3KR6Rzu1IC3slFTje5f6DUp2A2rg==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -953,9 +953,9 @@ packages:
 
 snapshots:
 
-  '@citizenfx/client@2.0.8965-1': {}
+  '@citizenfx/client@2.0.8981-1': {}
 
-  '@citizenfx/server@2.0.8965-1': {}
+  '@citizenfx/server@2.0.8981-1': {}
 
   '@esbuild/aix-ppc64@0.23.0':
     optional: true
@@ -1472,7 +1472,7 @@ snapshots:
 
   human-signals@5.0.0: {}
 
-  husky@9.1.0: {}
+  husky@9.1.1: {}
 
   ignore@5.3.1: {}
 
