@@ -149,7 +149,7 @@ export class YaCAClientPhoneModule {
     /**
      * Handles the "yaca:phone" state bag change.
      */
-    AddStateBagChangeHandler(PHONE_SPEAKER_STATE_NAME, "", (bagName: string, _: string, value: object, __: number, replicated: boolean) => {
+    AddStateBagChangeHandler(PHONE_SPEAKER_STATE_NAME, "", (bagName: string, _: string, value: object | null, __: number, replicated: boolean) => {
       if (replicated) {
         return;
       }
