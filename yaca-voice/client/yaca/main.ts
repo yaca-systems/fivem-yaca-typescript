@@ -835,8 +835,8 @@ export class YaCAClientModule {
     players: YacaPlayerData | YacaPlayerData[],
     type: YacaFilterEnum,
     state: boolean,
-    channel?: number,
-    range?: number,
+    channel?: number | null,
+    range?: number | null,
     ownMode?: CommDeviceMode,
     otherPlayersMode?: CommDeviceMode,
   ) {
@@ -869,10 +869,10 @@ export class YaCAClientModule {
       members: clientIds,
     };
 
-    if (typeof channel !== "undefined") {
+    if (typeof channel !== "undefined" && channel !== null) {
       protocol.channel = channel;
     }
-    if (typeof range !== "undefined") {
+    if (typeof range !== "undefined" && range !== null) {
       protocol.range = range;
     }
 
