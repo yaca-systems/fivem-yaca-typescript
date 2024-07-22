@@ -487,6 +487,7 @@ export class YaCAClientModule {
    * Get the player by client ID.
    *
    * @param clientId The client ID (TeamSpeak) of the player.
+   * @returns The player data.
    */
   getPlayerByClientId(clientId: number) {
     for (const player of this.allPlayers.values()) {
@@ -494,6 +495,8 @@ export class YaCAClientModule {
         return player;
       }
     }
+
+    return null;
   }
 
   /**
