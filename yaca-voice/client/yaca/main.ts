@@ -134,6 +134,7 @@ export class YaCAClientModule {
       MOVE_ERROR: locale("move_error"),
       WAIT_GAME_INIT: "",
       HEARTBEAT: "",
+      MAX_PLAYER_COUNT_REACHED: locale("max_players_reached") ?? "Your license reached the maximum player count. Please upgrade your license.",
       MUTE_STATE: "", // Deprecated in favor of SOUND_STATE
     };
 
