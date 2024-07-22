@@ -482,6 +482,7 @@ export class YaCAClientModule {
   getPlayerByID(remoteId: number) {
     return this.allPlayers.get(remoteId);
   }
+
   /**
    * Get the player by client ID.
    *
@@ -628,7 +629,17 @@ export class YaCAClientModule {
     }
 
     if (parsedPayload.code === "MOVED_CHANNEL") {
+      if (parsedPayload.message !== "INGAME_CHANNEL" && parsedPayload.message !== "EXCLUDED_CHANNEL") {
+        console.error("[YaCA-Websocket]: Unknown channel type: ", parsedPayload.message);
+        return;
+      }
+
       emit("yaca:external:channelChanged", parsedPayload.message);
+
+      if (this.saltyChatBridge) {
+        this.saltyChatBridge.handleMovedChannel(parsedPayload.message);
+      }
+
       return;
     }
 
@@ -892,6 +903,7 @@ export class YaCAClientModule {
       comm_device_settings: protocol,
     });
   }
+
   /**
    * Set the player speaking state and start the lip animation.
    *
@@ -980,6 +992,7 @@ export class YaCAClientModule {
       }
     }
   }
+
   /**
    * Handles the talk state of other players.
    *

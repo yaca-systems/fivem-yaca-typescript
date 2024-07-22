@@ -20,6 +20,8 @@ export class YaCAClientSaltyChatBridge {
   private isPrimaryReceiving = false;
   private isSecondaryReceiving = false;
 
+  private inSwissChannel = false;
+
   /**
    * Creates an instance of the SaltyChat bridge.
    *
@@ -205,7 +207,7 @@ export class YaCAClientSaltyChatBridge {
 
     switch (response) {
       case "OK":
-        state = 2;
+        state = this.inSwissChannel ? 3 : 2;
         break;
       case "MOVE_ERROR":
       case "OUTDATED_VERSION":
@@ -232,6 +234,28 @@ export class YaCAClientSaltyChatBridge {
     this.prevPluginState = null;
     emit("SaltyChat_PluginStateChanged", -1);
     this.currentPluginState = -1;
+  }
+
+  /**
+   * Handles the teamspeek channel move.
+   * This is used to determine if the player is in the swiss channel.
+   *
+   * @param channel - The channel the player moved to.
+   */
+  handleMovedChannel(channel: "INGAME_CHANNEL" | "EXCLUDED_CHANNEL") {
+    if (this.prevPluginState !== "OK") {
+      return;
+    }
+
+    this.inSwissChannel = channel === "EXCLUDED_CHANNEL";
+
+    if (this.inSwissChannel) {
+      this.currentPluginState = 3;
+      emit("SaltyChat_PluginStateChanged", 3);
+    } else {
+      this.currentPluginState = 2;
+      emit("SaltyChat_PluginStateChanged", 2);
+    }
   }
 
   /**
