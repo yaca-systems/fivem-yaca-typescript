@@ -13,6 +13,7 @@ export type YacaResponseCode =
   | "WAIT_GAME_INIT"
   | "HEARTBEAT"
   | "MAX_PLAYER_COUNT_REACHED"
+  | "MOVED_CHANNEL"
   | "OTHER_TALK_STATE";
 
 export interface YacaResponse {
