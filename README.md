@@ -89,6 +89,22 @@ Get the current voice range of the player as `int`.
 
 Get all voice ranges as `int[]`.
 
+#### `getMicrophoneMuteState(): boolean`
+
+Get the microphone mute state of the player as `boolean`.
+
+#### `getMicrophoneDisabledState(): boolean`
+
+Get the microphone disabled state of the player as `boolean`.
+
+#### `getSoundMuteState(): boolean`
+
+Get the sound mute state of the player as `boolean`.
+
+#### `getSoundDisabledState(): boolean`
+
+Get the sound disabled state of the player as `boolean`.
+
 ### Radio
 
 #### `enableRadio(state: boolean)`
@@ -375,6 +391,38 @@ This event is triggered when the voice range of a player is updated.
 ### yaca:external:muteStateChanged
 
 The event is triggered when the mute state of a player changes.
+
+| Parameter | Type      | Description        |
+| --------- | --------- | ------------------ |
+| state     | `boolean` | the new mute state |
+
+### yaca:external:microphoneMuteStateChanged
+
+The event is triggered when the microphone mute state of a player changes.
+
+| Parameter | Type      | Description        |
+| --------- | --------- | ------------------ |
+| state     | `boolean` | the new mute state |
+
+### yaca:external:microphoneDisabledStateChanged
+
+The event is triggered when the microphone disabled state of a player changes.
+
+| Parameter | Type      | Description        |
+| --------- | --------- | ------------------ |
+| state     | `boolean` | the new mute state |
+
+### yaca:external:soundMuteStateChanged
+
+The event is triggered when the sound mute state of a player changes.
+
+| Parameter | Type      | Description        |
+| --------- | --------- | ------------------ |
+| state     | `boolean` | the new mute state |
+
+### yaca:external:soundDisabledStateChanged
+
+The event is triggered when the sound disabled state of a player changes.
 
 | Parameter | Type      | Description        |
 | --------- | --------- | ------------------ |

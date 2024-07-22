@@ -9,6 +9,7 @@ import {
   type YacaProtocol,
   YacaResponse,
   type YacaSharedConfig,
+  type YacaSoundStateMessage,
   YacaStereoMode,
 } from "types";
 import {
@@ -55,8 +56,12 @@ export class YaCAClientModule {
   visualVoiceRangeTick: CitizenTimer | null = null;
 
   isTalking = false;
-  isPlayerMuted = false;
   useWhisper = false;
+
+  isMicrophoneMuted = false;
+  isMicrophoneDisabled = false;
+  isSoundMuted = false;
+  isSoundDisabled = false;
 
   currentlyPhoneSpeakerApplied: Set<number> = new Set();
   currentlySendingPhoneSpeakerSender: Set<number> = new Set();
@@ -127,6 +132,7 @@ export class YaCAClientModule {
       MOVE_ERROR: locale("move_error"),
       WAIT_GAME_INIT: "",
       HEARTBEAT: "",
+      MUTE_STATE: "", // Deprecated in favor of SOUND_STATE
     };
 
     this.websocket = new WebSocket();
@@ -194,9 +200,37 @@ export class YaCAClientModule {
     /**
      * Get all voice ranges.
      *
-     * @returns {number[]}
+     * @returns {number[]} All available voice ranges.
      */
     exports("getVoiceRanges", () => this.sharedConfig.voiceRange.ranges);
+
+    /**
+     * Get microphone mute state.
+     *
+     * @returns {boolean} The microphone mute state.
+     */
+    exports("getMicrophoneMuteState", () => this.isMicrophoneMuted);
+
+    /**
+     * Get microphone disabled state.
+     *
+     * @returns {boolean} The microphone disabled state.
+     */
+    exports("getMicrophoneDisabledState", () => this.isMicrophoneDisabled);
+
+    /**
+     * Get sound mute state.
+     *
+     * @returns {boolean}
+     */
+    exports("getSoundMuteState", () => this.isSoundMuted);
+
+    /**
+     * Get sound disabled state.
+     *
+     * @returns {boolean}
+     */
+    exports("getSoundDisabledState", () => this.isSoundDisabled);
   }
 
   /**
@@ -563,8 +597,13 @@ export class YaCAClientModule {
       return;
     }
 
-    if (parsedPayload.code === "TALK_STATE" || parsedPayload.code === "MUTE_STATE") {
+    if (parsedPayload.code === "TALK_STATE") {
       this.handleTalkState(parsedPayload);
+      return;
+    }
+
+    if (parsedPayload.code === "SOUND_STATE") {
+      this.handleSoundState(parsedPayload);
       return;
     }
 
@@ -836,19 +875,9 @@ export class YaCAClientModule {
    */
   handleTalkState(payload: YacaResponse) {
     const messageState = payload.message === "1";
+    const isPlayerMuted = this.isMicrophoneMuted || this.isMicrophoneDisabled || this.isSoundMuted || this.isSoundDisabled;
 
-    // Update state if player is muted or not
-    if (payload.code === "MUTE_STATE") {
-      this.isPlayerMuted = messageState;
-      emit("yaca:external:muteStateChanged", this.isPlayerMuted);
-
-      // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge?.enabled) {
-        emit("SaltyChat_MicStateChanged", this.isPlayerMuted);
-      }
-    }
-
-    const isTalking = !this.isPlayerMuted && messageState;
+    const isTalking = !isPlayerMuted && messageState;
     if (this.isTalking !== isTalking) {
       this.isTalking = isTalking;
 
@@ -867,6 +896,52 @@ export class YaCAClientModule {
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge?.enabled) {
         emit("SaltyChat_TalkStateChanged", isTalking);
+      }
+    }
+  }
+
+  /**
+   * Handles the sound state from teamspeak.
+   *
+   * @param payload - The response from teamspeak.
+   */
+  handleSoundState(payload: YacaResponse) {
+    const soundStates: YacaSoundStateMessage = JSON.parse(payload.message);
+
+    if (this.isMicrophoneMuted !== soundStates.microphoneMuted) {
+      emit("yaca:external:microphoneMuteStateChanged", soundStates.microphoneMuted);
+      emit("yaca:external:muteStateChanged", soundStates.microphoneMuted);
+
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
+        emit("SaltyChat_MicStateChanged", soundStates.microphoneMuted);
+      }
+    }
+
+    if (this.isMicrophoneDisabled !== soundStates.microphoneDisabled) {
+      emit("yaca:external:microphoneDisabledStateChanged", soundStates.microphoneDisabled);
+
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
+        emit("SaltyChat_MicEnabledChanged", soundStates.microphoneDisabled);
+      }
+    }
+
+    if (this.isSoundMuted !== soundStates.soundMuted) {
+      emit("yaca:external:soundMuteStateChanged", soundStates.soundMuted);
+
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
+        emit("SaltyChat_SoundStateChanged", soundStates.soundMuted);
+      }
+    }
+
+    if (this.isSoundDisabled !== soundStates.soundDisabled) {
+      emit("yaca:external:soundDisabledStateChanged", soundStates.soundDisabled);
+
+      // SaltyChat bridge
+      if (this.sharedConfig.saltyChatBridge?.enabled) {
+        emit("SaltyChat_SoundEnabledChanged", soundStates.soundDisabled);
       }
     }
   }
