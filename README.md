@@ -389,7 +389,7 @@ This event is triggered when the voice range of a player is updated.
 | rangeIndex | `int` | the index of the range    |
 
 ### yaca:external:muteStateChanged
-
+DEPRECATED: Use `yaca:external:microphoneMuteStateChanged` instead.
 The event is triggered when the mute state of a player changes.
 
 | Parameter | Type      | Description        |
