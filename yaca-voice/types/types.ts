@@ -3,7 +3,7 @@ import { type CommDeviceMode, YacaFilterEnum, YacaStereoMode } from "types";
 export type YacaResponseCode =
   | "RENAME_CLIENT"
   | "MOVE_CLIENT"
-  | "MUTE_STATE"
+  | "SOUND_STATE"
   | "TALK_STATE"
   | "OK"
   | "WRONG_TS_SERVER"
@@ -17,6 +17,13 @@ export interface YacaResponse {
   code: YacaResponseCode;
   requestType: string;
   message: string;
+}
+
+export interface YacaSoundStateMessage {
+  microphoneMuted: boolean;
+  microphoneDisabled: boolean;
+  soundMuted: boolean;
+  soundDisabled: boolean;
 }
 
 export interface YacaPlayerData {
