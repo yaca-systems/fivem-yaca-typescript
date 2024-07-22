@@ -71,5 +71,6 @@
     "oneCarClosed": 6,
     "megaPhoneInCar": 6
   },
-  "radioAntiSpamCooldown": false
+  "radioAntiSpamCooldown": false,
+  "useLocalLipSync": false
 }

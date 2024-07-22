@@ -11,7 +11,8 @@ export type YacaResponseCode =
   | "MOVE_ERROR"
   | "OUTDATED_VERSION"
   | "WAIT_GAME_INIT"
-  | "HEARTBEAT";
+  | "HEARTBEAT"
+  | "OTHER_TALK_STATE";
 
 export interface YacaResponse {
   code: YacaResponseCode;
