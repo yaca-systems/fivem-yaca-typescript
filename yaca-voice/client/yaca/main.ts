@@ -910,7 +910,7 @@ export class YaCAClientModule {
 
     if (this.isMicrophoneMuted !== soundStates.microphoneMuted) {
       emit("yaca:external:microphoneMuteStateChanged", soundStates.microphoneMuted);
-      emit("yaca:external:muteStateChanged", soundStates.microphoneMuted);
+      emit("yaca:external:muteStateChanged", soundStates.microphoneMuted); // Deprecated in favor of microphoneMuteStateChanged
 
       // SaltyChat bridge
       if (this.sharedConfig.saltyChatBridge?.enabled) {
