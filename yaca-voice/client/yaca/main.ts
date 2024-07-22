@@ -70,6 +70,7 @@ export class YaCAClientModule {
 
   isFiveM = cache.game === "fivem";
   isRedM = cache.game === "redm";
+  useLocalLipSync = false;
 
   /**
    * Sends a radar notification.
@@ -117,6 +118,7 @@ export class YaCAClientModule {
     this.sharedConfig = JSON.parse(LoadResourceFile(cache.resource, "config/shared.json"));
     initLocale(this.sharedConfig.locale);
 
+    this.useLocalLipSync = this.sharedConfig.useLocalLipSync ?? false;
     this.defaultVoiceRange = this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex] ?? 1;
 
     if (this.isFiveM) {
@@ -479,6 +481,18 @@ export class YaCAClientModule {
   getPlayerByID(remoteId: number) {
     return this.allPlayers.get(remoteId);
   }
+  /**
+   * Get the player by client ID.
+   *
+   * @param clientId The client ID (TeamSpeak) of the player.
+   */
+  getPlayerByClientId(clientId: number) {
+    for (const player of this.allPlayers.values()) {
+      if (player.clientId === clientId) {
+        return player;
+      }
+    }
+  }
 
   /**
    * Initializes the plugin.
@@ -604,6 +618,10 @@ export class YaCAClientModule {
 
     if (parsedPayload.code === "SOUND_STATE") {
       this.handleSoundState(parsedPayload);
+      return;
+    }
+    if (parsedPayload.code === "OTHER_TALK_STATE") {
+      this.handleOtherTalkState(parsedPayload);
       return;
     }
 
@@ -867,6 +885,23 @@ export class YaCAClientModule {
       comm_device_settings: protocol,
     });
   }
+  /**
+   * Set the player speaking state and start the lip animation.
+   *
+   * @param ped - The ped to sync the lips with.
+   * @param playerId - The player ID to sync the lips with.
+   * @param isTalking - The talking state of the player.
+   */
+  syncLipsPlayer(ped: number, playerId: number, isTalking: boolean) {
+    const animationData = localLipSyncAnimations[cache.game][isTalking ? "true" : "false"];
+
+    SetPlayerTalkingOverride(playerId, isTalking);
+    if (this.isFiveM) {
+      PlayFacialAnim(ped, animationData.name, animationData.dict);
+    } else if (this.isRedM) {
+      playRdrFacialAnim(ped, animationData.name, animationData.dict);
+    }
+  }
 
   /**
    * Handles the talk and mute state from teamspeak, displays it in UI and syncs lip to other players.
@@ -881,14 +916,7 @@ export class YaCAClientModule {
     if (this.isTalking !== isTalking) {
       this.isTalking = isTalking;
 
-      const animationData = localLipSyncAnimations[cache.game][isTalking ? "true" : "false"];
-
-      SetPlayerTalkingOverride(cache.playerId, isTalking);
-      if (this.isFiveM) {
-        PlayFacialAnim(cache.ped, animationData.name, animationData.dict);
-      } else if (this.isRedM) {
-        playRdrFacialAnim(cache.ped, animationData.name, animationData.dict);
-      }
+      this.syncLipsPlayer(cache.ped, cache.serverId, isTalking);
       LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true);
 
       emit("yaca:external:isTalking", isTalking);
@@ -944,6 +972,45 @@ export class YaCAClientModule {
         emit("SaltyChat_SoundEnabledChanged", soundStates.soundDisabled);
       }
     }
+  }
+  /**
+   * Handles the talk state of other players.
+   *
+   * @param payload - The response from teamspeak.
+   */
+  handleOtherTalkState(payload: YacaResponse) {
+    if (!this.useLocalLipSync) {
+      return;
+    }
+
+    let talkData: { clientId: number; isTalking: string };
+
+    try {
+      talkData = JSON.parse(payload.message);
+    } catch (error) {
+      console.error("[YaCA-Websocket]: Error while parsing other talk state message");
+      return;
+    }
+
+    const player = this.getPlayerByClientId(talkData.clientId);
+
+    if (!player || !player.remoteID) {
+      return;
+    }
+
+    const playerId = GetPlayerFromServerId(player.remoteID);
+
+    if (playerId === -1) {
+      return;
+    }
+
+    const ped = GetPlayerPed(playerId);
+
+    if (ped === 0) {
+      return;
+    }
+
+    this.syncLipsPlayer(ped, playerId, talkData.isTalking === "1");
   }
 
   /**

@@ -55,6 +55,7 @@ export interface YacaSharedConfig {
     megaPhoneInCar: number;
   };
   radioAntiSpamCooldown: number;
+  useLocalLipSync: boolean;
 }
 
 export interface YacaServerConfig {
