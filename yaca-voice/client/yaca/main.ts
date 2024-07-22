@@ -167,22 +167,24 @@ export class YaCAClientModule {
     this.phoneModule = new YaCAClientPhoneModule(this);
     this.radioModule = new YaCAClientRadioModule(this);
 
-    /**
-     * Add a state bag change handler for the lip sync state bag.
-     * Which is used to override the talking state of the player.
-     */
-    AddStateBagChangeHandler(LIP_SYNC_STATE_NAME, "", (bagName: string, _: string, value: boolean, __: number, replicated: boolean) => {
-      if (replicated) {
-        return;
-      }
+    if (!this.useLocalLipSync) {
+      /**
+       * Add a state bag change handler for the lip sync state bag.
+       * Which is used to override the talking state of the player.
+       */
+      AddStateBagChangeHandler(LIP_SYNC_STATE_NAME, "", (bagName: string, _: string, value: boolean, __: number, replicated: boolean) => {
+        if (replicated) {
+          return;
+        }
 
-      const playerId = GetPlayerFromStateBagName(bagName);
-      if (playerId === 0) {
-        return;
-      }
+        const playerId = GetPlayerFromStateBagName(bagName);
+        if (playerId === 0) {
+          return;
+        }
 
-      SetPlayerTalkingOverride(playerId, value);
-    });
+        SetPlayerTalkingOverride(playerId, value);
+      });
+    }
 
     if (this.sharedConfig.saltyChatBridge?.enabled) {
       this.sharedConfig.maxRadioChannels = 2;
