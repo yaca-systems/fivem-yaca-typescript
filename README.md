@@ -532,6 +532,14 @@ AddEventHandler('yaca:external:notification', function (message, type)
 end)
 ```
 
+### yaca:external:channelChanged
+
+The event is triggered when the player changes the channel to the ingame or excluded channel.
+
+| Parameter   | Type     | Description                                                                                                      |
+| ----------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| channelType | `string` | `INGAME_CHANNEL` when moving into the ingame channel and `EXCLUDED_CHANNEL` when moving into a excluded channel. |
+
 </details>
 
 <details>

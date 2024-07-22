@@ -621,8 +621,14 @@ export class YaCAClientModule {
       this.handleSoundState(parsedPayload);
       return;
     }
+
     if (parsedPayload.code === "OTHER_TALK_STATE") {
       this.handleOtherTalkState(parsedPayload);
+      return;
+    }
+
+    if (parsedPayload.code === "MOVED_CHANNEL") {
+      emit("yaca:external:channelChanged", parsedPayload.message);
       return;
     }
 
