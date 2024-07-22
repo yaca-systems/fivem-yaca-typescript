@@ -23,5 +23,7 @@
   "voice_range_changed": "Voice range changed to %s meters.",
 
   "radio_not_activated": "Your radio is not activated!",
-  "radio_channel_invalid": "The radio channel is invalid!"
+  "radio_channel_invalid": "The radio channel is invalid!",
+
+  "max_players_reached": "Your license reached the maximum player count. Please upgrade your license"
 }

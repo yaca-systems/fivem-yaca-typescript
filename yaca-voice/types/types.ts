@@ -12,6 +12,7 @@ export type YacaResponseCode =
   | "OUTDATED_VERSION"
   | "WAIT_GAME_INIT"
   | "HEARTBEAT"
+  | "MAX_PLAYER_COUNT_REACHED"
   | "OTHER_TALK_STATE";
 
 export interface YacaResponse {

@@ -23,5 +23,7 @@
   "voice_range_changed": "Sprachreichweite auf %s Meter geändert.",
 
   "radio_not_activated": "Das Funkgerät ist nicht aktiviert!",
-  "radio_channel_invalid": "Ungültiger Funkkanal!"
+  "radio_channel_invalid": "Ungültiger Funkkanal!",
+
+  "max_players_reached": "Ihre Lizenz hat die maximale Spieleranzahl erreicht. Bitte erweitern Sie Ihre Lizenz."
 }
