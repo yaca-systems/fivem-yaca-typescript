@@ -72,7 +72,8 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 | mufflingIntensities.bothCarsClosed      | `number`        | Adjusts how much a nearby player is muffled when themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.        | FiveM      |
 | mufflingIntensities.oneCarClosed        | `number`        | Adjusts how much a nearby player is muffled when either themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling. | FiveM      |
 | mufflingIntensities.megaPhoneInCar      | `number`        | Adjusts how much a nearby player is muffled when the player is using the megaphone and the nearby player is in a car. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.          | FiveM      |
-| radioAntiSpamCooldown                   | `number\|false` | Cooldown in miliseconds which the player has to wait to use the radio again, defaults to `false` which disables the feature.                                                                                             | Both       |
+| radioAntiSpamCooldown                   | `number\|false` | Cooldown in milliseconds which the player has to wait to use the radio again, defaults to `false` which disables the feature.                                                                                            | Both       |
+| useLocalLipSync                         | `boolean`       | When set to `true` the plugin syncs the talk state via the plugin, instead of the default way via statebags. This imitates the way how saltychat syncs the talk state, but has some drawbacks.                           | Both       |
 
 # Exports
 
