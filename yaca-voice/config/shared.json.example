@@ -48,7 +48,7 @@
     ]
   },
   "saltyChatBridge": {
-    "enabled": true,
+    "enabled": false,
     "keyBinds": {
       "primaryRadio": "N",
       "secondaryRadio": "CAPITAL"
