@@ -961,6 +961,7 @@ export class YaCAClientModule {
     const soundStates: YacaSoundStateMessage = JSON.parse(payload.message);
 
     if (this.isMicrophoneMuted !== soundStates.microphoneMuted) {
+      this.isMicrophoneMuted = soundStates.microphoneMuted;
       emit("yaca:external:microphoneMuteStateChanged", soundStates.microphoneMuted);
       emit("yaca:external:muteStateChanged", soundStates.microphoneMuted); // Deprecated in favor of microphoneMuteStateChanged
 
@@ -971,6 +972,7 @@ export class YaCAClientModule {
     }
 
     if (this.isMicrophoneDisabled !== soundStates.microphoneDisabled) {
+      this.isMicrophoneDisabled = soundStates.microphoneDisabled;
       emit("yaca:external:microphoneDisabledStateChanged", soundStates.microphoneDisabled);
 
       // SaltyChat bridge
@@ -980,6 +982,7 @@ export class YaCAClientModule {
     }
 
     if (this.isSoundMuted !== soundStates.soundMuted) {
+      this.isSoundMuted = soundStates.soundMuted;
       emit("yaca:external:soundMuteStateChanged", soundStates.soundMuted);
 
       // SaltyChat bridge
@@ -989,6 +992,7 @@ export class YaCAClientModule {
     }
 
     if (this.isSoundDisabled !== soundStates.soundDisabled) {
+      this.isSoundDisabled = soundStates.soundDisabled;
       emit("yaca:external:soundDisabledStateChanged", soundStates.soundDisabled);
 
       // SaltyChat bridge
