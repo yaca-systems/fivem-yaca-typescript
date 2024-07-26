@@ -25,5 +25,6 @@
   "radio_not_activated": "Your radio is not activated!",
   "radio_channel_invalid": "The radio channel is invalid!",
 
-  "max_players_reached": "Your license reached the maximum player count. Please upgrade your license"
+  "max_players_reached": "Your license reached the maximum player count. Please upgrade your license",
+  "license_server_timed_out": "The connection to the license server timed out, while verifying the license. Please wait a moment."
 }
