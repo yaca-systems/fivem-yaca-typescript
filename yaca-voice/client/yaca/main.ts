@@ -153,9 +153,11 @@ export class YaCAClientModule {
       WRONG_TS_SERVER: locale("wrong_ts_server"),
       NOT_CONNECTED: locale("not_connected"),
       MOVE_ERROR: locale("move_error"),
+      MAX_PLAYER_COUNT_REACHED: locale("max_players_reached") ?? "Your license reached the maximum player count. Please upgrade your license.",
+      LICENSE_SERVER_TIMED_OUT:
+        locale("license_server_timed_out") ?? "The connection to the license server timed out, while verifying the license. Please wait a moment.",
       WAIT_GAME_INIT: "",
       HEARTBEAT: "",
-      MAX_PLAYER_COUNT_REACHED: locale("max_players_reached") ?? "Your license reached the maximum player count. Please upgrade your license.",
       MUTE_STATE: "", // Deprecated in favor of SOUND_STATE
     };
 
