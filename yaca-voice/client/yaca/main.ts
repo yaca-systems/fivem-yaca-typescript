@@ -67,8 +67,6 @@ export class YaCAClientModule {
   currentlyPhoneSpeakerApplied: Set<number> = new Set();
   currentlySendingPhoneSpeakerSender: Set<number> = new Set();
 
-  responseCodesToErrorMessages: Record<string, string | undefined>;
-
   isFiveM = cache.game === "fivem";
   isRedM = cache.game === "redm";
   useLocalLipSync = false;
@@ -147,19 +145,6 @@ export class YaCAClientModule {
         this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel));
       }
     }
-
-    this.responseCodesToErrorMessages = {
-      OUTDATED_VERSION: locale("outdated_plugin"),
-      WRONG_TS_SERVER: locale("wrong_ts_server"),
-      NOT_CONNECTED: locale("not_connected"),
-      MOVE_ERROR: locale("move_error"),
-      MAX_PLAYER_COUNT_REACHED: locale("max_players_reached") ?? "Your license reached the maximum player count. Please upgrade your license.",
-      LICENSE_SERVER_TIMED_OUT:
-        locale("license_server_timed_out") ?? "The connection to the license server timed out, while verifying the license. Please wait a moment.",
-      WAIT_GAME_INIT: "",
-      HEARTBEAT: "",
-      MUTE_STATE: "", // Deprecated in favor of SOUND_STATE
-    };
 
     this.websocket = new WebSocket();
 
@@ -654,38 +639,43 @@ export class YaCAClientModule {
         this.handleOtherTalkState(parsedPayload);
         return;
       case "MOVED_CHANNEL":
-        if (parsedPayload.message !== "INGAME_CHANNEL" && parsedPayload.message !== "EXCLUDED_CHANNEL") {
-          console.error("[YaCA-Websocket]: Unknown channel type: ", parsedPayload.message);
-          return;
-        }
-
-        if (parsedPayload.message === "INGAME_CHANNEL") {
-          this.setCurrentPluginState(YacaPluginStates.IN_INGAME_CHANNEL);
-        } else {
-          this.setCurrentPluginState(YacaPluginStates.IN_EXCLUDED_CHANNEL);
-        }
-
-        emit("yaca:external:channelChanged", parsedPayload.message);
+        this.handleMovedChannel(parsedPayload.message);
         return;
       case "WRONG_TS_SERVER":
         this.setCurrentPluginState(YacaPluginStates.WRONG_TS_SERVER);
-        break;
+        this.notification(locale("wrong_ts_server") ?? "You are connected to the wrong teamspeak server!", YacaNotificationType.ERROR);
+        return;
       case "OUTDATED_VERSION":
         this.setCurrentPluginState(YacaPluginStates.OUTDATED_VERSION);
-        break;
-
-      // no default
+        this.notification(
+          locale("outdated_plugin", parsedPayload.message) ?? `Your plugin is outdated, please update to version ${parsedPayload.message}!`,
+          YacaNotificationType.ERROR,
+        );
+        return;
+      case "MAX_PLAYER_COUNT_REACHED":
+        this.notification(
+          locale("max_players_reached") ?? "Your license reached the maximum player count. Please upgrade your license.",
+          YacaNotificationType.ERROR,
+        );
+        return;
+      case "LICENSE_SERVER_TIMED_OUT":
+        this.notification(
+          locale("license_server_timed_out") ?? "The connection to the license server timed out, while verifying the license. Please wait a moment.",
+          YacaNotificationType.ERROR,
+        );
+        return;
+      case "MOVE_ERROR":
+        this.notification(locale("move_error") ?? "You are not connected to the teamspeak server!", YacaNotificationType.ERROR);
+        return;
+      case "WAIT_GAME_INIT":
+      case "HEARTBEAT":
+      case "MUTE_STATE":
+        return;
+      default:
+        console.log(`[YaCA-Websocket]: Unknown error code: ${parsedPayload.code}`);
+        this.notification(locale("unknown_error", parsedPayload.code) ?? `Unknown error code: ${parsedPayload.code}`, YacaNotificationType.ERROR);
+        return;
     }
-
-    const message = this.responseCodesToErrorMessages[parsedPayload.code] ?? "Unknown error!";
-    if (typeof this.responseCodesToErrorMessages[parsedPayload.code] === "undefined") {
-      console.log(`[YaCA-Websocket]: Unknown error code: ${parsedPayload.code}`);
-    }
-    if (message.length < 1) {
-      return;
-    }
-
-    this.notification(message, YacaNotificationType.ERROR);
   }
 
   /**
@@ -1069,6 +1059,26 @@ export class YaCAClientModule {
     }
 
     this.syncLipsPlayer(ped, playerId, talkData.isTalking === "1");
+  }
+
+  /**
+   * Handles the moved channel event.
+   *
+   * @param newChannel - The new channel the player is in.
+   */
+  handleMovedChannel(newChannel: string) {
+    if (newChannel !== "INGAME_CHANNEL" && newChannel !== "EXCLUDED_CHANNEL") {
+      console.error("[YaCA-Websocket]: Unknown channel type: ", newChannel);
+      return;
+    }
+
+    if (newChannel === "INGAME_CHANNEL") {
+      this.setCurrentPluginState(YacaPluginStates.IN_INGAME_CHANNEL);
+    } else {
+      this.setCurrentPluginState(YacaPluginStates.IN_EXCLUDED_CHANNEL);
+    }
+
+    emit("yaca:external:channelChanged", newChannel);
   }
 
   /**

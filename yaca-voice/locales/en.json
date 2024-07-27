@@ -1,12 +1,13 @@
 {
-  "plugin_not_activated": "Please activate your voiceplugin!",
-  "connect_error": "Error while connecting to voiceserver, please reconnect!",
+  "connect_error": "Error while connecting to voice server, please reconnect!",
   "plugin_not_initialized": "Plugin not initialized!",
 
-  "outdated_plugin": "Your plugin is outdated, please update it!",
+  "outdated_plugin": "Your plugin is outdated, please update to version %s!",
   "wrong_ts_server": "You are connected to the wrong teamspeak server!",
-  "not_connected": "You are not connected to the teamspeak server!",
   "move_error": "Error while moving to the channel!",
+  "max_players_reached": "Your license reached the maximum player count. Please upgrade your license",
+  "license_server_timed_out": "The connection to the license server timed out, while verifying the license. Please wait a moment.",
+  "unknown_error": "Unknown error code: %s",
 
   "changed_stereo_mode": "Channel %s is now only heard in %s.",
   "left_ear": "the left ear",
@@ -23,8 +24,5 @@
   "voice_range_changed": "Voice range changed to %s meters.",
 
   "radio_not_activated": "Your radio is not activated!",
-  "radio_channel_invalid": "The radio channel is invalid!",
-
-  "max_players_reached": "Your license reached the maximum player count. Please upgrade your license",
-  "license_server_timed_out": "The connection to the license server timed out, while verifying the license. Please wait a moment."
+  "radio_channel_invalid": "The radio channel is invalid!"
 }
