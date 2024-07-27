@@ -1,18 +1,17 @@
 import { type CommDeviceMode, YacaFilterEnum, YacaStereoMode } from "types";
 
 export type YacaResponseCode =
-  | "RENAME_CLIENT"
-  | "MOVE_CLIENT"
   | "SOUND_STATE"
+  | "MUTE_STATE" // Deprecated in favor of SOUND_STATE
   | "TALK_STATE"
   | "OK"
   | "WRONG_TS_SERVER"
-  | "NOT_CONNECTED"
   | "MOVE_ERROR"
   | "OUTDATED_VERSION"
   | "WAIT_GAME_INIT"
   | "HEARTBEAT"
   | "MAX_PLAYER_COUNT_REACHED"
+  | "LICENSE_SERVER_TIMED_OUT"
   | "MOVED_CHANNEL"
   | "OTHER_TALK_STATE";
 

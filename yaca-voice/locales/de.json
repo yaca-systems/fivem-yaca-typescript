@@ -1,12 +1,13 @@
 {
-  "plugin_not_activated": "Bitte aktiviere das Voice-Plugin!",
   "connect_error": "Fehler beim Verbinden zum Teamspeak-Server, bitte verbinde dich erneut!",
   "plugin_not_initialized": "Das Voice-Plugin wurde noch nicht initialisiert!",
 
-  "outdated_plugin": "Dein Voice-Plugin ist veraltet! Bitte aktualisiere es auf die neueste Version!",
+  "outdated_plugin": "Dein Voice-Plugin ist veraltet! Bitte aktualisiere auf die Version %s!",
   "wrong_ts_server": "Du bist auf dem falschen Teamspeak-Server!",
-  "not_connected": "Du bist nicht mit dem Teamspeak-Server verbunden!",
   "move_error": "Fehler beim Verschieben auf den Teamspeak-Server!",
+  "max_players_reached": "Ihre Lizenz hat die maximale Spieleranzahl erreicht. Bitte erweitern Sie Ihre Lizenz.",
+  "license_server_timed_out": "Die Verbindung zum Lizenzserver wurde beim Überprüfen der Lizenz unterbrochen. Bitte warte einen Moment.",
+  "unknown_error": "Unbekannter Fehlercode: %s",
 
   "changed_stereo_mode": "Kanal %s ist jetzt auf %s zu hören.",
   "left_ear": "dem linken Ohr",
@@ -23,8 +24,5 @@
   "voice_range_changed": "Sprachreichweite auf %s Meter geändert.",
 
   "radio_not_activated": "Das Funkgerät ist nicht aktiviert!",
-  "radio_channel_invalid": "Ungültiger Funkkanal!",
-
-  "max_players_reached": "Ihre Lizenz hat die maximale Spieleranzahl erreicht. Bitte erweitern Sie Ihre Lizenz.",
-  "license_server_timed_out": "Die Verbindung zum Lizenzserver wurde beim Überprüfen der Lizenz unterbrochen. Bitte warte einen Moment."
+  "radio_channel_invalid": "Ungültiger Funkkanal!"
 }
