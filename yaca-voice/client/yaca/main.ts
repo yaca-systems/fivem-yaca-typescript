@@ -71,7 +71,7 @@ export class YaCAClientModule {
   isRedM = cache.game === "redm";
   useLocalLipSync = false;
 
-  private currentPluginState: YacaPluginStates = YacaPluginStates.NOT_CONNECTED;
+  private currentPluginState: YacaPluginStates;
 
   /**
    * Sets the current plugin state and emits an event.
@@ -147,6 +147,7 @@ export class YaCAClientModule {
     }
 
     this.websocket = new WebSocket();
+    this.setCurrentPluginState(YacaPluginStates.NOT_CONNECTED);
 
     /**
      * Register the NUI callback types.
@@ -250,7 +251,7 @@ export class YaCAClientModule {
      *
      * @returns {YacaPluginStates} The current plugin state.
      */
-    exports("getPluginState", () => this.currentPluginState);
+    exports("getPluginState", () => this.currentPluginState ?? YacaPluginStates.NOT_CONNECTED);
   }
 
   /**
