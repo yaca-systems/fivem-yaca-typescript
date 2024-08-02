@@ -1,4 +1,4 @@
-import {CommDeviceMode, YacaFilterEnum, YacaStereoMode} from "./enums";
+import { CommDeviceMode, YacaFilterEnum, YacaStereoMode } from "./enums";
 
 export type YacaResponseCode =
   | "SOUND_STATE"

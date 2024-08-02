@@ -56,15 +56,14 @@ function runCommand(command) {
  * @param data - The data to send
  */
 function sendNuiData(event, data = {}) {
+  // skipcq: JS-0125
   fetch(`https://${GetParentResourceName()}/${event}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json; charset=UTF-8",
     },
     body: JSON.stringify(data),
-  }).catch((error) =>
-    console.error("[YaCA-Websocket] Error sending NUI Message:", error),
-  );
+  }).catch((error) => console.error("[YaCA-Websocket] Error sending NUI Message:", error));
 }
 
 $(() => {
@@ -82,5 +81,5 @@ $(() => {
     } else {
       console.error("[YaCA-Websocket] Unknown message:", event.data);
     }
-  })
+  });
 });

@@ -40,8 +40,7 @@ export class YaCAClientMegaphoneModule {
       this.lastMegaphoneState = state;
     });
 
-    const autoDetect = this.clientModule.sharedConfig.megaphone.automaticVehicleDetection ?? true;
-    if (this.clientModule.isFiveM && autoDetect) {
+    if (this.clientModule.isFiveM && this.clientModule.sharedConfig.megaphone.automaticVehicleDetection) {
       /**
        * Checks if the player can use the megaphone when they enter a vehicle.
        * If they can, it sets the `canUseMegaphone` property to `true`.

@@ -15,7 +15,9 @@
     "build": "turbo build --env-mode=loose",
     "dev": "turbo dev --env-mode=loose",
     "create-resource": "turbo create-resource --env-mode=loose && node scripts/create-resource.js",
-    "format": "prettier --write \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\""
+    "format": "prettier --write \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
+    "ci:format": "prettier --check \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
+    "ci:lint": "turbo ci:lint --env-mode=loose"
   },
   "devDependencies": {
     "turbo": "^2.0.11",

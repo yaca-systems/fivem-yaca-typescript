@@ -1,6 +1,7 @@
 export * from "./constants";
 export * from "./bridge";
 export * from "./locale";
+export * from "./config";
 
 /**
  * Sleeps for a given amount of time.

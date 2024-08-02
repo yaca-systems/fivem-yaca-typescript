@@ -1,7 +1,7 @@
 import type { YaCAClientModule } from "../yaca";
 import { YacaPluginStates } from "@yaca-voice/types";
 import { cache, registerRdrKeyBind } from "../utils";
-import { sleep, locale, saltyChatExport } from "@yaca-voice/common";
+import { locale, saltyChatExport, sleep } from "@yaca-voice/common";
 
 /**
  * The SaltyChat bridge for the client.

@@ -181,7 +181,7 @@ export class YaCAServerRadioModule {
 
     player.radioSettings.activated = state;
 
-    if (this.serverModule.sharedConfig.saltyChatBridge?.enabled) {
+    if (this.serverModule.sharedConfig.saltyChatBridge.enabled) {
       player.radioSettings.hasLong = true;
     }
 

@@ -9,6 +9,7 @@
   },
   "scripts": {
     "lint": "eslint src --fix",
+    "ci:lint": "eslint src",
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
