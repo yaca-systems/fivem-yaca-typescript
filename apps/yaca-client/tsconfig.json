@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "rootDir": "./src",
-    "types": ["@citizenfx/client"],
+    "types": ["@citizenfx/client"]
   },
   "include": ["./"]
 }

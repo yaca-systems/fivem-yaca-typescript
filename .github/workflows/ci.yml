@@ -33,7 +33,7 @@ jobs:
         run: pnpm i --frozen-lockfile
 
       - name: Run eslint
-        run: pnpm run lint
+        run: pnpm run ci:lint
 
   prettier:
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
         run: pnpm i --frozen-lockfile
 
       - name: Run prettier
-        run: pnpm run format
+        run: pnpm run ci:format
 
   typecheck:
     runs-on: ubuntu-latest
@@ -90,3 +90,31 @@ jobs:
 
       - name: Run typecheck
         run: pnpm run typecheck
+
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build

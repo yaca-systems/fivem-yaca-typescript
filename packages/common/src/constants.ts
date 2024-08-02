@@ -1,6 +1,4 @@
-const MEGAPHONE_STATE_NAME = "yacaMegaphone";
-const PHONE_SPEAKER_STATE_NAME = "yacaPhoneSpeaker";
-const LIP_SYNC_STATE_NAME = "yacaLipSync";
-const VOICE_RANGE_STATE_NAME = "yacaVoiceRange";
-
-export { MEGAPHONE_STATE_NAME, PHONE_SPEAKER_STATE_NAME, LIP_SYNC_STATE_NAME, VOICE_RANGE_STATE_NAME };
+export const MEGAPHONE_STATE_NAME = "yacaMegaphone";
+export const PHONE_SPEAKER_STATE_NAME = "yacaPhoneSpeaker";
+export const LIP_SYNC_STATE_NAME = "yacaLipSync";
+export const VOICE_RANGE_STATE_NAME = "yacaVoiceRange";

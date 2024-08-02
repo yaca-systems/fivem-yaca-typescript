@@ -1,6 +1,7 @@
 import {
   CommDeviceMode,
   DataObject,
+  defaultSharedConfig,
   type YacaClient,
   YacaFilterEnum,
   YacaNotificationType,
@@ -11,7 +12,7 @@ import {
   YacaResponse,
   type YacaSharedConfig,
   type YacaSoundStateMessage,
-  YacaStereoMode
+  YacaStereoMode,
 } from "@yaca-voice/types";
 import {
   cache,
@@ -23,21 +24,15 @@ import {
   playRdrFacialAnim,
   registerRdrKeyBind,
   vehicleHasOpening,
-  WebSocket
+  WebSocket,
 } from "../utils";
-import { localLipSyncAnimations } from "./data";
 import { YaCAClientSaltyChatBridge } from "../bridge/saltychat";
-import {
-  initLocale,
-  LIP_SYNC_STATE_NAME,
-  locale,
-  MEGAPHONE_STATE_NAME,
-  VOICE_RANGE_STATE_NAME
-} from "@yaca-voice/common";
+import { initLocale, LIP_SYNC_STATE_NAME, loadConfig, locale, MEGAPHONE_STATE_NAME, VOICE_RANGE_STATE_NAME } from "@yaca-voice/common";
 import { YaCAClientRadioModule } from "./radio";
 import { YaCAClientPhoneModule } from "./phone";
 import { YaCAClientMegaphoneModule } from "./megaphone";
 import { YaCAClientIntercomModule } from "./intercom";
+import { localLipSyncAnimations } from "./data";
 
 /**
  * The YaCA client module.
@@ -59,7 +54,7 @@ export class YaCAClientModule {
   saltyChatBridge?: YaCAClientSaltyChatBridge;
 
   canChangeVoiceRange = true;
-  defaultVoiceRange: number;
+  defaultVoiceRange = 1;
   rangeIndex: number;
   rangeInterval: CitizenTimer | null = null;
   visualVoiceRangeTimeout: CitizenTimer | null = null;
@@ -78,7 +73,6 @@ export class YaCAClientModule {
 
   isFiveM = cache.game === "fivem";
   isRedM = cache.game === "redm";
-  useLocalLipSync = false;
 
   private currentPluginState: YacaPluginStates;
 
@@ -95,9 +89,7 @@ export class YaCAClientModule {
     this.currentPluginState = state;
     emit("yaca:external:pluginStateChanged", state);
 
-    if (this.saltyChatBridge) {
-      this.saltyChatBridge.handleChangePluginState(state);
-    }
+    this.saltyChatBridge?.handleChangePluginState(state);
   }
 
   /**
@@ -107,7 +99,7 @@ export class YaCAClientModule {
    * @param {YacaNotificationType} type - The type of the notification, e.g. error, inform, success.
    */
   notification(message: string, type: YacaNotificationType) {
-    if (this.sharedConfig.notifications?.oxLib) {
+    if (this.sharedConfig.notifications.oxLib) {
       emit("ox_lib:notify", {
         id: "yaca",
         title: "YaCA",
@@ -116,7 +108,7 @@ export class YaCAClientModule {
       });
     }
 
-    if (this.sharedConfig.notifications?.gta) {
+    if (this.sharedConfig.notifications.gta) {
       if (this.isFiveM) {
         BeginTextCommandThefeedPost("STRING");
         AddTextComponentSubstringPlayerName(`YaCA: ${message}`);
@@ -129,7 +121,7 @@ export class YaCAClientModule {
       }
     }
 
-    if (this.sharedConfig.notifications?.redm) {
+    if (this.sharedConfig.notifications.redm) {
       if (this.isRedM) {
         displayRdrNotification(`YaCA: ${message}`, 2000);
       } else {
@@ -137,20 +129,28 @@ export class YaCAClientModule {
       }
     }
 
-    if (this.sharedConfig.notifications?.own) {
+    if (this.sharedConfig.notifications.own) {
       emit("yaca:external:notification", message, type);
     }
   }
 
   constructor() {
-    this.sharedConfig = JSON.parse(LoadResourceFile(cache.resource, "config/shared.json"));
+    this.sharedConfig = loadConfig<YacaSharedConfig>("config/shared.json", defaultSharedConfig);
     initLocale(this.sharedConfig.locale);
 
-    this.useLocalLipSync = this.sharedConfig.useLocalLipSync ?? false;
-    this.defaultVoiceRange = this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.defaultIndex] ?? 1;
+    this.rangeIndex = this.sharedConfig.voiceRange.defaultIndex;
+    if (this.sharedConfig.voiceRange.ranges[this.rangeIndex]) {
+      this.defaultVoiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex];
+    } else {
+      this.defaultVoiceRange = 1;
+      this.rangeIndex = 0;
+      this.sharedConfig.voiceRange.ranges = [1];
+
+      console.error("[YaCA] Default voice range is not set correctly in the config.");
+    }
 
     if (this.isFiveM) {
-      for (const vehicleModel of this.sharedConfig.mufflingVehicleWhitelist ?? []) {
+      for (const vehicleModel of this.sharedConfig.mufflingVehicleWhitelist) {
         this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel));
       }
     }
@@ -167,10 +167,10 @@ export class YaCAClientModule {
       setTimeout(() => {
         emitNet("server:yaca:nuiReady");
       }, 5000);
+
+      // skipcq: JS-0255
       cb({});
     });
-
-    this.rangeIndex = this.sharedConfig.voiceRange.defaultIndex ?? 0;
 
     this.registerExports();
     this.registerEvents();
@@ -185,7 +185,7 @@ export class YaCAClientModule {
     this.phoneModule = new YaCAClientPhoneModule(this);
     this.radioModule = new YaCAClientRadioModule(this);
 
-    if (!this.useLocalLipSync) {
+    if (!this.sharedConfig.useLocalLipSync) {
       /**
        * Add a state bag change handler for the lip sync state bag.
        * Which is used to override the talking state of the player.
@@ -204,7 +204,7 @@ export class YaCAClientModule {
       });
     }
 
-    if (this.sharedConfig.saltyChatBridge?.enabled) {
+    if (this.sharedConfig.saltyChatBridge.enabled) {
       this.sharedConfig.maxRadioChannels = 2;
       this.saltyChatBridge = new YaCAClientSaltyChatBridge(this);
     }
@@ -323,10 +323,7 @@ export class YaCAClientModule {
         const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
         if (channel) {
           this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
-
-          if (this.sharedConfig.saltyChatBridge?.enabled) {
-            this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
-          }
+          this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel);
         }
       }
     });
@@ -348,12 +345,12 @@ export class YaCAClientModule {
         if (channel) {
           this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER);
 
-          if (this.sharedConfig.saltyChatBridge?.enabled) {
+          if (this.saltyChatBridge) {
             const inRadio = this.radioModule?.playersInRadioChannel.get(channel);
             if (inRadio) {
               const inRadioArray = [...inRadio].filter((id) => id !== target);
               const state = inRadioArray.length > 0;
-              this.saltyChatBridge?.handleRadioReceivingStateChange(state, channel);
+              this.saltyChatBridge.handleRadioReceivingStateChange(state, channel);
             }
           }
         }
@@ -486,7 +483,7 @@ export class YaCAClientModule {
     onNet("client:yaca:changeVoiceRange", (range: number) => {
       emit("yaca:external:voiceRangeUpdate", range, this.rangeIndex);
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge?.enabled) {
+      if (this.saltyChatBridge) {
         emit("SaltyChat_VoiceRangeChanged", range.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
       }
     });
@@ -559,9 +556,9 @@ export class YaCAClientModule {
        * if the value is set to -1, the player voice range is taken
        * if the value is >= 0, you can set the max muffling range before it gets completely cut off
        */
-      muffling_range: this.sharedConfig.mufflingRange ?? 2,
-      build_type: this.sharedConfig.buildType ?? 0, // 0 = Release, 1 = Debug,
-      unmute_delay: this.sharedConfig.unmuteDelay ?? 400,
+      muffling_range: this.sharedConfig.mufflingRange,
+      build_type: this.sharedConfig.buildType,
+      unmute_delay: this.sharedConfig.unmuteDelay,
       operation_mode: dataObj.useWhisper ? 1 : 0,
     });
 
@@ -741,18 +738,16 @@ export class YaCAClientModule {
 
     const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1;
 
-    const isNotificationEnabled = this.sharedConfig.voiceRange.sendNotification ?? true;
-    if (isNotificationEnabled) {
+    if (this.sharedConfig.voiceRange.sendNotification) {
       this.notification(locale("voice_range_changed", voiceRange), YacaNotificationType.INFO);
     }
 
-    const isMarkerEnable = this.sharedConfig.voiceRange.markerColor?.enabled ?? true;
-    if (isMarkerEnable) {
-      const red = this.sharedConfig.voiceRange.markerColor?.r ?? 0;
-      const green = this.sharedConfig.voiceRange.markerColor?.g ?? 255;
-      const blue = this.sharedConfig.voiceRange.markerColor?.b ?? 0;
-      const alpha = this.sharedConfig.voiceRange.markerColor?.a ?? 50;
-      const duration = this.sharedConfig.voiceRange.markerColor?.duration ?? 1000;
+    if (this.sharedConfig.voiceRange.markerColor.enabled) {
+      const red = this.sharedConfig.voiceRange.markerColor.r;
+      const green = this.sharedConfig.voiceRange.markerColor.g;
+      const blue = this.sharedConfig.voiceRange.markerColor.b;
+      const alpha = this.sharedConfig.voiceRange.markerColor.a;
+      const duration = this.sharedConfig.voiceRange.markerColor.duration;
 
       this.visualVoiceRangeTimeout = setTimeout(() => {
         if (this.visualVoiceRangeTick) {
@@ -802,7 +797,7 @@ export class YaCAClientModule {
 
     emit("yaca:external:voiceRangeUpdate", voiceRange, this.rangeIndex);
     // SaltyChat bridge
-    if (this.sharedConfig.saltyChatBridge?.enabled) {
+    if (this.saltyChatBridge) {
       emit("SaltyChat_VoiceRangeChanged", voiceRange.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length);
     }
   }
@@ -975,7 +970,7 @@ export class YaCAClientModule {
       emit("yaca:external:isTalking", isTalking);
 
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge?.enabled) {
+      if (this.saltyChatBridge) {
         emit("SaltyChat_TalkStateChanged", isTalking);
       }
     }
@@ -995,7 +990,7 @@ export class YaCAClientModule {
       emit("yaca:external:muteStateChanged", soundStates.microphoneMuted); // Deprecated in favor of microphoneMuteStateChanged
 
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge?.enabled) {
+      if (this.saltyChatBridge) {
         emit("SaltyChat_MicStateChanged", soundStates.microphoneMuted);
       }
     }
@@ -1005,7 +1000,7 @@ export class YaCAClientModule {
       emit("yaca:external:microphoneDisabledStateChanged", soundStates.microphoneDisabled);
 
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge?.enabled) {
+      if (this.saltyChatBridge) {
         emit("SaltyChat_MicEnabledChanged", soundStates.microphoneDisabled);
       }
     }
@@ -1015,7 +1010,7 @@ export class YaCAClientModule {
       emit("yaca:external:soundMuteStateChanged", soundStates.soundMuted);
 
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge?.enabled) {
+      if (this.saltyChatBridge) {
         emit("SaltyChat_SoundStateChanged", soundStates.soundMuted);
       }
     }
@@ -1025,7 +1020,7 @@ export class YaCAClientModule {
       emit("yaca:external:soundDisabledStateChanged", soundStates.soundDisabled);
 
       // SaltyChat bridge
-      if (this.sharedConfig.saltyChatBridge?.enabled) {
+      if (this.saltyChatBridge) {
         emit("SaltyChat_SoundEnabledChanged", soundStates.soundDisabled);
       }
     }
@@ -1037,7 +1032,7 @@ export class YaCAClientModule {
    * @param payload - The response from teamspeak.
    */
   handleOtherTalkState(payload: YacaResponse) {
-    if (!this.useLocalLipSync) {
+    if (!this.sharedConfig.useLocalLipSync) {
       return;
     }
 
@@ -1118,10 +1113,10 @@ export class YaCAClientModule {
    */
   getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean, nearbyUsesMegaphone = false) {
     if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
-      return this.sharedConfig.mufflingIntensities?.differentRoom ?? 10;
+      return this.sharedConfig.mufflingIntensities.differentRoom;
     }
 
-    const vehicleMuffling = this.sharedConfig.vehicleMuffling ?? true;
+    const vehicleMuffling = this.sharedConfig.vehicleMuffling;
     if (this.isRedM || !vehicleMuffling) {
       return 0;
     }
@@ -1137,18 +1132,18 @@ export class YaCAClientModule {
       if (ownVehicleHasOpening) {
         return 0;
       } else {
-        return this.sharedConfig.mufflingIntensities?.megaPhoneInCar ?? 6;
+        return this.sharedConfig.mufflingIntensities.megaPhoneInCar;
       }
     }
 
     const nearbyPlayerVehicleHasOpening = this.checkIfVehicleHasOpening(nearbyPlayerVehicle);
 
     if (!ownVehicleHasOpening && !nearbyPlayerVehicleHasOpening) {
-      return this.sharedConfig.mufflingIntensities?.bothCarsClosed ?? 10;
+      return this.sharedConfig.mufflingIntensities.bothCarsClosed;
     }
 
     if (!ownVehicleHasOpening || !nearbyPlayerVehicleHasOpening) {
-      return this.sharedConfig.mufflingIntensities?.oneCarClosed ?? 5;
+      return this.sharedConfig.mufflingIntensities.oneCarClosed;
     }
 
     return 0;
@@ -1214,8 +1209,7 @@ export class YaCAClientModule {
       playersToPhoneSpeaker = new Set<number>(),
       playersOnPhoneSpeaker = new Set<number>(),
       localPos = GetEntityCoords(cache.ped, false),
-      currentRoom = GetRoomKeyFromEntity(cache.ped),
-      phoneSpeakerRange = this.sharedConfig.maxPhoneSpeakerRange ?? 5;
+      currentRoom = GetRoomKeyFromEntity(cache.ped);
 
     let hasVehicleOpening = true;
     if (this.isFiveM) {
@@ -1264,7 +1258,7 @@ export class YaCAClientModule {
       }
 
       // Check if the player is in phone speaker range.
-      if (calculateDistanceVec3(localPos, playerPos) > phoneSpeakerRange) {
+      if (calculateDistanceVec3(localPos, playerPos) > this.sharedConfig.maxPhoneSpeakerRange) {
         continue;
       }
 
@@ -1290,7 +1284,7 @@ export class YaCAClientModule {
           client_id: phoneCallMember.clientId,
           position: convertNumberArrayToXYZ(playerPos),
           direction: convertNumberArrayToXYZ(playerDirection),
-          range: phoneSpeakerRange,
+          range: this.sharedConfig.maxPhoneSpeakerRange,
           is_underwater: isUnderwater,
           muffle_intensity: muffleIntensity,
           is_muted: false,
@@ -1303,7 +1297,7 @@ export class YaCAClientModule {
           YacaFilterEnum.PHONE_SPEAKER,
           true,
           undefined,
-          phoneSpeakerRange,
+          this.sharedConfig.maxPhoneSpeakerRange,
           CommDeviceMode.RECEIVER,
           CommDeviceMode.SENDER,
         );

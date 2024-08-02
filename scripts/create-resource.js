@@ -1,12 +1,4 @@
-import {
-  readFileSync,
-  writeFileSync,
-  existsSync,
-  copyFileSync,
-  mkdirSync,
-  cpSync,
-  rmSync
-} from "fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 
 console.log("Building resource...");
 
@@ -15,19 +7,17 @@ if (existsSync("resource")) {
   rmSync("resource", { recursive: true });
 }
 
-mkdirSync("resource")
-mkdirSync("resource/yaca-voice")
+mkdirSync("resource");
+mkdirSync("resource/yaca-voice");
 
 cpSync("assets/yaca-voice", "resource/yaca-voice", { recursive: true });
 
-mkdirSync("resource/yaca-voice/dist")
+mkdirSync("resource/yaca-voice/dist");
 
-copyFileSync("apps/yaca-client/dist/client.js", "resource/yaca-voice/dist/client.js")
-copyFileSync("apps/yaca-server/dist/server.js", "resource/yaca-voice/dist/server.js")
+copyFileSync("apps/yaca-client/dist/client.js", "resource/yaca-voice/dist/client.js");
+copyFileSync("apps/yaca-server/dist/server.js", "resource/yaca-voice/dist/server.js");
 
-const packageJson = JSON.parse(
-  readFileSync("package.json", { encoding: "utf8" }),
-);
+const packageJson = JSON.parse(readFileSync("package.json", { encoding: "utf8" }));
 
 writeFileSync(
   "resource/yaca-voice/fxmanifest.lua",
@@ -62,7 +52,6 @@ provide 'saltychat'
 
 `,
 );
-
 
 if (existsSync("config/yaca-voice/shared.json")) {
   copyFileSync("config/yaca-voice/shared.json", "resource/yaca-voice/config/shared.json");
