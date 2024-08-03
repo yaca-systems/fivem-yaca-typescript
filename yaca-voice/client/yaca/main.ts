@@ -1036,7 +1036,7 @@ export class YaCAClientModule {
 
     try {
       talkData = JSON.parse(payload.message);
-    } catch (error) {
+    } catch {
       console.error("[YaCA-Websocket]: Error while parsing other talk state message");
       return;
     }
