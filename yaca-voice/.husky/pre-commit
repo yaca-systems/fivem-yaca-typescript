@@ -1,2 +1,0 @@
-cd yaca-voice
-pnpm exec lint-staged
