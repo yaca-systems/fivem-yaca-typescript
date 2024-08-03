@@ -20,10 +20,10 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.9073-1
+        version: 2.0.9235-1
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.9073-1
+        version: 2.0.9235-1
       '@eslint/js':
         specifier: ^9.8.0
         version: 9.8.0
@@ -32,7 +32,7 @@ importers:
         version: 3.0.3
       '@types/node':
         specifier: ^20.14.11
-        version: 20.14.13
+        version: 20.14.14
       esbuild:
         specifier: ^0.23.0
         version: 0.23.0
@@ -57,11 +57,11 @@ importers:
 
 packages:
 
-  '@citizenfx/client@2.0.9073-1':
-    resolution: {integrity: sha512-TOo00MZpqhu136+jzkssI9x0Z+X9Bq2I1KJRVCmTk9kim6SnWWJ2YudVmz+4BP5sf8PGCGBzzKl1jT5XM4I2pw==}
+  '@citizenfx/client@2.0.9235-1':
+    resolution: {integrity: sha512-e1FM4tX0eeY1Y1HuBj8D5JSlDqGmRW9epY24Odib+nk8L7IKRDBzxJBbktXfFsEqF10OJue9v7yx5ACot9CZGQ==}
 
-  '@citizenfx/server@2.0.9073-1':
-    resolution: {integrity: sha512-bYnzPuMFxzZ+9vbUh6I9KlaamYiXN1mKXBss+OvU5GdDiifBNyOfuj+jWlQ7hhf8e2yZJnp/jJi4uBGNyjy/fg==}
+  '@citizenfx/server@2.0.9235-1':
+    resolution: {integrity: sha512-x5RgQKm+nIgmABzxQpOVvrZOTTsSWDKOkT87gbjnILW3zOWokq3LU7Ag+Ki1HvPXAe43laJdy9wUUej27KhsRQ==}
 
   '@esbuild/aix-ppc64@0.23.0':
     resolution: {integrity: sha512-3sG8Zwa5fMcA9bgqB8AfWPQ+HFke6uD3h1s3RIwUNK8EG7a4buxvuFTs3j1IMs2NXAk9F30C/FF4vxRgQCcmoQ==}
@@ -256,8 +256,8 @@ packages:
   '@types/events@3.0.3':
     resolution: {integrity: sha512-trOc4AAUThEz9hapPtSd7wf5tiQKvTtu5b371UxXdTuqzIh0ArcRspRP0i0Viu+LXstIQ1z96t1nsPxT9ol01g==}
 
-  '@types/node@20.14.13':
-    resolution: {integrity: sha512-+bHoGiZb8UiQ0+WEtmph2IWQCjIqg8MDZMAV+ppRRhUZnquF5mQkP/9vpSwJClEiSM/C7fZZExPzfU0vJTyp8w==}
+  '@types/node@20.14.14':
+    resolution: {integrity: sha512-d64f00982fS9YoOgJkAMolK7MN8Iq3TDdVjchbYHdEmjth/DHowx82GnoA+tVUAN+7vxfYUgAzi+JXbKNd2SDQ==}
 
   '@typescript-eslint/eslint-plugin@8.0.0':
     resolution: {integrity: sha512-STIZdwEQRXAHvNUS6ILDf5z3u95Gc8jzywunxSNqX00OooIemaaNIA0vEgynJlycL5AjabYLLrIyHd4iazyvtg==}
@@ -918,9 +918,9 @@ packages:
 
 snapshots:
 
-  '@citizenfx/client@2.0.9073-1': {}
+  '@citizenfx/client@2.0.9235-1': {}
 
-  '@citizenfx/server@2.0.9073-1': {}
+  '@citizenfx/server@2.0.9235-1': {}
 
   '@esbuild/aix-ppc64@0.23.0':
     optional: true
@@ -1045,7 +1045,7 @@ snapshots:
 
   '@types/events@3.0.3': {}
 
-  '@types/node@20.14.13':
+  '@types/node@20.14.14':
     dependencies:
       undici-types: 5.26.5
 
