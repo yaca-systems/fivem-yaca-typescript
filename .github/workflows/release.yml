@@ -28,7 +28,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: yaca-voice/package.json
+          package_json_file: package.json
 
       - name: Get variables
         id: get_vars
@@ -40,46 +40,41 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: yaca-voice/pnpm-lock.yaml
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
-        working-directory: yaca-voice
 
       - name: Bump package version
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           pnpm version ${{ inputs.version }} --git-tag-version false
-        working-directory: yaca-voice
 
       - name: Run build
-        run: pnpm build
+        run: pnpm create-resource
         env:
           CI: false
-        working-directory: yaca-voice
 
       - name: Bundle files
         run: |
-          mkdir -p ./temp/yaca-voice
-          cp -r ./yaca-voice/resource/* ./temp/yaca-voice/
-          cd ./temp && zip -r ../yaca-voice.zip ./yaca-voice
+          cd ./resource && zip -r ../yaca-voice.zip ./yaca-voice
 
       - name: Update repository
         run: |
-          git add .
+          git add package.json
           git commit -am 'chore: bump version to v${{ inputs.version }}'
           git push
 
       - name: Create Release
-        uses: 'minemalox/automatic-release@v0'
+        uses: "minemalox/automatic-release@v0"
         id: auto_release
         with:
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          release_version: 'v${{ inputs.version }}'
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          release_version: "v${{ inputs.version }}"
           automatic_release_tag: true
-          title: 'v${{ inputs.version }}'
+          title: "v${{ inputs.version }}"
           prerelease: false
           files: yaca-voice.zip
           ignore_authors: |
