@@ -15,7 +15,6 @@
   },
   "devDependencies": {
     "@citizenfx/server": "latest",
-    "@eslint/js": "^8.57.0",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.14.10",
     "esbuild": "^0.20.2",
