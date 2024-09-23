@@ -61,7 +61,7 @@ export class YaCAClientPhoneModule {
 
       if (this.clientModule.useWhisper && target.remoteID === cache.serverId) {
         this.clientModule.setPlayersCommType([], YacaFilterEnum.PHONE, !state, undefined, undefined, CommDeviceMode.SENDER);
-      } else if (!this.clientModule.useWhisper) {
+      } else if (!this.clientModule.useWhisper && this.inCallWith.has(targetID)) {
         if (state) {
           this.clientModule.setPlayersCommType(
             target,
@@ -269,6 +269,14 @@ export class YaCAClientPhoneModule {
       commTargets.push(target);
     }
 
-    this.clientModule.setPlayersCommType(commTargets, filter, state, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER);
+    this.clientModule.setPlayersCommType(
+      commTargets,
+      filter,
+      state,
+      undefined,
+      undefined,
+      state || (!state && this.inCallWith.size) ? CommDeviceMode.TRANSCEIVER : undefined,
+      CommDeviceMode.TRANSCEIVER,
+    );
   }
 }
