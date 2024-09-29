@@ -16,11 +16,11 @@
   "devDependencies": {
     "@citizenfx/server": "latest",
     "@types/luxon": "^3.4.2",
-    "@types/node": "^20.14.10",
-    "esbuild": "^0.20.2",
-    "@yaca-voice/types": "workspace:*",
+    "@types/node": "^20.16.10",
     "@yaca-voice/common": "workspace:*",
-    "@yaca-voice/typescript-config": "workspace:*"
+    "@yaca-voice/types": "workspace:*",
+    "@yaca-voice/typescript-config": "workspace:*",
+    "esbuild": "^0.20.2"
   },
   "engines": {
     "node": ">=16.9.1"
