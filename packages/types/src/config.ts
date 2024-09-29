@@ -105,7 +105,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
   },
   vehicleMuffling: true,
   mufflingRange: -1,
-  mufflingVehicleWhitelist: ["gauntlet6", "draugur", "bodhi2", "vagrant", "outlaw", "trophytruck", "ratel"],
+  mufflingVehicleWhitelist: ["gauntlet6", "draugur", "bodhi2", "vagrant", "outlaw", "trophytruck", "ratel", "drifttampa", "sm722", "tornado4", "swinger"],
   mufflingIntensities: {
     differentRoom: 10,
     bothCarsClosed: 10,
