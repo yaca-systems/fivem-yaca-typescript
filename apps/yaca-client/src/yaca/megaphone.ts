@@ -138,11 +138,7 @@ export class YaCAClientMegaphoneModule {
     /**
      * Handles the megaphone state bag change.
      */
-    AddStateBagChangeHandler(MEGAPHONE_STATE_NAME, "", (bagName: string, _: string, value: number | null, __: number, replicated: boolean) => {
-      if (replicated) {
-        return;
-      }
-
+    AddStateBagChangeHandler(MEGAPHONE_STATE_NAME, "", (bagName: string, _: string, value: number | null) => {
       const playerId = GetPlayerFromStateBagName(bagName);
       if (playerId === 0) {
         return;
