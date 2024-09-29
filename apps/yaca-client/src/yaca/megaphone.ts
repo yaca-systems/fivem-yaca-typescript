@@ -12,6 +12,8 @@ export class YaCAClientMegaphoneModule {
   canUseMegaphone = false;
   lastMegaphoneState = false;
 
+  megaphoneVehicleWhitelistHashes = new Set<number>();
+
   /**
    * Creates an instance of the megaphone module.
    *
@@ -23,6 +25,10 @@ export class YaCAClientMegaphoneModule {
     this.registerEvents();
     if (this.clientModule.isFiveM) {
       this.registerKeybinds();
+
+      for (const vehicleModel of this.clientModule.sharedConfig.megaphone.allowedVehicleModels) {
+        this.megaphoneVehicleWhitelistHashes.add(GetHashKey(vehicleModel));
+      }
     } else if (this.clientModule.isRedM) {
       this.registerRdrKeybinds();
     }
@@ -55,7 +61,10 @@ export class YaCAClientMegaphoneModule {
         }
 
         const vehicleClass = GetVehicleClass(cache.vehicle);
-        this.canUseMegaphone = this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass);
+        const vehicleModel = GetEntityModel(cache.vehicle);
+
+        this.canUseMegaphone =
+          this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass) || this.megaphoneVehicleWhitelistHashes.has(vehicleModel);
       });
     }
   }

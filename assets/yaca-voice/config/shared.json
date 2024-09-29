@@ -33,7 +33,8 @@
   "megaphone": {
     "range": 30,
     "automaticVehicleDetection": true,
-    "allowedVehicleClasses": [18, 19]
+    "allowedVehicleClasses": [18, 19],
+    "allowedVehicleModels": ["polmav"]
   },
   "saltyChatBridge": {
     "enabled": false,

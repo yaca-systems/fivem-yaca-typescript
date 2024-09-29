@@ -36,6 +36,7 @@ export interface YacaSharedConfig {
     range: number;
     automaticVehicleDetection: boolean;
     allowedVehicleClasses: number[];
+    allowedVehicleModels: string[];
   };
   saltyChatBridge: {
     enabled: boolean;
@@ -93,6 +94,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     range: 30,
     automaticVehicleDetection: true,
     allowedVehicleClasses: [18, 19],
+    allowedVehicleModels: ["polmav"],
   },
   saltyChatBridge: {
     enabled: false,
