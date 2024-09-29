@@ -19,8 +19,7 @@
     "@types/node": "^20.16.10",
     "@yaca-voice/common": "workspace:*",
     "@yaca-voice/types": "workspace:*",
-    "@yaca-voice/typescript-config": "workspace:*",
-    "esbuild": "^0.20.2"
+    "@yaca-voice/typescript-config": "workspace:*"
   },
   "engines": {
     "node": ">=16.9.1"
