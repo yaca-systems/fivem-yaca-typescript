@@ -5,6 +5,7 @@
   "locale": "en",
   "unmuteDelay": 400,
   "maxPhoneSpeakerRange": 5,
+  "phoneHearPlayersNearby": false,
   "notifications": {
     "oxLib": false,
     "gta": true,
