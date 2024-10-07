@@ -40,6 +40,32 @@ export class YaCAClientPhoneModule {
       this.enablePhoneCall(targetIDs, state, filter);
     });
 
+    onNet("client:yaca:phoneSpeaker", (targetIDs: number[], state: boolean) => {
+      if (!targetIDs.length) {
+        return;
+      }
+
+      const commTargets = [];
+      for (const targetID of targetIDs) {
+        const target = this.clientModule.getPlayerByID(targetID);
+        if (!target) {
+          continue;
+        }
+
+        commTargets.push(target);
+      }
+
+      this.clientModule.setPlayersCommType(
+        commTargets,
+        YacaFilterEnum.PHONE,
+        state,
+        undefined,
+        undefined,
+        CommDeviceMode.TRANSCEIVER,
+        CommDeviceMode.TRANSCEIVER,
+      );
+    });
+
     /**
      * Handles the "client:yaca:phoneMute" server event.
      *
@@ -62,27 +88,7 @@ export class YaCAClientPhoneModule {
       if (this.clientModule.useWhisper && target.remoteID === cache.serverId) {
         this.clientModule.setPlayersCommType([], YacaFilterEnum.PHONE, !state, undefined, undefined, CommDeviceMode.SENDER);
       } else if (!this.clientModule.useWhisper && this.inCallWith.has(targetID)) {
-        if (state) {
-          this.clientModule.setPlayersCommType(
-            target,
-            YacaFilterEnum.PHONE,
-            false,
-            undefined,
-            undefined,
-            CommDeviceMode.TRANSCEIVER,
-            CommDeviceMode.TRANSCEIVER,
-          );
-        } else {
-          this.clientModule.setPlayersCommType(
-            target,
-            YacaFilterEnum.PHONE,
-            true,
-            undefined,
-            undefined,
-            CommDeviceMode.TRANSCEIVER,
-            CommDeviceMode.TRANSCEIVER,
-          );
-        }
+        this.clientModule.setPlayersCommType(target, YacaFilterEnum.PHONE, state, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER);
       }
     });
 
@@ -92,46 +98,36 @@ export class YaCAClientPhoneModule {
      * @param {number | number[]} playerIDs - The IDs of the players to be added or removed from the phone speaker.
      * @param {boolean} state - The state indicating whether to add or remove the players.
      */
-    onNet("client:yaca:playersToPhoneSpeakerEmit", (playerIDs: number | number[], state: boolean) => {
+    onNet("client:yaca:playersToPhoneSpeakerEmitWhisper", (playerIDs: number | number[], state: boolean) => {
+      if (!this.clientModule.useWhisper) return;
+
       if (!Array.isArray(playerIDs)) {
         playerIDs = [playerIDs];
       }
 
-      const applyRemovePhoneSpeaker: Set<YacaPlayerData> = new Set();
+      const targets: Set<YacaPlayerData> = new Set();
       for (const playerID of playerIDs) {
         const player = this.clientModule.getPlayerByID(playerID);
         if (!player) {
           continue;
         }
 
-        applyRemovePhoneSpeaker.add(player);
+        targets.add(player);
       }
 
-      if (applyRemovePhoneSpeaker.size < 1) {
+      if (targets.size < 1) {
         return;
       }
 
-      if (state) {
-        this.clientModule.setPlayersCommType(
-          Array.from(applyRemovePhoneSpeaker),
-          YacaFilterEnum.PHONE_SPEAKER,
-          true,
-          undefined,
-          undefined,
-          CommDeviceMode.SENDER,
-          CommDeviceMode.RECEIVER,
-        );
-      } else {
-        this.clientModule.setPlayersCommType(
-          Array.from(applyRemovePhoneSpeaker),
-          YacaFilterEnum.PHONE_SPEAKER,
-          false,
-          undefined,
-          undefined,
-          CommDeviceMode.SENDER,
-          CommDeviceMode.RECEIVER,
-        );
-      }
+      this.clientModule.setPlayersCommType(
+        Array.from(targets),
+        YacaFilterEnum.PHONE_SPEAKER,
+        state,
+        undefined,
+        undefined,
+        CommDeviceMode.SENDER,
+        CommDeviceMode.RECEIVER,
+      );
     });
   }
 
