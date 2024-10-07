@@ -30,13 +30,14 @@ export class YaCAServerPhoneModle {
          * @param {number[]} enableForTargets - The IDs of the players to enable the phone speaker for.
          * @param {number[]} disableForTargets - The IDs of the players to disable the phone speaker for.
          */
-        onNet('server:yaca:phoneSpeakerEmit', (enableForTargets?: number[], disableForTargets?: number[]) => {
-            const player = this.serverModule.players.get(source)
+        onNet("server:yaca:phoneSpeakerEmitWhisper", (enableForTargets?: number[], disableForTargets?: number[]) => {
+            const player = this.serverModule.players.get(source);
             if (!player) {
-                return
+              return;
             }
 
-            const sendTo = new Set<number>()
+            const enableReceive = new Set<number>();
+            const disableReceive = new Set<number>();
 
             for (const callTarget of player.voiceSettings.inCallWith) {
                 const target = this.serverModule.players.get(callTarget)
@@ -44,21 +45,81 @@ export class YaCAServerPhoneModle {
                     continue
                 }
 
-                sendTo.add(callTarget)
+                if (enableForTargets?.length) enableReceive.add(callTarget);
+                if (disableForTargets?.length) disableReceive.add(callTarget);
+              }
+
+            if (enableReceive?.size) {
+              for (const target of enableReceive) {
+                emitNet("client:yaca:playersToPhoneSpeakerEmitWhisper", target, enableForTargets, true);
+              }
             }
 
-            if (enableForTargets?.length) {
-                for (const target of sendTo) {
-                    emitNet('client:yaca:playersToPhoneSpeakerEmit', target, enableForTargets, true)
-                }
+            if (disableReceive?.size) {
+              for (const target of disableReceive) {
+                emitNet("client:yaca:playersToPhoneSpeakerEmitWhisper", target, disableForTargets, false);
+              }
+            }
+        });
+
+      onNet("server:yaca:phoneSpeakerEmit", (enableForTargets?: number[], disableForTargets?: number[]) => {
+        if (this.serverModule.sharedConfig.phoneHearPlayersNearby === false) {
+          return;
+        }
+
+        const player = this.serverModule.players.get(source);
+        if (!player) {
+          return;
+        }
+
+        const enableReceive = new Set<number>();
+        const disableReceive = new Set<number>();
+
+        if (enableForTargets?.length) {
+          player.voiceSettings.inCallWith.forEach(callTarget => {
+            const target = this.serverModule.players.get(callTarget);
+            if (!target) {
+              return;
             }
 
-            if (disableForTargets?.length) {
-                for (const target of sendTo) {
-                    emitNet('client:yaca:playersToPhoneSpeakerEmit', target, disableForTargets, false)
-                }
-            }
-        })
+            enableReceive.add(callTarget);
+
+            enableForTargets.forEach(targetID => {
+              const map = player.voiceSettings.emittedPhoneSpeaker
+              const set = map.get(targetID) ?? new Set<number>()
+              set.add(callTarget)
+              map.set(targetID, set)
+            })
+          })
+        }
+
+        if (disableForTargets?.length) {
+          disableForTargets.forEach(targetID => {
+            player.voiceSettings.emittedPhoneSpeaker.get(targetID)?.forEach(emittedTarget => {
+              const target = this.serverModule.players.get(emittedTarget);
+              if (!target) {
+                return;
+              }
+
+              disableReceive.add(emittedTarget);
+            })
+
+            player.voiceSettings.emittedPhoneSpeaker.delete(targetID)
+          })
+        }
+
+        if (enableReceive.size) {
+          for (const target of enableReceive) {
+            emitNet("client:yaca:phoneSpeaker", target, enableForTargets, true);
+          }
+        }
+
+        if (disableReceive.size) {
+          for (const target of disableReceive) {
+            emitNet("client:yaca:phoneSpeaker", target, disableForTargets, false);
+          }
+        }
+      });
     }
 
     registerExports() {

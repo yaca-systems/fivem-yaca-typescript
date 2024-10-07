@@ -1,61 +1,62 @@
 import { YacaBuildType } from './enums'
 
 export interface YacaSharedConfig {
-    debug: boolean
-    versionCheck: boolean
-    buildType: YacaBuildType
-    locale: string
-    unmuteDelay: number
-    maxPhoneSpeakerRange: number
+    debug: boolean;
+    versionCheck: boolean;
+    buildType: YacaBuildType;
+    locale: string;
+    unmuteDelay: number;
+    maxPhoneSpeakerRange: number;
+    phoneHearPlayersNearby: false | "PHONE_SPEAKER" | true;
     notifications: {
-        oxLib: boolean
-        gta: boolean
-        redm: boolean
-        own: boolean
-    }
+      oxLib: boolean;
+      gta: boolean;
+      redm: boolean;
+      own: boolean;
+    };
     keyBinds: {
-        toggleRange: string | false
-        radioTransmit: string | false
-        megaphone: string | false
-    }
-    maxRadioChannels: number
+      toggleRange: string | false;
+      radioTransmit: string | false;
+      megaphone: string | false;
+    };
+    maxRadioChannels: number;
     voiceRange: {
-        defaultIndex: number
-        ranges: number[]
-        sendNotification: boolean
-        markerColor: {
-            enabled: boolean
-            r: number
-            g: number
-            b: number
-            a: number
-            duration: number
-        }
-    }
+      defaultIndex: number;
+      ranges: number[];
+      sendNotification: boolean;
+      markerColor: {
+        enabled: boolean;
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+        duration: number;
+      };
+    };
     megaphone: {
-        range: number
-        automaticVehicleDetection: boolean
-        allowedVehicleClasses: number[]
-        allowedVehicleModels: string[]
-    }
+      range: number;
+      automaticVehicleDetection: boolean;
+      allowedVehicleClasses: number[];
+      allowedVehicleModels: string[];
+    };
     saltyChatBridge: {
-        enabled: boolean
-        keyBinds: {
-            primaryRadio: string | false
-            secondaryRadio: string | false
-        }
-    }
-    vehicleMuffling: boolean
-    mufflingRange: number
-    mufflingVehicleWhitelist: string[]
+      enabled: boolean;
+      keyBinds: {
+        primaryRadio: string | false;
+        secondaryRadio: string | false;
+      };
+    };
+    vehicleMuffling: boolean;
+    mufflingRange: number;
+    mufflingVehicleWhitelist: string[];
     mufflingIntensities: {
-        differentRoom: number
-        bothCarsClosed: number
-        oneCarClosed: number
-        megaPhoneInCar: number
-    }
-    radioAntiSpamCooldown: number | false
-    useLocalLipSync: boolean
+      differentRoom: number;
+      bothCarsClosed: number;
+      oneCarClosed: number;
+      megaPhoneInCar: number;
+    };
+    radioAntiSpamCooldown: number | false;
+    useLocalLipSync: boolean;
 }
 
 export const defaultSharedConfig: YacaSharedConfig = {
@@ -65,6 +66,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     locale: 'en',
     unmuteDelay: 400,
     maxPhoneSpeakerRange: 5,
+    phoneHearPlayersNearby: false,
     notifications: {
         oxLib: false,
         gta: true,
