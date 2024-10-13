@@ -62,7 +62,7 @@ export class YaCAServerPhoneModle {
       }
     });
 
-    onNet("server:yaca:phoneSpeakerEmit", (enableForTargets?: number[], disableForTargets?: number[]) => {
+    onNet("server:yaca:phoneEmit", (enableForTargets?: number[], disableForTargets?: number[]) => {
       if (this.serverModule.sharedConfig.phoneHearPlayersNearby === false) {
         return;
       }
@@ -110,13 +110,13 @@ export class YaCAServerPhoneModle {
 
       if (enableReceive.size) {
         for (const target of enableReceive) {
-          emitNet("client:yaca:phoneSpeaker", target, enableForTargets, true);
+          emitNet("client:yaca:phoneHearAround", target, enableForTargets, true);
         }
       }
 
       if (disableReceive.size) {
         for (const target of disableReceive) {
-          emitNet("client:yaca:phoneSpeaker", target, disableForTargets, false);
+          emitNet("client:yaca:phoneHearAround", target, disableForTargets, false);
         }
       }
     });

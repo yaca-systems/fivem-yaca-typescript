@@ -40,7 +40,13 @@ export class YaCAClientPhoneModule {
       this.enablePhoneCall(targetIDs, state, filter);
     });
 
-    onNet("client:yaca:phoneSpeaker", (targetIDs: number[], state: boolean) => {
+    /**
+     * Handles the "client:yaca:phoneHearAround" server event.
+     *
+     * @param {number[]} targetIDs - The IDs of the targets.
+     * @param {boolean} state - The state of the phone hear around.
+     */
+    onNet("client:yaca:phoneHearAround", (targetIDs: number[], state: boolean) => {
       if (!targetIDs.length) {
         return;
       }
