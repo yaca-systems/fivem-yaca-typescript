@@ -68,9 +68,9 @@ export class YaCAClientModule {
   isSoundMuted = false;
   isSoundDisabled = false;
 
-  currentlyPhoneSpeakerApplied: Set<number> = new Set();
-  currentlySendingPhoneSpeakerSender: Set<number> = new Set();
-  phoneHearNearbyPlayer: Set<number> = new Set();
+  currentlyPhoneSpeakerApplied = new Set<number>();
+  currentlySendingPhoneSpeakerSender = new Set<number>();
+  phoneHearNearbyPlayer = new Set<number>();
 
   isFiveM = cache.game === "fivem";
   isRedM = cache.game === "redm";
@@ -1198,9 +1198,9 @@ export class YaCAClientModule {
   }
 
   /**
+   * Handles around phone emit.
    *
-   *
-   * @param playerToHearOnPhone
+   * @param playerToHearOnPhone - The players to hear on the phone.
    */
   handlePhoneEmit(playerToHearOnPhone: Set<number>) {
     switch (this.sharedConfig.phoneHearPlayersNearby) {
@@ -1296,21 +1296,13 @@ export class YaCAClientModule {
       }
 
       const distanceToPlayer = calculateDistanceVec3(localPos, playerPos);
+      const phoneSpeakerActive = this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size;
 
-      // Check if the player is in phone speaker range.
-      if (distanceToPlayer > this.sharedConfig.maxPhoneSpeakerRange) {
-        continue;
-      }
-
-      // Phone speaker handling - user who enabled it.
-      if (this.useWhisper && this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) {
-        playersToPhoneSpeaker.add(remoteId);
-      }
-
+      // Who can be heard on the phone.
       if (this.sharedConfig.phoneHearPlayersNearby !== false && !localData.mutedOnPhone && distanceToPlayer <= range) {
         switch (this.sharedConfig.phoneHearPlayersNearby) {
           case "PHONE_SPEAKER":
-            if (this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) {
+            if (phoneSpeakerActive) {
               playerToHearOnPhone.add(remoteId);
             }
             break;
@@ -1320,6 +1312,16 @@ export class YaCAClientModule {
             }
             break;
         }
+      }
+
+      // Check if the player is in phone speaker range.
+      if (distanceToPlayer > this.sharedConfig.maxPhoneSpeakerRange) {
+        continue;
+      }
+
+      // Phone speaker handling - user who enabled it.
+      if (this.useWhisper && phoneSpeakerActive) {
+        playersToPhoneSpeaker.add(remoteId);
       }
 
       // If no phone speaker is active, skip the rest.
