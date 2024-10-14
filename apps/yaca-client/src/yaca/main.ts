@@ -340,6 +340,8 @@ export class YaCAClientModule {
         return;
       }
 
+      this.phoneModule.removePhoneSpeakerFromEntity(target);
+
       const frequency = this.radioModule?.playersWithShortRange.get(target);
       if (frequency) {
         const channel = this.radioModule?.findRadioChannelByFrequency(frequency);
@@ -1348,6 +1350,10 @@ export class YaCAClientModule {
         });
 
         playersOnPhoneSpeaker.add(phoneCallMemberId);
+
+        if (this.currentlyPhoneSpeakerApplied.has(phoneCallMemberId)) {
+          continue;
+        }
 
         this.setPlayersCommType(
           phoneCallMember,
