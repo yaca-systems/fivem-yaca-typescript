@@ -151,11 +151,7 @@ export class YaCAClientPhoneModule {
     /**
      * Handles the "yaca:phone" state bag change.
      */
-    AddStateBagChangeHandler(PHONE_SPEAKER_STATE_NAME, "", (bagName: string, _: string, value: object | null, __: number, replicated: boolean) => {
-      if (replicated) {
-        return;
-      }
-
+    AddStateBagChangeHandler(PHONE_SPEAKER_STATE_NAME, "", (bagName: string, _: string, value: number | number[] | null) => {
       const playerId = GetPlayerFromStateBagName(bagName);
       if (playerId === 0) {
         return;
@@ -198,7 +194,15 @@ export class YaCAClientPhoneModule {
       playersToSet.push(phoneCallMember);
     }
 
-    this.clientModule.setPlayersCommType(playersToSet, YacaFilterEnum.PHONE_SPEAKER, false);
+    this.clientModule.setPlayersCommType(
+      playersToSet,
+      YacaFilterEnum.PHONE_SPEAKER,
+      false,
+      undefined,
+      undefined,
+      CommDeviceMode.RECEIVER,
+      CommDeviceMode.SENDER,
+    );
 
     delete entityData.phoneCallMemberIds;
   }

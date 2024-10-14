@@ -2,7 +2,7 @@ import { generateRandomName } from "../utils";
 import { DataObject, defaultServerConfig, defaultSharedConfig, ServerCache, YacaServerConfig, YacaSharedConfig } from "@yaca-voice/types";
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale, loadConfig, VOICE_RANGE_STATE_NAME } from "@yaca-voice/common";
-import { checkVersion } from "../utils/versioncheck";
+import { checkVersion } from "../utils";
 import { YaCAServerPhoneModle } from "./phone";
 import { YaCAServerRadioModule } from "./radio";
 import { YaCAServerMegaphoneModule } from "./megaphone";
@@ -118,7 +118,7 @@ export class YaCAServerModule {
         ingameName: name,
         mutedOnPhone: false,
         inCallWith: new Set<number>(),
-        emittedPhoneSpeaker: new Map<number, Set<number>>()
+        emittedPhoneSpeaker: new Map<number, Set<number>>(),
       },
       radioSettings: {
         activated: false,
