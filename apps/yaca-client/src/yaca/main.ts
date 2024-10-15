@@ -827,6 +827,7 @@ export class YaCAClientModule {
    * @param {number} range - The range for the communication. Optional.
    * @param {CommDeviceMode} ownMode - The mode for the player. Optional.
    * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
+   * @param {number} errorLevel - The error level for the communication. Optional.
    */
   setPlayersCommType(
     players: YacaPlayerData | YacaPlayerData[],
@@ -836,6 +837,7 @@ export class YaCAClientModule {
     range?: number | null,
     ownMode?: CommDeviceMode,
     otherPlayersMode?: CommDeviceMode,
+    errorLevel?: number | null,
   ) {
     if (!Array.isArray(players)) {
       players = [players];
@@ -854,10 +856,16 @@ export class YaCAClientModule {
         continue;
       }
 
-      clientIds.push({
+      const clientProtocol: YacaClient = {
         client_id: player.clientId,
         mode: otherPlayersMode,
-      });
+      };
+
+      if (typeof errorLevel !== "undefined" && errorLevel !== null) {
+        clientProtocol.errorLevel = errorLevel;
+      }
+
+      clientIds.push(clientProtocol);
     }
 
     const protocol: YacaProtocol = {
