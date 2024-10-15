@@ -277,6 +277,7 @@ export class YaCAClientPhoneModule {
       undefined,
       state || (!state && this.inCallWith.size) ? CommDeviceMode.TRANSCEIVER : undefined,
       CommDeviceMode.TRANSCEIVER,
+      GlobalState[PHONE_SPEAKER_STATE_NAME] ?? undefined,
     );
   }
 }

@@ -1,7 +1,14 @@
 import { generateRandomName } from "../utils";
 import { DataObject, defaultServerConfig, defaultSharedConfig, ServerCache, YacaServerConfig, YacaSharedConfig } from "@yaca-voice/types";
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
-import { initLocale, loadConfig, VOICE_RANGE_STATE_NAME } from "@yaca-voice/common";
+import {
+  getGlobalErrorLevel,
+  GLOBAL_ERROR_LEVEL_STATE_NAME,
+  initLocale,
+  loadConfig,
+  setGlobalErrorLevel,
+  VOICE_RANGE_STATE_NAME
+} from "@yaca-voice/common";
 import { checkVersion } from "../utils/versioncheck";
 import { YaCAServerPhoneModle } from "./phone";
 import { YaCAServerRadioModule } from "./radio";
@@ -87,6 +94,8 @@ export class YaCAServerModule {
     if (this.sharedConfig.versionCheck) {
       checkVersion().then();
     }
+
+    GlobalState.set(GLOBAL_ERROR_LEVEL_STATE_NAME, 0, true);
   }
 
   /**
@@ -163,6 +172,20 @@ export class YaCAServerModule {
      * @param {number} playerId - The ID of the player to set the voice range for.
      */
     exports("setPlayerVoiceRange", (playerId: number, range: number) => this.changeVoiceRange(playerId, range));
+
+    /**
+     * Set the global error level.
+     *
+     * @param {number} errorLevel - The new error level. Between 0 and 1.
+     */
+    exports("setGlobalErrorLevel", (errorLevel: number) => setGlobalErrorLevel(errorLevel));
+
+    /**
+     * Get the global error level.
+     *
+     * @returns {number} - The global error level.
+     */
+    exports("getGlobalErrorLevel", () => getGlobalErrorLevel());
   }
 
   /**
