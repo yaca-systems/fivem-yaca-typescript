@@ -1,6 +1,6 @@
 import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from "@yaca-voice/types";
-import { cache, calculateDistanceVec3, clamp, registerRdrKeyBind, requestAnimDict } from "../utils";
-import { locale } from "@yaca-voice/common";
+import { cache, calculateDistanceVec3, registerRdrKeyBind, requestAnimDict } from "../utils";
+import { clamp, GLOBAL_ERROR_LEVEL_STATE_NAME, locale } from "@yaca-voice/common";
 import { YaCAClientModule } from "./main";
 
 /**
@@ -236,8 +236,9 @@ export class YaCAClientRadioModule {
           if (this.clientModule.sharedConfig.radioTowers.enabled && ownDistanceToTower) {
             const ownSignalStrength = this.calculateSignalStrength(ownDistanceToTower);
             const senderSignalStrength = this.calculateSignalStrength(senderDistanceToTower);
+            const globalSignalError = GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? 0;
 
-            errorLevel = Math.max(ownSignalStrength, senderSignalStrength);
+            errorLevel = Math.max(ownSignalStrength, senderSignalStrength, globalSignalError);
           }
 
           this.clientModule.setPlayersCommType(

@@ -63,8 +63,9 @@ export class YaCAServerRadioModule {
      *
      * @param {boolean} state - The state of the radio.
      * @param {number} channel - The channel to change the talking state for.
+     * @param {number} distanceToTower - The distance to the tower.
      */
-    onNet("server:yaca:radioTalking", (state: boolean, channel: number, distanceToTower: number = -1) => {
+    onNet("server:yaca:radioTalking", (state: boolean, channel: number, distanceToTower = -1) => {
       this.radioTalkingState(source, state, channel, distanceToTower);
     });
 
