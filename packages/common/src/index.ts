@@ -2,6 +2,7 @@ export * from './constants'
 export * from './bridge'
 export * from './locale'
 export * from './config'
+export * from './errorlevel'
 
 /**
  * Sleeps for a given amount of time.
@@ -10,6 +11,17 @@ export * from './config'
  */
 export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms, null))
+}
+
+/**
+ * Clamps a value between a minimum and maximum value.
+ *
+ * @param {number} value - The value to be clamped.
+ * @param {number} [min=0] - The minimum value. Defaults to 0 if not provided.
+ * @param {number} [max=1] - The maximum value. Defaults to 1 if not provided.
+ */
+export function clamp(value: number, min = 0, max = 1) {
+    return Math.max(min, Math.min(max, value))
 }
 
 /**
