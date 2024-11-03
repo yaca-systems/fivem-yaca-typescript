@@ -63,9 +63,10 @@ export class YaCAServerRadioModule {
          *
          * @param {boolean} state - The state of the radio.
          * @param {number} channel - The channel to change the talking state for.
+         * @param {number} distanceToTower - The distance to the tower.
          */
-        onNet('server:yaca:radioTalking', (state: boolean, channel: number) => {
-            this.radioTalkingState(source, state, channel)
+        onNet('server:yaca:radioTalking', (state: boolean, channel: number, distanceToTower = -1) => {
+            this.radioTalkingState(source, state, channel, distanceToTower)
         })
 
         /**
@@ -341,8 +342,9 @@ export class YaCAServerRadioModule {
      * @param {number} src - The player to change the talking state for.
      * @param {boolean} state - The new talking state.
      * @param {number} channel - The channel to change the talking state for.
+     * @param {number} distanceToTower - The distance to the tower.
      */
-    radioTalkingState(src: number, state: boolean, channel: number) {
+    radioTalkingState(src: number, state: boolean, channel: number, distanceToTower: number) {
         const player = this.serverModule.getPlayer(src)
         if (!player || !player.radioSettings.activated) {
             return
@@ -393,7 +395,7 @@ export class YaCAServerRadioModule {
         }
 
         for (const target of targets) {
-            emitNet('client:yaca:radioTalking', target, src, radioFrequency, state, radioInfos)
+            emitNet('client:yaca:radioTalking', target, src, radioFrequency, state, radioInfos, false, distanceToTower)
         }
 
         if (this.serverConfig.useWhisper) {

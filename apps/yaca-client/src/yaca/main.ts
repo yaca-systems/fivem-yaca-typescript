@@ -1,4 +1,13 @@
-import { LIP_SYNC_STATE_NAME, MEGAPHONE_STATE_NAME, VOICE_RANGE_STATE_NAME, initLocale, loadConfig, locale } from '@yaca-voice/common'
+import {
+    GLOBAL_ERROR_LEVEL_STATE_NAME,
+    LIP_SYNC_STATE_NAME,
+    MEGAPHONE_STATE_NAME,
+    VOICE_RANGE_STATE_NAME,
+    clamp,
+    initLocale,
+    loadConfig,
+    locale,
+} from '@yaca-voice/common'
 import {
     CommDeviceMode,
     type DataObject,
@@ -20,7 +29,6 @@ import {
     WebSocket,
     cache,
     calculateDistanceVec3,
-    clamp,
     convertNumberArrayToXYZ,
     displayRdrNotification,
     getCamDirection,
@@ -202,6 +210,18 @@ export class YaCAClientModule {
 
                 SetPlayerTalkingOverride(playerId, value)
             })
+
+            /**
+             * Add a state bag change handler for the global error level state bag.
+             * Which is used to override the global error level.
+             */
+            AddStateBagChangeHandler(GLOBAL_ERROR_LEVEL_STATE_NAME, '', (_bagName: string, _key: string, _value: number, __: number, replicated: boolean) => {
+                if (replicated) {
+                    return
+                }
+
+                this.phoneModule.enablePhoneCall(Array.from(this.phoneModule.inCallWith), true)
+            })
         }
 
         if (this.sharedConfig.saltyChatBridge.enabled) {
@@ -261,6 +281,13 @@ export class YaCAClientModule {
          * @returns {YacaPluginStates} The current plugin state.
          */
         exports('getPluginState', () => this.currentPluginState ?? YacaPluginStates.NOT_CONNECTED)
+
+        /**
+         * Get the global error level.
+         *
+         * @returns {number} The global error level.
+         */
+        exports('getGlobalErrorLevel', () => GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? 0)
     }
 
     /**
@@ -322,7 +349,16 @@ export class YaCAClientModule {
             if (frequency) {
                 const channel = this.radioModule?.findRadioChannelByFrequency(frequency)
                 if (channel) {
-                    this.setPlayersCommType(player, YacaFilterEnum.RADIO, true, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER)
+                    this.setPlayersCommType(
+                        player,
+                        YacaFilterEnum.RADIO,
+                        true,
+                        channel,
+                        undefined,
+                        CommDeviceMode.RECEIVER,
+                        CommDeviceMode.SENDER,
+                        GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? undefined,
+                    )
                     this.saltyChatBridge?.handleRadioReceivingStateChange(true, channel)
                 }
             }
@@ -343,7 +379,16 @@ export class YaCAClientModule {
             if (frequency) {
                 const channel = this.radioModule?.findRadioChannelByFrequency(frequency)
                 if (channel) {
-                    this.setPlayersCommType(player, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER)
+                    this.setPlayersCommType(
+                        player,
+                        YacaFilterEnum.RADIO,
+                        false,
+                        channel,
+                        undefined,
+                        CommDeviceMode.RECEIVER,
+                        CommDeviceMode.SENDER,
+                        GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? undefined,
+                    )
 
                     if (this.saltyChatBridge) {
                         const inRadio = this.radioModule?.playersInRadioChannel.get(channel)
@@ -827,6 +872,7 @@ export class YaCAClientModule {
      * @param {number} range - The range for the communication. Optional.
      * @param {CommDeviceMode} ownMode - The mode for the player. Optional.
      * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
+     * @param {number} errorLevel - The error level for the communication. Optional.
      */
     setPlayersCommType(
         players: YacaPlayerData | YacaPlayerData[],
@@ -836,6 +882,7 @@ export class YaCAClientModule {
         range?: number | null,
         ownMode?: CommDeviceMode,
         otherPlayersMode?: CommDeviceMode,
+        errorLevel?: number | null,
     ) {
         if (!Array.isArray(players)) {
             players = [players]
@@ -854,10 +901,16 @@ export class YaCAClientModule {
                 continue
             }
 
-            clientIds.push({
+            const clientProtocol: YacaClient = {
                 client_id: player.clientId,
                 mode: otherPlayersMode,
-            })
+            }
+
+            if (typeof errorLevel !== 'undefined' && errorLevel !== null) {
+                clientProtocol.errorLevel = errorLevel
+            }
+
+            clientIds.push(clientProtocol)
         }
 
         const protocol: YacaProtocol = {
