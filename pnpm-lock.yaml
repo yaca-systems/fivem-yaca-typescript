@@ -16,7 +16,7 @@ importers:
         version: 0.24.0
       turbo:
         specifier: ^2.1.2
-        version: 2.1.2
+        version: 2.2.3
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -308,8 +308,18 @@ packages:
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
 
+  '@eslint-community/eslint-utils@4.4.1':
+    resolution: {integrity: sha512-s3O3waFUrMV8P/XaF/+ZTp1X9XBZW1a4B97ZnjQF2KYWaFD2A8KyFBsrsfSjEmjn3RGWAIuvlneuZm3CUK3jbA==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
+
   '@eslint-community/regexpp@4.11.1':
     resolution: {integrity: sha512-m4DVN9ZqskZoLU5GlWZadwDnYo3vAEydiUayB9widCl9ffWx2IvPnp6n3on5rJmziJSw9Bv+Z3ChDVdMwXCY8Q==}
+    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+
+  '@eslint-community/regexpp@4.12.1':
+    resolution: {integrity: sha512-CCZCDJuduB9OUkFkY2IgppNZMi2lBQgD2qzwXkEia16cge2pijY/aXi96CJMquDMn3nJdlPV1A5KrJEXwfLNzQ==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
 
   '@eslint/config-array@0.18.0':
@@ -332,16 +342,16 @@ packages:
     resolution: {integrity: sha512-BsWiH1yFGjXXS2yvrf5LyuoSIIbPrGUWob917o+BTKuZ7qJdxX8aJLRxs1fS9n6r7vESrq1OUqb68dANcFXuQQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@eslint/plugin-kit@0.2.0':
-    resolution: {integrity: sha512-vH9PiIMMwvhCx31Af3HiGzsVNULDbyVkHXwlemn/B0TFj/00ho3y55efXrUZTfQipxoHC5u4xq6zblww1zm1Ig==}
+  '@eslint/plugin-kit@0.2.2':
+    resolution: {integrity: sha512-CXtq5nR4Su+2I47WPOlWud98Y5Lv8Kyxp2ukhgFx/eW6Blm18VXJO5WuQylPugRo8nbluoi6GvvxBLqHcvqUUw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@humanwhocodes/module-importer@1.0.1':
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
     engines: {node: '>=12.22'}
 
-  '@humanwhocodes/retry@0.3.0':
-    resolution: {integrity: sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==}
+  '@humanwhocodes/retry@0.3.1':
+    resolution: {integrity: sha512-JBxkERygn7Bv/GbN5Rv8Ul6LVknS+5Bp6RgDC/O8gEBU/yeH5Ui5C/OlWrTb6qct7LjjfT6Re2NxB0ln0yYybA==}
     engines: {node: '>=18.18'}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -433,8 +443,8 @@ packages:
     peerDependencies:
       acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
 
-  acorn@8.12.1:
-    resolution: {integrity: sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==}
+  acorn@8.14.0:
+    resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -516,16 +526,16 @@ packages:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
     engines: {node: '>=10'}
 
-  eslint-scope@8.1.0:
-    resolution: {integrity: sha512-14dSvlhaVhKKsa9Fx1l8A17s7ah7Ef7wCakJ10LYk6+GYmP9yDti2oq2SEwcyndt6knfcZyhyxwY3i9yL78EQw==}
+  eslint-scope@8.2.0:
+    resolution: {integrity: sha512-PHlWUfG6lvPc3yvP5A4PNyBL1W8fkDUccmI21JUu/+GKZBoH/W5u6usENXUrWFRsyoW5ACUjFGgAFQp5gUlb/A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   eslint-visitor-keys@3.4.3:
     resolution: {integrity: sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  eslint-visitor-keys@4.1.0:
-    resolution: {integrity: sha512-Q7lok0mqMUSf5a/AdAZkA5a/gHcO6snwQClVNNvFKCAVlxXucdU8pKydU5ZVZjBx5xr37vGbFFWtLQYreLzrZg==}
+  eslint-visitor-keys@4.2.0:
+    resolution: {integrity: sha512-UyLnSehNt62FFhSwjZlHmeokpRK59rcz29j+F1/aDgbkbRTk7wIc9XzdoasMUbRNKDM0qQt/+BJ4BrpFeABemw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   eslint@9.11.1:
@@ -538,8 +548,8 @@ packages:
       jiti:
         optional: true
 
-  espree@10.2.0:
-    resolution: {integrity: sha512-upbkBJbckcCNBDBDXEbuhjbP68n+scUd3k/U2EkyM9nw+I/jPiL4cLF/Al06CF96wRltFda16sxDFrxsI1v0/g==}
+  espree@10.3.0:
+    resolution: {integrity: sha512-0QYC8b24HWY8zjRnDTL6RiHfDbAWn63qb4LMj1Z4b076A4une81+z03Kg7l7mn/48PUTqoLptSXez8oknU8Clg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   esquery@1.6.0:
@@ -802,38 +812,38 @@ packages:
     peerDependencies:
       typescript: '>=4.2.0'
 
-  turbo-darwin-64@2.1.2:
-    resolution: {integrity: sha512-3TEBxHWh99h2yIzkuIigMEOXt/ItYQp0aPiJjPd1xN4oDcsKK5AxiFKPH9pdtfIBzYsY59kQhZiFj0ELnSP7Bw==}
+  turbo-darwin-64@2.2.3:
+    resolution: {integrity: sha512-Rcm10CuMKQGcdIBS3R/9PMeuYnv6beYIHqfZFeKWVYEWH69sauj4INs83zKMTUiZJ3/hWGZ4jet9AOwhsssLyg==}
     cpu: [x64]
     os: [darwin]
 
-  turbo-darwin-arm64@2.1.2:
-    resolution: {integrity: sha512-he0miWNq2WxJzsH82jS2Z4MXpnkzn9SH8a79iPXiJkq25QREImucscM4RPasXm8wARp91pyysJMq6aasD45CeA==}
+  turbo-darwin-arm64@2.2.3:
+    resolution: {integrity: sha512-+EIMHkuLFqUdJYsA3roj66t9+9IciCajgj+DVek+QezEdOJKcRxlvDOS2BUaeN8kEzVSsNiAGnoysFWYw4K0HA==}
     cpu: [arm64]
     os: [darwin]
 
-  turbo-linux-64@2.1.2:
-    resolution: {integrity: sha512-fKUBcc0rK8Vdqv5a/E3CSpMBLG1bzwv+Q0Q83F8fG2ZfNCNKGbcEYABdonNZkkx141Rj03cZQFCgxu3MVEGU+A==}
+  turbo-linux-64@2.2.3:
+    resolution: {integrity: sha512-UBhJCYnqtaeOBQLmLo8BAisWbc9v9daL9G8upLR+XGj6vuN/Nz6qUAhverN4Pyej1g4Nt1BhROnj6GLOPYyqxQ==}
     cpu: [x64]
     os: [linux]
 
-  turbo-linux-arm64@2.1.2:
-    resolution: {integrity: sha512-sV8Bpmm0WiuxgbhxymcC7wSsuxfBBieI98GegSwbr/bs1ANAgzCg93urIrdKdQ3/b31zZxQwcaP4FBF1wx1Qdg==}
+  turbo-linux-arm64@2.2.3:
+    resolution: {integrity: sha512-hJYT9dN06XCQ3jBka/EWvvAETnHRs3xuO/rb5bESmDfG+d9yQjeTMlhRXKrr4eyIMt6cLDt1LBfyi+6CQ+VAwQ==}
     cpu: [arm64]
     os: [linux]
 
-  turbo-windows-64@2.1.2:
-    resolution: {integrity: sha512-wcmIJZI9ORT9ykHGliFE6kWRQrlH930QGSjSgWC8uFChFFuOyUlvC7ttcxuSvU9VqC7NF4C+GVAcFJQ8lTjN7g==}
+  turbo-windows-64@2.2.3:
+    resolution: {integrity: sha512-NPrjacrZypMBF31b4HE4ROg4P3nhMBPHKS5WTpMwf7wydZ8uvdEHpESVNMOtqhlp857zbnKYgP+yJF30H3N2dQ==}
     cpu: [x64]
     os: [win32]
 
-  turbo-windows-arm64@2.1.2:
-    resolution: {integrity: sha512-zdnXjrhk7YO6CP+Q5wPueEvOCLH4lDa6C4rrwiakcWcPgcQGbVozJlo4uaQ6awo8HLWQEvOwu84RkWTdLAc/Hw==}
+  turbo-windows-arm64@2.2.3:
+    resolution: {integrity: sha512-fnNrYBCqn6zgKPKLHu4sOkihBI/+0oYFr075duRxqUZ+1aLWTAGfHZLgjVeLh3zR37CVzuerGIPWAEkNhkWEIw==}
     cpu: [arm64]
     os: [win32]
 
-  turbo@2.1.2:
-    resolution: {integrity: sha512-Jb0rbU4iHEVQ18An/YfakdIv9rKnd3zUfSE117EngrfWXFHo3RndVH96US3GsT8VHpwTncPePDBT2t06PaFLrw==}
+  turbo@2.2.3:
+    resolution: {integrity: sha512-5lDvSqIxCYJ/BAd6rQGK/AzFRhBkbu4JHVMLmGh/hCb7U3CqSnr5Tjwfy9vc+/5wG2DJ6wttgAaA7MoCgvBKZQ==}
     hasBin: true
 
   type-check@0.4.0:
@@ -995,7 +1005,14 @@ snapshots:
       eslint: 9.11.1
       eslint-visitor-keys: 3.4.3
 
+  '@eslint-community/eslint-utils@4.4.1(eslint@9.11.1)':
+    dependencies:
+      eslint: 9.11.1
+      eslint-visitor-keys: 3.4.3
+
   '@eslint-community/regexpp@4.11.1': {}
+
+  '@eslint-community/regexpp@4.12.1': {}
 
   '@eslint/config-array@0.18.0':
     dependencies:
@@ -1011,7 +1028,7 @@ snapshots:
     dependencies:
       ajv: 6.12.6
       debug: 4.3.7
-      espree: 10.2.0
+      espree: 10.3.0
       globals: 14.0.0
       ignore: 5.3.2
       import-fresh: 3.3.0
@@ -1025,13 +1042,13 @@ snapshots:
 
   '@eslint/object-schema@2.1.4': {}
 
-  '@eslint/plugin-kit@0.2.0':
+  '@eslint/plugin-kit@0.2.2':
     dependencies:
       levn: 0.4.1
 
   '@humanwhocodes/module-importer@1.0.1': {}
 
-  '@humanwhocodes/retry@0.3.0': {}
+  '@humanwhocodes/retry@0.3.1': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -1140,11 +1157,11 @@ snapshots:
       '@typescript-eslint/types': 8.7.0
       eslint-visitor-keys: 3.4.3
 
-  acorn-jsx@5.3.2(acorn@8.12.1):
+  acorn-jsx@5.3.2(acorn@8.14.0):
     dependencies:
-      acorn: 8.12.1
+      acorn: 8.14.0
 
-  acorn@8.12.1: {}
+  acorn@8.14.0: {}
 
   ajv@6.12.6:
     dependencies:
@@ -1236,26 +1253,26 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-scope@8.1.0:
+  eslint-scope@8.2.0:
     dependencies:
       esrecurse: 4.3.0
       estraverse: 5.3.0
 
   eslint-visitor-keys@3.4.3: {}
 
-  eslint-visitor-keys@4.1.0: {}
+  eslint-visitor-keys@4.2.0: {}
 
   eslint@9.11.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.4.0(eslint@9.11.1)
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/eslint-utils': 4.4.1(eslint@9.11.1)
+      '@eslint-community/regexpp': 4.12.1
       '@eslint/config-array': 0.18.0
       '@eslint/core': 0.6.0
       '@eslint/eslintrc': 3.1.0
       '@eslint/js': 9.11.1
-      '@eslint/plugin-kit': 0.2.0
+      '@eslint/plugin-kit': 0.2.2
       '@humanwhocodes/module-importer': 1.0.1
-      '@humanwhocodes/retry': 0.3.0
+      '@humanwhocodes/retry': 0.3.1
       '@nodelib/fs.walk': 1.2.8
       '@types/estree': 1.0.6
       '@types/json-schema': 7.0.15
@@ -1264,9 +1281,9 @@ snapshots:
       cross-spawn: 7.0.3
       debug: 4.3.7
       escape-string-regexp: 4.0.0
-      eslint-scope: 8.1.0
-      eslint-visitor-keys: 4.1.0
-      espree: 10.2.0
+      eslint-scope: 8.2.0
+      eslint-visitor-keys: 4.2.0
+      espree: 10.3.0
       esquery: 1.6.0
       esutils: 2.0.3
       fast-deep-equal: 3.1.3
@@ -1287,11 +1304,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  espree@10.2.0:
+  espree@10.3.0:
     dependencies:
-      acorn: 8.12.1
-      acorn-jsx: 5.3.2(acorn@8.12.1)
-      eslint-visitor-keys: 4.1.0
+      acorn: 8.14.0
+      acorn-jsx: 5.3.2(acorn@8.14.0)
+      eslint-visitor-keys: 4.2.0
 
   esquery@1.6.0:
     dependencies:
@@ -1514,32 +1531,32 @@ snapshots:
     dependencies:
       typescript: 5.6.2
 
-  turbo-darwin-64@2.1.2:
+  turbo-darwin-64@2.2.3:
     optional: true
 
-  turbo-darwin-arm64@2.1.2:
+  turbo-darwin-arm64@2.2.3:
     optional: true
 
-  turbo-linux-64@2.1.2:
+  turbo-linux-64@2.2.3:
     optional: true
 
-  turbo-linux-arm64@2.1.2:
+  turbo-linux-arm64@2.2.3:
     optional: true
 
-  turbo-windows-64@2.1.2:
+  turbo-windows-64@2.2.3:
     optional: true
 
-  turbo-windows-arm64@2.1.2:
+  turbo-windows-arm64@2.2.3:
     optional: true
 
-  turbo@2.1.2:
+  turbo@2.2.3:
     optionalDependencies:
-      turbo-darwin-64: 2.1.2
-      turbo-darwin-arm64: 2.1.2
-      turbo-linux-64: 2.1.2
-      turbo-linux-arm64: 2.1.2
-      turbo-windows-64: 2.1.2
-      turbo-windows-arm64: 2.1.2
+      turbo-darwin-64: 2.2.3
+      turbo-darwin-arm64: 2.2.3
+      turbo-linux-64: 2.2.3
+      turbo-linux-arm64: 2.2.3
+      turbo-windows-64: 2.2.3
+      turbo-windows-arm64: 2.2.3
 
   type-check@0.4.0:
     dependencies:
