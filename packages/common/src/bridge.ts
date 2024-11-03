@@ -1,10 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint: no type for this callback
 export function saltyChatExport(method: string, cb: (...args: any[]) => void) {
-  on(
-    `__cfx_export_saltychat_${method}`,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (setCb: (...args: any[]) => void) => {
-      setCb(cb);
-    },
-  );
+    on(
+        `__cfx_export_saltychat_${method}`,
+        // biome-ignore lint: no type for this callback
+        (setCb: (...args: any[]) => void) => {
+            setCb(cb)
+        },
+    )
 }

@@ -1,11 +1,11 @@
-import { cache } from "./cache";
+import { cache } from './cache'
 
-export * from "./vectors";
-export * from "./websocket";
-export * from "./cache";
-export * from "./streaming";
-export * from "./vehicle";
-export * from "./redm";
+export * from './vectors'
+export * from './websocket'
+export * from './cache'
+export * from './streaming'
+export * from './vehicle'
+export * from './redm'
 
 /**
  * Clamps a value between a minimum and maximum value.
@@ -15,7 +15,7 @@ export * from "./redm";
  * @param {number} [max=1] - The maximum value. Defaults to 1 if not provided.
  */
 export function clamp(value: number, min = 0, max = 1) {
-  return Math.max(min, Math.min(max, value));
+    return Math.max(min, Math.min(max, value))
 }
 
 /**
@@ -28,7 +28,7 @@ export function clamp(value: number, min = 0, max = 1) {
  * @returns {number} The rounded number.
  */
 export function roundFloat(num: number, decimalPlaces = 17): number {
-  return parseFloat(num.toFixed(decimalPlaces));
+    return Number.parseFloat(num.toFixed(decimalPlaces))
 }
 
 /**
@@ -37,14 +37,14 @@ export function roundFloat(num: number, decimalPlaces = 17): number {
  * @returns {x: number, y: number, z: number} The direction vector.
  */
 export function getCamDirection(): { x: number; y: number; z: number } {
-  const rotVector = GetGameplayCamRot(0),
-    num = rotVector[2] * 0.0174532924,
-    num2 = rotVector[0] * 0.0174532924,
-    num3 = Math.abs(Math.cos(num2));
+    const rotVector = GetGameplayCamRot(0)
+    const num = rotVector[2] * 0.0174532924
+    const num2 = rotVector[0] * 0.0174532924
+    const num3 = Math.abs(Math.cos(num2))
 
-  return {
-    x: roundFloat(-Math.sin(num) * num3),
-    y: roundFloat(Math.cos(num) * num3),
-    z: roundFloat(GetEntityForwardVector(cache.ped)[2]),
-  };
+    return {
+        x: roundFloat(-Math.sin(num) * num3),
+        y: roundFloat(Math.cos(num) * num3),
+        z: roundFloat(GetEntityForwardVector(cache.ped)[2]),
+    }
 }
