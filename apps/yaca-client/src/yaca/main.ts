@@ -1205,23 +1205,21 @@ export class YaCAClientModule {
    * @param playerToHearOnPhone - The players to hear on the phone.
    */
   handlePhoneEmit(playerToHearOnPhone: Set<number>) {
-    switch (this.sharedConfig.phoneHearPlayersNearby) {
-      case false:
+    if (this.sharedConfig.phoneHearPlayersNearby === false) {
+      return;
+    } else if (this.sharedConfig.phoneHearPlayersNearby === "PHONE_SPEAKER") {
+      if (
+        !(
+          (this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) ||
+          ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCallWith.size) && this.phoneHearNearbyPlayer.size)
+        )
+      ) {
         return;
-      case "PHONE_SPEAKER":
-        if (
-          !(
-            (this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) ||
-            ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCallWith.size) && this.phoneHearNearbyPlayer.size)
-          )
-        ) {
-          return;
-        }
-        break;
-      case true:
-        if (!(this.phoneModule.inCallWith.size || (!this.phoneModule.inCallWith.size && this.phoneHearNearbyPlayer.size))) {
-          return;
-        }
+      }
+    } else if (this.sharedConfig.phoneHearPlayersNearby) {
+      if (!(this.phoneModule.inCallWith.size || (!this.phoneModule.inCallWith.size && this.phoneHearNearbyPlayer.size))) {
+        return;
+      }
     }
 
     const playersToNotHear = [...this.phoneHearNearbyPlayer].filter((playerId) => !playerToHearOnPhone.has(playerId));
@@ -1290,7 +1288,7 @@ export class YaCAClientModule {
           client_id: voiceSetting.clientId,
           position: convertNumberArrayToXYZ(playerPos),
           direction: convertNumberArrayToXYZ(playerDirection),
-          range: range,
+          range,
           is_underwater: isUnderwater,
           muffle_intensity: muffleIntensity,
           is_muted: voiceSetting.forceMuted ?? false,
@@ -1302,17 +1300,14 @@ export class YaCAClientModule {
 
       // Who can be heard on the phone.
       if (this.sharedConfig.phoneHearPlayersNearby !== false && !localData.mutedOnPhone && !voiceSetting.forceMuted && distanceToPlayer <= range) {
-        switch (this.sharedConfig.phoneHearPlayersNearby) {
-          case "PHONE_SPEAKER":
-            if (phoneSpeakerActive) {
-              playerToHearOnPhone.add(remoteId);
-            }
-            break;
-          case true:
-            if (this.phoneModule.inCallWith.size) {
-              playerToHearOnPhone.add(remoteId);
-            }
-            break;
+        if (this.sharedConfig.phoneHearPlayersNearby === "PHONE_SPEAKER") {
+          if (phoneSpeakerActive) {
+            playerToHearOnPhone.add(remoteId);
+          }
+        } else if (this.sharedConfig.phoneHearPlayersNearby) {
+          if (this.phoneModule.inCallWith.size) {
+            playerToHearOnPhone.add(remoteId);
+          }
         }
       }
 

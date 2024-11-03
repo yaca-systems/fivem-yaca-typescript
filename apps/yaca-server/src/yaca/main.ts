@@ -1,8 +1,7 @@
-import { generateRandomName } from "../utils";
+import { checkVersion, generateRandomName } from "../utils";
 import { DataObject, defaultServerConfig, defaultSharedConfig, ServerCache, YacaServerConfig, YacaSharedConfig } from "@yaca-voice/types";
 import { YaCAServerSaltyChatBridge } from "../bridge/saltychat";
 import { initLocale, loadConfig, VOICE_RANGE_STATE_NAME } from "@yaca-voice/common";
-import { checkVersion } from "../utils";
 import { YaCAServerPhoneModle } from "./phone";
 import { YaCAServerRadioModule } from "./radio";
 import { YaCAServerMegaphoneModule } from "./megaphone";
