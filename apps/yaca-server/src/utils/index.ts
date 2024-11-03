@@ -1,3 +1,3 @@
-export * from "./generator";
-export * from "./cache";
-export * from "./versioncheck";
+export * from './generator'
+export * from './cache'
+export * from './versioncheck'
