@@ -11,18 +11,15 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "typecheck": "turbo typecheck --env-mode=loose",
-    "lint": "turbo lint --env-mode=loose",
+    "format": "pnpm biome format --write",
+    "lint": "pnpm biome lint --write",
+    "check": "pnpm biome check --formatter-enabled=true --linter-enabled=true --organize-imports-enabled=true --write",
     "build": "turbo build --env-mode=loose",
     "dev": "turbo dev --env-mode=loose",
-    "create-resource": "turbo create-resource --env-mode=loose && node scripts/create-resource.js",
-    "format": "prettier --write \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
-    "ci:format": "prettier --check \"**/*.{mjs,cjs,js,ts,json,yml,yaml,md}\"",
-    "ci:lint": "turbo ci:lint --env-mode=loose"
+    "create-resource": "turbo create-resource --env-mode=loose && node scripts/create-resource.js"
   },
   "devDependencies": {
-    "@eslint/js": "^9.11.1",
-    "eslint": "^9.11.1",
-    "prettier": "^3.3.3",
+    "@biomejs/biome": "1.9.4",
     "turbo": "^2.1.2",
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.7.0",

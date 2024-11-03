@@ -1,8 +1,8 @@
 /// <reference types="@citizenfx/client" />
 
-import { YaCAClientModule } from "./yaca";
-import { initCache } from "./utils";
+import { initCache } from './utils'
+import { YaCAClientModule } from './yaca'
 
-initCache();
+initCache()
 
-new YaCAClientModule();
+new YaCAClientModule()

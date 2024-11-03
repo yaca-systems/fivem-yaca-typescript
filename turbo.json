@@ -7,15 +7,6 @@
     "typecheck": {
       "cache": false
     },
-    "lint": {
-      "cache": false
-    },
-    "ci:format": {
-      "cache": false
-    },
-    "ci:lint": {
-      "cache": false
-    },
     "dev": {
       "persistent": true,
       "cache": false

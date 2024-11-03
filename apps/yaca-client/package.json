@@ -6,9 +6,7 @@
   "scripts": {
     "build": "node build.js --mode=production",
     "dev": "node build.js",
-    "typecheck": "tsc --project tsconfig.json",
-    "lint": "eslint src --fix",
-    "ci:lint": "eslint src"
+    "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
     "eventemitter2": "^6.4.9"
