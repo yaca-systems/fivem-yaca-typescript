@@ -1301,7 +1301,7 @@ export class YaCAClientModule {
       const phoneSpeakerActive = this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size;
 
       // Who can be heard on the phone.
-      if (this.sharedConfig.phoneHearPlayersNearby !== false && !localData.mutedOnPhone && distanceToPlayer <= range) {
+      if (this.sharedConfig.phoneHearPlayersNearby !== false && !localData.mutedOnPhone && !voiceSetting.forceMuted && distanceToPlayer <= range) {
         switch (this.sharedConfig.phoneHearPlayersNearby) {
           case "PHONE_SPEAKER":
             if (phoneSpeakerActive) {
