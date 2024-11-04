@@ -16,6 +16,7 @@ export type YaCAPlayer = {
         ingameName: string
         mutedOnPhone: boolean
         inCallWith: Set<number>
+        emittedPhoneSpeaker: Map<number, Set<number>>
     }
     radioSettings: {
         activated: boolean
@@ -116,6 +117,7 @@ export class YaCAServerModule {
                 ingameName: name,
                 mutedOnPhone: false,
                 inCallWith: new Set<number>(),
+                emittedPhoneSpeaker: new Map<number, Set<number>>(),
             },
             radioSettings: {
                 activated: false,

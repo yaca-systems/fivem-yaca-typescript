@@ -1,5 +1,6 @@
 import { locale } from '@yaca-voice/common'
 import { YacaNotificationType, type YacaServerConfig, type YacaSharedConfig } from '@yaca-voice/types'
+import { triggerClientEvent } from '../utils/events'
 import type { YaCAServerModule } from './main'
 
 /**
@@ -279,15 +280,10 @@ export class YaCAServerRadioModule {
             allTargets.push(key)
         }
 
-        if (!this.serverConfig.useWhisper) {
-            for (const target of playersArray) {
-                if (player.voicePlugin) {
-                    emitNet('client:yaca:leaveRadioChannel', target, player.voicePlugin.clientId, frequency)
-                }
-            }
-        }
         if (this.serverConfig.useWhisper) {
             emitNet('client:yaca:radioTalking', src, allTargets, frequency, false, null, true)
+        } else if (player.voicePlugin) {
+            triggerClientEvent('client:yaca:leaveRadioChannel', playersArray, player.voicePlugin.clientId, frequency)
         }
 
         allPlayersInChannel.delete(src)

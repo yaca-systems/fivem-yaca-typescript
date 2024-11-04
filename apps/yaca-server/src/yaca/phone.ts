@@ -1,5 +1,6 @@
 import { PHONE_SPEAKER_STATE_NAME } from '@yaca-voice/common'
 import { YacaFilterEnum } from '@yaca-voice/types'
+import { triggerClientEvent } from '../utils/events'
 import type { YaCAServerModule } from './main'
 
 /**
@@ -30,13 +31,13 @@ export class YaCAServerPhoneModle {
          * @param {number[]} enableForTargets - The IDs of the players to enable the phone speaker for.
          * @param {number[]} disableForTargets - The IDs of the players to disable the phone speaker for.
          */
-        onNet('server:yaca:phoneSpeakerEmit', (enableForTargets?: number[], disableForTargets?: number[]) => {
+        onNet('server:yaca:phoneSpeakerEmitWhisper', (enableForTargets?: number[], disableForTargets?: number[]) => {
             const player = this.serverModule.players.get(source)
             if (!player) {
                 return
             }
 
-            const sendTo = new Set<number>()
+            const targets = new Set<number>()
 
             for (const callTarget of player.voiceSettings.inCallWith) {
                 const target = this.serverModule.players.get(callTarget)
@@ -44,19 +45,73 @@ export class YaCAServerPhoneModle {
                     continue
                 }
 
-                sendTo.add(callTarget)
+                targets.add(callTarget)
             }
 
+            if (targets.size && enableForTargets?.length) {
+                triggerClientEvent('client:yaca:playersToPhoneSpeakerEmitWhisper', Array.from(targets), enableForTargets, true)
+            }
+
+            if (targets.size && disableForTargets?.length) {
+                triggerClientEvent('client:yaca:playersToPhoneSpeakerEmitWhisper', Array.from(targets), disableForTargets, false)
+            }
+        })
+
+        /**
+         * Handles the "server:yaca:phoneEmit" event.
+         *
+         * @param {number[]} enableForTargets - The IDs of the players to enable the phone speaker for.
+         * @param {number[]} disableForTargets - The IDs of the players to disable the phone speaker for.
+         */
+        onNet('server:yaca:phoneEmit', (enableForTargets?: number[], disableForTargets?: number[]) => {
+            if (!this.serverModule.sharedConfig.phoneHearPlayersNearby) return
+
+            const player = this.serverModule.players.get(source)
+            if (!player) {
+                return
+            }
+
+            const enableReceive = new Set<number>()
+            const disableReceive = new Set<number>()
+
             if (enableForTargets?.length) {
-                for (const target of sendTo) {
-                    emitNet('client:yaca:playersToPhoneSpeakerEmit', target, enableForTargets, true)
+                for (const callTarget of player.voiceSettings.inCallWith) {
+                    const target = this.serverModule.players.get(callTarget)
+                    if (!target) continue
+
+                    enableReceive.add(callTarget)
+
+                    for (const targetID of enableForTargets) {
+                        const map = player.voiceSettings.emittedPhoneSpeaker
+                        const set = map.get(targetID) ?? new Set<number>()
+                        set.add(callTarget)
+                        map.set(targetID, set)
+                    }
                 }
             }
 
             if (disableForTargets?.length) {
-                for (const target of sendTo) {
-                    emitNet('client:yaca:playersToPhoneSpeakerEmit', target, disableForTargets, false)
+                for (const targetID of disableForTargets) {
+                    const emittedFor = player.voiceSettings.emittedPhoneSpeaker.get(targetID)
+                    if (!emittedFor) continue
+
+                    for (const emittedTarget of emittedFor) {
+                        const target = this.serverModule.players.get(emittedTarget)
+                        if (!target) continue
+
+                        disableReceive.add(emittedTarget)
+                    }
+
+                    player.voiceSettings.emittedPhoneSpeaker.delete(targetID)
                 }
+            }
+
+            if (enableReceive.size && enableForTargets?.length) {
+                triggerClientEvent('client:yaca:phoneHearAround', Array.from(enableReceive), enableForTargets, true)
+            }
+
+            if (disableReceive.size && disableForTargets?.length) {
+                triggerClientEvent('client:yaca:phoneHearAround', Array.from(disableReceive), disableForTargets, false)
             }
         })
     }

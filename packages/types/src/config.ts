@@ -7,6 +7,7 @@ export interface YacaSharedConfig {
     locale: string
     unmuteDelay: number
     maxPhoneSpeakerRange: number
+    phoneHearPlayersNearby: false | 'PHONE_SPEAKER' | true
     notifications: {
         oxLib: boolean
         gta: boolean
@@ -65,6 +66,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     locale: 'en',
     unmuteDelay: 400,
     maxPhoneSpeakerRange: 5,
+    phoneHearPlayersNearby: false,
     notifications: {
         oxLib: false,
         gta: true,
