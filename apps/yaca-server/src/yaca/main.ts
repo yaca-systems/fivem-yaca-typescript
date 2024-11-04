@@ -198,14 +198,10 @@ export class YaCAServerModule {
      * @param {number} src - The source-id of the player who disconnected.
      */
     handlePlayerDisconnect(src: number) {
-        console.log(`YaCA: Player ${src} disconnected.`)
-
         const player = this.players.get(src)
         if (!player) {
             return
         }
-
-        console.log('player', player)
 
         this.nameSet.delete(player.voiceSettings?.ingameName)
 

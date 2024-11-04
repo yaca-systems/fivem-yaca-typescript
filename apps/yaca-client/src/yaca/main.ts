@@ -1036,7 +1036,7 @@ export class YaCAClientModule {
             return
         }
 
-        let talkData: { clientId: number; isTalking: string }
+        let talkData: { clientId: number; isTalking: boolean }
 
         try {
             talkData = JSON.parse(payload.message)
@@ -1057,13 +1057,7 @@ export class YaCAClientModule {
             return
         }
 
-        const ped = GetPlayerPed(playerId)
-
-        if (ped === 0) {
-            return
-        }
-
-        this.syncLipsPlayer(ped, playerId, talkData.isTalking === '1')
+        SetPlayerTalkingOverride(playerId, talkData.isTalking)
     }
 
     /**
