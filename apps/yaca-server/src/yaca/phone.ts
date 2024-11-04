@@ -97,7 +97,6 @@ export class YaCAServerPhoneModle {
 
                     for (const emittedTarget of emittedFor) {
                         const target = this.serverModule.players.get(emittedTarget)
-                        console.log('server:yaca:phoneEmit', emittedTarget, target)
                         if (!target) continue
 
                         disableReceive.add(emittedTarget)
