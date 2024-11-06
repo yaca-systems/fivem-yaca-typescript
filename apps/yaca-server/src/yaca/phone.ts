@@ -26,7 +26,7 @@ export class YaCAServerPhoneModle {
      */
     registerEvents() {
         /**
-         * Handles the "server:yaca:phoneSpeakerEmit" event.
+         * Handles the "server:yaca:phoneSpeakerEmitWhisper" event.
          *
          * @param {number[]} enableForTargets - The IDs of the players to enable the phone speaker for.
          * @param {number[]} disableForTargets - The IDs of the players to disable the phone speaker for.
@@ -97,6 +97,7 @@ export class YaCAServerPhoneModle {
 
                     for (const emittedTarget of emittedFor) {
                         const target = this.serverModule.players.get(emittedTarget)
+                        console.log('server:yaca:phoneEmit', emittedTarget, target)
                         if (!target) continue
 
                         disableReceive.add(emittedTarget)
@@ -107,11 +108,29 @@ export class YaCAServerPhoneModle {
             }
 
             if (enableReceive.size && enableForTargets?.length) {
-                triggerClientEvent('client:yaca:phoneHearAround', Array.from(enableReceive), enableForTargets, true)
+                const enableForTargetsData = new Set<number>()
+
+                for (const enableTarget of enableForTargets) {
+                    const target = this.serverModule.players.get(enableTarget)
+                    if (!target || !target.voicePlugin) continue
+
+                    enableForTargetsData.add(target.voicePlugin.clientId)
+                }
+
+                triggerClientEvent('client:yaca:phoneHearAround', Array.from(enableReceive), Array.from(enableForTargetsData), true)
             }
 
             if (disableReceive.size && disableForTargets?.length) {
-                triggerClientEvent('client:yaca:phoneHearAround', Array.from(disableReceive), disableForTargets, false)
+                const disableForTargetsData = new Set<number>()
+
+                for (const disableTarget of disableForTargets) {
+                    const target = this.serverModule.players.get(disableTarget)
+                    if (!target || !target.voicePlugin) continue
+
+                    disableForTargetsData.add(target.voicePlugin.clientId)
+                }
+
+                triggerClientEvent('client:yaca:phoneHearAround', Array.from(disableReceive), Array.from(disableForTargetsData), false)
             }
         })
     }
