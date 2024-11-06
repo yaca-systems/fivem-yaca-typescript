@@ -43,19 +43,13 @@ export class YaCAClientPhoneModule {
         /**
          * Handles the "client:yaca:phoneHearAround" server event.
          *
-         * @param {number[]} targetIDs - The IDs of the targets.
+         * @param {number[]} targetClientIds - The IDs of the targets.
          * @param {boolean} state - The state of the phone hear around.
          */
-        onNet('client:yaca:phoneHearAround', (targetIDs: number[], state: boolean) => {
-            if (!targetIDs.length) return
+        onNet('client:yaca:phoneHearAround', (targetClientIds: number[], state: boolean) => {
+            if (!targetClientIds.length) return
 
-            const commTargets = []
-            for (const targetID of targetIDs) {
-                const target = this.clientModule.getPlayerByID(targetID)
-                if (!target) continue
-
-                commTargets.push(target)
-            }
+            const commTargets = Array.from(targetClientIds).map((clientId) => ({ clientId }))
 
             this.clientModule.setPlayersCommType(
                 commTargets,
@@ -115,7 +109,7 @@ export class YaCAClientPhoneModule {
                 playerIDs = [playerIDs]
             }
 
-            const targets: Set<YacaPlayerData> = new Set()
+            const targets = new Set<YacaPlayerData>()
             for (const playerID of playerIDs) {
                 const player = this.clientModule.getPlayerByID(playerID)
                 if (!player) {

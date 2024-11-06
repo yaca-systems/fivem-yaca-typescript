@@ -2,6 +2,7 @@ import { VOICE_RANGE_STATE_NAME, initLocale, loadConfig } from '@yaca-voice/comm
 import { type DataObject, type ServerCache, type YacaServerConfig, type YacaSharedConfig, defaultServerConfig, defaultSharedConfig } from '@yaca-voice/types'
 import { YaCAServerSaltyChatBridge } from '../bridge/saltychat'
 import { checkVersion, generateRandomName } from '../utils'
+import { triggerClientEvent } from '../utils/events'
 import { YaCAServerMegaphoneModule } from './megaphone'
 import { YaCAServerPhoneModle } from './phone'
 import { YaCAServerRadioModule } from './radio'
@@ -171,7 +172,7 @@ export class YaCAServerModule {
      */
     registerEvents() {
         // FiveM: player dropped
-        on('playerDropped', () => {
+        on('playerDropped', (_reason: string) => {
             this.handlePlayerDisconnect(source)
         })
 
@@ -197,10 +198,14 @@ export class YaCAServerModule {
      * @param {number} src - The source-id of the player who disconnected.
      */
     handlePlayerDisconnect(src: number) {
+        console.log(`YaCA: Player ${src} disconnected.`)
+
         const player = this.players.get(src)
         if (!player) {
             return
         }
+
+        console.log('player', player)
 
         this.nameSet.delete(player.voiceSettings?.ingameName)
 
@@ -210,6 +215,15 @@ export class YaCAServerModule {
             if (!value.size) {
                 this.radioModule.radioFrequencyMap.delete(key)
             }
+        }
+
+        for (const [targetId, emitterTargets] of player.voiceSettings.emittedPhoneSpeaker) {
+            const target = this.players.get(targetId)
+            if (!target || !target.voicePlugin) {
+                continue
+            }
+
+            triggerClientEvent('client:yaca:phoneHearAround', Array.from(emitterTargets), [target.voicePlugin.clientId], false)
         }
 
         emitNet('client:yaca:disconnect', -1, src)

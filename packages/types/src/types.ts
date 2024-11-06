@@ -29,10 +29,10 @@ export interface YacaSoundStateMessage {
 }
 
 export interface YacaPlayerData {
-    remoteID?: number
-    clientId?: number
-    forceMuted?: boolean
-    mutedOnPhone?: boolean
+    remoteID: number
+    clientId: number
+    forceMuted: boolean
+    mutedOnPhone: boolean
     phoneCallMemberIds?: number[]
 }
 

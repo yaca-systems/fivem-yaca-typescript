@@ -429,8 +429,8 @@ export class YaCAClientModule {
          *
          */
         onNet('client:yaca:disconnect', (remoteId: number) => {
-            this.allPlayers.delete(remoteId)
             this.phoneModule.handleDisconnect(remoteId)
+            this.allPlayers.delete(remoteId)
         })
 
         /**
@@ -697,13 +697,10 @@ export class YaCAClientModule {
      */
     setPlayerVariable(player: number, variable: string, value: unknown) {
         const currentData = this.getPlayerByID(player)
-
-        if (!currentData) {
-            this.allPlayers.set(player, {})
-        }
+        if (!currentData) return
 
         // @ts-expect-error Object cannot be undefined
-        this.getPlayerByID(player)[variable] = value
+        currentData[variable] = value
     }
 
     /**
@@ -832,7 +829,7 @@ export class YaCAClientModule {
      * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
      */
     setPlayersCommType(
-        players: YacaPlayerData | YacaPlayerData[],
+        players: { clientId: number } | { clientId: number }[],
         type: YacaFilterEnum,
         state: boolean,
         channel?: number | null,
