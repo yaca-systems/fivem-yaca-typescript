@@ -68,8 +68,7 @@ function initCache() {
  * @param key - The cache key to listen for.
  * @param cb - The callback to execute when the cache updates.
  */
-// biome-ignore lint: has to be any because of the way the function is used
-export const onCache = <T = any>(key: keyof ClientCache, cb: (value: T) => void) => {
+export const onCache = <T = never>(key: keyof ClientCache, cb: (value: T) => void) => {
   on(`yaca:cache:${key}`, cb)
 }
 

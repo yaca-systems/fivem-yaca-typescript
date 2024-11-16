@@ -26,8 +26,7 @@ export const checkVersion = async () => {
     return
   }
 
-  // biome-ignore lint: no type for this api response
-  const data = (await response.json()) as any
+  const data = (await response.json()) as { tag_name: string; html_url: string }
 
   const latestVersion = data.tag_name
   if (!latestVersion && latestVersion === currentVersion) {
