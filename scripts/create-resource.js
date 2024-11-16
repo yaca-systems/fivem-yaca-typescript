@@ -3,8 +3,8 @@ import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writ
 console.log('Building resource...')
 
 if (existsSync('resource')) {
-    console.log('Removing existing resource directory...')
-    rmSync('resource', { recursive: true })
+  console.log('Removing existing resource directory...')
+  rmSync('resource', { recursive: true })
 }
 
 mkdirSync('resource')
@@ -20,8 +20,8 @@ copyFileSync('apps/yaca-server/dist/server.js', 'resource/yaca-voice/dist/server
 const packageJson = JSON.parse(readFileSync('package.json', { encoding: 'utf8' }))
 
 writeFileSync(
-    'resource/yaca-voice/fxmanifest.lua',
-    `fx_version 'cerulean'
+  'resource/yaca-voice/fxmanifest.lua',
+  `fx_version 'cerulean'
 games { 'gta5', 'rdr3' }
 rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships.'
 
@@ -54,11 +54,11 @@ provide 'saltychat'
 )
 
 if (existsSync('config/yaca-voice/shared.json')) {
-    copyFileSync('config/yaca-voice/shared.json', 'resource/yaca-voice/config/shared.json')
+  copyFileSync('config/yaca-voice/shared.json', 'resource/yaca-voice/config/shared.json')
 }
 
 if (existsSync('config/yaca-voice/server.json')) {
-    copyFileSync('config/yaca-voice/server.json', 'resource/yaca-voice/config/server.json')
+  copyFileSync('config/yaca-voice/server.json', 'resource/yaca-voice/config/server.json')
 }
 
 copyFileSync('README.md', 'resource/yaca-voice/README.md')
