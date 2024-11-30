@@ -10,7 +10,7 @@ export function hasWindow(vehicle: number, windowId: number): boolean {
     case 0:
       return GetEntityBoneIndexByName(vehicle, 'window_lf') !== -1
     case 1:
-      return GetEntityBoneIndexByName(vehicle, 'window_rf') !== -1
+      return GetEntityBoneIndexByName(vehicle, 'window_rf') !== -1 || GetEntityBoneIndexByName(vehicle, 'wiindow_rf') !== -1
     case 2:
       return GetEntityBoneIndexByName(vehicle, 'window_lr') !== -1
     case 3:
