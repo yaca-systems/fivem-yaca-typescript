@@ -336,6 +336,7 @@ export class YaCAClientRadioModule {
       channelSettings.muted = state
       emit('yaca:external:setRadioMuteState', channel, state)
       this.disableRadioFromPlayerInChannel(channel)
+      this.updateRadioChannelData(channel)
     })
 
     /**
@@ -479,6 +480,7 @@ export class YaCAClientRadioModule {
       if (state && !this.radioInitialized) {
         this.radioInitialized = true
         this.initRadioSettings()
+        this.updateRadioChannelData(this.activeRadioChannel)
       }
 
       emit('yaca:external:isRadioEnabled', state)
@@ -613,6 +615,7 @@ export class YaCAClientRadioModule {
 
     emit('yaca:external:changedActiveRadioChannel', channel)
     this.activeRadioChannel = channel
+    this.updateRadioChannelData(this.activeRadioChannel)
 
     return true
   }
@@ -689,6 +692,7 @@ export class YaCAClientRadioModule {
     // Prevent duplicate update, cuz mute has its own update
     if (channelSettings.volume > 0) {
       emit('yaca:external:setRadioVolume', channel, channelSettings.volume)
+      this.updateRadioChannelData(channel)
     }
 
     // Send update to voice plugin
@@ -990,5 +994,18 @@ export class YaCAClientRadioModule {
   sendRadioRequestToServer(channel: number) {
     const distanceToTower = this.getNearestRadioTower()?.distance ?? -1
     emitNet('server:yaca:radioTalking', true, channel, distanceToTower)
+  }
+
+
+  /**
+   * Updates the data of the specified radio channel if certain conditions are met.
+   *
+   * @param {number} channel - The number of the radio channel to update.
+   */
+  updateRadioChannelData(channel: number) {
+    if (channel !== this.activeRadioChannel || typeof exports['yaca-ui'] === 'undefined' || typeof exports['yaca-ui'].setRadioChannelData === 'undefined')
+      return
+
+    exports['yaca-ui'].setRadioChannelData(this.radioChannelSettings.get(channel))
   }
 }

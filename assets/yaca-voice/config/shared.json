@@ -19,7 +19,7 @@
     "megaphone": "B"
   },
   "radioSettings": {
-    "channelCount": 6,
+    "channelCount": 9,
     "mode": "Tower",
     "maxDistance": 5000,
     "towerPositions": [
