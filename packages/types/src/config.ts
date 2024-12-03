@@ -78,7 +78,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     radioTransmit: 'CAPITAL',
     megaphone: 'B',
   },
-  maxRadioChannels: 6,
+  maxRadioChannels: 9,
   voiceRange: {
     defaultIndex: 2,
     ranges: [1, 3, 8, 15, 20, 25, 30, 40],
