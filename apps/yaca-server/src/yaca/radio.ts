@@ -68,15 +68,6 @@ export class YaCAServerRadioModule {
     onNet('server:yaca:radioTalking', (state: boolean, channel: number) => {
       this.radioTalkingState(source, state, channel)
     })
-
-    /**
-     * Handles the "server:yaca:changeActiveRadioChannel" server event.
-     *
-     * @param {number} channel - The channel to change the frequency of.
-     */
-    onNet('server:yaca:changeActiveRadioChannel', (channel: number) => {
-      this.radioActiveChannelChange(source, channel)
-    })
   }
 
   /**
@@ -182,7 +173,7 @@ export class YaCAServerRadioModule {
 
     player.radioSettings.activated = state
 
-    if (this.serverModule.sharedConfig.saltyChatBridge.enabled) {
+    if (this.serverModule.sharedConfig.saltyChatBridge) {
       player.radioSettings.hasLong = true
     }
 
@@ -313,22 +304,6 @@ export class YaCAServerRadioModule {
     foundPlayer.muted = !foundPlayer.muted
     emitNet('client:yaca:setRadioMuteState', src, channel, foundPlayer.muted)
     emit('yaca:external:changedRadioMuteState', src, channel, foundPlayer.muted)
-  }
-
-  /**
-   * Change the active radio channel for a player.
-   *
-   * @param {number} src - The player to change the active channel for.
-   * @param {number} channel - The new active channel.
-   */
-  radioActiveChannelChange(src: number, channel: number) {
-    const player = this.serverModule.getPlayer(src)
-    if (!player || Number.isNaN(channel) || channel < 1 || channel > this.sharedConfig.maxRadioChannels) {
-      return
-    }
-
-    player.radioSettings.currentChannel = channel
-    emit('yaca:external:changedRadioActiveChannel', src, channel)
   }
 
   /**

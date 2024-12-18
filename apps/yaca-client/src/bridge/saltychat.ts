@@ -1,6 +1,6 @@
-import { locale, saltyChatExport, sleep } from '@yaca-voice/common'
+import { saltyChatExport, sleep } from '@yaca-voice/common'
 import { YacaPluginStates } from '@yaca-voice/types'
-import { cache, registerRdrKeyBind } from '../utils'
+import { cache } from '../utils'
 import type { YaCAClientModule } from '../yaca'
 
 /**
@@ -25,11 +25,6 @@ export class YaCAClientSaltyChatBridge {
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule
 
-    if (this.clientModule.isFiveM) {
-      this.registerSaltyChatKeyBinds()
-    } else if (this.clientModule.isRedM) {
-      this.registerSaltyChatRdrKeyBinds()
-    }
     this.registerSaltyChatExports()
     this.enableRadio().then()
 
@@ -53,83 +48,6 @@ export class YaCAClientSaltyChatBridge {
     }
 
     this.clientModule.radioModule.enableRadio(true)
-  }
-
-  /**
-   * Register the keybindings for the saltychat bridge.
-   * This is for FiveM.
-   */
-  registerSaltyChatKeyBinds() {
-    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio !== false) {
-      RegisterCommand(
-        '+primaryRadio',
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(true, 1)
-        },
-        false,
-      )
-      RegisterCommand(
-        '-primaryRadio',
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(false, 1)
-        },
-        false,
-      )
-      RegisterKeyMapping('+primaryRadio', locale('use_salty_primary_radio'), 'keyboard', this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio)
-    }
-
-    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio !== false) {
-      RegisterCommand(
-        '+secondaryRadio',
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(true, 2)
-        },
-        false,
-      )
-      RegisterCommand(
-        '-secondaryRadio',
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(false, 2)
-        },
-        false,
-      )
-      RegisterKeyMapping(
-        '+secondaryRadio',
-        locale('use_salty_secondary_radio'),
-        'keyboard',
-        this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio,
-      )
-    }
-  }
-
-  /**
-   * Register the keybindings for the saltychat bridge.
-   * This is for RedM.
-   */
-  registerSaltyChatRdrKeyBinds() {
-    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio !== false) {
-      registerRdrKeyBind(
-        this.clientModule.sharedConfig.saltyChatBridge.keyBinds.primaryRadio,
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(true, 1)
-        },
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(false, 1)
-        },
-      )
-    }
-
-    if (this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio !== false) {
-      registerRdrKeyBind(
-        this.clientModule.sharedConfig.saltyChatBridge.keyBinds.secondaryRadio,
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(true, 2)
-        },
-        () => {
-          this.clientModule.radioModule.radioTalkingStart(false, 2)
-        },
-      )
-    }
   }
 
   /**
