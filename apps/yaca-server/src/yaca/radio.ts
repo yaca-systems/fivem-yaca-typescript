@@ -207,7 +207,7 @@ export class YaCAServerRadioModule {
             return
         }
 
-        if (Number.isNaN(channel) || channel < 1 || channel > this.sharedConfig.maxRadioChannels) {
+        if (Number.isNaN(channel) || channel < 1 || channel > this.sharedConfig.radioSettings.channelCount) {
             emitNet('client:yaca:notification', src, locale('radio_channel_invalid'), YacaNotificationType.ERROR)
             return
         }
@@ -328,7 +328,7 @@ export class YaCAServerRadioModule {
      */
     radioActiveChannelChange(src: number, channel: number) {
         const player = this.serverModule.getPlayer(src)
-        if (!player || Number.isNaN(channel) || channel < 1 || channel > this.sharedConfig.maxRadioChannels) {
+        if (!player || Number.isNaN(channel) || channel < 1 || channel > this.sharedConfig.radioSettings.channelCount) {
             return
         }
 
@@ -395,7 +395,7 @@ export class YaCAServerRadioModule {
         }
 
         for (const target of targets) {
-            emitNet('client:yaca:radioTalking', target, src, radioFrequency, state, radioInfos, false, distanceToTower)
+            emitNet('client:yaca:radioTalking', target, src, radioFrequency, state, radioInfos, false, distanceToTower, GetEntityCoords(src))
         }
 
         if (this.serverConfig.useWhisper) {

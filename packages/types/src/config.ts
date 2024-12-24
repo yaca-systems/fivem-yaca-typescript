@@ -18,11 +18,11 @@ export interface YacaSharedConfig {
         radioTransmit: string | false
         megaphone: string | false
     }
-    maxRadioChannels: number
-    radioTowers: {
-        enabled: boolean
+    radioSettings: {
+        channelCount: number
+        mode: 'None' | 'Direct' | 'Tower'
         maxDistance: number
-        positions: [number, number, number][]
+        towerPositions: [number, number, number][]
     }
     voiceRange: {
         defaultIndex: number
@@ -81,11 +81,11 @@ export const defaultSharedConfig: YacaSharedConfig = {
         radioTransmit: 'CAPITAL',
         megaphone: 'B',
     },
-    maxRadioChannels: 6,
-    radioTowers: {
-        enabled: true,
+    radioSettings: {
+        channelCount: 6,
+        mode: 'None',
         maxDistance: 1000,
-        positions: [
+        towerPositions: [
             [2572, 5397, 56],
             [2663, 4972, 56],
             [2892, 3911, 56],

@@ -16,11 +16,11 @@
     "radioTransmit": "CAPITAL",
     "megaphone": "B"
   },
-  "maxRadioChannels": 6,
-  "radioTowers": {
-    "enabled": true,
+  "radioSettings": {
+    "channelCount": 6,
+    "mode": "Tower",
     "maxDistance": 5000,
-    "positions": [
+    "towerPositions": [
       [2572, 5397, 56],
       [2663, 4972, 56],
       [2892, 3911, 56],
