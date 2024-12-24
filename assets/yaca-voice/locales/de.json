@@ -15,7 +15,8 @@
   "both_ears": "beiden Ohren",
 
   "use_megaphone": "Megaphon benutzen",
-  "use_radio": "Funkgerät benutzen",
+  "use_radio": "Im primären Funkkanal senden",
+  "use_secondary_radio": "Im sekundären Funkkanal senden",
 
   "use_salty_primary_radio": "Primäres Funkgerät benutzen",
   "use_salty_secondary_radio": "Sekundäres Funkgerät benutzen",

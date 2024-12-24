@@ -10,12 +10,15 @@ export class YaCAClientRadioModule {
   clientModule: YaCAClientModule
 
   radioEnabled = false
+  radioInitialized = false
+
   talkingInChannels = new Set<number>()
   radioChannelSettings = new Map<number, YacaRadioSettings>()
-  radioInitialized = false
-  activeRadioChannel = 1
   playersWithShortRange = new Map<number, string>()
   playersInRadioChannel = new Map<number, Set<number>>()
+
+  activeRadioChannel = 1
+  secondaryRadioChannel = 2
 
   radioOnCooldown = false
 
@@ -37,12 +40,10 @@ export class YaCAClientRadioModule {
     this.registerExports()
     this.registerEvents()
 
-    if (!this.clientModule.saltyChatBridge) {
-      if (this.clientModule.isFiveM) {
-        this.registerKeybinds()
-      } else {
-        this.registerRdrKeybinds()
-      }
+    if (this.clientModule.isFiveM) {
+      this.registerKeybinds()
+    } else {
+      this.registerRdrKeybinds()
     }
   }
 
@@ -106,12 +107,12 @@ export class YaCAClientRadioModule {
     exports('isRadioChannelMuted', (channel: number = this.activeRadioChannel) => this.isRadioChannelMuted(channel))
 
     /**
-     * Exports the `changeActiveRadioChannel` function to the plugin.
+     * Exports the `setActiveRadioChannel` function to the plugin.
      * This function changes the active radio channel.
      *
      * @param {number} channel - The new radio channel.
      */
-    exports('changeActiveRadioChannel', (channel: number) => this.changeActiveRadioChannel(channel))
+    exports('setActiveRadioChannel', (channel: number) => this.setActiveRadioChannel(channel))
 
     /**
      * Exports the `getActiveRadioChannel` function to the plugin.
@@ -120,6 +121,22 @@ export class YaCAClientRadioModule {
      * @returns {number} The active radio channel.
      */
     exports('getActiveRadioChannel', () => this.activeRadioChannel)
+
+    /**
+     * Exports the `setSecondaryRadioChannel` function to the plugin.
+     * This function changes the secondary radio channel.
+     *
+     * @param {number} channel - The new radio channel.
+     */
+    exports('setSecondaryRadioChannel', (channel: number) => this.setSecondaryRadioChannel(channel))
+
+    /**
+     * Exports the `getActiveRadioChannel` function to the plugin.
+     * This function returns the active radio channel.
+     *
+     * @returns {number} The active radio channel.
+     */
+    exports('getSecondaryRadioChannel', () => this.secondaryRadioChannel)
 
     /**
      * Exports the `changeRadioChannelVolume` function to the plugin.
@@ -175,9 +192,8 @@ export class YaCAClientRadioModule {
      *
      * @param {boolean} state - The state of the radio talking.
      * @param {number} channel - The radio channel.
-     * @param {boolean} [clearPedTasks=true] - Whether to clear ped tasks. Defaults to true if not provided.
      */
-    exports('radioTalkingStart', (state: boolean, channel: number, clearPedTasks = true) => this.radioTalkingStart(state, channel, clearPedTasks))
+    exports('radioTalkingStart', (state: boolean, channel: number) => this.radioTalkingStart(state, channel))
   }
 
   /**
@@ -305,28 +321,52 @@ export class YaCAClientRadioModule {
    * Registers the command and key mapping for the radio talking.
    */
   registerKeybinds() {
-    if (this.clientModule.sharedConfig.keyBinds.radioTransmit === false) {
-      return
+    if (this.clientModule.sharedConfig.keyBinds.primaryRadioTransmit !== false) {
+      /**
+       * Registers the command and key mapping for the radio talking.
+       */
+      RegisterCommand(
+        '+yaca:radioTalking',
+        () => {
+          this.radioTalkingStart(true, this.activeRadioChannel)
+        },
+        false,
+      )
+      RegisterCommand(
+        '-yaca:radioTalking',
+        () => {
+          this.radioTalkingStart(false, this.activeRadioChannel)
+        },
+        false,
+      )
+      RegisterKeyMapping('+yaca:radioTalking', locale('use_radio'), 'keyboard', this.clientModule.sharedConfig.keyBinds.primaryRadioTransmit)
     }
 
-    /**
-     * Registers the command and key mapping for the radio talking.
-     */
-    RegisterCommand(
-      '+yaca:radioTalking',
-      () => {
-        this.radioTalkingStart(true, this.activeRadioChannel)
-      },
-      false,
-    )
-    RegisterCommand(
-      '-yaca:radioTalking',
-      () => {
-        this.radioTalkingStart(false, this.activeRadioChannel)
-      },
-      false,
-    )
-    RegisterKeyMapping('+yaca:radioTalking', locale('use_radio'), 'keyboard', this.clientModule.sharedConfig.keyBinds.radioTransmit)
+    if (this.clientModule.sharedConfig.keyBinds.secondaryRadioTransmit !== false) {
+      /**
+       * Registers the command and key mapping for the secondary radio talking.
+       */
+      RegisterCommand(
+        '+yaca:secondaryRadioTalking',
+        () => {
+          this.radioTalkingStart(true, this.secondaryRadioChannel)
+        },
+        false,
+      )
+      RegisterCommand(
+        '-yaca:secondaryRadioTalking',
+        () => {
+          this.radioTalkingStart(false, this.secondaryRadioChannel)
+        },
+        false,
+      )
+      RegisterKeyMapping(
+        '+yaca:secondaryRadioTalking',
+        locale('use_secondary_radio'),
+        'keyboard',
+        this.clientModule.sharedConfig.keyBinds.secondaryRadioTransmit,
+      )
+    }
   }
 
   /**
@@ -334,19 +374,29 @@ export class YaCAClientRadioModule {
    * This is only available in RedM.
    */
   registerRdrKeybinds() {
-    if (this.clientModule.sharedConfig.keyBinds.radioTransmit === false) {
-      return
+    if (this.clientModule.sharedConfig.keyBinds.primaryRadioTransmit !== false) {
+      registerRdrKeyBind(
+        this.clientModule.sharedConfig.keyBinds.primaryRadioTransmit,
+        () => {
+          this.radioTalkingStart(true, this.activeRadioChannel)
+        },
+        () => {
+          this.radioTalkingStart(false, this.activeRadioChannel)
+        },
+      )
     }
 
-    registerRdrKeyBind(
-      this.clientModule.sharedConfig.keyBinds.radioTransmit,
-      () => {
-        this.radioTalkingStart(true, this.activeRadioChannel)
-      },
-      () => {
-        this.radioTalkingStart(false, this.activeRadioChannel)
-      },
-    )
+    if (this.clientModule.sharedConfig.keyBinds.secondaryRadioTransmit !== false) {
+      registerRdrKeyBind(
+        this.clientModule.sharedConfig.keyBinds.secondaryRadioTransmit,
+        () => {
+          this.radioTalkingStart(true, this.secondaryRadioChannel)
+        },
+        () => {
+          this.radioTalkingStart(false, this.secondaryRadioChannel)
+        },
+      )
+    }
   }
 
   /**
@@ -460,14 +510,35 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The new radio channel.
    * @returns {boolean} Whether the channel was changed.
    */
-  changeActiveRadioChannel(channel: number): boolean {
+  setActiveRadioChannel(channel: number): boolean {
     if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
       return false
     }
 
-    emitNet('server:yaca:changeActiveRadioChannel', channel)
     emit('yaca:external:changedActiveRadioChannel', channel)
     this.activeRadioChannel = channel
+
+    return true
+  }
+
+  /**
+   * Change the active radio channel.
+   *
+   * @param {number} channel - The new radio channel.
+   * @returns {boolean} Whether the channel was changed.
+   */
+  setSecondaryRadioChannel(channel: number): boolean {
+    if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
+      return false
+    }
+
+    if (this.secondaryRadioChannel === channel) {
+      this.secondaryRadioChannel = -1
+    } else {
+      this.secondaryRadioChannel = channel
+    }
+
+    emit('yaca:external:changedSecondaryRadioChannel', this.secondaryRadioChannel)
 
     return true
   }
@@ -763,9 +834,8 @@ export class YaCAClientRadioModule {
    *
    * @param {boolean} state - The state of the radio talking.
    * @param {number} channel - The radio channel.
-   * @param {boolean} [clearPedTasks=true] - Whether to clear ped tasks. Defaults to true if not provided.
    */
-  radioTalkingStart(state: boolean, channel: number, clearPedTasks = true) {
+  radioTalkingStart(state: boolean, channel: number) {
     if (!state) {
       if (this.talkingInChannels.has(channel)) {
         this.talkingInChannels.delete(channel)
@@ -778,9 +848,7 @@ export class YaCAClientRadioModule {
         emitNet('server:yaca:radioTalking', false, channel)
         emit('yaca:external:isRadioTalking', false, channel)
 
-        if (clearPedTasks) {
-          StopAnimTask(cache.ped, 'random@arrests', 'generic_radio_chatter', 4)
-        }
+        StopAnimTask(cache.ped, 'random@arrests', 'generic_radio_chatter', 4)
       }
 
       return
