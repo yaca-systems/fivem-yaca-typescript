@@ -59,6 +59,7 @@ export class YaCAClientPhoneModule {
         undefined,
         CommDeviceMode.TRANSCEIVER,
         CommDeviceMode.TRANSCEIVER,
+        GlobalState[PHONE_SPEAKER_STATE_NAME] ?? undefined,
       )
     })
 
