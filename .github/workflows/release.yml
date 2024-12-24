@@ -3,9 +3,22 @@ name: Build
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: "Branch to build"
+        required: true
+        default: "main"
+        type: choice
+        options:
+          - main
+          - prerelease
       version:
         description: "The version to release (e.g. X.X.X)"
         required: true
+      prerelease:
+        description: "Is this a prerelease?"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -23,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.repository.default_branch }}
+          ref: ${{ inputs.branch }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -75,7 +88,7 @@ jobs:
           release_version: "v${{ inputs.version }}"
           automatic_release_tag: true
           title: "v${{ inputs.version }}"
-          prerelease: false
+          prerelease: ${{ inputs.prerelease }}
           files: yaca-voice.zip
           ignore_authors: |
             github-actions[bot]
