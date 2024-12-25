@@ -929,6 +929,8 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The radio channel.
    */
   radioTalkingStart(state: boolean, channel: number) {
+    if (channel == -1) return
+
     if (!state) {
       if (this.talkingInChannels.has(channel)) {
         this.talkingInChannels.delete(channel)
