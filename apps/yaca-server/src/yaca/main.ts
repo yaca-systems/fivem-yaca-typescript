@@ -80,7 +80,6 @@ export class YaCAServerModule {
     this.registerEvents()
 
     if (this.sharedConfig.saltyChatBridge) {
-      this.sharedConfig.radioSettings.channelCount = 2
       this.saltChatBridge = new YaCAServerSaltyChatBridge(this)
     }
 
