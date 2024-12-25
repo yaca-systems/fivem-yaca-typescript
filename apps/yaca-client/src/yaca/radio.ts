@@ -633,8 +633,10 @@ export class YaCAClientRadioModule {
 
     if (this.secondaryRadioChannel === channel) {
       this.secondaryRadioChannel = -1
+      this.clientModule.notification(locale('secondary_radio_channel_disabled'), YacaNotificationType.INFO)
     } else {
       this.secondaryRadioChannel = channel
+      this.clientModule.notification(locale('secondary_radio_channel_enabled', channel), YacaNotificationType.INFO)
     }
 
     emit('yaca:external:changedSecondaryRadioChannel', this.secondaryRadioChannel)
