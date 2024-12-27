@@ -938,6 +938,11 @@ export class YaCAClientRadioModule {
           this.radioTalkingStateToPlugin(false, channel)
         }
 
+        if (this.radioTowerCalculation.has(channel)) {
+          clearInterval(this.radioTowerCalculation.get(channel) as CitizenTimer)
+          this.radioTowerCalculation.delete(channel)
+        }
+
         this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(false, channel)
 
         emitNet('server:yaca:radioTalking', false, channel)
