@@ -365,7 +365,9 @@ export class YaCAServerRadioModule {
       }
     }
 
-    triggerClientEvent('client:yaca:radioTalking', targets, src, radioFrequency, state, radioInfos, false, distanceToTower, GetEntityCoords(src))
+    if (targets.length) {
+      triggerClientEvent('client:yaca:radioTalking', targets, src, radioFrequency, state, radioInfos, false, distanceToTower, GetEntityCoords(src))
+    }
 
     if (this.serverConfig.useWhisper) {
       emitNet('client:yaca:radioTalking', src, targetsToSender, radioFrequency, state, radioInfos, true)
