@@ -331,6 +331,8 @@ export class YaCAServerRadioModule {
       return
     }
 
+    const sourcePed = GetPlayerPed((global as any).source);
+
     let targets: number[] = []
     const targetsToSender: number[] = []
     const radioInfos: Record<number, { shortRange: boolean }> = {}
@@ -365,9 +367,7 @@ export class YaCAServerRadioModule {
       }
     }
 
-    if (targets.length) {
-      triggerClientEvent('client:yaca:radioTalking', targets, src, radioFrequency, state, radioInfos, false, distanceToTower, GetEntityCoords(src))
-    }
+    triggerClientEvent('client:yaca:radioTalking', targets, src, radioFrequency, state, radioInfos, false, distanceToTower, GetEntityCoords(sourcePed))
 
     if (this.serverConfig.useWhisper) {
       emitNet('client:yaca:radioTalking', src, targetsToSender, radioFrequency, state, radioInfos, true)
