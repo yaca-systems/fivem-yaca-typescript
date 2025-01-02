@@ -929,7 +929,7 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The radio channel.
    */
   radioTalkingStart(state: boolean, channel: number) {
-    if (channel == -1) return
+    if (channel === -1) return
 
     if (!state) {
       if (this.talkingInChannels.has(channel)) {
@@ -1012,8 +1012,7 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The number of the radio channel to update.
    */
   updateRadioChannelData(channel: number) {
-    if (channel !== this.activeRadioChannel || typeof exports['yaca-ui'] === 'undefined' || typeof exports['yaca-ui'].setRadioChannelData === 'undefined')
-      return
+    if (channel !== this.activeRadioChannel || GetResourceState("yaca-ui") !== "started") return
 
     exports['yaca-ui'].setRadioChannelData(this.radioChannelSettings.get(channel))
   }
