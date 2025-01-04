@@ -187,8 +187,8 @@ export class YaCAServerModule {
     })
 
     //YaCa: voice restart
-    onNet('server:yaca:wsReady', (isFirstConnect: boolean) => {
-      this.playerReconnect(source, isFirstConnect)
+    onNet('server:yaca:wsReady', () => {
+      this.playerReconnect(source)
     })
   }
 
@@ -258,9 +258,8 @@ export class YaCAServerModule {
    * Used if a player reconnects to the server.
    *
    * @param {number} src - The source-id of the player to reconnect.
-   * @param {boolean} isFirstConnect - Whether this is the player's first connection.
    */
-  playerReconnect(src: number, isFirstConnect: boolean) {
+  playerReconnect(src: number) {
     const player = this.players.get(src)
     if (!player) {
       return
@@ -268,16 +267,6 @@ export class YaCAServerModule {
 
     if (!player.voiceSettings.voiceFirstConnect) {
       return
-    }
-
-    if (!isFirstConnect) {
-      const name = generateRandomName(src, this.nameSet, this.serverConfig.userNamePattern)
-      if (!name) {
-        return
-      }
-
-      this.nameSet.delete(player.voiceSettings.ingameName)
-      player.voiceSettings.ingameName = name
     }
 
     this.connect(src)
