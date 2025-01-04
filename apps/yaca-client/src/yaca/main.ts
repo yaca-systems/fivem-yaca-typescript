@@ -109,6 +109,11 @@ export class YaCAClientModule {
       })
     }
 
+    if (this.sharedConfig.notifications.okoknotify && GetResourceState('okokNotify') === 'started') {
+      const okType = type === YacaNotificationType.INFO ? 'info' : type
+      exports.okokNotify.Alert('YaCA', message, 2000, okType)
+    }
+
     if (this.sharedConfig.notifications.gta) {
       if (this.isFiveM) {
         BeginTextCommandThefeedPost('STRING')
