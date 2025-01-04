@@ -10,6 +10,7 @@ export interface YacaSharedConfig {
   phoneHearPlayersNearby: false | 'PHONE_SPEAKER' | true
   notifications: {
     oxLib: boolean
+    okoknotify: boolean
     gta: boolean
     redm: boolean
     own: boolean
@@ -69,6 +70,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
   phoneHearPlayersNearby: false,
   notifications: {
     oxLib: false,
+    okoknotify: false,
     gta: true,
     redm: false,
     own: false,
