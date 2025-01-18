@@ -22,7 +22,6 @@ export type YaCAPlayer = {
   }
   radioSettings: {
     activated: boolean
-    currentChannel: number
     hasLong: boolean
     frequencies: Record<number, string>
   }
@@ -83,7 +82,7 @@ export class YaCAServerModule {
     this.registerExports()
     this.registerEvents()
 
-    if (this.sharedConfig.saltyChatBridge.enabled) {
+    if (this.sharedConfig.saltyChatBridge) {
       this.sharedConfig.maxRadioChannels = 2
       this.saltChatBridge = new YaCAServerSaltyChatBridge(this)
     }
@@ -108,6 +107,7 @@ export class YaCAServerModule {
   connectToVoice(src: number) {
     const name = generateRandomName(src, this.nameSet, this.serverConfig.userNamePattern)
     if (!name) {
+      DropPlayer(src.toString(), '[YaCA] Failed to generate a random name.')
       return
     }
 
@@ -125,7 +125,6 @@ export class YaCAServerModule {
       },
       radioSettings: {
         activated: false,
-        currentChannel: 1,
         hasLong: false,
         frequencies: {},
       },
