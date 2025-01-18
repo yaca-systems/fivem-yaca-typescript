@@ -125,12 +125,26 @@ export class YaCAClientMegaphoneModule {
       return this.canUseMegaphone
     })
 
+    /**
+     * Sets the `canUseMegaphone` property.
+     *
+     * @param {boolean} state - The state to set the `canUseMegaphone` property to.
+     */
     exports('setCanUseMegaphone', (state: boolean) => {
       this.canUseMegaphone = state
 
       if (!state && this.lastMegaphoneState) {
         emitNet('server:yaca:playerLeftVehicle')
       }
+    })
+
+    /**
+     * Toggles the use of the megaphone.
+     *
+     * @param {boolean} [state=false] - The state of the megaphone. Defaults to false if not provided.
+     */
+    exports('useMegaphone', (state = false) => {
+      this.useMegaphone(state)
     })
   }
 
