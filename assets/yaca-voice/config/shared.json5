@@ -1,0 +1,660 @@
+{
+  // Enable the debug mode to enable some debug commands.
+  "debug": false,
+  // Enable the version check to get notified about new versions.
+  "versionCheck": true,
+  // The build type of the plugin. 0 = release, 1 = develop (develop allows using all yaca plugin version)
+  "buildType": 0,
+  // The locale that should be used.
+  "locale": "en",
+  // The time before the teamspeak client is being unmuted after joining the ingame channel.
+  "unmuteDelay": 400,
+  // The range in which you can hear the phone speaker when active.
+  "maxPhoneSpeakerRange": 5,
+  /* Choose if players near other players that are in a call, should be heard by the players on the opposite side of the call.
+   *
+   * Following options are available:
+   * - false: Disable the feature completely
+   * - true: Enable the feature always
+   * - "PHONE_SPEAKER": Enable the feature only when the player on the phone has the phone speaker enabled.
+   */
+  "phoneHearPlayersNearby": false,
+  // Choose which notifications should be enabled.
+  "notifications": {
+    // Enable notifications from ox_lib
+    "oxLib": false,
+    // Enable notifications from okokNotify
+    "okoknotify": false,
+    // Enable notifications from GTA (FiveM only)
+    "gta": true,
+    // Enable notifications from Rdr 2 (RedM only)
+    "redm": false,
+    // Enable the option to implement a custom notification
+    "own": false
+  },
+  // Set the default key binds for the plugin, which can be then changed by the player.
+  "keyBinds": {
+    // The key to toggle the voice range
+    "toggleRange": "Z",
+    // The key to transmit on the primary radio
+    "primaryRadioTransmit": "N",
+    // The key to transmit on the secondary radio
+    "secondaryRadioTransmit": "CAPITAL",
+    // The key to use the megaphone
+    "megaphone": "B"
+  },
+  "radioSettings": {
+    // The maximum amount of radio channels that can be used.
+    "channelCount": 6,
+    /* Choose the mode of the radio system.
+     *
+     * Following options are available:
+     * - "Tower": The radio system is based on towers, which means that the range is limited by the distance to the next tower.
+     * - "Direct": The radio system is based on the distance between the players.
+     * - "None": The radio always works no matter the distance.
+     */
+    "mode": "Tower",
+    // The maximum distance between two players or to the tower to be able to hear each other.
+    "maxDistance": 5000,
+    // The positions of the towers.
+    "towerPositions": [
+      [
+        2572,
+        5397,
+        56
+      ],
+      [
+        2663,
+        4972,
+        56
+      ],
+      [
+        2892,
+        3911,
+        56
+      ],
+      [
+        2720,
+        3304,
+        64
+      ],
+      [
+        2388,
+        2949,
+        64
+      ],
+      [
+        1830,
+        2368,
+        64
+      ],
+      [
+        1650,
+        1316,
+        102
+      ],
+      [
+        1363,
+        680,
+        102
+      ],
+      [
+        918,
+        230,
+        92
+      ],
+      [
+        567,
+        303,
+        58
+      ],
+      [
+        -47,
+        -666,
+        74
+      ],
+      [
+        -585,
+        -902,
+        53
+      ],
+      [
+        2572,
+        5397,
+        56
+      ],
+      [
+        2338,
+        5940,
+        77
+      ],
+      [
+        1916,
+        6244,
+        65
+      ],
+      [
+        1591,
+        6371,
+        42
+      ],
+      [
+        953,
+        6504,
+        42
+      ],
+      [
+        76,
+        6606,
+        42
+      ],
+      [
+        408,
+        6587,
+        42
+      ],
+      [
+        -338,
+        -579,
+        48
+      ],
+      [
+        -293,
+        -632,
+        47
+      ],
+      [
+        -269,
+        -962,
+        143
+      ],
+      [
+        98,
+        -870,
+        136
+      ],
+      [
+        -214,
+        -744,
+        219
+      ],
+      [
+        -166,
+        -590,
+        199
+      ],
+      [
+        124,
+        -654,
+        261
+      ],
+      [
+        149,
+        -769,
+        261
+      ],
+      [
+        580,
+        89,
+        117
+      ],
+      [
+        423,
+        15,
+        151
+      ],
+      [
+        424,
+        18,
+        151
+      ],
+      [
+        551,
+        -28,
+        93
+      ],
+      [
+        305,
+        -284,
+        68
+      ],
+      [
+        299,
+        -313,
+        68
+      ],
+      [
+        1240,
+        -1090,
+        44
+      ],
+      [
+        -418,
+        -2804,
+        14
+      ],
+      [
+        802,
+        -2996,
+        27
+      ],
+      [
+        253,
+        -3145,
+        39
+      ],
+      [
+        207,
+        -3145,
+        39
+      ],
+      [
+        207,
+        -3307,
+        39
+      ],
+      [
+        247,
+        -3307,
+        39
+      ],
+      [
+        484,
+        -2178,
+        40
+      ],
+      [
+        548,
+        -2219,
+        67
+      ],
+      [
+        -701,
+        58,
+        68
+      ],
+      [
+        -696,
+        208,
+        139
+      ],
+      [
+        -769,
+        255,
+        134
+      ],
+      [
+        -150,
+        -150,
+        96
+      ],
+      [
+        -202,
+        -327,
+        65
+      ],
+      [
+        -1913,
+        -3031,
+        22
+      ],
+      [
+        -1918,
+        -3028,
+        22
+      ],
+      [
+        -1039,
+        -2385,
+        27
+      ],
+      [
+        -1042,
+        -2390,
+        27
+      ],
+      [
+        -1583,
+        -3216,
+        28
+      ],
+      [
+        -1590,
+        -3212,
+        28
+      ],
+      [
+        -1308,
+        -2626,
+        36
+      ],
+      [
+        -1311,
+        -2624,
+        36
+      ],
+      [
+        -984,
+        -2778,
+        48
+      ],
+      [
+        -991,
+        -2774,
+        48
+      ],
+      [
+        -556,
+        -119,
+        50
+      ],
+      [
+        -619,
+        -106,
+        51
+      ],
+      [
+        -1167,
+        -575,
+        40
+      ],
+      [
+        -1152,
+        -443,
+        42
+      ],
+      [
+        -1156,
+        -498,
+        49
+      ],
+      [
+        -1290,
+        -445,
+        106
+      ],
+      [
+        -928,
+        -383,
+        135
+      ],
+      [
+        -902,
+        -443,
+        170
+      ],
+      [
+        -770,
+        -786,
+        83
+      ],
+      [
+        -824,
+        -719,
+        120
+      ],
+      [
+        -598,
+        -917,
+        35
+      ],
+      [
+        -678,
+        -717,
+        54
+      ],
+      [
+        -669,
+        -804,
+        31
+      ],
+      [
+        -1463,
+        -526,
+        83
+      ],
+      [
+        -1525,
+        -596,
+        66
+      ],
+      [
+        -1375,
+        -465,
+        83
+      ],
+      [
+        -1711,
+        478,
+        127
+      ],
+      [
+        -2311,
+        335,
+        187
+      ],
+      [
+        -2214,
+        342,
+        198
+      ],
+      [
+        -2234,
+        187,
+        193
+      ],
+      [
+        202,
+        1204,
+        230
+      ],
+      [
+        217,
+        1140,
+        230
+      ],
+      [
+        668,
+        590,
+        136
+      ],
+      [
+        722,
+        562,
+        134
+      ],
+      [
+        838,
+        510,
+        138
+      ],
+      [
+        773,
+        575,
+        138
+      ],
+      [
+        735,
+        231,
+        145
+      ],
+      [
+        450,
+        5566,
+        795
+      ],
+      [
+        -449,
+        6019,
+        35
+      ],
+      [
+        -142,
+        6286,
+        39
+      ],
+      [
+        -368,
+        6105,
+        38
+      ],
+      [
+        2792,
+        5996,
+        355
+      ],
+      [
+        2796,
+        5992,
+        354
+      ],
+      [
+        3460,
+        3653,
+        51
+      ],
+      [
+        3459,
+        3659,
+        51
+      ],
+      [
+        3615,
+        3642,
+        51
+      ],
+      [
+        3614,
+        3636,
+        51
+      ],
+      [
+        -2180,
+        3252,
+        54
+      ],
+      [
+        -2124,
+        3219,
+        54
+      ],
+      [
+        -2050,
+        3178,
+        54
+      ],
+      [
+        1858,
+        3694,
+        37
+      ],
+      [
+        1695,
+        3614,
+        37
+      ],
+      [
+        1692,
+        2532,
+        60
+      ],
+      [
+        1692,
+        2647,
+        60
+      ],
+      [
+        1824,
+        2574,
+        60
+      ],
+      [
+        1407,
+        2117,
+        104
+      ]
+    ]
+  },
+  "voiceRange": {
+    // The default index which should be used for the voice range when a player joins the server.
+    "defaultIndex": 2,
+    // The ranges that should be available for the players.
+    "ranges": [
+      1,
+      3,
+      8,
+      15,
+      20,
+      25,
+      30,
+      40
+    ],
+    // Choose if a notification should be sent when the voice range is changed.
+    "sendNotification": false,
+    "markerColor": {
+      // Choose if the marker should be enabled.
+      "enabled": true,
+      // The color of the marker, r = red, g = green, b = blue, a = alpha
+      "r": 0,
+      "g": 255,
+      "b": 0,
+      "a": 50,
+      // The duration the marker should be shown.
+      "duration": 1000
+    }
+  },
+  "megaphone": {
+    // The range of the megaphone.
+    "range": 30,
+    // Choose if the plugin should automatically detect if the player should be able to use the megaphone in the vehicle. (FiveM only)
+    "automaticVehicleDetection": true,
+    // The allowed vehicle classes for the megaphone. (FiveM only)
+    "allowedVehicleClasses": [
+      18,
+      19
+    ],
+    // The allowed vehicle models for the megaphone.  (FiveM only)
+    "allowedVehicleModels": [
+      "polmav"
+    ]
+  },
+  // Choose if the saltyChatBridge should be enabled.
+  "saltyChatBridge": false,
+  "mufflingSettings": {
+    // If set to -1, the player voice range is used, all values >= 0 sets the muffling range before it gets completely cut off
+    "mufflingRange": -1,
+    "vehicleMuffling": {
+      // If set to true, the vehicle muffling feature is enabled. (FiveM only)
+      "enabled": true,
+      // Whitelist of vehicles that should be not be affected by the vehicle muffling. (FiveM only)
+      "vehicleWhitelist": [
+        "gauntlet6",
+        "draugur",
+        "bodhi2",
+        "vagrant",
+        "outlaw",
+        "trophytruck",
+        "ratel",
+        "drifttampa",
+        "sm722",
+        "tornado4",
+        "swinger"
+      ],
+    },
+    // The intensities of the muffling. (0 = no muffling, 10 = full muffling)
+    "intensities": {
+      // The intensity when the players are in different rooms.
+      "differentRoom": 10,
+        // The intensity when both cars are closed. (FiveM only)
+      "bothCarsClosed": 10,
+        // The intensity when one car is closed. (FiveM only)
+      "oneCarClosed": 6,
+        // The intensity of muffling of the megaphone of a player in a different car. (FiveM only)
+      "megaPhoneInCar": 6
+    }
+  },
+  // Cooldown in milliseconds which the player has to wait to use the radio again, defaults to false which disables the feature.
+  "radioAntiSpamCooldown": false,
+  // When set to true the plugin syncs the talk state via the plugin, instead of the default way via statebags. This imitates the way how saltychat syncs the talk state, but has some drawbacks.
+  "useLocalLipSync": false
+}

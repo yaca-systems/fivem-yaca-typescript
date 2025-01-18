@@ -58,8 +58,8 @@ export class YaCAServerModule {
   constructor() {
     console.log('~g~ --> YaCA: Server loaded')
 
-    this.serverConfig = loadConfig<YacaServerConfig>('config/server.json', defaultServerConfig)
-    this.sharedConfig = loadConfig<YacaSharedConfig>('config/shared.json', defaultSharedConfig)
+    this.serverConfig = loadConfig<YacaServerConfig>('config/server.json5', defaultServerConfig)
+    this.sharedConfig = loadConfig<YacaSharedConfig>('config/shared.json5', defaultSharedConfig)
 
     initLocale(this.sharedConfig.locale)
 
