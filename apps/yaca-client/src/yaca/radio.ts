@@ -1,6 +1,6 @@
 import { locale } from '@yaca-voice/common'
 import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from '@yaca-voice/types'
-import { cache, clamp, registerRdrKeyBind, requestAnimDict } from '../utils'
+import { cache, clamp, calculateDistanceVec3, registerRdrKeyBind, requestAnimDict } from '../utils'
 import type { YaCAClientModule } from './main'
 
 /**
@@ -11,6 +11,9 @@ export class YaCAClientRadioModule {
 
   radioEnabled = false
   radioInitialized = false
+
+  radioMode: 'None' | 'Direct' | 'Tower' = 'None'
+  radioTowerCalculation = new Map<number, CitizenTimer | null>()
 
   talkingInChannels = new Set<number>()
   radioChannelSettings = new Map<number, YacaRadioSettings>()
@@ -220,48 +223,99 @@ export class YaCAClientRadioModule {
      * @param {boolean} infos.shortRange - The state of the short range.
      * @param {boolean} self - The state of the player.
      */
-    onNet('client:yaca:radioTalking', (target: number, frequency: string, state: boolean, infos: { shortRange: boolean }[], self = false) => {
-      const channel = this.findRadioChannelByFrequency(frequency)
-      if (!channel) {
-        return
-      }
-
-      if (self) {
-        this.radioTalkingStateToPluginWithWhisper(state, target, channel)
-        return
-      }
-
-      const player = this.clientModule.getPlayerByID(target)
-      if (!player) {
-        return
-      }
-
-      const info = infos[cache.serverId]
-
-      if (!info?.shortRange || (info?.shortRange && GetPlayerFromServerId(target) !== -1)) {
-        this.clientModule.setPlayersCommType(player, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER)
-      }
-
-      if (state) {
-        this.playersInRadioChannel.get(channel)?.add(target)
-        if (info?.shortRange) {
-          this.playersWithShortRange.set(target, frequency)
+    onNet(
+      'client:yaca:radioTalking',
+      (
+        target: number,
+        frequency: string,
+        state: boolean,
+        infos: { shortRange: boolean }[],
+        self = false,
+        senderDistanceToTower = -1,
+        senderPosition: [number, number, number] = [0, 0, 0],
+      ) => {
+        const channel = this.findRadioChannelByFrequency(frequency)
+        if (!channel) {
+          return
         }
 
-        emit('yaca:external:isRadioReceiving', true, channel)
-        this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(true, channel)
-      } else {
-        this.playersInRadioChannel.get(channel)?.delete(target)
-        if (info?.shortRange) {
-          this.playersWithShortRange.delete(target)
+        let ownDistanceToTower = -1
+
+        if (this.radioMode === 'Tower') {
+          const nearestTower = this.getNearestRadioTower()
+          if (nearestTower) {
+            ownDistanceToTower = nearestTower.distance
+          }
+        } else if (this.radioMode === 'Direct') {
+          ownDistanceToTower = calculateDistanceVec3(GetEntityCoords(cache.ped, false), senderPosition)
         }
 
-        const inRadio = this.playersInRadioChannel.get(channel)?.size || 0
-        const state = inRadio > 0
-        emit('yaca:external:isRadioReceiving', state, channel)
-        this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(state, channel)
-      }
-    })
+        if (self) {
+          if (state) {
+            if (this.radioMode === 'Tower' && ownDistanceToTower === -1) return
+            if (this.radioMode === 'Direct' && ownDistanceToTower > this.clientModule.sharedConfig.radioSettings.maxDistance) return
+          }
+          this.radioTalkingStateToPluginWithWhisper(state, target, channel)
+          return
+        }
+
+        if (state) {
+          if (this.radioMode === 'Tower' && (ownDistanceToTower === -1 || senderDistanceToTower === -1)) return
+          if (this.radioMode === 'Direct' && ownDistanceToTower > this.clientModule.sharedConfig.radioSettings.maxDistance) return
+        }
+
+        const player = this.clientModule.getPlayerByID(target)
+        if (!player) {
+          return
+        }
+
+        const info = infos[cache.serverId]
+
+        if (!info?.shortRange || (info?.shortRange && GetPlayerFromServerId(target) !== -1)) {
+          let errorLevel: number | null = null
+
+          if (this.radioMode === 'Tower') {
+            const ownSignalStrength = this.calculateSignalStrength(ownDistanceToTower)
+            const senderSignalStrength = this.calculateSignalStrength(senderDistanceToTower)
+
+            errorLevel = Math.max(ownSignalStrength, senderSignalStrength)
+          } else if (this.radioMode === 'Direct') {
+            errorLevel = this.calculateSignalStrength(ownDistanceToTower)
+          }
+
+          this.clientModule.setPlayersCommType(
+            player,
+            YacaFilterEnum.RADIO,
+            state,
+            channel,
+            undefined,
+            CommDeviceMode.RECEIVER,
+            CommDeviceMode.SENDER,
+            errorLevel,
+          )
+        }
+
+        if (state) {
+          this.playersInRadioChannel.get(channel)?.add(target)
+          if (info?.shortRange) {
+            this.playersWithShortRange.set(target, frequency)
+          }
+
+          emit('yaca:external:isRadioReceiving', true, channel)
+          this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(true, channel)
+        } else {
+          this.playersInRadioChannel.get(channel)?.delete(target)
+          if (info?.shortRange) {
+            this.playersWithShortRange.delete(target)
+          }
+
+          const inRadio = this.playersInRadioChannel.get(channel)?.size || 0
+          const state = inRadio > 0
+          emit('yaca:external:isRadioReceiving', state, channel)
+          this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(state, channel)
+        }
+      },
+    )
 
     /**
      * Handles the "client:yaca:setRadioMuteState" server event.
@@ -414,7 +468,7 @@ export class YaCAClientRadioModule {
       emitNet('server:yaca:enableRadio', state)
 
       if (!state) {
-        for (let i = 1; i <= this.clientModule.sharedConfig.maxRadioChannels; i++) {
+        for (let i = 1; i <= this.clientModule.sharedConfig.radioSettings.channelCount; i++) {
           this.disableRadioFromPlayerInChannel(i)
         }
       }
@@ -426,6 +480,45 @@ export class YaCAClientRadioModule {
 
       emit('yaca:external:isRadioEnabled', state)
     }
+  }
+
+  /**
+   * Calculate the signal strength based on the distance.
+   *
+   * @param distance - The distance to the radio tower.
+   * @param maxDistance - The maximum distance to the radio tower.
+   *
+   * @returns {number} The signal strength.
+   */
+  calculateSignalStrength(distance: number, maxDistance: number = this.clientModule.sharedConfig.radioSettings.maxDistance): number {
+    const ratio = distance / maxDistance
+    return clamp(Math.log10(1 + ratio * 8.5) / Math.log10(10), 0, 1)
+  }
+
+  /**
+   * Finds the nearest tower to the local player.
+   * Iterates through all towers and calculates the distance to the local player's position.
+   * Keeps track of the nearest tower found during the iteration.
+   *
+   * @returns {object} An object containing the nearest tower and its distance, or null if no towers are present.
+   */
+  getNearestRadioTower() {
+    let nearestTower: { distance: number; coords: [number, number, number] } | null = null
+
+    const playerPos = GetEntityCoords(cache.ped, false)
+
+    for (const coords of this.clientModule.sharedConfig.radioSettings.towerPositions) {
+      const distance = calculateDistanceVec3(playerPos, coords)
+      if (distance >= this.clientModule.sharedConfig.radioSettings.maxDistance) {
+        continue
+      }
+
+      if (!nearestTower || distance < nearestTower.distance) {
+        nearestTower = { distance, coords }
+      }
+    }
+
+    return nearestTower
   }
 
   /**
@@ -698,7 +791,7 @@ export class YaCAClientRadioModule {
    * Set volume & stereo mode for all radio channels on first start and reconnect.
    */
   initRadioSettings() {
-    for (let i = 1; i <= this.clientModule.sharedConfig.maxRadioChannels; i++) {
+    for (let i = 1; i <= this.clientModule.sharedConfig.radioSettings.channelCount; i++) {
       if (!this.radioChannelSettings.has(i)) {
         this.radioChannelSettings.set(i, {
           ...this.defaultRadioSettings,
@@ -739,25 +832,16 @@ export class YaCAClientRadioModule {
    * Sends an event to the plugin when a player starts or stops talking on the radio with whisper.
    *
    * @param state - The state of the player talking on the radio.
-   * @param targets - The IDs of the targets.
+   * @param target - The IDs of the targets.
    * @param channel - The channel number.
    */
-  radioTalkingStateToPluginWithWhisper(state: boolean, targets: number | number[], channel: number) {
-    if (!Array.isArray(targets)) {
-      targets = [targets]
+  radioTalkingStateToPluginWithWhisper(state: boolean, target: number, channel: number) {
+    const player = this.clientModule.getPlayerByID(target)
+    if (!player) {
+      return
     }
 
-    const comDeviceTargets = []
-    for (const target of targets) {
-      const player = this.clientModule.getPlayerByID(target)
-      if (!player) {
-        continue
-      }
-
-      comDeviceTargets.push(player)
-    }
-
-    this.clientModule.setPlayersCommType(comDeviceTargets, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.SENDER, CommDeviceMode.RECEIVER)
+    this.clientModule.setPlayersCommType(player, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.SENDER, CommDeviceMode.RECEIVER)
   }
 
   /**
@@ -881,8 +965,27 @@ export class YaCAClientRadioModule {
 
       this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(true, channel)
 
+      if (!this.radioTowerCalculation.has(channel)) {
+        this.radioTowerCalculation.set(
+          channel,
+          setInterval(() => {
+            this.sendRadioRequestToServer(channel)
+          }, 1000),
+        )
+      }
+
       emitNet('server:yaca:radioTalking', true, channel)
       emit('yaca:external:isRadioTalking', true, channel)
     })
+  }
+
+  /**
+   * Sends a radio request to the server and calculates the distance to the nearest radio tower.
+   *
+   * @param channel - The radio channel to send the request to.
+   */
+  sendRadioRequestToServer(channel: number) {
+    const distanceToTower = this.getNearestRadioTower()?.distance ?? -1
+    emitNet('server:yaca:radioTalking', true, channel, distanceToTower)
   }
 }
