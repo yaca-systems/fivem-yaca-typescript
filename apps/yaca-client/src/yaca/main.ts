@@ -151,7 +151,7 @@ export class YaCAClientModule {
   }
 
   constructor() {
-    this.sharedConfig = loadConfig<YacaSharedConfig>('config/shared.json', defaultSharedConfig)
+    this.sharedConfig = loadConfig<YacaSharedConfig>('config/shared.json5', defaultSharedConfig)
     initLocale(this.sharedConfig.locale)
 
     this.rangeIndex = this.sharedConfig.voiceRange.defaultIndex
@@ -166,7 +166,7 @@ export class YaCAClientModule {
     }
 
     if (this.isFiveM) {
-      for (const vehicleModel of this.sharedConfig.mufflingVehicleWhitelist) {
+      for (const vehicleModel of this.sharedConfig.mufflingSettings.vehicleMuffling.vehicleWhitelist) {
         this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel))
       }
     }
@@ -607,12 +607,7 @@ export class YaCAClientModule {
       default_channel: dataObj.deChid,
       ingame_channel_password: dataObj.channelPassword,
       excluded_channels: dataObj.excludeChannels,
-      /**
-       * Default are 2 meters
-       * if the value is set to -1, the player voice range is taken
-       * if the value is >= 0, you can set the max muffling range before it gets completely cut off
-       */
-      muffling_range: this.sharedConfig.mufflingRange,
+      muffling_range: this.sharedConfig.mufflingSettings.mufflingRange,
       build_type: this.sharedConfig.buildType,
       unmute_delay: this.sharedConfig.unmuteDelay,
       operation_mode: dataObj.useWhisper ? 1 : 0,
@@ -1168,10 +1163,10 @@ export class YaCAClientModule {
    */
   getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean, nearbyUsesMegaphone = false) {
     if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
-      return this.sharedConfig.mufflingIntensities.differentRoom
+      return this.sharedConfig.mufflingSettings.intensities.differentRoom
     }
 
-    const vehicleMuffling = this.sharedConfig.vehicleMuffling
+    const vehicleMuffling = this.sharedConfig.mufflingSettings.vehicleMuffling.enabled
     if (this.isRedM || !vehicleMuffling) {
       return 0
     }
@@ -1188,17 +1183,17 @@ export class YaCAClientModule {
         return 0
       }
 
-      return this.sharedConfig.mufflingIntensities.megaPhoneInCar
+      return this.sharedConfig.mufflingSettings.intensities.megaPhoneInCar
     }
 
     const nearbyPlayerVehicleHasOpening = this.checkIfVehicleHasOpening(nearbyPlayerVehicle)
 
     if (!ownVehicleHasOpening && !nearbyPlayerVehicleHasOpening) {
-      return this.sharedConfig.mufflingIntensities.bothCarsClosed
+      return this.sharedConfig.mufflingSettings.intensities.bothCarsClosed
     }
 
     if (!ownVehicleHasOpening || !nearbyPlayerVehicleHasOpening) {
-      return this.sharedConfig.mufflingIntensities.oneCarClosed
+      return this.sharedConfig.mufflingSettings.intensities.oneCarClosed
     }
 
     return 0

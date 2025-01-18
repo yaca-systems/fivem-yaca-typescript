@@ -47,14 +47,19 @@ export interface YacaSharedConfig {
     allowedVehicleModels: string[]
   }
   saltyChatBridge: boolean
-  vehicleMuffling: boolean
-  mufflingRange: number
-  mufflingVehicleWhitelist: string[]
-  mufflingIntensities: {
-    differentRoom: number
-    bothCarsClosed: number
-    oneCarClosed: number
-    megaPhoneInCar: number
+
+  mufflingSettings: {
+    mufflingRange: number
+    vehicleMuffling: {
+      enabled: boolean
+      vehicleWhitelist: string[]
+    }
+    intensities: {
+      differentRoom: number
+      bothCarsClosed: number
+      oneCarClosed: number
+      megaPhoneInCar: number
+    }
   }
   radioAntiSpamCooldown: number | false
   useLocalLipSync: boolean
@@ -211,14 +216,18 @@ export const defaultSharedConfig: YacaSharedConfig = {
     allowedVehicleModels: ['polmav'],
   },
   saltyChatBridge: false,
-  vehicleMuffling: true,
-  mufflingRange: -1,
-  mufflingVehicleWhitelist: ['gauntlet6', 'draugur', 'bodhi2', 'vagrant', 'outlaw', 'trophytruck', 'ratel', 'drifttampa', 'sm722', 'tornado4', 'swinger'],
-  mufflingIntensities: {
-    differentRoom: 10,
-    bothCarsClosed: 10,
-    oneCarClosed: 6,
-    megaPhoneInCar: 6,
+  mufflingSettings: {
+    mufflingRange: -1,
+    vehicleMuffling: {
+      enabled: true,
+      vehicleWhitelist: ['gauntlet6', 'draugur', 'bodhi2', 'vagrant', 'outlaw', 'trophytruck', 'ratel', 'drifttampa', 'sm722', 'tornado4', 'swinger'],
+    },
+    intensities: {
+      differentRoom: 10,
+      bothCarsClosed: 10,
+      oneCarClosed: 6,
+      megaPhoneInCar: 6,
+    },
   },
   radioAntiSpamCooldown: false,
   useLocalLipSync: false,

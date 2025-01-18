@@ -11,7 +11,8 @@
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
-    "fast-printf": "^1.6.9"
+    "fast-printf": "^1.6.9",
+    "json5": "^2.2.3"
   },
   "devDependencies": {
     "@citizenfx/client": "latest",

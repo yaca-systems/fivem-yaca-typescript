@@ -1,3 +1,34 @@
+import JSON5 from 'json5'
+
+function mergeAndValidate<T extends object>(defaultObj: T, parsedObj: T, path: string[] = []): T {
+  const result: T = { ...defaultObj }
+
+  for (const key in defaultObj) {
+    const currentPath = [...path, key].join('.')
+
+    if (!(key in parsedObj)) {
+      console.warn(
+        `[YaCA] Missing config value for key '${currentPath}' setting to default value: ${defaultObj[key]}\nMissing config values can cause unexpected behavior of the script.`,
+      )
+    } else if (typeof defaultObj[key] === 'object' && defaultObj[key] !== null && typeof parsedObj[key] === 'object' && parsedObj[key] !== null) {
+      // Recursive merge for nested objects
+      result[key] = mergeAndValidate(defaultObj[key], parsedObj[key], [...path, key])
+    } else {
+      result[key] = parsedObj[key]
+    }
+  }
+
+  for (const key in parsedObj) {
+    const currentPath = [...path, key].join('.')
+
+    if (!(key in defaultObj)) {
+      console.warn(`[YaCA] Unknown config key '${currentPath}' found in config file. This key will be ignored and can be removed.`)
+    }
+  }
+
+  return result
+}
+
 /**
  * Load a config file from the resource and merge it with the default values.
  *
@@ -13,21 +44,7 @@ export function loadConfig<T extends object>(filePath: string, defaultValues: T)
     return defaultValues
   }
 
-  const parsedData = JSON.parse(fileData) as T
+  const parsedData = JSON5.parse(fileData) as T
 
-  for (const key in defaultValues) {
-    if (!(key in parsedData)) {
-      console.warn(
-        `[YaCA] Missing config value for key '${key}' setting to default value: ${defaultValues[key]}\nMissing config values can cause unexpected behavior of the script.`,
-      )
-    }
-  }
-
-  for (const key in parsedData) {
-    if (!(key in defaultValues)) {
-      console.warn(`[YaCA] Unknown config key '${key}' found in config file. This keys will be ignored and can be removed.`)
-    }
-  }
-
-  return { ...defaultValues, ...parsedData }
+  return mergeAndValidate<T>(defaultValues, parsedData)
 }
