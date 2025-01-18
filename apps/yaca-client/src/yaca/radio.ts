@@ -1,6 +1,6 @@
-import { locale } from '@yaca-voice/common'
+import { GLOBAL_ERROR_LEVEL_STATE_NAME, clamp, locale } from '@yaca-voice/common'
 import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from '@yaca-voice/types'
-import { cache, clamp, calculateDistanceVec3, registerRdrKeyBind, requestAnimDict } from '../utils'
+import { cache, calculateDistanceVec3, registerRdrKeyBind, requestAnimDict } from '../utils'
 import type { YaCAClientModule } from './main'
 
 /**
@@ -12,14 +12,13 @@ export class YaCAClientRadioModule {
   radioEnabled = false
   radioInitialized = false
 
-  radioMode: 'None' | 'Direct' | 'Tower' = 'None'
-  radioTowerCalculation = new Map<number, CitizenTimer | null>()
-
   talkingInChannels = new Set<number>()
   radioChannelSettings = new Map<number, YacaRadioSettings>()
   playersWithShortRange = new Map<number, string>()
   playersInRadioChannel = new Map<number, Set<number>>()
+  radioTowerCalculation = new Map<number, CitizenTimer | null>()
 
+  radioMode: 'None' | 'Direct' | 'Tower' = 'None'
   activeRadioChannel = 1
   secondaryRadioChannel = 2
 
@@ -274,13 +273,17 @@ export class YaCAClientRadioModule {
         if (!info?.shortRange || (info?.shortRange && GetPlayerFromServerId(target) !== -1)) {
           let errorLevel: number | null = null
 
+          const globalErrorLevel = GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] || 0
+
           if (this.radioMode === 'Tower') {
             const ownSignalStrength = this.calculateSignalStrength(ownDistanceToTower)
             const senderSignalStrength = this.calculateSignalStrength(senderDistanceToTower)
 
-            errorLevel = Math.max(ownSignalStrength, senderSignalStrength)
+            errorLevel = Math.max(ownSignalStrength, senderSignalStrength, globalErrorLevel)
           } else if (this.radioMode === 'Direct') {
-            errorLevel = this.calculateSignalStrength(ownDistanceToTower)
+            const signaleStrength = this.calculateSignalStrength(ownDistanceToTower)
+
+            errorLevel = Math.max(signaleStrength, globalErrorLevel)
           }
 
           this.clientModule.setPlayersCommType(
@@ -333,6 +336,7 @@ export class YaCAClientRadioModule {
       channelSettings.muted = state
       emit('yaca:external:setRadioMuteState', channel, state)
       this.disableRadioFromPlayerInChannel(channel)
+      this.updateRadioChannelData(channel)
     })
 
     /**
@@ -476,6 +480,7 @@ export class YaCAClientRadioModule {
       if (state && !this.radioInitialized) {
         this.radioInitialized = true
         this.initRadioSettings()
+        this.updateRadioChannelData(this.activeRadioChannel)
       }
 
       emit('yaca:external:isRadioEnabled', state)
@@ -610,6 +615,7 @@ export class YaCAClientRadioModule {
 
     emit('yaca:external:changedActiveRadioChannel', channel)
     this.activeRadioChannel = channel
+    this.updateRadioChannelData(this.activeRadioChannel)
 
     return true
   }
@@ -627,8 +633,10 @@ export class YaCAClientRadioModule {
 
     if (this.secondaryRadioChannel === channel) {
       this.secondaryRadioChannel = -1
+      this.clientModule.notification(locale('secondary_radio_channel_disabled'), YacaNotificationType.INFO)
     } else {
       this.secondaryRadioChannel = channel
+      this.clientModule.notification(locale('secondary_radio_channel_enabled', channel), YacaNotificationType.INFO)
     }
 
     emit('yaca:external:changedSecondaryRadioChannel', this.secondaryRadioChannel)
@@ -686,6 +694,7 @@ export class YaCAClientRadioModule {
     // Prevent duplicate update, cuz mute has its own update
     if (channelSettings.volume > 0) {
       emit('yaca:external:setRadioVolume', channel, channelSettings.volume)
+      this.updateRadioChannelData(channel)
     }
 
     // Send update to voice plugin
@@ -920,11 +929,18 @@ export class YaCAClientRadioModule {
    * @param {number} channel - The radio channel.
    */
   radioTalkingStart(state: boolean, channel: number) {
+    if (channel === -1) return
+
     if (!state) {
       if (this.talkingInChannels.has(channel)) {
         this.talkingInChannels.delete(channel)
         if (!this.clientModule.useWhisper) {
           this.radioTalkingStateToPlugin(false, channel)
+        }
+
+        if (this.radioTowerCalculation.has(channel)) {
+          clearInterval(this.radioTowerCalculation.get(channel) as CitizenTimer)
+          this.radioTowerCalculation.delete(channel)
         }
 
         this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(false, channel)
@@ -987,5 +1003,17 @@ export class YaCAClientRadioModule {
   sendRadioRequestToServer(channel: number) {
     const distanceToTower = this.getNearestRadioTower()?.distance ?? -1
     emitNet('server:yaca:radioTalking', true, channel, distanceToTower)
+  }
+
+
+  /**
+   * Updates the data of the specified radio channel if certain conditions are met.
+   *
+   * @param {number} channel - The number of the radio channel to update.
+   */
+  updateRadioChannelData(channel: number) {
+    if (channel !== this.activeRadioChannel || GetResourceState("yaca-ui") !== "started") return
+
+    exports['yaca-ui'].setRadioChannelData(this.radioChannelSettings.get(channel))
   }
 }

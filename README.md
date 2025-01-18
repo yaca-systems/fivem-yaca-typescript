@@ -415,6 +415,18 @@ Returns whether a player is in a phone call as `[bool, number[]]`.
 |-----------|----------|-------------------|
 | source    | `number` | the player source |
 
+#### `setGlobalErrorLevel(level: number)`
+
+Sets the global error level.
+
+| Parameter | Type     | Description     |
+|-----------|----------|-----------------|
+| level     | `number` | the error level |
+
+#### `getGlobalErrorLevel(): number`
+
+Returns the global error level as `number`.
+
 </details>
 
 # Events
