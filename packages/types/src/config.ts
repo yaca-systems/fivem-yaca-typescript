@@ -17,7 +17,8 @@ export interface YacaSharedConfig {
   }
   keyBinds: {
     toggleRange: string | false
-    radioTransmit: string | false
+    primaryRadioTransmit: string | false
+    secondaryRadioTransmit: string | false
     megaphone: string | false
   }
   maxRadioChannels: number
@@ -40,13 +41,7 @@ export interface YacaSharedConfig {
     allowedVehicleClasses: number[]
     allowedVehicleModels: string[]
   }
-  saltyChatBridge: {
-    enabled: boolean
-    keyBinds: {
-      primaryRadio: string | false
-      secondaryRadio: string | false
-    }
-  }
+  saltyChatBridge: boolean
   vehicleMuffling: boolean
   mufflingRange: number
   mufflingVehicleWhitelist: string[]
@@ -77,7 +72,8 @@ export const defaultSharedConfig: YacaSharedConfig = {
   },
   keyBinds: {
     toggleRange: 'Z',
-    radioTransmit: 'CAPITAL',
+    primaryRadioTransmit: 'N',
+    secondaryRadioTransmit: 'CAPITAL',
     megaphone: 'B',
   },
   maxRadioChannels: 6,
@@ -100,13 +96,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     allowedVehicleClasses: [18, 19],
     allowedVehicleModels: ['polmav'],
   },
-  saltyChatBridge: {
-    enabled: false,
-    keyBinds: {
-      primaryRadio: 'N',
-      secondaryRadio: 'CAPITAL',
-    },
-  },
+  saltyChatBridge: false,
   vehicleMuffling: true,
   mufflingRange: -1,
   mufflingVehicleWhitelist: ['gauntlet6', 'draugur', 'bodhi2', 'vagrant', 'outlaw', 'trophytruck', 'ratel', 'drifttampa', 'sm722', 'tornado4', 'swinger'],
