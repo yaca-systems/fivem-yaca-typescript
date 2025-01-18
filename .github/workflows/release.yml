@@ -65,13 +65,6 @@ jobs:
         run: |
           cd ./resource && zip -r ../yaca-voice.zip ./yaca-voice
 
-      - name: Update repository
-        if: inputs.prelease == false
-        run: |
-          git add package.json
-          git commit -am 'chore: bump version to v${{ inputs.version }}'
-          git push
-
       - name: Create Release
         uses: "minemalox/automatic-release@v0"
         id: auto_release
