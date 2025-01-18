@@ -34,48 +34,47 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 
 # Shared Config
 
-| Variable                                | Type                           | Description                                                                                                                                                                                                                                                         | FiveM/RedM |
-|-----------------------------------------|--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| debug                                   | `boolean`                      | Enable the debug mode to enable some debug commands.                                                                                                                                                                                                                | Both       |
-| versionCheck                            | `boolean`                      | Enable/Disable the automatic version check.                                                                                                                                                                                                                         | Both       |
-| buildType                               | `number`                       | `0` for release and `1` for develop (develop allows using all yaca plugin version)                                                                                                                                                                                  | Both       |
-| locale                                  | `string`                       | The locale that should be used preferred                                                                                                                                                                                                                            | Both       |
-| unmuteDelay                             | `number`                       | The time before the teamspeak client is being unmuted after joining the ingame channel.                                                                                                                                                                             | Both       |
-| maxPhoneSpeakerRange                    | `number`                       | The range in which you can here the phone speaker when active.                                                                                                                                                                                                      | Both       |
-| phoneHearPlayersNearby                  | `false\|PHONE_SPEAKER\|true`   | If players near other players that are in a call, should be heard by the players on the opposite side of the call. `false` to disable, `true` to enable it always and `PHONE_SPEAKER` to only enable it when the player on the phone has the phone speaker enabled. | Both       |
-| notifications.oxLib                     | `boolean`                      | Enable or disable the notifications via ox_lib.                                                                                                                                                                                                                     | Both       |
-| notifications.okoknotify                | `boolean`                      | Enable or disable the notifications via okoknotify.                                                                                                                                                                                                                     | Both       |
-| notifications.gta                       | `boolean`                      | Enable or disable the notifications via default gta radar notifications.                                                                                                                                                                                            | FiveM      |
-| notifications.redm                      | `boolean`                      | Enable or disable the notifications via default redm notifications.                                                                                                                                                                                                 | RedM       |
-| notifications.own                       | `boolean`                      | Enable or disable the use of own notifications via the provided event.                                                                                                                                                                                              | Both       |
-| keyBinds.toggleRange                    | `string`                       | The default keybinding for changing the voice range, set to `false` to disable.                                                                                                                                                                                     | Both       |
-| keyBinds.radioTransmit                  | `string`                       | The default keybinding for using the radio, set to `false` to disable. (not available if the saltychat bridge is enabled)                                                                                                                                           | Both       |
-| keyBinds.megaphone                      | `string`                       | The default keybinding for using the megaphone, set to `false` to disable.                                                                                                                                                                                          | Both       |
-| maxRadioChannels                        | `number`                       | Amount of Radio Channels available for the player.                                                                                                                                                                                                                  | Both       |
-| voiceRange.defaultIndex                 | `number`                       | The default voice range that should be chosen when a player connects.                                                                                                                                                                                               | Both       |
-| voiceRange.ranges                       | `number[]`                     | The available voice ranges which the player can change through.                                                                                                                                                                                                     | Both       |
-| voiceRange.sendNotification             | `boolean`                      | If a notification should be sent when the voice range is changed.                                                                                                                                                                                                   | Both       |
-| voiceRange.markerColor.enabled          | `boolean`                      | If the voice range marker should be enabled or not.                                                                                                                                                                                                                 | Both       |
-| voiceRange.markerColor.r                | `number`                       | The red value of the voice range marker color.                                                                                                                                                                                                                      | Both       |
-| voiceRange.markerColor.g                | `number`                       | The green value of the voice range marker color.                                                                                                                                                                                                                    | Both       |
-| voiceRange.markerColor.b                | `number`                       | The blue value of the voice range marker color.                                                                                                                                                                                                                     | Both       |
-| voiceRange.markerColor.a                | `number`                       | The alpha value of the voice range marker color.                                                                                                                                                                                                                    | Both       |
-| voiceRange.markerColor.duration         | `number`                       | The duration in milliseconds the voice range marker should be visible.                                                                                                                                                                                              | Both       |
-| megaphone.range                         | `number`                       | The range in which the megaphone should be heard.                                                                                                                                                                                                                   | Both       |
-| megaphone.automaticVehicleDetection     | `boolean`                      | Enable the automatic detection if the megaphone can be used via vehicle classes.                                                                                                                                                                                    | FiveM      |
-| megaphone.allowedVehicleClasses         | `number[]`                     | GTA Vehicle class ids that should be able to use the megaphone. (only available if the automatic vehicle detection is enable)                                                                                                                                       | FiveM      |
-| saltyChatBridge.enabled                 | `boolean`                      | If the saltychat bridge should be enabled or not.                                                                                                                                                                                                                   | Both       |
-| saltyChatBridge.keyBinds.primaryRadio   | `string`                       | The default keybinding for using the primary radio. (only available if the saltychat bridge is enabled)                                                                                                                                                             | Both       |
-| saltyChatBridge.keyBinds.secondaryRadio | `string`                       | The default keybinding for using the secondary radio. (only available if the saltychat bridge is enabled)                                                                                                                                                           | Both       |
-| vehicleMuffling                         | `boolean`                      | If players sitting in vehicles should be muffled when sitting inside a car without a window/door open. `true` to enable and `false` to disable                                                                                                                      | FiveM      |
-| mufflingRange                           | `number`                       | If set to -1, the player voice range is used, all values >= 0 sets the muffling range before it gets completely cut off                                                                                                                                             | Both       |
-| mufflingVehicleWhitelist                | `string[]`                     | Whitelist of vehicle models that should not be muffled when sitting inside a car without a window/door open.                                                                                                                                                        | FiveM      |
-| mufflingIntensities.differentRoom       | `number`                       | Adjusts how much a nearby player is muffles when they are in a different room and not in line of sight. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                                                   | Both       |
-| mufflingIntensities.bothCarsClosed      | `number`                       | Adjusts how much a nearby player is muffled when themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                                   | FiveM      |
-| mufflingIntensities.oneCarClosed        | `number`                       | Adjusts how much a nearby player is muffled when either themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                            | FiveM      |
-| mufflingIntensities.megaPhoneInCar      | `number`                       | Adjusts how much a nearby player is muffled when the player is using the megaphone and the nearby player is in a car. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                                     | FiveM      |
-| radioAntiSpamCooldown                   | `number\|false`                | Cooldown in milliseconds which the player has to wait to use the radio again, defaults to `false` which disables the feature.                                                                                                                                       | Both       |
-| useLocalLipSync                         | `boolean`                      | When set to `true` the plugin syncs the talk state via the plugin, instead of the default way via statebags. This imitates the way how saltychat syncs the talk state, but has some drawbacks.                                                                      | Both       |
+| Variable                            | Type                         | Description                                                                                                                                                                                                                                                         | FiveM/RedM |
+|-------------------------------------|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| debug                               | `boolean`                    | Enable the debug mode to enable some debug commands.                                                                                                                                                                                                                | Both       |
+| versionCheck                        | `boolean`                    | Enable/Disable the automatic version check.                                                                                                                                                                                                                         | Both       |
+| buildType                           | `number`                     | `0` for release and `1` for develop (develop allows using all yaca plugin version)                                                                                                                                                                                  | Both       |
+| locale                              | `string`                     | The locale that should be used preferred                                                                                                                                                                                                                            | Both       |
+| unmuteDelay                         | `number`                     | The time before the teamspeak client is being unmuted after joining the ingame channel.                                                                                                                                                                             | Both       |
+| maxPhoneSpeakerRange                | `number`                     | The range in which you can here the phone speaker when active.                                                                                                                                                                                                      | Both       |
+| phoneHearPlayersNearby              | `false\|PHONE_SPEAKER\|true` | If players near other players that are in a call, should be heard by the players on the opposite side of the call. `false` to disable, `true` to enable it always and `PHONE_SPEAKER` to only enable it when the player on the phone has the phone speaker enabled. | Both       |
+| notifications.oxLib                 | `boolean`                    | Enable or disable the notifications via ox_lib.                                                                                                                                                                                                                     | Both       |
+| notifications.okoknotify            | `boolean`                    | Enable or disable the notifications via okoknotify.                                                                                                                                                                                                                 | Both       |
+| notifications.gta                   | `boolean`                    | Enable or disable the notifications via default gta radar notifications.                                                                                                                                                                                            | FiveM      |
+| notifications.redm                  | `boolean`                    | Enable or disable the notifications via default redm notifications.                                                                                                                                                                                                 | RedM       |
+| notifications.own                   | `boolean`                    | Enable or disable the use of own notifications via the provided event.                                                                                                                                                                                              | Both       |
+| keyBinds.toggleRange                | `string`                     | The default keybinding for changing the voice range, set to `false` to disable.                                                                                                                                                                                     | Both       |
+| keyBinds.primaryRadioTransmit       | `string`                     | The default keybinding for using the radio, set to `false` to disable.                                                                                                                                                                                              | Both       |
+| keyBinds.secondaryRadioTransmit     | `string`                     | The default keybinding for using the secondary radio, set to `false` to disable.                                                                                                                                                                                    | Both       |
+| keyBinds.megaphone                  | `string`                     | The default keybinding for using the megaphone, set to `false` to disable.                                                                                                                                                                                          | Both       |
+| maxRadioChannels                    | `number`                     | Amount of Radio Channels available for the player.                                                                                                                                                                                                                  | Both       |
+| voiceRange.defaultIndex             | `number`                     | The default voice range that should be chosen when a player connects.                                                                                                                                                                                               | Both       |
+| voiceRange.ranges                   | `number[]`                   | The available voice ranges which the player can change through.                                                                                                                                                                                                     | Both       |
+| voiceRange.sendNotification         | `boolean`                    | If a notification should be sent when the voice range is changed.                                                                                                                                                                                                   | Both       |
+| voiceRange.markerColor.enabled      | `boolean`                    | If the voice range marker should be enabled or not.                                                                                                                                                                                                                 | Both       |
+| voiceRange.markerColor.r            | `number`                     | The red value of the voice range marker color.                                                                                                                                                                                                                      | Both       |
+| voiceRange.markerColor.g            | `number`                     | The green value of the voice range marker color.                                                                                                                                                                                                                    | Both       |
+| voiceRange.markerColor.b            | `number`                     | The blue value of the voice range marker color.                                                                                                                                                                                                                     | Both       |
+| voiceRange.markerColor.a            | `number`                     | The alpha value of the voice range marker color.                                                                                                                                                                                                                    | Both       |
+| voiceRange.markerColor.duration     | `number`                     | The duration in milliseconds the voice range marker should be visible.                                                                                                                                                                                              | Both       |
+| megaphone.range                     | `number`                     | The range in which the megaphone should be heard.                                                                                                                                                                                                                   | Both       |
+| megaphone.automaticVehicleDetection | `boolean`                    | Enable the automatic detection if the megaphone can be used via vehicle classes.                                                                                                                                                                                    | FiveM      |
+| megaphone.allowedVehicleClasses     | `number[]`                   | GTA Vehicle class ids that should be able to use the megaphone. (only available if the automatic vehicle detection is enable)                                                                                                                                       | FiveM      |
+| saltyChatBridge                     | `boolean`                    | If the saltychat bridge should be enabled or not.                                                                                                                                                                                                                   | Both       |
+| vehicleMuffling                     | `boolean`                    | If players sitting in vehicles should be muffled when sitting inside a car without a window/door open. `true` to enable and `false` to disable                                                                                                                      | FiveM      |
+| mufflingRange                       | `number`                     | If set to -1, the player voice range is used, all values >= 0 sets the muffling range before it gets completely cut off                                                                                                                                             | Both       |
+| mufflingVehicleWhitelist            | `string[]`                   | Whitelist of vehicle models that should not be muffled when sitting inside a car without a window/door open.                                                                                                                                                        | FiveM      |
+| mufflingIntensities.differentRoom   | `number`                     | Adjusts how much a nearby player is muffles when they are in a different room and not in line of sight. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                                                   | Both       |
+| mufflingIntensities.bothCarsClosed  | `number`                     | Adjusts how much a nearby player is muffled when themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                                   | FiveM      |
+| mufflingIntensities.oneCarClosed    | `number`                     | Adjusts how much a nearby player is muffled when either themself and the nearby player are in a car with closed windows/doors. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                            | FiveM      |
+| mufflingIntensities.megaPhoneInCar  | `number`                     | Adjusts how much a nearby player is muffled when the player is using the megaphone and the nearby player is in a car. Values between 0 and 10 are possible, while 0 is no muffling and 10 is the most muffling.                                                     | FiveM      |
+| radioAntiSpamCooldown               | `number\|false`              | Cooldown in milliseconds which the player has to wait to use the radio again, defaults to `false` which disables the feature.                                                                                                                                       | Both       |
+| useLocalLipSync                     | `boolean`                    | When set to `true` the plugin syncs the talk state via the plugin, instead of the default way via statebags. This imitates the way how saltychat syncs the talk state, but has some drawbacks.                                                                      | Both       |
 
 # Exports
 
@@ -180,7 +179,7 @@ Returns whether a radio channel is muted as `boolean`.
 |-----------|----------|--------------------|
 | channel   | `number` | the channel number |
 
-#### `changeActiveRadioChannel(channel: number): bool`
+#### `setActiveRadioChannel(channel: number): bool`
 
 Changes the active radio channel. Returns whether the operation was successful as `bool`.
 
@@ -191,6 +190,18 @@ Changes the active radio channel. Returns whether the operation was successful a
 #### `getActiveRadioChannel(): number`
 
 Returns the active radio channel as `number`.
+
+#### `setSecondaryRadioChannel(channel: number): bool`
+
+Changes the secondary radio channel. Returns whether the operation was successful as `bool`.
+
+| Parameter | Type     | Description           |
+|-----------|----------|-----------------------|
+| channel   | `number` | the new radio channel |
+
+#### `getSecondaryRadioChannel(): number`
+
+Returns the secondary radio channel as `number`.
 
 #### `changeRadioChannelVolume(higher: boolean): bool`
 
@@ -238,15 +249,14 @@ Returns the stereo mode of a radio channel as `string`.
 |-----------|----------|--------------------|
 | channel   | `number` | the channel number |
 
-#### `radioTalkingStart(state: boolean, channel: number, clearPedTasks: boolean = true)`
+#### `radioTalkingStart(state: boolean, channel: number)`
 
 Starts or stops talking on the radio.
 
-| Parameter     | Type      | Description                                                       |
-|---------------|-----------|-------------------------------------------------------------------|
-| state         | `boolean` | `true` to start talking, `false` to stop                          |
-| channel       | `number`  | the channel to talk on                                            |
-| clearPedTasks | `boolean` | `true` to clear the ped tasks, `false` to not clear the ped tasks |
+| Parameter | Type      | Description                              |
+|-----------|-----------|------------------------------------------|
+| state     | `boolean` | `true` to start talking, `false` to stop |
+| channel   | `number`  | the channel to talk on                   |
 
 ### Phone
 
@@ -503,6 +513,14 @@ The event is triggered when the active radio channel of a player changes.
 |-----------|----------|------------------------------|
 | channel   | `number` | the new active radio channel |
 
+### yaca:external:changedSecondaryRadioChannel
+
+The event is triggered when the secondary radio channel of a player changes.
+
+| Parameter | Type     | Description                                       |
+|-----------|----------|---------------------------------------------------|
+| channel   | `number` | the new active radio channel, or `-1` if disabled |
+
 ### yaca:external:setRadioVolume
 
 The event is triggered when the radio volume of a player changes.
@@ -626,15 +644,6 @@ The event is triggered when the radio mute state of a player changes.
 | source    | `int`     | the player source                            |
 | channel   | `int`     | the channel where the mute state was changed |
 | state     | `boolean` | the new mute state                           |
-
-### yaca:external:changedRadioActiveChannel
-
-The event is triggered when the active radio channel of a player changes.
-
-| Parameter | Type     | Description                  |
-|-----------|----------|------------------------------|
-| source    | `int`    | the player source            |
-| channel   | `number` | the new active radio channel |
 
 </details>
 
