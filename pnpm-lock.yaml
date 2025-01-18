@@ -32,7 +32,7 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.10778-1
+        version: 2.0.12255-1
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
@@ -51,13 +51,16 @@ importers:
 
   apps/yaca-server:
     dependencies:
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
     devDependencies:
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.10778-1
+        version: 2.0.12255-1
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
@@ -79,13 +82,16 @@ importers:
       fast-printf:
         specifier: ^1.6.9
         version: 1.6.9
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.10778-1
+        version: 2.0.12255-1
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.10778-1
+        version: 2.0.12255-1
       '@types/node':
         specifier: ^22.7.4
         version: 22.7.4
@@ -152,11 +158,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@citizenfx/client@2.0.10778-1':
-    resolution: {integrity: sha512-abkABdTwfjgMjHL/MFqHMv+LJ3tNZCMXWX1lkjY3+B7ZEdKjJ3LVMtsyRw0Yg1AqWhhswCFse+7o/gcNe9IJkA==}
+  '@citizenfx/client@2.0.12255-1':
+    resolution: {integrity: sha512-G/zRdsaC7/qONA+UQxIU9cVtYB/D9YDFwbANaxmcNnfM/H5Lf69FxDuVUTMKQERpgv3APa1dYVhH/GILEUjykg==}
 
-  '@citizenfx/server@2.0.10778-1':
-    resolution: {integrity: sha512-JYVMC4Hw4XOlXBokxbRYcBTc02Xp4aiE+biZgddwt6cQqPGnp4Rmjt1/7+ksKp/jWxYgWYCBy2QtW3pAple/+Q==}
+  '@citizenfx/server@2.0.12255-1':
+    resolution: {integrity: sha512-OYXd+7XjRZMOMWhLnE6O4ASK2558vsA7xOf9SymrouCKmTzcJeOHiX/jSqlsG7APitnADQLMRNWqguJN7ocIOA==}
 
   '@esbuild/aix-ppc64@0.24.0':
     resolution: {integrity: sha512-WtKdFM7ls47zkKHFVzMz8opM7LkcsIp9amDUBIAWirg70RM71WRSjdILPsY5Uv1D42ZpUfaPILDlfactHgsRkw==}
@@ -671,6 +677,11 @@ packages:
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
 
+  json5@2.2.3:
+    resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
+    engines: {node: '>=6'}
+    hasBin: true
+
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -914,9 +925,9 @@ snapshots:
   '@biomejs/cli-win32-x64@1.9.4':
     optional: true
 
-  '@citizenfx/client@2.0.10778-1': {}
+  '@citizenfx/client@2.0.12255-1': {}
 
-  '@citizenfx/server@2.0.10778-1': {}
+  '@citizenfx/server@2.0.12255-1': {}
 
   '@esbuild/aix-ppc64@0.24.0':
     optional: true
@@ -1402,6 +1413,8 @@ snapshots:
   json-schema-traverse@0.4.1: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
+
+  json5@2.2.3: {}
 
   keyv@4.5.4:
     dependencies:

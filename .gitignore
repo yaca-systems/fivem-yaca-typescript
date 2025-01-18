@@ -46,8 +46,8 @@ jspm_packages/
 .idea
 
 # Config files
-config/yaca-voice/shared.json
-config/yaca-voice/server.json
+config/yaca-voice/shared.json5
+config/yaca-voice/server.json5
 
 # FiveM
 .yarn.installed

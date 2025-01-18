@@ -1005,14 +1005,13 @@ export class YaCAClientRadioModule {
     emitNet('server:yaca:radioTalking', true, channel, distanceToTower)
   }
 
-
   /**
    * Updates the data of the specified radio channel if certain conditions are met.
    *
    * @param {number} channel - The number of the radio channel to update.
    */
   updateRadioChannelData(channel: number) {
-    if (channel !== this.activeRadioChannel || GetResourceState("yaca-ui") !== "started") return
+    if (channel !== this.activeRadioChannel || GetResourceState('yaca-ui') !== 'started') return
 
     exports['yaca-ui'].setRadioChannelData(this.radioChannelSettings.get(channel))
   }

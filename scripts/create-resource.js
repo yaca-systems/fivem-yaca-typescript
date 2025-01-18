@@ -53,12 +53,12 @@ provide 'saltychat'
 `,
 )
 
-if (existsSync('config/yaca-voice/shared.json')) {
-  copyFileSync('config/yaca-voice/shared.json', 'resource/yaca-voice/config/shared.json')
+if (existsSync('config/yaca-voice/shared.json5')) {
+  copyFileSync('config/yaca-voice/shared.json5', 'resource/yaca-voice/config/shared.json5')
 }
 
-if (existsSync('config/yaca-voice/server.json')) {
-  copyFileSync('config/yaca-voice/server.json', 'resource/yaca-voice/config/server.json')
+if (existsSync('config/yaca-voice/server.json5')) {
+  copyFileSync('config/yaca-voice/server.json5', 'resource/yaca-voice/config/server.json5')
 }
 
 copyFileSync('README.md', 'resource/yaca-voice/README.md')
