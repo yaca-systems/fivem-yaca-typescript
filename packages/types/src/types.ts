@@ -53,6 +53,7 @@ export interface DataObject {
 export interface YacaClient {
   client_id?: number
   mode?: CommDeviceMode
+  errorLevel?: number
 }
 
 export interface YacaProtocol {
