@@ -264,6 +264,28 @@ Starts or stops talking on the radio.
 
 Returns whether the player is in a phone call as a `boolean`.
 
+### Megaphone
+
+#### `getCanUseMegaphone(): boolean`
+
+Returns whether the player can use the megaphone as a `boolean`.
+
+#### `setCanUseMegaphone(state: boolean)`
+
+Sets whether the player can use the megaphone.
+
+| Parameter | Type      | Description                                             |
+|-----------|-----------|---------------------------------------------------------|
+| state     | `boolean` | `true` to allow using of megaphone, `false` to disallow |
+
+### `useMegaphone(state: boolean)`
+
+Starts or stops using the megaphone.
+
+| Parameter | Type      | Description                            |
+|-----------|-----------|----------------------------------------|
+| state     | `boolean` | `true` to start using, `false` to stop |
+
 </details>
 
 <details>
