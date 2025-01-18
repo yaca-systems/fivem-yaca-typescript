@@ -8,17 +8,6 @@ export * from './vehicle'
 export * from './redm'
 
 /**
- * Clamps a value between a minimum and maximum value.
- *
- * @param {number} value - The value to be clamped.
- * @param {number} [min=0] - The minimum value. Defaults to 0 if not provided.
- * @param {number} [max=1] - The maximum value. Defaults to 1 if not provided.
- */
-export function clamp(value: number, min = 0, max = 1) {
-  return Math.max(min, Math.min(max, value))
-}
-
-/**
  * Rounds a float to a specified number of decimal places.
  * Defaults to 2 decimal places if not provided.
  *

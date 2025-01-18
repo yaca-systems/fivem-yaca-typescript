@@ -1,4 +1,4 @@
-import { VOICE_RANGE_STATE_NAME, initLocale, loadConfig } from '@yaca-voice/common'
+import { GLOBAL_ERROR_LEVEL_STATE_NAME, VOICE_RANGE_STATE_NAME, getGlobalErrorLevel, initLocale, loadConfig, setGlobalErrorLevel } from '@yaca-voice/common'
 import { type DataObject, type ServerCache, type YacaServerConfig, type YacaSharedConfig, defaultServerConfig, defaultSharedConfig } from '@yaca-voice/types'
 import { YaCAServerSaltyChatBridge } from '../bridge/saltychat'
 import { checkVersion, generateRandomName } from '../utils'
@@ -87,6 +87,8 @@ export class YaCAServerModule {
     if (this.sharedConfig.versionCheck) {
       checkVersion().then()
     }
+
+    GlobalState.set(GLOBAL_ERROR_LEVEL_STATE_NAME, 0, true)
   }
 
   /**
@@ -164,6 +166,20 @@ export class YaCAServerModule {
      * @param {number} playerId - The ID of the player to set the voice range for.
      */
     exports('setPlayerVoiceRange', (playerId: number, range: number) => this.changeVoiceRange(playerId, range))
+
+    /**
+     * Set the global error level.
+     *
+     * @param {number} errorLevel - The new error level. Between 0 and 1.
+     */
+    exports('setGlobalErrorLevel', (errorLevel: number) => setGlobalErrorLevel(errorLevel))
+
+    /**
+     * Get the global error level.
+     *
+     * @returns {number} - The global error level.
+     */
+    exports('getGlobalErrorLevel', () => getGlobalErrorLevel())
   }
 
   /**
