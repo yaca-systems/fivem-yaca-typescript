@@ -5,7 +5,7 @@ import type { YaCAClientModule } from './main'
  */
 export class YaCAClientTxAdminModule {
   clientModule: YaCAClientModule
-  spectating = false
+  spectating: number | false = false
 
   /**
    * Creates an instance of the txadmin module.
@@ -25,8 +25,8 @@ export class YaCAClientTxAdminModule {
     /**
      * Handles the "txcl:spectate:start" server event.
      */
-    onNet('txcl:spectate:start', () => {
-      this.spectating = true
+    onNet('txcl:spectate:start', (targetServerId: number) => {
+      this.spectating = targetServerId
     })
 
     onNet('client:yaca:txadmin:stopspectate', () => {
