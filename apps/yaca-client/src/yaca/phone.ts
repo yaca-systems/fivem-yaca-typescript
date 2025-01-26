@@ -1,4 +1,4 @@
-import { PHONE_SPEAKER_STATE_NAME } from '@yaca-voice/common'
+import { GLOBAL_ERROR_LEVEL_STATE_NAME, PHONE_SPEAKER_STATE_NAME } from '@yaca-voice/common'
 import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData } from '@yaca-voice/types'
 import { cache } from '../utils'
 import type { YaCAClientModule } from './main'
@@ -274,6 +274,7 @@ export class YaCAClientPhoneModule {
       undefined,
       state || (!state && this.inCallWith.size) ? CommDeviceMode.TRANSCEIVER : undefined,
       CommDeviceMode.TRANSCEIVER,
+      GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? undefined,
     )
   }
 }
