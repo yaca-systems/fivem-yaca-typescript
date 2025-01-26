@@ -41,7 +41,7 @@ import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
 import { YaCAClientPhoneModule } from './phone'
 import { YaCAClientRadioModule } from './radio'
-import { YaCAClientTxAdminModule } from './txadmin.js'
+import { YaCAClientTxAdminModule } from './txadmin'
 
 /**
  * The YaCA client module.
@@ -1156,13 +1156,22 @@ export class YaCAClientModule {
   /**
    * Get the muffle intensity for the nearby player.
    *
+   * @param {number} playerPed - The player ped.
    * @param {number} nearbyPlayerPed - The nearby player ped.
+   * @param {number} playerVehicle - The vehicle the player is in.
    * @param {number} ownCurrentRoom - The current room the client is in.
    * @param {boolean} ownVehicleHasOpening - The opening state ot the vehicle the client is in.
    * @param {boolean} nearbyUsesMegaphone - The state if the nearby player uses a megaphone.
    */
-  getMuffleIntensity(nearbyPlayerPed: number, ownCurrentRoom: number, ownVehicleHasOpening: boolean, nearbyUsesMegaphone = false) {
-    if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(cache.ped, nearbyPlayerPed, 17)) {
+  getMuffleIntensity(
+    playerPed: number,
+    nearbyPlayerPed: number,
+    playerVehicle: number | false,
+    ownCurrentRoom: number,
+    ownVehicleHasOpening: boolean,
+    nearbyUsesMegaphone = false,
+  ) {
+    if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(playerPed, nearbyPlayerPed, 17)) {
       return this.sharedConfig.mufflingSettings.intensities.differentRoom
     }
 
@@ -1172,7 +1181,7 @@ export class YaCAClientModule {
     }
 
     const nearbyPlayerVehicle = GetVehiclePedIsIn(nearbyPlayerPed, false)
-    const ownVehicleId = cache.vehicle || 0
+    const ownVehicleId = playerVehicle || 0
 
     if (ownVehicleId === nearbyPlayerVehicle) {
       return 0
@@ -1290,10 +1299,30 @@ export class YaCAClientModule {
     const playersToPhoneSpeaker = new Set<number>()
     const playersOnPhoneSpeaker = new Set<number>()
     const playerToHearOnPhone = new Set<number>()
-    const localEntityCoords = GetEntityCoords(cache.ped, false)
-    const localPos = this.txAdminModule.spectating ? [localEntityCoords[0], localEntityCoords[1], localEntityCoords[2] + 15] : localEntityCoords
-    const currentRoom = GetRoomKeyFromEntity(cache.ped)
-    const hasVehicleOpening = this.isFiveM ? this.checkIfVehicleHasOpening(cache.vehicle) : true
+
+    let localPlayerPed = cache.ped
+    let localPlayerVehicle = cache.vehicle
+
+    if (this.txAdminModule.spectating) {
+      const remotePlayerId = GetPlayerFromServerId(this.txAdminModule.spectating)
+
+      if (remotePlayerId !== -1) {
+        const remotePlayerPed = GetPlayerPed(remotePlayerId)
+        if (remotePlayerPed !== 0) {
+          localPlayerPed = remotePlayerPed
+          const remotePlayerVehicle = GetVehiclePedIsIn(remotePlayerPed, false)
+          if (remotePlayerVehicle !== 0) {
+            localPlayerVehicle = remotePlayerVehicle
+          } else {
+            localPlayerVehicle = false
+          }
+        }
+      }
+    }
+
+    const localPos = GetEntityCoords(localPlayerPed, false)
+    const currentRoom = GetRoomKeyFromEntity(localPlayerPed)
+    const hasVehicleOpening = this.isFiveM ? this.checkIfVehicleHasOpening(localPlayerVehicle) : true
     const phoneSpeakerActive = this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size
 
     for (const player of GetActivePlayers()) {
@@ -1312,7 +1341,14 @@ export class YaCAClientModule {
       const range = playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
 
       // Get the muffle intensity for the player.
-      const muffleIntensity = this.getMuffleIntensity(playerPed, currentRoom, hasVehicleOpening, playerState[MEGAPHONE_STATE_NAME] !== null)
+      const muffleIntensity = this.getMuffleIntensity(
+        localPlayerPed,
+        playerPed,
+        localPlayerVehicle,
+        currentRoom,
+        hasVehicleOpening,
+        playerState[MEGAPHONE_STATE_NAME] !== null,
+      )
 
       // Get the player position, the distance to the player, the player direction and if the player is underwater.
       const playerPos = GetEntityCoords(playerPed, false)
@@ -1396,7 +1432,7 @@ export class YaCAClientModule {
         player_position: convertNumberArrayToXYZ(localPos),
         player_range: LocalPlayer.state[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange,
         // @ts-expect-error Type error in the native
-        player_is_underwater: IsPedSwimmingUnderWater(cache.ped) === 1,
+        player_is_underwater: IsPedSwimmingUnderWater(localPlayerPed) === 1,
         player_is_muted: localData.forceMuted ?? false,
         players_list: Array.from(players.values()),
       },

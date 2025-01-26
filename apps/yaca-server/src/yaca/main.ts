@@ -6,7 +6,7 @@ import { triggerClientEvent } from '../utils/events'
 import { YaCAServerMegaphoneModule } from './megaphone'
 import { YaCAServerPhoneModle } from './phone'
 import { YaCAServerRadioModule } from './radio'
-import { YaCAServerTxAdminModule } from './txadmin.js'
+import { YaCAServerTxAdminModule } from './txadmin'
 
 /**
  * The player data type for YaCA.
