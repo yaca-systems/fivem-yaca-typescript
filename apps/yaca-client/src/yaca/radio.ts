@@ -39,6 +39,8 @@ export class YaCAClientRadioModule {
   constructor(clientModule: YaCAClientModule) {
     this.clientModule = clientModule
 
+    this.radioMode = this.clientModule.sharedConfig.radioSettings.mode
+
     this.registerExports()
     this.registerEvents()
 

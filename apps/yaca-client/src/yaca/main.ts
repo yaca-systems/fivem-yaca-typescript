@@ -207,11 +207,7 @@ export class YaCAClientModule {
        * Add a state bag change handler for the lip sync state bag.
        * Which is used to override the talking state of the player.
        */
-      AddStateBagChangeHandler(LIP_SYNC_STATE_NAME, '', (bagName: string, _: string, value: boolean, __: number, replicated: boolean) => {
-        if (replicated) {
-          return
-        }
-
+      AddStateBagChangeHandler(LIP_SYNC_STATE_NAME, '', (bagName: string, _: string, value: boolean, __: number) => {
         const playerId = GetPlayerFromStateBagName(bagName)
         if (playerId === 0) {
           return
@@ -224,12 +220,10 @@ export class YaCAClientModule {
        * Add a state bag change handler for the global error level state bag.
        * Which is used to override the global error level.
        */
-      AddStateBagChangeHandler(GLOBAL_ERROR_LEVEL_STATE_NAME, '', (_bagName: string, _key: string, _value: number, __: number, replicated: boolean) => {
-        if (replicated) {
-          return
-        }
-
-        this.phoneModule.enablePhoneCall(Array.from(this.phoneModule.inCallWith), true)
+      AddStateBagChangeHandler(GLOBAL_ERROR_LEVEL_STATE_NAME, '', (_bagName: string, _key: string, _value: number, __: number) => {
+        setImmediate(() => {
+          this.phoneModule.enablePhoneCall(Array.from(this.phoneModule.inCallWith), true)
+        })
       })
     }
 
