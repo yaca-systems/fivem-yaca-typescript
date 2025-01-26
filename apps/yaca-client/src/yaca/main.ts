@@ -41,6 +41,7 @@ import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
 import { YaCAClientPhoneModule } from './phone'
 import { YaCAClientRadioModule } from './radio'
+import { YaCAClientTxAdminModule } from './txadmin.js'
 
 /**
  * The YaCA client module.
@@ -58,6 +59,7 @@ export class YaCAClientModule {
   phoneModule: YaCAClientPhoneModule
   megaphoneModule: YaCAClientMegaphoneModule
   intercomModule: YaCAClientIntercomModule
+  txAdminModule: YaCAClientTxAdminModule
 
   saltyChatBridge?: YaCAClientSaltyChatBridge
 
@@ -198,6 +200,7 @@ export class YaCAClientModule {
     this.megaphoneModule = new YaCAClientMegaphoneModule(this)
     this.phoneModule = new YaCAClientPhoneModule(this)
     this.radioModule = new YaCAClientRadioModule(this)
+    this.txAdminModule = new YaCAClientTxAdminModule(this)
 
     if (!this.sharedConfig.useLocalLipSync) {
       /**
@@ -1287,7 +1290,8 @@ export class YaCAClientModule {
     const playersToPhoneSpeaker = new Set<number>()
     const playersOnPhoneSpeaker = new Set<number>()
     const playerToHearOnPhone = new Set<number>()
-    const localPos = GetEntityCoords(cache.ped, false)
+    const localEntityCoords = GetEntityCoords(cache.ped, false)
+    const localPos = this.txAdminModule.spectating ? [localEntityCoords[0], localEntityCoords[1], localEntityCoords[2] + 15] : localEntityCoords
     const currentRoom = GetRoomKeyFromEntity(cache.ped)
     const hasVehicleOpening = this.isFiveM ? this.checkIfVehicleHasOpening(cache.vehicle) : true
     const phoneSpeakerActive = this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size

@@ -6,6 +6,7 @@ import { triggerClientEvent } from '../utils/events'
 import { YaCAServerMegaphoneModule } from './megaphone'
 import { YaCAServerPhoneModle } from './phone'
 import { YaCAServerRadioModule } from './radio'
+import { YaCAServerTxAdminModule } from './txadmin.js'
 
 /**
  * The player data type for YaCA.
@@ -49,6 +50,7 @@ export class YaCAServerModule {
   phoneModule: YaCAServerPhoneModle
   radioModule: YaCAServerRadioModule
   megaphoneModule: YaCAServerMegaphoneModule
+  txadminModule: YaCAServerTxAdminModule
 
   saltChatBridge?: YaCAServerSaltyChatBridge
 
@@ -75,6 +77,7 @@ export class YaCAServerModule {
     this.phoneModule = new YaCAServerPhoneModle(this)
     this.radioModule = new YaCAServerRadioModule(this)
     this.megaphoneModule = new YaCAServerMegaphoneModule(this)
+    this.txadminModule = new YaCAServerTxAdminModule()
 
     this.registerExports()
     this.registerEvents()
