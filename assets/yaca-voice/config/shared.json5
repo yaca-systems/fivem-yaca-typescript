@@ -45,7 +45,7 @@
   },
   "radioSettings": {
     // The maximum amount of radio channels that can be used.
-    "channelCount": 6,
+    "channelCount": 9,
     /* Choose the mode of the radio system.
      *
      * Following options are available:

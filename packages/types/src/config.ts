@@ -87,7 +87,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     megaphone: 'B',
   },
   radioSettings: {
-    channelCount: 6,
+    channelCount: 9,
     mode: 'None',
     maxDistance: 1000,
     towerPositions: [
