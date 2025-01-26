@@ -10,7 +10,14 @@ function mergeAndValidate<T extends object>(defaultObj: T, parsedObj: T, path: s
       console.warn(
         `[YaCA] Missing config value for key '${currentPath}' setting to default value: ${defaultObj[key]}\nMissing config values can cause unexpected behavior of the script.`,
       )
-    } else if (typeof defaultObj[key] === 'object' && defaultObj[key] !== null && typeof parsedObj[key] === 'object' && parsedObj[key] !== null) {
+    } else if (
+      typeof defaultObj[key] === 'object' &&
+      defaultObj[key] !== null &&
+      !Array.isArray(defaultObj[key]) &&
+      typeof parsedObj[key] === 'object' &&
+      parsedObj[key] !== null &&
+      !Array.isArray(parsedObj[key])
+    ) {
       // Recursive merge for nested objects
       result[key] = mergeAndValidate(defaultObj[key], parsedObj[key], [...path, key])
     } else {

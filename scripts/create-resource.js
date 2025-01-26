@@ -41,7 +41,7 @@ ui_page 'web/index.html'
 files {
     'web/index.html',
     'web/script.js',
-    'config/shared.json',
+    'config/shared.json5',
     'locales/*.json',
 }
 
