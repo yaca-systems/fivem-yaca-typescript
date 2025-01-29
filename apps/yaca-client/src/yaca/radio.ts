@@ -286,6 +286,8 @@ export class YaCAClientRadioModule {
             const signaleStrength = this.calculateSignalStrength(ownDistanceToTower)
 
             errorLevel = Math.max(signaleStrength, globalErrorLevel)
+          } else {
+            errorLevel = globalErrorLevel
           }
 
           this.clientModule.setPlayersCommType(
