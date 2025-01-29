@@ -60,6 +60,22 @@ The state can be one of the following:
 - `"IN_INGAME_CHANNEL"`: The user is in the ingame channel
 - `"IN_EXCLUDED_CHANNEL"`: The user is in an excluded channel
 
+#### `getGlobalErrorLevel(): number`
+
+Get the global error level as `number`.
+
+#### `setSpectatingPlayer(playerId: number | false)`
+
+Set the player to spectate.
+
+| Parameter | Type              | Description       |
+|-----------|-------------------|-------------------|
+| playerId  | `number \| false` | the player to set |
+
+#### `getSpectatingPlayer(): number`
+
+Get the player the user is spectating as `number`.
+
 ### Radio
 
 #### `enableRadio(state: boolean)`
