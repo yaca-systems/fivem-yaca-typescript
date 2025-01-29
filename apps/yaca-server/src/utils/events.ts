@@ -1,3 +1,10 @@
+/**
+ * Send a event to one or multiple clients.
+ *
+ * @param eventName - The name of the event.
+ * @param targetIds - The target ids.
+ * @param args - The arguments to send.
+ */
 export const triggerClientEvent = (eventName: string, targetIds: number[] | number, ...args: unknown[]) => {
   if (!Array.isArray(targetIds)) {
     targetIds = [targetIds]

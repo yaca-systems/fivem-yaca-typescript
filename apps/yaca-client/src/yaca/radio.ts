@@ -240,16 +240,7 @@ export class YaCAClientRadioModule {
           return
         }
 
-        let ownDistanceToTower = -1
-
-        if (this.radioMode === 'Tower') {
-          const nearestTower = this.getNearestRadioTower()
-          if (nearestTower) {
-            ownDistanceToTower = nearestTower.distance
-          }
-        } else if (this.radioMode === 'Direct') {
-          ownDistanceToTower = calculateDistanceVec3(GetEntityCoords(cache.ped, false), senderPosition)
-        }
+        const ownDistanceToTower = this.getDistanceToTowerOrSender(senderPosition)
 
         if (self) {
           if (state) {
@@ -273,22 +264,7 @@ export class YaCAClientRadioModule {
         const info = infos[cache.serverId]
 
         if (!info?.shortRange || (info?.shortRange && GetPlayerFromServerId(target) !== -1)) {
-          let errorLevel: number | null = null
-
-          const globalErrorLevel = GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] || 0
-
-          if (this.radioMode === 'Tower') {
-            const ownSignalStrength = this.calculateSignalStrength(ownDistanceToTower)
-            const senderSignalStrength = this.calculateSignalStrength(senderDistanceToTower)
-
-            errorLevel = Math.max(ownSignalStrength, senderSignalStrength, globalErrorLevel)
-          } else if (this.radioMode === 'Direct') {
-            const signaleStrength = this.calculateSignalStrength(ownDistanceToTower)
-
-            errorLevel = Math.max(signaleStrength, globalErrorLevel)
-          } else {
-            errorLevel = globalErrorLevel
-          }
+          const errorLevel = this.getErrorLevelFromDistance(ownDistanceToTower, senderDistanceToTower)
 
           this.clientModule.setPlayersCommType(
             player,
@@ -459,6 +435,53 @@ export class YaCAClientRadioModule {
         },
       )
     }
+  }
+
+  /**
+   * Calculates the error level based on the distance to the tower or sender.
+   *
+   * @param ownDistanceToTower - The distance to the tower.
+   * @param senderDistanceToTower - The distance to the tower for the sender.
+   */
+  getErrorLevelFromDistance(ownDistanceToTower: number, senderDistanceToTower: number) {
+    let errorLevel: number
+
+    const globalErrorLevel = GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] || 0
+
+    if (this.radioMode === 'Tower') {
+      const ownSignalStrength = this.calculateSignalStrength(ownDistanceToTower)
+      const senderSignalStrength = this.calculateSignalStrength(senderDistanceToTower)
+
+      errorLevel = Math.max(ownSignalStrength, senderSignalStrength, globalErrorLevel)
+    } else if (this.radioMode === 'Direct') {
+      const signaleStrength = this.calculateSignalStrength(ownDistanceToTower)
+
+      errorLevel = Math.max(signaleStrength, globalErrorLevel)
+    } else {
+      errorLevel = globalErrorLevel
+    }
+
+    return errorLevel
+  }
+
+  /**
+   * Get the distance to the tower or sender.
+   *
+   * @param senderPosition - The position of the sender.
+   */
+  getDistanceToTowerOrSender(senderPosition: [number, number, number]) {
+    let ownDistanceToTower = -1
+
+    if (this.radioMode === 'Tower') {
+      const nearestTower = this.getNearestRadioTower()
+      if (nearestTower) {
+        ownDistanceToTower = nearestTower.distance
+      }
+    } else if (this.radioMode === 'Direct') {
+      ownDistanceToTower = calculateDistanceVec3(GetEntityCoords(cache.ped, false), senderPosition)
+    }
+
+    return ownDistanceToTower
   }
 
   /**

@@ -1,9 +1,23 @@
 import JSON5 from 'json5'
 
+/**
+ * Merge the default object with the parsed object and validate the parsed object.
+ * This function will log warnings for missing and unknown keys in the parsed object.
+ * If a key is missing in the parsed object, the default value will be used.
+ * If a key is unknown in the parsed object, it will be ignored.
+ *
+ * @param defaultObj - The default object.
+ * @param parsedObj - The parsed object.
+ * @param path - The path to the current object.
+ */
 function mergeAndValidate<T extends object>(defaultObj: T, parsedObj: T, path: string[] = []): T {
   const result: T = { ...defaultObj }
 
   for (const key in defaultObj) {
+    if (Object.prototype.hasOwnProperty.call(defaultObj, key) === false) {
+      continue
+    }
+
     const currentPath = [...path, key].join('.')
 
     if (!(key in parsedObj)) {
@@ -25,7 +39,7 @@ function mergeAndValidate<T extends object>(defaultObj: T, parsedObj: T, path: s
     }
   }
 
-  for (const key in parsedObj) {
+  for (const key of Object.keys(parsedObj)) {
     const currentPath = [...path, key].join('.')
 
     if (!(key in defaultObj)) {
