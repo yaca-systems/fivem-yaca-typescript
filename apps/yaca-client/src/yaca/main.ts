@@ -41,7 +41,6 @@ import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
 import { YaCAClientPhoneModule } from './phone'
 import { YaCAClientRadioModule } from './radio'
-import { YaCAClientTxAdminModule } from './txadmin'
 
 /**
  * The YaCA client module.
@@ -59,7 +58,6 @@ export class YaCAClientModule {
   phoneModule: YaCAClientPhoneModule
   megaphoneModule: YaCAClientMegaphoneModule
   intercomModule: YaCAClientIntercomModule
-  txAdminModule: YaCAClientTxAdminModule
 
   saltyChatBridge?: YaCAClientSaltyChatBridge
 
@@ -72,6 +70,7 @@ export class YaCAClientModule {
 
   isTalking = false
   useWhisper = false
+  spectatingPlayer: number | false = false
 
   isMicrophoneMuted = false
   isMicrophoneDisabled = false
@@ -200,7 +199,6 @@ export class YaCAClientModule {
     this.megaphoneModule = new YaCAClientMegaphoneModule(this)
     this.phoneModule = new YaCAClientPhoneModule(this)
     this.radioModule = new YaCAClientRadioModule(this)
-    this.txAdminModule = new YaCAClientTxAdminModule(this)
 
     if (!this.sharedConfig.useLocalLipSync) {
       /**
@@ -291,6 +289,22 @@ export class YaCAClientModule {
      * @returns {number} The global error level.
      */
     exports('getGlobalErrorLevel', () => GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? 0)
+
+    /**
+     * Set the player that should be spectated.
+     *
+     * @param {number | false} player - The player to be spectated.
+     */
+    exports('setSpectatingPlayer', (player: number | false) => {
+      this.spectatingPlayer = player
+    })
+
+    /**
+     * Get the player that is currently spectated.
+     *
+     * @returns {number | false} The player that is currently spectated. False if no player is spectated.
+     */
+    exports('getSpectatingPlayer', () => this.spectatingPlayer)
   }
 
   /**
@@ -546,6 +560,22 @@ export class YaCAClientModule {
      */
     onNet('client:yaca:notification', (message: string, type: YacaNotificationType) => {
       this.notification(message, type)
+    })
+
+    /**
+     * Handles the "txcl:spectate:start" server event.
+     *
+     * @param {number} targetServerId - The ID of the target server that is spectated.
+     */
+    onNet('txcl:spectate:start', (targetServerId: number) => {
+      this.spectatingPlayer = targetServerId
+    })
+
+    /**
+     * Handles the "txcl:spectate:stop" server event.
+     */
+    onNet('client:yaca:txadmin:stopspectate', () => {
+      this.spectatingPlayer = false
     })
   }
 
@@ -1297,8 +1327,8 @@ export class YaCAClientModule {
     let localPlayerPed = cache.ped
     let localPlayerVehicle = cache.vehicle
 
-    if (this.txAdminModule.spectating) {
-      const remotePlayerId = GetPlayerFromServerId(this.txAdminModule.spectating)
+    if (this.spectatingPlayer) {
+      const remotePlayerId = GetPlayerFromServerId(this.spectatingPlayer)
 
       if (remotePlayerId !== -1) {
         const remotePlayerPed = GetPlayerPed(remotePlayerId)

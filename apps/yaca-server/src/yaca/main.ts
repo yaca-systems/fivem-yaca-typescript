@@ -6,7 +6,6 @@ import { triggerClientEvent } from '../utils/events'
 import { YaCAServerMegaphoneModule } from './megaphone'
 import { YaCAServerPhoneModle } from './phone'
 import { YaCAServerRadioModule } from './radio'
-import { YaCAServerTxAdminModule } from './txadmin'
 
 /**
  * The player data type for YaCA.
@@ -50,7 +49,6 @@ export class YaCAServerModule {
   phoneModule: YaCAServerPhoneModle
   radioModule: YaCAServerRadioModule
   megaphoneModule: YaCAServerMegaphoneModule
-  txadminModule: YaCAServerTxAdminModule
 
   saltChatBridge?: YaCAServerSaltyChatBridge
 
@@ -77,7 +75,6 @@ export class YaCAServerModule {
     this.phoneModule = new YaCAServerPhoneModle(this)
     this.radioModule = new YaCAServerRadioModule(this)
     this.megaphoneModule = new YaCAServerMegaphoneModule(this)
-    this.txadminModule = new YaCAServerTxAdminModule()
 
     this.registerExports()
     this.registerEvents()
@@ -203,9 +200,14 @@ export class YaCAServerModule {
       this.addNewPlayer(source, clientId)
     })
 
-    //YaCa: voice restart
+    // YaCa: voice restart
     onNet('server:yaca:wsReady', () => {
       this.playerReconnect(source)
+    })
+
+    // TxAdmin: spectate stop event
+    onNet('txsv:req:spectate:end', () => {
+      emitNet('client:yaca:txadmin:stopspectate', source)
     })
   }
 
