@@ -6,8 +6,5 @@
   "types": "/src/index.ts",
   "exports": {
     ".": "./src/index.ts"
-  },
-  "scripts": {
-    "lint": "eslint src --fix"
   }
 }
