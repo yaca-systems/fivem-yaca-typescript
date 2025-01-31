@@ -23,7 +23,8 @@
     "use_salty_primary_radio": "Primäres Funkgerät benutzen",
     "use_salty_secondary_radio": "Sekundäres Funkgerät benutzen",
 
-    "change_voice_range": "Sprachreichweite ändern",
+    "change_voice_range_increase": "Sprachreichweite erhöhen",
+    "change_voice_range_decrease": "Sprachreichweite verringern",
     "voice_range_changed": "Sprachreichweite auf %s Meter geändert.",
 
     "radio_not_activated": "Das Funkgerät ist nicht aktiviert!",

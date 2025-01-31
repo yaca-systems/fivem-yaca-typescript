@@ -23,7 +23,8 @@
     "use_salty_primary_radio": "Use primary radio",
     "use_salty_secondary_radio": "Use secondary radio",
 
-    "change_voice_range": "Change voice range",
+    "change_voice_range_increase": "Increase voice range",
+    "change_voice_range_decrease": "Decrease voice range",
     "voice_range_changed": "Voice range changed to %s meters.",
 
     "radio_not_activated": "Your radio is not activated!",
