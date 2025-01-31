@@ -34,8 +34,10 @@
   },
   // Set the default key binds for the plugin, which can be then changed by the player.
   "keyBinds": {
-    // The key to toggle the voice range
-    "toggleRange": "Z",
+    // The key to increase the voice range
+    "increaseVoicerange": "ADD",
+    // The key to descrease the voice range
+    "decreaseVoicerange": "SUBTRACT",
     // The key to transmit on the primary radio
     "primaryRadioTransmit": "N",
     // The key to transmit on the secondary radio

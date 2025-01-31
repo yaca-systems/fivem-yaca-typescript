@@ -16,7 +16,8 @@ export interface YacaSharedConfig {
         own: boolean
     }
     keyBinds: {
-        toggleRange: string | false
+        increaseVoicerange: string | false
+        decreaseVoicerange: string | false
         primaryRadioTransmit: string | false
         secondaryRadioTransmit: string | false
         megaphone: string | false
@@ -81,7 +82,8 @@ export const defaultSharedConfig: YacaSharedConfig = {
         own: false,
     },
     keyBinds: {
-        toggleRange: 'Z',
+        increaseVoicerange: 'ADD',
+        decreaseVoicerange: 'SUBTRACT',
         primaryRadioTransmit: 'N',
         secondaryRadioTransmit: 'CAPITAL',
         megaphone: 'B',

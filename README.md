@@ -31,6 +31,10 @@ Get the current voice range of the player as `int`.
 
 Get all voice ranges as `int[]`.
 
+#### `changeVoiceRange(increase: boolean): void`
+
+Change the voice range of the player.
+
 #### `getMicrophoneMuteState(): boolean`
 
 Get the microphone mute state of the player as `boolean`.

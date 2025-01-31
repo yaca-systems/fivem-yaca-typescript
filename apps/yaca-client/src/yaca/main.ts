@@ -249,6 +249,15 @@ export class YaCAClientModule {
         exports('getVoiceRanges', () => this.sharedConfig.voiceRange.ranges)
 
         /**
+         * Get the current voice range.
+         *
+         * @returns {number} The current voice range.
+         */
+        exports('changeVoiceRange', (increase = true) => {
+            this.changeVoiceRange(increase)
+        })
+
+        /**
          * Get microphone mute state.
          *
          * @returns {boolean} The microphone mute state.
@@ -312,22 +321,35 @@ export class YaCAClientModule {
      * This is only available in FiveM.
      */
     registerKeybindings() {
-        if (this.sharedConfig.keyBinds.toggleRange === false) {
-            return
+        if (this.sharedConfig.keyBinds.increaseVoicerange !== false) {
+            /**
+             * Registers the "yaca:changeVoiceRange" command and keybinding.
+             * This command is used to change the voice range.
+             */
+            RegisterCommand(
+                'yaca:changeVoiceRange',
+                () => {
+                    this.changeVoiceRange(true)
+                },
+                false,
+            )
+            RegisterKeyMapping('yaca:changeVoiceRange', locale('change_voice_range_increase'), 'keyboard', this.sharedConfig.keyBinds.increaseVoicerange)
         }
 
-        /**
-         * Registers the "yaca:changeVoiceRange" command and keybinding.
-         * This command is used to change the voice range.
-         */
-        RegisterCommand(
-            'yaca:changeVoiceRange',
-            () => {
-                this.changeVoiceRange()
-            },
-            false,
-        )
-        RegisterKeyMapping('yaca:changeVoiceRange', locale('change_voice_range'), 'keyboard', this.sharedConfig.keyBinds.toggleRange)
+        if (this.sharedConfig.keyBinds.decreaseVoicerange !== false) {
+            /**
+             * Registers the "-yaca:changeVoiceRange" command and keybinding.
+             * This command is used to change the voice range.
+             */
+            RegisterCommand(
+                '-yaca:changeVoiceRange',
+                () => {
+                    this.changeVoiceRange(false)
+                },
+                false,
+            )
+            RegisterKeyMapping('-yaca:changeVoiceRange', locale('change_voice_range_decrease'), 'keyboard', this.sharedConfig.keyBinds.decreaseVoicerange)
+        }
     }
 
     /**
@@ -335,16 +357,23 @@ export class YaCAClientModule {
      * This is only available in RedM.
      */
     registerRdrKeybindings() {
-        if (this.sharedConfig.keyBinds.toggleRange === false) {
-            return
+        if (this.sharedConfig.keyBinds.increaseVoicerange !== false) {
+            /**
+             * Registers the keybinding for changing the voice Range.
+             */
+            registerRdrKeyBind(this.sharedConfig.keyBinds.increaseVoicerange, () => {
+                this.changeVoiceRange()
+            })
         }
 
-        /**
-         * Registers the keybinding for changing the voice Range.
-         */
-        registerRdrKeyBind(this.sharedConfig.keyBinds.toggleRange, () => {
-            this.changeVoiceRange()
-        })
+        if (this.sharedConfig.keyBinds.decreaseVoicerange !== false) {
+            /**
+             * Registers the keybinding for changing the voice Range.
+             */
+            registerRdrKeyBind(this.sharedConfig.keyBinds.decreaseVoicerange, () => {
+                this.changeVoiceRange(false)
+            })
+        }
     }
 
     /**
@@ -786,8 +815,10 @@ export class YaCAClientModule {
 
     /**
      * Changes the voice range to the next range.
+     *
+     * @param {boolean} increase - If the voice range should be increased or decreased.
      */
-    changeVoiceRange() {
+    changeVoiceRange(increase = true) {
         if (!this.canChangeVoiceRange) {
             return
         }
@@ -802,10 +833,18 @@ export class YaCAClientModule {
             this.visualVoiceRangeTick = null
         }
 
-        this.rangeIndex += 1
+        if (increase) {
+            this.rangeIndex += 1
 
-        if (this.rangeIndex > this.sharedConfig.voiceRange.ranges.length - 1) {
-            this.rangeIndex = 0
+            if (this.rangeIndex > this.sharedConfig.voiceRange.ranges.length - 1) {
+                this.rangeIndex = 0
+            }
+        } else {
+            this.rangeIndex -= 1
+
+            if (this.rangeIndex < 0) {
+                this.rangeIndex = this.sharedConfig.voiceRange.ranges.length - 1
+            }
         }
 
         const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1
