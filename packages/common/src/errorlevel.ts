@@ -7,7 +7,7 @@ import { clamp } from './index'
  * @param errorLevel The new error level. Between 0 and 1.
  */
 export const setGlobalErrorLevel = (errorLevel: number) => {
-  GlobalState.set(GLOBAL_ERROR_LEVEL_STATE_NAME, clamp(errorLevel, 0, 1), true)
+    GlobalState.set(GLOBAL_ERROR_LEVEL_STATE_NAME, clamp(errorLevel, 0, 1), true)
 }
 
 /**
@@ -16,5 +16,5 @@ export const setGlobalErrorLevel = (errorLevel: number) => {
  * @returns The global error level.
  */
 export const getGlobalErrorLevel = () => {
-  return GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? 0
+    return GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? 0
 }

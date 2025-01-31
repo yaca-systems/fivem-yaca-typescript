@@ -1,8 +1,8 @@
 {
-  "extends": "@yaca-voice/typescript-config/fivem.json",
-  "compilerOptions": {
-    "baseUrl": "./",
-    "rootDir": "./src"
-  },
-  "include": ["./"]
+    "extends": "@yaca-voice/typescript-config/fivem.json",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "rootDir": "./src"
+    },
+    "include": ["./"]
 }

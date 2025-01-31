@@ -1,9 +1,9 @@
 {
-  "extends": "@yaca-voice/typescript-config/fivem.json",
-  "compilerOptions": {
-    "baseUrl": "./",
-    "rootDir": "./src",
-    "types": ["@types/node", "@citizenfx/server"]
-  },
-  "include": ["./"]
+    "extends": "@yaca-voice/typescript-config/fivem.json",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "rootDir": "./src",
+        "types": ["@types/node", "@citizenfx/server"]
+    },
+    "include": ["./"]
 }

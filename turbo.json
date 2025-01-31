@@ -1,19 +1,19 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "tasks": {
-    "build": {
-      "dependsOn": ["typecheck", "^build"]
-    },
-    "typecheck": {
-      "cache": false
-    },
-    "dev": {
-      "persistent": true,
-      "cache": false
-    },
-    "create-resource": {
-      "dependsOn": ["build"],
-      "cache": false
+    "$schema": "https://turbo.build/schema.json",
+    "tasks": {
+        "build": {
+            "dependsOn": ["typecheck", "^build"]
+        },
+        "typecheck": {
+            "cache": false
+        },
+        "dev": {
+            "persistent": true,
+            "cache": false
+        },
+        "create-resource": {
+            "dependsOn": ["build"],
+            "cache": false
+        }
     }
-  }
 }

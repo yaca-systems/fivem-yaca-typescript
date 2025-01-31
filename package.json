@@ -1,27 +1,27 @@
 {
-  "name": "yaca-voice",
-  "type": "module",
-  "description": "YACA Voice Integration for FiveM & RedM",
-  "author": "MineMalox & LuftigerLuca",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yaca-systems/fivem-yaca-typescript"
-  },
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "typecheck": "turbo typecheck --env-mode=loose",
-    "format": "pnpm biome format --write",
-    "lint": "pnpm biome lint --write",
-    "check": "pnpm biome check --formatter-enabled=true --linter-enabled=true --organize-imports-enabled=true --write",
-    "build": "turbo build --env-mode=loose",
-    "dev": "turbo dev --env-mode=loose",
-    "create-resource": "turbo create-resource --env-mode=loose && node scripts/create-resource.js"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "esbuild": "^0.24.2",
-    "turbo": "^2.3.4",
-    "typescript": "^5.7.3"
-  },
-  "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
+    "name": "yaca-voice",
+    "type": "module",
+    "description": "YACA Voice Integration for FiveM & RedM",
+    "author": "MineMalox & LuftigerLuca",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yaca-systems/fivem-yaca-typescript"
+    },
+    "scripts": {
+        "preinstall": "npx only-allow pnpm",
+        "typecheck": "turbo typecheck --env-mode=loose",
+        "format": "pnpm biome format --write",
+        "lint": "pnpm biome lint --write",
+        "check": "pnpm biome check --formatter-enabled=true --linter-enabled=true --organize-imports-enabled=true --write",
+        "build": "turbo build --env-mode=loose",
+        "dev": "turbo dev --env-mode=loose",
+        "create-resource": "turbo create-resource --env-mode=loose && node scripts/create-resource.js"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4",
+        "esbuild": "^0.24.2",
+        "turbo": "^2.3.4",
+        "typescript": "^5.7.3"
+    },
+    "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
 }
