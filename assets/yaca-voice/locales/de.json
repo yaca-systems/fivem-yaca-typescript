@@ -13,6 +13,8 @@
   "left_ear": "dem linken Ohr",
   "right_ear": "dem rechten Ohr",
   "both_ears": "beiden Ohren",
+  "secondary_radio_channel_disabled": "Der sekundäre Funkkanal wurde deaktiviert.",
+  "secondary_radio_channel_enabled": "Kanal %s ist nun der Sekundäre Funkkanal.",
 
   "use_megaphone": "Megaphon benutzen",
   "use_radio": "Im primären Funkkanal senden",

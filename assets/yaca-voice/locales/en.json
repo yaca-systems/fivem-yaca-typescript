@@ -13,6 +13,8 @@
   "left_ear": "the left ear",
   "right_ear": "the right ear",
   "both_ears": "both ears",
+  "secondary_radio_channel_disabled": "The secondary radio channel has been disabled.",
+  "secondary_radio_channel_enabled": "Channel %s is now the secondary radio channel.",
 
   "use_megaphone": "Use megaphone",
   "use_radio": "Use radio",
