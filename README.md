@@ -13,8 +13,8 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 1. Download and install the latest [release](https://github.com/yaca-systems/fivem-yaca-typescript/releases) of this
    resource.
 2. Add `start yaca-voice` into your `server.cfg`.
-3. Open `config/server.json` and adjust the variables to your needs.
-4. Open `config/shared.json` and adjust the variables to your needs.
+3. Open `config/server.json5` and adjust the variables to your needs.
+4. Open `config/shared.json5` and adjust the variables to your needs.
 
 # Exports
 
