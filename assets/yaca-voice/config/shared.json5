@@ -579,7 +579,7 @@
   },
   "voiceRange": {
     // The default index which should be used for the voice range when a player joins the server.
-    "defaultIndex": 2,
+    "defaultIndex": 1,
     // The ranges that should be available for the players.
     "ranges": [
       1,

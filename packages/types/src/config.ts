@@ -199,7 +199,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
         ],
     },
     voiceRange: {
-        defaultIndex: 2,
+        defaultIndex: 1,
         ranges: [1, 3, 8, 15, 20, 25, 30, 40],
         sendNotification: true,
         markerColor: {
