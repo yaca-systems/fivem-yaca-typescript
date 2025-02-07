@@ -43,7 +43,9 @@
     // The key to transmit on the secondary radio
     "secondaryRadioTransmit": "CAPITAL",
     // The key to use the megaphone
-    "megaphone": "B"
+    "megaphone": "B",
+    // The native keyid to hold additional to change voicerange via mousehweel by 1 meter, false to disable that feature
+    "voicerrangeScroll": false
   },
   "radioSettings": {
     // The maximum amount of radio channels that can be used.

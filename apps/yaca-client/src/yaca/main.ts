@@ -230,6 +230,12 @@ export class YaCAClientModule {
             this.saltyChatBridge = new YaCAClientSaltyChatBridge(this)
         }
 
+        if (this.sharedConfig.keyBinds.voicerrangeScroll !== false) {
+            setInterval(() => {
+                this.handleVoicerangeViaMouseWheel()
+            })
+        }
+
         console.log('[Client] YaCA Client loaded.')
     }
 
@@ -816,12 +822,10 @@ export class YaCAClientModule {
     /**
      * Changes the voice range to the next range.
      *
-     * @param {boolean} increase - If the voice range should be increased or decreased.
+     * @param {boolean | number} increase - If the voice range should be increased or decreased.
      */
-    changeVoiceRange(increase = true) {
-        if (!this.canChangeVoiceRange) {
-            return
-        }
+    changeVoiceRange(increase: boolean | number = true) {
+        if (!this.canChangeVoiceRange) return
 
         if (this.visualVoiceRangeTimeout) {
             clearTimeout(this.visualVoiceRangeTimeout)
@@ -833,21 +837,25 @@ export class YaCAClientModule {
             this.visualVoiceRangeTick = null
         }
 
-        if (increase) {
-            this.rangeIndex += 1
-
-            if (this.rangeIndex > this.sharedConfig.voiceRange.ranges.length - 1) {
-                this.rangeIndex = 0
+        let voiceRange = 1
+        if (typeof increase === 'boolean') {
+            const currentVoiceRange = this.getVoiceRange()
+            if (increase) {
+                const newIndex = this.sharedConfig.voiceRange.ranges.findIndex((range) => range > currentVoiceRange)
+                this.rangeIndex = newIndex !== -1 ? newIndex : 0
+            } else {
+                const newIndex = this.sharedConfig.voiceRange.ranges
+                    .slice()
+                    .reverse()
+                    .findIndex((range) => range < currentVoiceRange)
+                this.rangeIndex = newIndex !== -1 ? this.sharedConfig.voiceRange.ranges.length - 1 - newIndex : this.sharedConfig.voiceRange.ranges.length - 1
             }
-        } else {
-            this.rangeIndex -= 1
 
-            if (this.rangeIndex < 0) {
-                this.rangeIndex = this.sharedConfig.voiceRange.ranges.length - 1
-            }
+            voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1
+        } else if (typeof increase === 'number') {
+            this.rangeIndex = -1
+            voiceRange = increase
         }
-
-        const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1
 
         if (this.sharedConfig.voiceRange.sendNotification) {
             this.notification(locale('voice_range_changed', voiceRange), YacaNotificationType.INFO)
@@ -1349,6 +1357,26 @@ export class YaCAClientModule {
         if (playersToHear.length || playersToNotHear.length) {
             emitNet('server:yaca:phoneEmit', playersToHear, playersToNotHear)
         }
+    }
+
+    /**
+     * Handles the voice range adjustment using the mouse wheel.
+     */
+    handleVoicerangeViaMouseWheel() {
+        if (!IsControlPressed(0, this.sharedConfig.keyBinds.voicerrangeScroll as number)) return
+        HudWeaponWheelIgnoreSelection()
+
+        let newValue = 0
+        const currentVoiceRange = this.getVoiceRange()
+        if (IsControlPressed(0, 242)) {
+            newValue = Math.max(1, currentVoiceRange - 1)
+        } else if (IsControlPressed(0, 241)) {
+            newValue = Math.min(this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.ranges.length - 1], currentVoiceRange + 1)
+        }
+
+        if (newValue <= 0 || currentVoiceRange === newValue) return
+
+        this.changeVoiceRange(newValue)
     }
 
     /**
