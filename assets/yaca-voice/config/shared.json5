@@ -48,6 +48,12 @@
     "voicerrangeScroll": false
   },
   "radioSettings": {
+    // Customize animation
+    "animation": {
+      "dictionary": "random@arrests",
+      "name": "generic_radio_chatter",
+      "flag": 49
+    },
     // The maximum amount of radio channels that can be used.
     "channelCount": 9,
     /* Choose the mode of the radio system.

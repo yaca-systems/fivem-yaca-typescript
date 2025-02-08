@@ -975,7 +975,12 @@ export class YaCAClientRadioModule {
                 emitNet('server:yaca:radioTalking', false, channel)
                 emit('yaca:external:isRadioTalking', false, channel)
 
-                StopAnimTask(cache.ped, 'random@arrests', 'generic_radio_chatter', 4)
+                StopAnimTask(
+                    cache.ped,
+                    this.clientModule.sharedConfig.radioSettings.animation.dictionary,
+                    this.clientModule.sharedConfig.radioSettings.animation.name,
+                    4,
+                )
             }
 
             return
@@ -1003,8 +1008,20 @@ export class YaCAClientRadioModule {
             this.radioTalkingStateToPlugin(true, channel)
         }
 
-        requestAnimDict('random@arrests').then(() => {
-            TaskPlayAnim(cache.ped, 'random@arrests', 'generic_radio_chatter', 3, -4, -1, 49, 0.0, false, false, false)
+        requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary).then(() => {
+            TaskPlayAnim(
+                cache.ped,
+                this.clientModule.sharedConfig.radioSettings.animation.dictionary,
+                this.clientModule.sharedConfig.radioSettings.animation.name,
+                3,
+                -4,
+                -1,
+                this.clientModule.sharedConfig.radioSettings.animation.flag,
+                0.0,
+                false,
+                false,
+                false,
+            )
 
             this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(true, channel)
 

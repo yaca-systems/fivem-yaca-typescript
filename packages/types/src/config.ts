@@ -24,6 +24,11 @@ export interface YacaSharedConfig {
         voicerrangeScroll: number | false
     }
     radioSettings: {
+        animation: {
+            dictionary: string
+            name: string
+            flag: number
+        }
         channelCount: number
         mode: 'None' | 'Direct' | 'Tower'
         maxDistance: number
@@ -91,6 +96,11 @@ export const defaultSharedConfig: YacaSharedConfig = {
         voicerrangeScroll: false,
     },
     radioSettings: {
+        animation: {
+            dictionary: 'random@arrests',
+            name: 'generic_radio_chatter',
+            flag: 49,
+        },
         channelCount: 9,
         mode: 'None',
         maxDistance: 1000,
