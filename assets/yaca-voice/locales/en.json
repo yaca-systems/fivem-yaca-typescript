@@ -26,6 +26,7 @@
     "change_voice_range_increase": "Increase voice range",
     "change_voice_range_decrease": "Decrease voice range",
     "voice_range_changed": "Voice range changed to %s meters.",
+    "change_voice_range_via_mousewheel": "Change voice range by 1 meter",
 
     "radio_not_activated": "Your radio is not activated!",
     "radio_channel_invalid": "The radio channel is invalid!"

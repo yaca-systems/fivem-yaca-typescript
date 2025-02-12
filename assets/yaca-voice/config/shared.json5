@@ -45,7 +45,7 @@
     // The key to use the megaphone
     "megaphone": "B",
     // The native keyid to hold additional to change voicerange via mousehweel by 1 meter, false to disable that feature
-    "voicerrangeScroll": false
+    "voicerRangeWithMouseWheel": "LCONTROL"
   },
   "radioSettings": {
     // Customize animation

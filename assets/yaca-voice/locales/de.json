@@ -26,6 +26,7 @@
     "change_voice_range_increase": "Sprachreichweite erhöhen",
     "change_voice_range_decrease": "Sprachreichweite verringern",
     "voice_range_changed": "Sprachreichweite auf %s Meter geändert.",
+    "change_voice_range_via_mousewheel": "Sprachreichweite je 1 Meter ändern",
 
     "radio_not_activated": "Das Funkgerät ist nicht aktiviert!",
     "radio_channel_invalid": "Ungültiger Funkkanal!"

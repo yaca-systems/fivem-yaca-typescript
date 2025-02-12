@@ -21,7 +21,7 @@ export interface YacaSharedConfig {
         primaryRadioTransmit: string | false
         secondaryRadioTransmit: string | false
         megaphone: string | false
-        voicerrangeScroll: number | false
+        voicerRangeWithMouseWheel: string | false
     }
     radioSettings: {
         animation: {
@@ -93,7 +93,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
         primaryRadioTransmit: 'N',
         secondaryRadioTransmit: 'CAPITAL',
         megaphone: 'B',
-        voicerrangeScroll: false,
+        voicerRangeWithMouseWheel: 'LCONTROL',
     },
     radioSettings: {
         animation: {

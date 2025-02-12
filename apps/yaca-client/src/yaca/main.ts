@@ -67,6 +67,7 @@ export class YaCAClientModule {
     rangeInterval: CitizenTimer | null = null
     visualVoiceRangeTimeout: CitizenTimer | null = null
     visualVoiceRangeTick: CitizenTimer | null = null
+    voiceRangeViaMouseWheelTick: CitizenTimer | null = null
 
     isTalking = false
     useWhisper = false
@@ -230,12 +231,6 @@ export class YaCAClientModule {
             this.saltyChatBridge = new YaCAClientSaltyChatBridge(this)
         }
 
-        if (this.sharedConfig.keyBinds.voicerrangeScroll !== false) {
-            setInterval(() => {
-                this.handleVoicerangeViaMouseWheel()
-            })
-        }
-
         console.log('[Client] YaCA Client loaded.')
     }
 
@@ -356,6 +351,40 @@ export class YaCAClientModule {
             )
             RegisterKeyMapping('-yaca:changeVoiceRange', locale('change_voice_range_decrease'), 'keyboard', this.sharedConfig.keyBinds.decreaseVoicerange)
         }
+
+        if (this.sharedConfig.keyBinds.voicerRangeWithMouseWheel !== false) {
+            /**
+             * Registers the "+yaca:changeVoiceRangeWithMousewheel" command and keybinding.
+             * This command is used to change the voice range.
+             */
+            RegisterCommand(
+                '+yaca:changeVoiceRangeWithMousewheel',
+                () => {
+                    this.voiceRangeViaMouseWheelTick = setInterval(() => {
+                        this.handleVoicerangeViaMouseWheel()
+                    })
+                },
+                false,
+            )
+
+            RegisterCommand(
+                '-yaca:changeVoiceRangeWithMousewheel',
+                () => {
+                    if (this.voiceRangeViaMouseWheelTick) {
+                        clearInterval(this.voiceRangeViaMouseWheelTick)
+                        this.voiceRangeViaMouseWheelTick = null
+                    }
+                },
+                false,
+            )
+
+            RegisterKeyMapping(
+                '+yaca:changeVoiceRangeWithMousewheel',
+                locale('change_voice_range_via_mousewheel'),
+                'keyboard',
+                this.sharedConfig.keyBinds.voicerRangeWithMouseWheel,
+            )
+        }
     }
 
     /**
@@ -379,6 +408,28 @@ export class YaCAClientModule {
             registerRdrKeyBind(this.sharedConfig.keyBinds.decreaseVoicerange, () => {
                 this.changeVoiceRange(false)
             })
+        }
+
+        if (this.sharedConfig.keyBinds.voicerRangeWithMouseWheel !== false) {
+            /**
+             * Registers the "+yaca:changeVoiceRangeWithScroll" command and keybinding.
+             * This command is used to change the voice range.
+             */
+
+            registerRdrKeyBind(
+                this.sharedConfig.keyBinds.voicerRangeWithMouseWheel,
+                () => {
+                    this.voiceRangeViaMouseWheelTick = setInterval(() => {
+                        this.handleVoicerangeViaMouseWheel()
+                    })
+                },
+                () => {
+                    if (this.voiceRangeViaMouseWheelTick) {
+                        clearInterval(this.voiceRangeViaMouseWheelTick)
+                        this.voiceRangeViaMouseWheelTick = null
+                    }
+                },
+            )
         }
     }
 
@@ -1363,7 +1414,6 @@ export class YaCAClientModule {
      * Handles the voice range adjustment using the mouse wheel.
      */
     handleVoicerangeViaMouseWheel() {
-        if (!IsControlPressed(0, this.sharedConfig.keyBinds.voicerrangeScroll as number)) return
         HudWeaponWheelIgnoreSelection()
 
         let newValue = 0
