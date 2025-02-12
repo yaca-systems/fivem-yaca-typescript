@@ -2,12 +2,14 @@ import { GLOBAL_ERROR_LEVEL_STATE_NAME, clamp, locale } from '@yaca-voice/common
 import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from '@yaca-voice/types'
 import { cache, calculateDistanceVec3, registerRdrKeyBind, requestAnimDict } from '../utils'
 import type { YaCAClientModule } from './main'
+import type { YaCAClientPropModule } from './prop'
 
 /**
  * The radio module for the client.
  */
 export class YaCAClientRadioModule {
     clientModule: YaCAClientModule
+    propModule: YaCAClientPropModule
 
     radioEnabled = false
     radioInitialized = false
@@ -36,10 +38,13 @@ export class YaCAClientRadioModule {
      *
      * @param clientModule - The client module.
      */
-    constructor(clientModule: YaCAClientModule) {
+    constructor(clientModule: YaCAClientModule, propModule: YaCAClientPropModule) {
         this.clientModule = clientModule
+        this.propModule = propModule
 
         this.radioMode = this.clientModule.sharedConfig.radioSettings.mode
+
+        requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary)
 
         this.registerExports()
         this.registerEvents()
@@ -981,6 +986,10 @@ export class YaCAClientRadioModule {
                     this.clientModule.sharedConfig.radioSettings.animation.name,
                     4,
                 )
+
+                if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
+                    this.addOrRemoveTalkingProp()
+                }
             }
 
             return
@@ -1009,6 +1018,10 @@ export class YaCAClientRadioModule {
         }
 
         requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary).then(() => {
+            if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
+                this.addOrRemoveTalkingProp()
+            }
+
             TaskPlayAnim(
                 cache.ped,
                 this.clientModule.sharedConfig.radioSettings.animation.dictionary,
@@ -1058,5 +1071,17 @@ export class YaCAClientRadioModule {
         if (channel !== this.activeRadioChannel || GetResourceState('yaca-ui') !== 'started') return
 
         exports['yaca-ui'].setRadioChannelData(this.radioChannelSettings.get(channel))
+    }
+
+    /**
+     * Adds or removes a talking prop based on the current radio settings.
+     */
+    addOrRemoveTalkingProp() {
+        this.propModule.handleProp(
+            this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop as string,
+            this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
+            this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
+            this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
+        )
     }
 }

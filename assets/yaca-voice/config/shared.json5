@@ -54,6 +54,24 @@
       "name": "generic_radio_chatter",
       "flag": 49
     },
+    "propWhileTalking": {
+      // The prop that should be shown while talking on the radio.
+      "prop": false,
+      // The bone that the prop should be attached to.
+      "boneId": 28422,
+      // The position of the prop.
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      // The rotation of the prop.
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
     // The maximum amount of radio channels that can be used.
     "channelCount": 9,
     /* Choose the mode of the radio system.

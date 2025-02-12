@@ -40,6 +40,7 @@ import { localLipSyncAnimations } from './data'
 import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
 import { YaCAClientPhoneModule } from './phone'
+import { YaCAClientPropModule } from './prop.js'
 import { YaCAClientRadioModule } from './radio'
 
 /**
@@ -58,6 +59,7 @@ export class YaCAClientModule {
     phoneModule: YaCAClientPhoneModule
     megaphoneModule: YaCAClientMegaphoneModule
     intercomModule: YaCAClientIntercomModule
+    propModule: YaCAClientPropModule
 
     saltyChatBridge?: YaCAClientSaltyChatBridge
 
@@ -196,10 +198,11 @@ export class YaCAClientModule {
             this.registerRdrKeybindings()
         }
 
+        this.propModule = new YaCAClientPropModule(this)
         this.intercomModule = new YaCAClientIntercomModule(this)
         this.megaphoneModule = new YaCAClientMegaphoneModule(this)
         this.phoneModule = new YaCAClientPhoneModule(this)
-        this.radioModule = new YaCAClientRadioModule(this)
+        this.radioModule = new YaCAClientRadioModule(this, this.propModule)
 
         if (!this.sharedConfig.useLocalLipSync) {
             /**

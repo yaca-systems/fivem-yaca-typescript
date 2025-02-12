@@ -29,6 +29,12 @@ export interface YacaSharedConfig {
             name: string
             flag: number
         }
+        propWhileTalking: {
+            prop: string | false
+            boneId: number
+            position: [number, number, number]
+            rotation: [number, number, number]
+        }
         channelCount: number
         mode: 'None' | 'Direct' | 'Tower'
         maxDistance: number
@@ -100,6 +106,12 @@ export const defaultSharedConfig: YacaSharedConfig = {
             dictionary: 'random@arrests',
             name: 'generic_radio_chatter',
             flag: 49,
+        },
+        propWhileTalking: {
+            prop: false,
+            boneId: 28422,
+            position: [0.0, 0.0, 0.0],
+            rotation: [0.0, 0.0, 0.0],
         },
         channelCount: 9,
         mode: 'None',
