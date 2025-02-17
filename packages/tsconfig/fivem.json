@@ -1,10 +1,11 @@
 {
+    "$schema": "https://json.schemastore.org/tsconfig",
     "compilerOptions": {
         "noImplicitAny": true,
         "strictNullChecks": true,
-        "module": "es2020",
-        "target": "es2021",
-        "lib": ["es2021", "esnext.disposable"],
+        "module": "es2022",
+        "target": "es2023",
+        "lib": ["es2023", "esnext.disposable"],
         "types": ["@types/node", "@citizenfx/client", "@citizenfx/server"],
         "resolveJsonModule": true,
         "esModuleInterop": true,

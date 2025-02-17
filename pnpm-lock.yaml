@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      '@types/node':
+        specifier: ^22.7.4
+        version: 22.13.4
       esbuild:
         specifier: ^0.24.2
         version: 0.24.2
@@ -33,9 +36,6 @@ importers:
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
-      '@types/node':
-        specifier: ^20.16.10
-        version: 20.16.10
       '@yaca-voice/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -58,9 +58,6 @@ importers:
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
-      '@types/node':
-        specifier: ^20.16.10
-        version: 20.16.10
       '@yaca-voice/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -86,9 +83,6 @@ importers:
       '@citizenfx/server':
         specifier: latest
         version: 2.0.12651-1
-      '@types/node':
-        specifier: ^22.7.4
-        version: 22.7.4
       '@yaca-voice/typescript-config':
         specifier: workspace:*
         version: link:../tsconfig
@@ -311,11 +305,8 @@ packages:
   '@types/luxon@3.4.2':
     resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==}
 
-  '@types/node@20.16.10':
-    resolution: {integrity: sha512-vQUKgWTjEIRFCvK6CyriPH3MZYiYlNy0fKiEYHWbcoWLEgs4opurGGKlebrTLqdSMIbXImH6XExNiIyNUv3WpA==}
-
-  '@types/node@22.7.4':
-    resolution: {integrity: sha512-y+NPi1rFzDs1NdQHHToqeiX2TIS79SWEAw9GYhkkx8bD0ChpfqC+n2j5OXOCpzfojBEBt6DnEnnG9MY0zk1XLg==}
+  '@types/node@22.13.4':
+    resolution: {integrity: sha512-ywP2X0DYtX3y08eFVx5fNIw7/uIv8hYUKgXoK8oayJlLnKcRfEYCxWMVE1XagUdVtCJlZT1AU4LXEABW+L1Peg==}
 
   boolean@3.2.0:
     resolution: {integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==}
@@ -397,8 +388,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  undici-types@6.19.8:
-    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
+  undici-types@6.20.0:
+    resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
@@ -522,13 +513,9 @@ snapshots:
 
   '@types/luxon@3.4.2': {}
 
-  '@types/node@20.16.10':
+  '@types/node@22.13.4':
     dependencies:
-      undici-types: 6.19.8
-
-  '@types/node@22.7.4':
-    dependencies:
-      undici-types: 6.19.8
+      undici-types: 6.20.0
 
   boolean@3.2.0: {}
 
@@ -616,6 +603,6 @@ snapshots:
 
   typescript@5.7.3: {}
 
-  undici-types@6.19.8: {}
+  undici-types@6.20.0: {}
 
   web-streams-polyfill@3.3.3: {}

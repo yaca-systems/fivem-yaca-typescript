@@ -21,7 +21,8 @@
         "@biomejs/biome": "1.9.4",
         "esbuild": "^0.24.2",
         "turbo": "^2.3.4",
-        "typescript": "^5.7.3"
+        "typescript": "^5.7.3",
+        "@types/node": "^22.7.4"
     },
-    "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
+    "packageManager": "pnpm@9.15.5+sha512.845196026aab1cc3f098a0474b64dfbab2afe7a1b4e91dd86895d8e4aa32a7a6d03049e2d0ad770bbe4de023a7122fb68c1a1d6e0d033c7076085f9d5d4800d4"
 }

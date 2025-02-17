@@ -17,7 +17,6 @@
     "devDependencies": {
         "@citizenfx/client": "latest",
         "@citizenfx/server": "latest",
-        "@types/node": "^22.7.4",
         "@yaca-voice/typescript-config": "workspace:*"
     }
 }
