@@ -1,5 +1,14 @@
 import { GLOBAL_ERROR_LEVEL_STATE_NAME, VOICE_RANGE_STATE_NAME, getGlobalErrorLevel, initLocale, loadConfig, setGlobalErrorLevel } from '@yaca-voice/common'
-import { type DataObject, type ServerCache, type YacaServerConfig, type YacaSharedConfig, defaultServerConfig, defaultSharedConfig } from '@yaca-voice/types'
+import {
+    type DataObject,
+    type ServerCache,
+    type YacaServerConfig,
+    type YacaSharedConfig,
+    type YacaTowerConfig,
+    defaultServerConfig,
+    defaultSharedConfig,
+    defaultTowerConfig,
+} from '@yaca-voice/types'
 import { YaCAServerSaltyChatBridge } from '../bridge/saltychat'
 import { checkVersion, generateRandomName } from '../utils'
 import { triggerClientEvent } from '../utils/events'
@@ -45,6 +54,7 @@ export class YaCAServerModule {
 
     serverConfig: YacaServerConfig
     sharedConfig: YacaSharedConfig
+    towerConfig: YacaTowerConfig
 
     phoneModule: YaCAServerPhoneModle
     radioModule: YaCAServerRadioModule
@@ -60,6 +70,7 @@ export class YaCAServerModule {
 
         this.serverConfig = loadConfig<YacaServerConfig>('config/server.json5', defaultServerConfig)
         this.sharedConfig = loadConfig<YacaSharedConfig>('config/shared.json5', defaultSharedConfig)
+        this.towerConfig = loadConfig<YacaTowerConfig>('config/tower.json5', defaultTowerConfig)
 
         initLocale(this.sharedConfig.locale)
 

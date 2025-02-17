@@ -42,6 +42,7 @@ files {
     'web/index.html',
     'web/script.js',
     'config/shared.json5',
+    'config/towers.json5',
     'locales/*.json',
 }
 

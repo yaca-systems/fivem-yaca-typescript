@@ -6,6 +6,7 @@ export * from './cache'
 export * from './streaming'
 export * from './vehicle'
 export * from './redm'
+export * from './props'
 
 /**
  * Rounds a float to a specified number of decimal places.

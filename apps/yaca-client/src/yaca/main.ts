@@ -22,7 +22,9 @@ import {
     type YacaSharedConfig,
     type YacaSoundStateMessage,
     type YacaStereoMode,
+    type YacaTowerConfig,
     defaultSharedConfig,
+    defaultTowerConfig,
 } from '@yaca-voice/types'
 import { YaCAClientSaltyChatBridge } from '../bridge/saltychat'
 import {
@@ -40,7 +42,6 @@ import { localLipSyncAnimations } from './data'
 import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
 import { YaCAClientPhoneModule } from './phone'
-import { YaCAClientPropModule } from './prop.js'
 import { YaCAClientRadioModule } from './radio'
 
 /**
@@ -50,7 +51,10 @@ import { YaCAClientRadioModule } from './radio'
  */
 export class YaCAClientModule {
     websocket: WebSocket
+
     sharedConfig: YacaSharedConfig
+    towerConfig: YacaTowerConfig
+
     mufflingVehicleWhitelistHash = new Set<number>()
     allPlayers = new Map<number, YacaPlayerData>()
     firstConnect = true
@@ -59,7 +63,6 @@ export class YaCAClientModule {
     phoneModule: YaCAClientPhoneModule
     megaphoneModule: YaCAClientMegaphoneModule
     intercomModule: YaCAClientIntercomModule
-    propModule: YaCAClientPropModule
 
     saltyChatBridge?: YaCAClientSaltyChatBridge
 
@@ -154,6 +157,7 @@ export class YaCAClientModule {
 
     constructor() {
         this.sharedConfig = loadConfig<YacaSharedConfig>('config/shared.json5', defaultSharedConfig)
+        this.towerConfig = loadConfig<YacaTowerConfig>('config/tower.json5', defaultTowerConfig)
         initLocale(this.sharedConfig.locale)
 
         this.rangeIndex = this.sharedConfig.voiceRange.defaultIndex
@@ -198,11 +202,10 @@ export class YaCAClientModule {
             this.registerRdrKeybindings()
         }
 
-        this.propModule = new YaCAClientPropModule(this)
         this.intercomModule = new YaCAClientIntercomModule(this)
         this.megaphoneModule = new YaCAClientMegaphoneModule(this)
         this.phoneModule = new YaCAClientPhoneModule(this)
-        this.radioModule = new YaCAClientRadioModule(this, this.propModule)
+        this.radioModule = new YaCAClientRadioModule(this)
 
         if (!this.sharedConfig.useLocalLipSync) {
             /**
@@ -253,12 +256,21 @@ export class YaCAClientModule {
         exports('getVoiceRanges', () => this.sharedConfig.voiceRange.ranges)
 
         /**
-         * Get the current voice range.
+         * Change the voice range to the next range.
          *
-         * @returns {number} The current voice range.
+         * @param {boolean} increase - If the voice range should be increased or decreased.
          */
         exports('changeVoiceRange', (increase = true) => {
             this.changeVoiceRange(increase)
+        })
+
+        /**
+         * Set the voice range to the given value.
+         *
+         * @param {number} range - The voice range to set
+         */
+        exports('setVoiceRange', (range: number) => {
+            this.setVoiceRange(range)
         })
 
         /**
@@ -325,37 +337,37 @@ export class YaCAClientModule {
      * This is only available in FiveM.
      */
     registerKeybindings() {
-        if (this.sharedConfig.keyBinds.increaseVoicerange !== false) {
+        if (this.sharedConfig.keyBinds.increaseVoiceRange !== false) {
             /**
-             * Registers the "yaca:changeVoiceRange" command and keybinding.
+             * Registers the "yaca:increaseVoiceRange" command and keybinding.
              * This command is used to change the voice range.
              */
             RegisterCommand(
-                'yaca:changeVoiceRange',
+                'yaca:increaseVoiceRange',
                 () => {
                     this.changeVoiceRange(true)
                 },
                 false,
             )
-            RegisterKeyMapping('yaca:changeVoiceRange', locale('change_voice_range_increase'), 'keyboard', this.sharedConfig.keyBinds.increaseVoicerange)
+            RegisterKeyMapping('yaca:increaseVoiceRange', locale('change_voice_range_increase'), 'keyboard', this.sharedConfig.keyBinds.increaseVoiceRange)
         }
 
-        if (this.sharedConfig.keyBinds.decreaseVoicerange !== false) {
+        if (this.sharedConfig.keyBinds.decreaseVoiceRange !== false) {
             /**
-             * Registers the "-yaca:changeVoiceRange" command and keybinding.
+             * Registers the "yaca:decreaseVoiceRange" command and keybinding.
              * This command is used to change the voice range.
              */
             RegisterCommand(
-                '-yaca:changeVoiceRange',
+                'yaca:decreaseVoiceRange',
                 () => {
                     this.changeVoiceRange(false)
                 },
                 false,
             )
-            RegisterKeyMapping('-yaca:changeVoiceRange', locale('change_voice_range_decrease'), 'keyboard', this.sharedConfig.keyBinds.decreaseVoicerange)
+            RegisterKeyMapping('yaca:decreaseVoiceRange', locale('change_voice_range_decrease'), 'keyboard', this.sharedConfig.keyBinds.decreaseVoiceRange)
         }
 
-        if (this.sharedConfig.keyBinds.voicerRangeWithMouseWheel !== false) {
+        if (this.sharedConfig.keyBinds.voiceRangeWithMouseWheel !== false) {
             /**
              * Registers the "+yaca:changeVoiceRangeWithMousewheel" command and keybinding.
              * This command is used to change the voice range.
@@ -364,7 +376,7 @@ export class YaCAClientModule {
                 '+yaca:changeVoiceRangeWithMousewheel',
                 () => {
                     this.voiceRangeViaMouseWheelTick = setInterval(() => {
-                        this.handleVoicerangeViaMouseWheel()
+                        this.handleVoiceRangeViaMouseWheel()
                     })
                 },
                 false,
@@ -385,7 +397,7 @@ export class YaCAClientModule {
                 '+yaca:changeVoiceRangeWithMousewheel',
                 locale('change_voice_range_via_mousewheel'),
                 'keyboard',
-                this.sharedConfig.keyBinds.voicerRangeWithMouseWheel,
+                this.sharedConfig.keyBinds.voiceRangeWithMouseWheel,
             )
         }
     }
@@ -395,35 +407,35 @@ export class YaCAClientModule {
      * This is only available in RedM.
      */
     registerRdrKeybindings() {
-        if (this.sharedConfig.keyBinds.increaseVoicerange !== false) {
+        if (this.sharedConfig.keyBinds.increaseVoiceRange !== false) {
             /**
              * Registers the keybinding for changing the voice Range.
              */
-            registerRdrKeyBind(this.sharedConfig.keyBinds.increaseVoicerange, () => {
+            registerRdrKeyBind(this.sharedConfig.keyBinds.increaseVoiceRange, () => {
                 this.changeVoiceRange()
             })
         }
 
-        if (this.sharedConfig.keyBinds.decreaseVoicerange !== false) {
+        if (this.sharedConfig.keyBinds.decreaseVoiceRange !== false) {
             /**
              * Registers the keybinding for changing the voice Range.
              */
-            registerRdrKeyBind(this.sharedConfig.keyBinds.decreaseVoicerange, () => {
+            registerRdrKeyBind(this.sharedConfig.keyBinds.decreaseVoiceRange, () => {
                 this.changeVoiceRange(false)
             })
         }
 
-        if (this.sharedConfig.keyBinds.voicerRangeWithMouseWheel !== false) {
+        if (this.sharedConfig.keyBinds.voiceRangeWithMouseWheel !== false) {
             /**
              * Registers the "+yaca:changeVoiceRangeWithScroll" command and keybinding.
              * This command is used to change the voice range.
              */
 
             registerRdrKeyBind(
-                this.sharedConfig.keyBinds.voicerRangeWithMouseWheel,
+                this.sharedConfig.keyBinds.voiceRangeWithMouseWheel,
                 () => {
                     this.voiceRangeViaMouseWheelTick = setInterval(() => {
-                        this.handleVoicerangeViaMouseWheel()
+                        this.handleVoiceRangeViaMouseWheel()
                     })
                 },
                 () => {
@@ -876,11 +888,63 @@ export class YaCAClientModule {
     /**
      * Changes the voice range to the next range.
      *
-     * @param {boolean | number} increase - If the voice range should be increased or decreased.
+     * @param {boolean} increase - If the voice range should be increased or decreased.
      */
-    changeVoiceRange(increase: boolean | number = true) {
+    changeVoiceRange(increase = true) {
         if (!this.canChangeVoiceRange) return
 
+        const currentVoiceRange = this.getVoiceRange()
+        if (increase) {
+            const newIndex = this.sharedConfig.voiceRange.ranges.findIndex((range) => range > currentVoiceRange)
+            this.rangeIndex = newIndex !== -1 ? newIndex : 0
+        } else {
+            const newIndex = this.sharedConfig.voiceRange.ranges
+                .slice()
+                .reverse()
+                .findIndex((range) => range < currentVoiceRange)
+            this.rangeIndex = newIndex !== -1 ? this.sharedConfig.voiceRange.ranges.length - 1 - newIndex : this.sharedConfig.voiceRange.ranges.length - 1
+        }
+
+        const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1
+        this.changeVoiceRangeInternal(voiceRange)
+    }
+
+    /**
+     * Set the voice range to the given value.
+     *
+     * @param voiceRange - The voice range to set
+     */
+    setVoiceRange(voiceRange: number) {
+        this.rangeIndex = -1
+        this.changeVoiceRangeInternal(voiceRange)
+    }
+
+    /**
+     * Internal function to change the voice range.
+     *
+     * @param voiceRange - The voice range to set
+     * @private
+     */
+    private changeVoiceRangeInternal(voiceRange: number) {
+        if (!this.canChangeVoiceRange) return
+
+        this.showRangeVisual(voiceRange)
+
+        LocalPlayer.state.set(VOICE_RANGE_STATE_NAME, voiceRange, true)
+
+        emit('yaca:external:voiceRangeUpdate', voiceRange, this.rangeIndex)
+        // SaltyChat bridge
+        if (this.saltyChatBridge) {
+            emit('SaltyChat_VoiceRangeChanged', voiceRange.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length)
+        }
+    }
+
+    /**
+     * Shows the voice range visuals.
+     *
+     * @param newVoiceRange - The new voice range
+     */
+    showRangeVisual(newVoiceRange: number) {
         if (this.visualVoiceRangeTimeout) {
             clearTimeout(this.visualVoiceRangeTimeout)
             this.visualVoiceRangeTimeout = null
@@ -891,28 +955,8 @@ export class YaCAClientModule {
             this.visualVoiceRangeTick = null
         }
 
-        let voiceRange = 1
-        if (typeof increase === 'boolean') {
-            const currentVoiceRange = this.getVoiceRange()
-            if (increase) {
-                const newIndex = this.sharedConfig.voiceRange.ranges.findIndex((range) => range > currentVoiceRange)
-                this.rangeIndex = newIndex !== -1 ? newIndex : 0
-            } else {
-                const newIndex = this.sharedConfig.voiceRange.ranges
-                    .slice()
-                    .reverse()
-                    .findIndex((range) => range < currentVoiceRange)
-                this.rangeIndex = newIndex !== -1 ? this.sharedConfig.voiceRange.ranges.length - 1 - newIndex : this.sharedConfig.voiceRange.ranges.length - 1
-            }
-
-            voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1
-        } else if (typeof increase === 'number') {
-            this.rangeIndex = -1
-            voiceRange = increase
-        }
-
         if (this.sharedConfig.voiceRange.sendNotification) {
-            this.notification(locale('voice_range_changed', voiceRange), YacaNotificationType.INFO)
+            this.notification(locale('voice_range_changed', newVoiceRange), YacaNotificationType.INFO)
         }
 
         if (this.sharedConfig.voiceRange.markerColor.enabled) {
@@ -947,8 +991,8 @@ export class YaCAClientModule {
                     0,
                     0,
                     0,
-                    voiceRange * 2,
-                    voiceRange * 2,
+                    newVoiceRange * 2,
+                    newVoiceRange * 2,
                     1,
                     red,
                     green,
@@ -964,14 +1008,6 @@ export class YaCAClientModule {
                     false,
                 )
             })
-        }
-
-        LocalPlayer.state.set(VOICE_RANGE_STATE_NAME, voiceRange, true)
-
-        emit('yaca:external:voiceRangeUpdate', voiceRange, this.rangeIndex)
-        // SaltyChat bridge
-        if (this.saltyChatBridge) {
-            emit('SaltyChat_VoiceRangeChanged', voiceRange.toFixed(1), this.rangeIndex, this.sharedConfig.voiceRange.ranges.length)
         }
     }
 
@@ -1416,11 +1452,12 @@ export class YaCAClientModule {
     /**
      * Handles the voice range adjustment using the mouse wheel.
      */
-    handleVoicerangeViaMouseWheel() {
+    handleVoiceRangeViaMouseWheel() {
         HudWeaponWheelIgnoreSelection()
 
         let newValue = 0
         const currentVoiceRange = this.getVoiceRange()
+
         if (IsControlPressed(0, 242)) {
             newValue = Math.max(1, currentVoiceRange - 1)
         } else if (IsControlPressed(0, 241)) {
@@ -1429,7 +1466,7 @@ export class YaCAClientModule {
 
         if (newValue <= 0 || currentVoiceRange === newValue) return
 
-        this.changeVoiceRange(newValue)
+        this.setVoiceRange(newValue)
     }
 
     /**

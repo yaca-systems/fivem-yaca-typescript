@@ -33,7 +33,11 @@ Get all voice ranges as `int[]`.
 
 #### `changeVoiceRange(increase: boolean): void`
 
-Change the voice range of the player.
+Change the voice range of the player to the next range.
+
+#### `setVoiceRange(range: number): void`
+
+Set the voice range of the player.
 
 #### `getMicrophoneMuteState(): boolean`
 

@@ -1,15 +1,13 @@
 import { GLOBAL_ERROR_LEVEL_STATE_NAME, clamp, locale } from '@yaca-voice/common'
 import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from '@yaca-voice/types'
-import { cache, calculateDistanceVec3, registerRdrKeyBind, requestAnimDict } from '../utils'
+import { cache, calculateDistanceVec3, createProp, registerRdrKeyBind, requestAnimDict } from '../utils'
 import type { YaCAClientModule } from './main'
-import type { YaCAClientPropModule } from './prop'
 
 /**
  * The radio module for the client.
  */
 export class YaCAClientRadioModule {
     clientModule: YaCAClientModule
-    propModule: YaCAClientPropModule
 
     radioEnabled = false
     radioInitialized = false
@@ -25,6 +23,7 @@ export class YaCAClientRadioModule {
     secondaryRadioChannel = 2
 
     radioOnCooldown = false
+    currentRadioProp: number | null = null
 
     defaultRadioSettings: YacaRadioSettings = {
         frequency: '0',
@@ -38,13 +37,10 @@ export class YaCAClientRadioModule {
      *
      * @param clientModule - The client module.
      */
-    constructor(clientModule: YaCAClientModule, propModule: YaCAClientPropModule) {
+    constructor(clientModule: YaCAClientModule) {
         this.clientModule = clientModule
-        this.propModule = propModule
 
         this.radioMode = this.clientModule.sharedConfig.radioSettings.mode
-
-        requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary)
 
         this.registerExports()
         this.registerEvents()
@@ -544,7 +540,7 @@ export class YaCAClientRadioModule {
 
         const playerPos = GetEntityCoords(cache.ped, false)
 
-        for (const coords of this.clientModule.sharedConfig.radioSettings.towerPositions) {
+        for (const coords of this.clientModule.towerConfig.towerPositions) {
             const distance = calculateDistanceVec3(playerPos, coords)
             if (distance >= this.clientModule.sharedConfig.radioSettings.maxDistance) {
                 continue
@@ -987,8 +983,12 @@ export class YaCAClientRadioModule {
                     4,
                 )
 
-                if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
-                    this.addOrRemoveTalkingProp()
+                if (this.currentRadioProp !== null) {
+                    if (DoesEntityExist(this.currentRadioProp)) {
+                        DeleteEntity(this.currentRadioProp)
+                    }
+
+                    this.currentRadioProp = null
                 }
             }
 
@@ -1017,9 +1017,14 @@ export class YaCAClientRadioModule {
             this.radioTalkingStateToPlugin(true, channel)
         }
 
-        requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary).then(() => {
+        requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary).then(async () => {
             if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
-                this.addOrRemoveTalkingProp()
+                this.currentRadioProp = await createProp(
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop as string,
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
+                )
             }
 
             TaskPlayAnim(
@@ -1071,17 +1076,5 @@ export class YaCAClientRadioModule {
         if (channel !== this.activeRadioChannel || GetResourceState('yaca-ui') !== 'started') return
 
         exports['yaca-ui'].setRadioChannelData(this.radioChannelSettings.get(channel))
-    }
-
-    /**
-     * Adds or removes a talking prop based on the current radio settings.
-     */
-    addOrRemoveTalkingProp() {
-        this.propModule.handleProp(
-            this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop as string,
-            this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
-            this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
-            this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
-        )
     }
 }
