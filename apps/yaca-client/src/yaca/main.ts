@@ -1472,6 +1472,7 @@ export class YaCAClientModule {
     /**
      * Calculate the players in streaming range and send them to the voice plugin.
      */
+    // skipcq: JS-R1005
     calcPlayers() {
         const localData = this.getPlayerByID(cache.serverId)
         if (!localData) return
