@@ -3,20 +3,22 @@ import { build } from 'esbuild'
 const production = process.argv.includes('--mode=production')
 
 build({
+    logLevel: "info",
     entryPoints: ['src/index.ts'],
     outfile: './dist/client.js',
     bundle: true,
+    keepNames: true,
+    treeShaking: true,
     loader: {
         '.ts': 'ts',
         '.js': 'js',
     },
     write: true,
     platform: 'browser',
-    target: 'es2021',
+    target: 'es2023',
     format: 'iife',
-    minify: production,
     sourcemap: production ? false : 'inline',
-    dropLabels: production ? ['DEV'] : undefined,
+    dropLabels: production ? ['DEV'] : undefined
 })
     .then(() => {
         console.log('Client built successfully')
