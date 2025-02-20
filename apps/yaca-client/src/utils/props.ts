@@ -1,5 +1,5 @@
 import { cache } from './cache'
-import { loadModel } from './model'
+import { requestModel } from './streaming'
 
 /**
  * Create a prop and attach it to the player.
@@ -15,7 +15,8 @@ export const createProp = async (
     offset: [number, number, number] = [0.0, 0.0, 0.0],
     rotation: [number, number, number] = [0.0, 0.0, 0.0],
 ) => {
-    const modelHash = await loadModel(model)
+    const modelHash = await requestModel(model)
+    if (!modelHash) return
 
     const [x, y, z] = GetEntityCoords(cache.ped, true)
     const [ox, oy, oz] = offset

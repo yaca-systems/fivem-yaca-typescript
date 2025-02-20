@@ -1,25 +1,57 @@
 import { waitFor } from '@yaca-voice/common'
 
 /**
+ * Request an asset and wait for it to load.
+ *
+ * @param request - The function to request the asset
+ * @param hasLoaded - The function to check if the asset has loaded
+ * @param assetType - The type of the asset
+ * @param asset - The asset to request
+ * @param timeout - The timeout in ms
+ */
+async function streamingRequest<T extends string | number>(
+    request: (asset: T) => unknown,
+    hasLoaded: (asset: T) => boolean,
+    assetType: string,
+    asset: T,
+    timeout = 30000,
+) {
+    if (hasLoaded(asset)) return asset
+
+    request(asset)
+
+    return waitFor(
+        () => {
+            if (hasLoaded(asset)) return asset
+        },
+        `failed to load ${assetType} '${asset}' - this may be caused by\n- too many loaded assets\n- oversized, invalid, or corrupted assets`,
+        timeout,
+    )
+}
+
+/**
  * Request a animation dictionary.
  *
  * @param animDict - The animation dictionary to request.
- * @param timeout - The timeout for the request.
+ * @returns A promise that resolves to the animation dictionary once it is loaded.
+ * @throws Will throw an error if the animation dictionary is not valid or if the animation dictionary fails to load within the timeout.
  */
-export const requestAnimDict = async (animDict: string, timeout?: number): Promise<string> => {
-    if (!DoesAnimDictExist(animDict)) throw new Error(`attempted to load invalid animDict '${animDict}' (does not exist)`)
-    if (HasAnimDictLoaded(animDict)) return animDict
+export const requestAnimDict = (animDict: string) => {
+    if (!DoesAnimDictExist(animDict)) throw new Error(`attempted to load invalid animDict '${animDict}'`)
 
-    RequestAnimDict(animDict)
+    return streamingRequest(RequestAnimDict, HasAnimDictLoaded, 'animDict', animDict)
+}
 
-    await waitFor(
-        () => {
-            if (HasAnimDictLoaded(animDict)) return animDict
-            return null
-        },
-        `failed to load animDict '${animDict}' after ${timeout} ticks`,
-        timeout || 5000,
-    )
+/**
+ * Loads a model by its name or hash key.
+ *
+ * @param modelName - The name or hash key of the model to load.
+ * @returns A promise that resolves to the model hash key once the model is loaded.
+ * @throws Will throw an error if the model is not valid or if the model fails to load within the timeout.
+ */
+export const requestModel = (modelName: string | number) => {
+    if (typeof modelName !== 'number') modelName = GetHashKey(modelName)
+    if (!IsModelValid(modelName)) throw new Error(`attempted to load invalid model '${modelName}'`)
 
-    return animDict
+    return streamingRequest(RequestModel, HasModelLoaded, 'model', modelName)
 }

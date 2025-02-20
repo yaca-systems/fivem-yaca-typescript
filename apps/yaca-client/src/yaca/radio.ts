@@ -23,7 +23,7 @@ export class YaCAClientRadioModule {
     secondaryRadioChannel = 2
 
     radioOnCooldown = false
-    currentRadioProp: number | null = null
+    currentRadioProp: number | null
 
     defaultRadioSettings: YacaRadioSettings = {
         frequency: '0',
@@ -956,7 +956,7 @@ export class YaCAClientRadioModule {
      * @param {boolean} state - The state of the radio talking.
      * @param {number} channel - The radio channel.
      */
-    radioTalkingStart(state: boolean, channel: number) {
+    async radioTalkingStart(state: boolean, channel: number) {
         if (channel === -1) return
 
         if (!state) {
@@ -982,10 +982,15 @@ export class YaCAClientRadioModule {
                     this.clientModule.sharedConfig.radioSettings.animation.name,
                     4,
                 )
+                RemoveAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary)
 
                 if (this.currentRadioProp !== null) {
                     if (DoesEntityExist(this.currentRadioProp)) {
                         DeleteEntity(this.currentRadioProp)
+                    }
+
+                    if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
+                        SetModelAsNoLongerNeeded(this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop)
                     }
 
                     this.currentRadioProp = null
@@ -1017,19 +1022,22 @@ export class YaCAClientRadioModule {
             this.radioTalkingStateToPlugin(true, channel)
         }
 
-        requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary).then(async () => {
-            if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
-                this.currentRadioProp = await createProp(
-                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop as string,
-                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
-                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
-                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
-                )
-            }
+        if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
+            const prop = await createProp(
+                this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop,
+                this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
+                this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
+                this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
+            )
 
+            this.currentRadioProp = prop ?? null
+        }
+
+        const animDict = await requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary)
+        if (animDict) {
             TaskPlayAnim(
                 cache.ped,
-                this.clientModule.sharedConfig.radioSettings.animation.dictionary,
+                animDict,
                 this.clientModule.sharedConfig.radioSettings.animation.name,
                 3,
                 -4,
@@ -1040,21 +1048,21 @@ export class YaCAClientRadioModule {
                 false,
                 false,
             )
+        }
 
-            this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(true, channel)
+        this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(true, channel)
 
-            if (!this.radioTowerCalculation.has(channel)) {
-                this.radioTowerCalculation.set(
-                    channel,
-                    setInterval(() => {
-                        this.sendRadioRequestToServer(channel)
-                    }, 1000),
-                )
-            }
+        if (!this.radioTowerCalculation.has(channel)) {
+            this.radioTowerCalculation.set(
+                channel,
+                setInterval(() => {
+                    this.sendRadioRequestToServer(channel)
+                }, 1000),
+            )
+        }
 
-            emitNet('server:yaca:radioTalking', true, channel)
-            emit('yaca:external:isRadioTalking', true, channel)
-        })
+        emitNet('server:yaca:radioTalking', true, channel)
+        emit('yaca:external:isRadioTalking', true, channel)
     }
 
     /**

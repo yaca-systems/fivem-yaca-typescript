@@ -43,6 +43,10 @@ function initCache() {
         const vehicle = GetVehiclePedIsIn(ped, false)
 
         if (vehicle > 0) {
+            if (vehicle !== cache.vehicle) {
+                cache.seat = false
+            }
+
             cache.vehicle = vehicle
 
             if (!cache.seat || GetPedInVehicleSeat(vehicle, cache.seat) !== ped) {

@@ -8,10 +8,11 @@ import { requestAnimDict } from './streaming'
  * @param animName - The animation name to use.
  * @param animDict - The animation dictionary to use.
  */
-export function playRdrFacialAnim(ped: number, animName: string, animDict: string) {
-    requestAnimDict(animDict, 10000).then(() => {
-        SetFacialIdleAnimOverride(ped, animName, animDict)
-    })
+export const playRdrFacialAnim = async (ped: number, animName: string, animDict: string) => {
+    const loadedAnimDict = await requestAnimDict(animDict)
+    if (!loadedAnimDict) return
+
+    SetFacialIdleAnimOverride(ped, animName, loadedAnimDict)
 }
 
 /**
