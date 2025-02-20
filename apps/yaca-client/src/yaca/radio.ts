@@ -241,20 +241,17 @@ export class YaCAClientRadioModule {
                     return
                 }
 
-                const ownDistanceToTower = this.getDistanceToTowerOrSender(senderPosition)
+                const ownDistanceToTowerOrSender = this.getDistanceToTowerOrSender(senderPosition)
 
                 if (self) {
-                    if (state) {
-                        if (this.radioMode === 'Tower' && ownDistanceToTower === -1) return
-                        if (this.radioMode === 'Direct' && ownDistanceToTower > this.clientModule.sharedConfig.radioSettings.maxDistance) return
-                    }
+                    if (state && this.radioMode !== 'None' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) return
                     this.radioTalkingStateToPluginWithWhisper(state, target, channel)
                     return
                 }
 
                 if (state) {
-                    if (this.radioMode === 'Tower' && (ownDistanceToTower === -1 || senderDistanceToTower === -1)) return
-                    if (this.radioMode === 'Direct' && ownDistanceToTower > this.clientModule.sharedConfig.radioSettings.maxDistance) return
+                    if (this.radioMode !== 'Direct' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) return
+                    if (this.radioMode === 'Tower' && senderDistanceToTower > this.clientModule.sharedConfig.radioSettings.maxDistance) return
                 }
 
                 const player = this.clientModule.getPlayerByID(target)
@@ -265,7 +262,7 @@ export class YaCAClientRadioModule {
                 const info = infos[cache.serverId]
 
                 if (!info?.shortRange || (info?.shortRange && GetPlayerFromServerId(target) !== -1)) {
-                    const errorLevel = this.getErrorLevelFromDistance(ownDistanceToTower, senderDistanceToTower)
+                    const errorLevel = this.getErrorLevelFromDistance(ownDistanceToTowerOrSender, senderDistanceToTower)
 
                     this.clientModule.setPlayersCommType(
                         player,
@@ -471,13 +468,10 @@ export class YaCAClientRadioModule {
      * @param senderPosition - The position of the sender.
      */
     getDistanceToTowerOrSender(senderPosition: [number, number, number]) {
-        let ownDistanceToTower = -1
+        let ownDistanceToTower = Number.MAX_VALUE
 
         if (this.radioMode === 'Tower') {
-            const nearestTower = this.getNearestRadioTower()
-            if (nearestTower) {
-                ownDistanceToTower = nearestTower.distance
-            }
+            ownDistanceToTower = this.getNearestRadioTower()
         } else if (this.radioMode === 'Direct') {
             ownDistanceToTower = calculateDistanceVec3(GetEntityCoords(cache.ped, false), senderPosition)
         }
@@ -531,27 +525,24 @@ export class YaCAClientRadioModule {
     /**
      * Finds the nearest tower to the local player.
      * Iterates through all towers and calculates the distance to the local player's position.
-     * Keeps track of the nearest tower found during the iteration.
+     * Keeps track of the nearest tower and returns its distance.
      *
-     * @returns {object} An object containing the nearest tower and its distance, or null if no towers are present.
+     * @returns {number | null} The distance to the nearest tower, or null if no tower is found.
      */
     getNearestRadioTower() {
-        let nearestTower: { distance: number; coords: [number, number, number] } | null = null
+        let nearestTowerDistance = Number.MAX_VALUE
 
         const playerPos = GetEntityCoords(cache.ped, false)
 
         for (const coords of this.clientModule.towerConfig.towerPositions) {
             const distance = calculateDistanceVec3(playerPos, coords)
-            if (distance >= this.clientModule.sharedConfig.radioSettings.maxDistance) {
-                continue
-            }
 
-            if (!nearestTower || distance < nearestTower.distance) {
-                nearestTower = { distance, coords }
+            if (!nearestTowerDistance || distance < nearestTowerDistance) {
+                nearestTowerDistance = distance
             }
         }
 
-        return nearestTower
+        return nearestTowerDistance
     }
 
     /**
@@ -1071,7 +1062,7 @@ export class YaCAClientRadioModule {
      * @param channel - The radio channel to send the request to.
      */
     sendRadioRequestToServer(channel: number) {
-        const distanceToTower = this.getNearestRadioTower()?.distance ?? -1
+        const distanceToTower = this.getNearestRadioTower() ?? -1
         emitNet('server:yaca:radioTalking', true, channel, distanceToTower)
     }
 
