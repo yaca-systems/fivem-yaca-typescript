@@ -377,14 +377,7 @@ export class YaCAServerRadioModule {
         )
 
         if (this.serverConfig.useWhisper) {
-            emitNet(
-                'client:yaca:radioTalkingWhisper',
-                src,
-                targetsToSender,
-                radioFrequency,
-                state,
-                GetEntityCoords(GetPlayerPed(src.toString())),
-            )
+            emitNet('client:yaca:radioTalkingWhisper', src, targetsToSender, radioFrequency, state, GetEntityCoords(GetPlayerPed(src.toString())))
         }
     }
 }

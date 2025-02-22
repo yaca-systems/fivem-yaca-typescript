@@ -301,23 +301,18 @@ export class YaCAClientRadioModule {
          * @param {boolean} self - The state of the player.
          */
         onNet(
-          'client:yaca:radioTalkingWhisper',
-          (
-            targets: number[],
-            frequency: string,
-            state: boolean,
-            senderPosition: [number, number, number] = [0, 0, 0]
-          ) => {
-              const channel = this.findRadioChannelByFrequency(frequency)
-              if (!channel) {
-                  return
-              }
+            'client:yaca:radioTalkingWhisper',
+            (targets: number[], frequency: string, state: boolean, senderPosition: [number, number, number] = [0, 0, 0]) => {
+                const channel = this.findRadioChannelByFrequency(frequency)
+                if (!channel) {
+                    return
+                }
 
-              const ownDistanceToTowerOrSender = this.getDistanceToTowerOrSender(senderPosition)
+                const ownDistanceToTowerOrSender = this.getDistanceToTowerOrSender(senderPosition)
 
-              if (state && this.radioMode !== 'None' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) targets = []
-              this.radioTalkingStateToPluginWithWhisper(state, targets, channel)
-          },
+                if (state && this.radioMode !== 'None' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) targets = []
+                this.radioTalkingStateToPluginWithWhisper(state, targets, channel)
+            },
         )
 
         /**
@@ -890,7 +885,7 @@ export class YaCAClientRadioModule {
 
         for (const target of targets) {
             const player = this.clientModule.getPlayerByID(target)
-            if (!player) continue;
+            if (!player) continue
 
             comDeviceTargets.push(player)
         }
