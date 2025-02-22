@@ -1,6 +1,4 @@
 {
-  // Enable the debug mode to enable some debug commands.
-  "debug": false,
   // Enable the version check to get notified about new versions.
   "versionCheck": true,
   // The build type of the plugin. 0 = release, 1 = develop (develop allows using all yaca plugin version)

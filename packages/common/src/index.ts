@@ -1,8 +1,8 @@
-export * from './constants'
 export * from './bridge'
-export * from './locale'
 export * from './config'
+export * from './constants'
 export * from './errorlevel'
+export * from './locale'
 
 /**
  * Sleeps for a given amount of time.

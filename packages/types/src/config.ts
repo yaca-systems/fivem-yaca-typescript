@@ -1,7 +1,6 @@
 import { YacaBuildType } from './enums'
 
 export interface YacaSharedConfig {
-    debug: boolean
     versionCheck: boolean
     buildType: YacaBuildType
     locale: string
@@ -77,7 +76,6 @@ export interface YacaSharedConfig {
 }
 
 export const defaultSharedConfig: YacaSharedConfig = {
-    debug: false,
     versionCheck: true,
     buildType: YacaBuildType.RELEASE,
     locale: 'en',
