@@ -223,7 +223,6 @@ export class YaCAClientRadioModule {
          * @param {boolean} state - The state of the radio talking.
          * @param {object[]} infos - The information about the radio.
          * @param {boolean} infos.shortRange - The state of the short range.
-         * @param {boolean} self - The state of the player.
          */
         onNet(
             'client:yaca:radioTalking',
@@ -232,7 +231,6 @@ export class YaCAClientRadioModule {
                 frequency: string,
                 state: boolean,
                 infos: { shortRange: boolean }[],
-                self = false,
                 senderDistanceToTower = -1,
                 senderPosition: [number, number, number] = [0, 0, 0],
             ) => {
@@ -243,14 +241,8 @@ export class YaCAClientRadioModule {
 
                 const ownDistanceToTowerOrSender = this.getDistanceToTowerOrSender(senderPosition)
 
-                if (self) {
-                    if (state && this.radioMode !== 'None' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) return
-                    this.radioTalkingStateToPluginWithWhisper(state, target, channel)
-                    return
-                }
-
                 if (state) {
-                    if (this.radioMode !== 'Direct' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) return
+                    if (this.radioMode !== 'None' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) return
                     if (this.radioMode === 'Tower' && senderDistanceToTower > this.clientModule.sharedConfig.radioSettings.maxDistance) return
                 }
 
@@ -296,6 +288,36 @@ export class YaCAClientRadioModule {
                     this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(state, channel)
                 }
             },
+        )
+
+        /**
+         * Handles the "client:yaca:radioTalking" server event.
+         *
+         * @param {number} target - The ID of the target.
+         * @param {string} frequency - The frequency of the radio.
+         * @param {boolean} state - The state of the radio talking.
+         * @param {object[]} infos - The information about the radio.
+         * @param {boolean} infos.shortRange - The state of the short range.
+         * @param {boolean} self - The state of the player.
+         */
+        onNet(
+          'client:yaca:radioTalkingWhisper',
+          (
+            targets: number[],
+            frequency: string,
+            state: boolean,
+            senderPosition: [number, number, number] = [0, 0, 0]
+          ) => {
+              const channel = this.findRadioChannelByFrequency(frequency)
+              if (!channel) {
+                  return
+              }
+
+              const ownDistanceToTowerOrSender = this.getDistanceToTowerOrSender(senderPosition)
+
+              if (state && this.radioMode !== 'None' && ownDistanceToTowerOrSender > this.clientModule.sharedConfig.radioSettings.maxDistance) targets = []
+              this.radioTalkingStateToPluginWithWhisper(state, targets, channel)
+          },
         )
 
         /**
@@ -860,16 +882,20 @@ export class YaCAClientRadioModule {
      * Sends an event to the plugin when a player starts or stops talking on the radio with whisper.
      *
      * @param state - The state of the player talking on the radio.
-     * @param target - The IDs of the targets.
+     * @param targets - The IDs of the targets.
      * @param channel - The channel number.
      */
-    radioTalkingStateToPluginWithWhisper(state: boolean, target: number, channel: number) {
-        const player = this.clientModule.getPlayerByID(target)
-        if (!player) {
-            return
+    radioTalkingStateToPluginWithWhisper(state: boolean, targets: number[], channel: number) {
+        const comDeviceTargets = []
+
+        for (const target of targets) {
+            const player = this.clientModule.getPlayerByID(target)
+            if (!player) continue;
+
+            comDeviceTargets.push(player)
         }
 
-        this.clientModule.setPlayersCommType(player, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.SENDER, CommDeviceMode.RECEIVER)
+        this.clientModule.setPlayersCommType(comDeviceTargets, YacaFilterEnum.RADIO, state, channel, undefined, CommDeviceMode.SENDER, CommDeviceMode.RECEIVER)
     }
 
     /**
@@ -953,10 +979,6 @@ export class YaCAClientRadioModule {
         if (!state) {
             if (this.talkingInChannels.has(channel)) {
                 this.talkingInChannels.delete(channel)
-                if (!this.clientModule.useWhisper) {
-                    this.radioTalkingStateToPlugin(false, channel)
-                }
-
                 if (this.radioTowerCalculation.has(channel)) {
                     clearInterval(this.radioTowerCalculation.get(channel) as CitizenTimer)
                     this.radioTowerCalculation.delete(channel)
@@ -964,7 +986,11 @@ export class YaCAClientRadioModule {
 
                 this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(false, channel)
 
-                emitNet('server:yaca:radioTalking', false, channel)
+                if (!this.clientModule.useWhisper) {
+                    this.radioTalkingStateToPlugin(false, channel)
+                }
+
+                emitNet('server:yaca:radioTalking', false, channel, -1)
                 emit('yaca:external:isRadioTalking', false, channel)
 
                 StopAnimTask(
@@ -1043,6 +1069,7 @@ export class YaCAClientRadioModule {
 
         this.clientModule.saltyChatBridge?.handleRadioTalkingStateChange(true, channel)
 
+        this.sendRadioRequestToServer(channel)
         if (!this.radioTowerCalculation.has(channel)) {
             this.radioTowerCalculation.set(
                 channel,
@@ -1052,7 +1079,6 @@ export class YaCAClientRadioModule {
             )
         }
 
-        emitNet('server:yaca:radioTalking', true, channel)
         emit('yaca:external:isRadioTalking', true, channel)
     }
 
