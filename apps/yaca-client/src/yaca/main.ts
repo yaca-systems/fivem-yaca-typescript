@@ -34,6 +34,7 @@ import {
     convertNumberArrayToXYZ,
     displayRdrNotification,
     getCamDirection,
+    joaat,
     playRdrFacialAnim,
     registerRdrKeyBind,
     vehicleHasOpening,
@@ -173,7 +174,7 @@ export class YaCAClientModule {
 
         if (this.isFiveM) {
             for (const vehicleModel of this.sharedConfig.mufflingSettings.vehicleMuffling.vehicleWhitelist) {
-                this.mufflingVehicleWhitelistHash.add(GetHashKey(vehicleModel))
+                this.mufflingVehicleWhitelistHash.add(joaat(vehicleModel))
             }
         }
 

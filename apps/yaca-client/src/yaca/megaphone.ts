@@ -1,6 +1,6 @@
 import { MEGAPHONE_STATE_NAME, locale } from '@yaca-voice/common'
 import { CommDeviceMode, YacaFilterEnum } from '@yaca-voice/types'
-import { cache, onCache, registerRdrKeyBind } from '../utils'
+import { cache, joaat, onCache, registerRdrKeyBind } from '../utils'
 import type { YaCAClientModule } from './main'
 
 /**
@@ -27,7 +27,7 @@ export class YaCAClientMegaphoneModule {
             this.registerKeybinds()
 
             for (const vehicleModel of this.clientModule.sharedConfig.megaphone.allowedVehicleModels) {
-                this.megaphoneVehicleWhitelistHashes.add(GetHashKey(vehicleModel))
+                this.megaphoneVehicleWhitelistHashes.add(joaat(vehicleModel))
             }
         } else if (this.clientModule.isRedM) {
             this.registerRdrKeybinds()

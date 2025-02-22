@@ -1,4 +1,5 @@
 import { waitFor } from '@yaca-voice/common'
+import { joaat } from './props'
 
 /**
  * Request an asset and wait for it to load.
@@ -50,7 +51,7 @@ export const requestAnimDict = (animDict: string) => {
  * @throws Will throw an error if the model is not valid or if the model fails to load within the timeout.
  */
 export const requestModel = (modelName: string | number) => {
-    if (typeof modelName !== 'number') modelName = GetHashKey(modelName)
+    if (typeof modelName !== 'number') modelName = joaat(modelName)
     if (!IsModelValid(modelName)) throw new Error(`attempted to load invalid model '${modelName}'`)
 
     return streamingRequest(RequestModel, HasModelLoaded, 'model', modelName)

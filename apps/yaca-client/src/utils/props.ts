@@ -1,6 +1,26 @@
 import { cache } from './cache'
 import { requestModel } from './streaming'
 
+export const joaat = (input: string, ignore_casing = true) => {
+    input = !ignore_casing ? input.toLowerCase() : input
+    const length = input.length
+
+    let hash: number
+    let i: number
+
+    for (hash = i = 0; i < length; i++) {
+        hash += input.charCodeAt(i)
+        hash += hash << 10
+        hash ^= hash >>> 6
+    }
+
+    hash += hash << 3
+    hash ^= hash >>> 11
+    hash += hash << 15
+
+    return hash >>> 0
+}
+
 /**
  * Create a prop and attach it to the player.
  *
