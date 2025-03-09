@@ -147,7 +147,8 @@
         "sm722",
         "tornado4",
         "swinger",
-        "locust"
+        "locust",
+        "hotring"
       ],
     },
     // The intensities of the muffling. (0 = no muffling, 10 = full muffling)
