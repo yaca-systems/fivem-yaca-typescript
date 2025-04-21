@@ -174,10 +174,6 @@ export class YaCAServerRadioModule {
 
         player.radioSettings.activated = state
 
-        if (this.serverModule.sharedConfig.saltyChatBridge) {
-            player.radioSettings.hasLong = true
-        }
-
         emit('yaca:export:enabledRadio', src, state)
     }
 

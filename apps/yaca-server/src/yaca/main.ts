@@ -134,7 +134,7 @@ export class YaCAServerModule {
             },
             radioSettings: {
                 activated: false,
-                hasLong: false,
+                hasLong: true,
                 frequencies: {},
             },
         })
