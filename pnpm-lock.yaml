@@ -19,7 +19,7 @@ importers:
         version: 2.3.4
       typescript:
         specifier: ^5.7.3
-        version: 5.7.3
+        version: 5.8.3
 
   apps/yaca-client:
     dependencies:
@@ -29,7 +29,7 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.12651-1
+        version: 2.0.14482-1
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
@@ -54,7 +54,7 @@ importers:
     devDependencies:
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.12651-1
+        version: 2.0.14482-1
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
@@ -82,10 +82,10 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.12651-1
+        version: 2.0.14482-1
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.12651-1
+        version: 2.0.14482-1
       '@types/node':
         specifier: ^22.7.4
         version: 22.7.4
@@ -152,11 +152,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@citizenfx/client@2.0.12651-1':
-    resolution: {integrity: sha512-8VATU0jwmZEcWCITZJMNw6w9EJW9TgxGcgqVX+0sLbvpQ3yaboYy3h6/9lOH+dZwioDj2GM58dvejbaPcJxM6A==}
+  '@citizenfx/client@2.0.14482-1':
+    resolution: {integrity: sha512-i7tQifiLlpqISKiG9elciHGCF9apCkmYWisFCfLtV0KqlLx5Trdfxe/XSbZgsB2S+Viw4cosdFy8H4VzhDjy+w==}
 
-  '@citizenfx/server@2.0.12651-1':
-    resolution: {integrity: sha512-DIOeUjmVL81wc5g+F8/z2BcEnJY2mAez3KrhlXQk3fs7l4wg+CD1S+vCQkM01INO3od8M2mOuZsMdTzz+dOjtA==}
+  '@citizenfx/server@2.0.14482-1':
+    resolution: {integrity: sha512-h6gRGBFHmHS1BY/kFxcuWt2hbvK4/vORT99P/h4M1yRs1fSJ8EYK/oFzjY6oio75q/zboD7pZIqG9TlLc31W/g==}
 
   '@esbuild/aix-ppc64@0.24.2':
     resolution: {integrity: sha512-thpVCb/rhxE/BnMLQ7GReQLLN8q9qbHmI55F4489/ByVg2aQaQ6kbcLb6FHkocZzQhxc4gx0sCk0tJkKBFzDhA==}
@@ -353,6 +353,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-fetch@3.3.2:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
@@ -392,8 +393,8 @@ packages:
     resolution: {integrity: sha512-1kiLO5C0Okh5ay1DbHsxkPsw9Sjsbjzm6cF85CpWjR0BIyBFNDbKqtUyqGADRS1dbbZoQanJZVj4MS5kk8J42Q==}
     hasBin: true
 
-  typescript@5.7.3:
-    resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
+  typescript@5.8.3:
+    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -441,9 +442,9 @@ snapshots:
   '@biomejs/cli-win32-x64@1.9.4':
     optional: true
 
-  '@citizenfx/client@2.0.12651-1': {}
+  '@citizenfx/client@2.0.14482-1': {}
 
-  '@citizenfx/server@2.0.12651-1': {}
+  '@citizenfx/server@2.0.14482-1': {}
 
   '@esbuild/aix-ppc64@0.24.2':
     optional: true
@@ -614,7 +615,7 @@ snapshots:
       turbo-windows-64: 2.3.4
       turbo-windows-arm64: 2.3.4
 
-  typescript@5.7.3: {}
+  typescript@5.8.3: {}
 
   undici-types@6.19.8: {}
 
