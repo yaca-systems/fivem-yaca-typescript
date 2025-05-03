@@ -1,6 +1,8 @@
 {
   // Enable the version check to get notified about new versions.
   "versionCheck": true,
+  // Enable manual or automatic connecting to the voice channel when joining the server.
+  "autoConnectOnJoin": true,
   // The build type of the plugin. 0 = release, 1 = develop (develop allows using all yaca plugin version)
   "buildType": 0,
   // The locale that should be used.

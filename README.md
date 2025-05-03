@@ -257,6 +257,13 @@ Starts or stops using the megaphone.
 
 ### General
 
+#### `connectToVoice(source: number)`
+Connects a player to the voice system.
+
+| Parameter | Type     | Description       |
+|-----------|----------|-------------------|
+| source    | `number` | the player source |
+
 #### `getPlayerAliveStatus(source: number): bool`
 
 Get the alive status of a player as `bool`.

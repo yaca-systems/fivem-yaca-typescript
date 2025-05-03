@@ -146,6 +146,7 @@ export class YaCAServerModule {
      * Register all exports for the YaCA module.
      */
     registerExports() {
+        exports('connectToVoice', (src: number) => this.connectToVoice(src))
         /**
          * Get the alive status of a player.
          *
@@ -203,6 +204,7 @@ export class YaCAServerModule {
 
         // YaCA: connect to voice when NUI is ready
         onNet('server:yaca:nuiReady', () => {
+            if (!this.sharedConfig.autoConnectOnJoin) return
             this.connectToVoice(source)
         })
 

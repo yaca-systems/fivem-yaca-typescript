@@ -2,6 +2,7 @@ import { YacaBuildType } from './enums'
 
 export interface YacaSharedConfig {
     versionCheck: boolean
+    autoConnectOnJoin: boolean
     buildType: YacaBuildType
     locale: string
     unmuteDelay: number
@@ -77,6 +78,7 @@ export interface YacaSharedConfig {
 
 export const defaultSharedConfig: YacaSharedConfig = {
     versionCheck: true,
+    autoConnectOnJoin: true,
     buildType: YacaBuildType.RELEASE,
     locale: 'en',
     unmuteDelay: 400,

@@ -187,9 +187,12 @@ export class YaCAClientModule {
         RegisterNuiCallbackType('YACA_OnNuiReady')
         on('__cfx_nui:YACA_OnNuiReady', (_: unknown, cb: (data: unknown) => void) => {
             this.websocket.nuiReady = true
-            setTimeout(() => {
-                emitNet('server:yaca:nuiReady')
-            }, 5000)
+
+            if (this.sharedConfig.autoConnectOnJoin) {
+                setTimeout(() => {
+                    emitNet('server:yaca:nuiReady')
+                }, 5000)
+            }
 
             // skipcq: JS-0255
             cb({})
