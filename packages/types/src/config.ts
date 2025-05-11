@@ -50,6 +50,8 @@ export interface YacaSharedConfig {
             b: number
             a: number
             duration: number
+            type: number
+            rotate: boolean
         }
     }
     megaphone: {
@@ -126,6 +128,8 @@ export const defaultSharedConfig: YacaSharedConfig = {
             b: 0,
             a: 50,
             duration: 1000,
+            type: 1,
+            rotate: true,
         },
     },
     megaphone: {

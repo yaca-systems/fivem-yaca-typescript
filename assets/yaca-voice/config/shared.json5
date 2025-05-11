@@ -110,7 +110,9 @@
       "b": 0,
       "a": 50,
       // The duration the marker should be shown.
-      "duration": 1000
+      "duration": 1000,
+      "type": 1,
+      "rotate": true
     }
   },
   "megaphone": {

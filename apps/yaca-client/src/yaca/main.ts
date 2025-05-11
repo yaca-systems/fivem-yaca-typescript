@@ -979,13 +979,18 @@ export class YaCAClientModule {
                 this.visualVoiceRangeTimeout = null
             }, duration)
 
+            if (!this.isFiveM && this.sharedConfig.voiceRange.markerColor.type < 1000) {
+                this.sharedConfig.voiceRange.markerColor.type = 0x94fdae17
+                console.warn('[YaCA] Marker type is not supported in RedM. Using default marker type.')
+            }
+
             this.visualVoiceRangeTick = setInterval(() => {
                 const entity = cache.vehicle || cache.ped
                 const pos = GetEntityCoords(entity, false)
                 const posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98
 
                 DrawMarker(
-                    this.isFiveM ? 1 : 0x94fdae17,
+                    this.sharedConfig.voiceRange.markerColor.type,
                     pos[0],
                     pos[1],
                     posZ,
@@ -1005,7 +1010,7 @@ export class YaCAClientModule {
                     false,
                     true,
                     2,
-                    true,
+                    this.sharedConfig.voiceRange.markerColor.rotate,
                     // @ts-expect-error Type error in the native
                     null,
                     null,
