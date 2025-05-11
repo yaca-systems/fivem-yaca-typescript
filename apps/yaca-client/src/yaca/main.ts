@@ -278,6 +278,20 @@ export class YaCAClientModule {
         })
 
         /**
+         * Enable or disable the voice range change function.
+         *
+         * @param {boolean} enable - If the voice range change function should be enabled or disabled.
+         */
+        exports('setVoiceRangeChangeAllowedState', (enable: boolean) => {
+            this.canChangeVoiceRange = enable
+        })
+
+        /**
+         * Get the voice range change allowed state.
+         */
+        exports('getVoiceRangeChangeAllowedState', () => this.canChangeVoiceRange)
+
+        /**
          * Get microphone mute state.
          *
          * @returns {boolean} The microphone mute state.

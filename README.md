@@ -39,6 +39,18 @@ Change the voice range of the player to the next range.
 
 Set the voice range of the player.
 
+#### `setVoiceRangeChangeAllowedState(state: boolean): void`
+
+Enable or disable the possibility to change the voice range.
+
+| Parameter | Type      | Description                                    |
+|-----------|-----------|------------------------------------------------|
+| state     | `boolean` | `true` to allow the voice range change, `false` to disable |
+
+#### `getVoiceRangeChangeAllowedState(): boolean`
+
+Get the voice range change allowed state of the player as `boolean`.
+
 #### `getMicrophoneMuteState(): boolean`
 
 Get the microphone mute state of the player as `boolean`.
