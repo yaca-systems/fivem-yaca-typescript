@@ -51,6 +51,18 @@ Enable or disable the possibility to change the voice range.
 
 Get the voice range change allowed state of the player as `boolean`.
 
+#### `setMaxVoiceRange(range: number): void`
+
+Set the maximum allowed voice range of the player in meters to limit the voice range temporarily.
+
+| Parameter | Type     | Description                                    |
+|-----------|-----------|------------------------------------------------|
+| range     | `number`  | `-1` to disable the limit, or a number in meters to set the limit |
+
+#### `getMaxVoiceRange(): number`
+
+Get the maximum allowed voice range of the player in meters.
+
 #### `getMicrophoneMuteState(): boolean`
 
 Get the microphone mute state of the player as `boolean`.

@@ -69,6 +69,7 @@ export class YaCAClientModule {
 
     canChangeVoiceRange = true
     defaultVoiceRange = 1
+    maxVoiceRange = -1
     rangeIndex: number
     rangeInterval: CitizenTimer | null = null
     visualVoiceRangeTimeout: CitizenTimer | null = null
@@ -290,6 +291,22 @@ export class YaCAClientModule {
          * Get the voice range change allowed state.
          */
         exports('getVoiceRangeChangeAllowedState', () => this.canChangeVoiceRange)
+
+        /**
+         * Set the maximum voice range.
+         *
+         * @param {number} maxVoiceRange - The maximum voice range, -1 to disable.
+         */
+        exports('setMaxVoiceRange', (maxVoiceRange: number) => {
+            this.maxVoiceRange = maxVoiceRange
+        })
+
+        /**
+         * Get the maximum allowed voice range.
+         *
+         * @returns {number} The maximum voice range.
+         */
+        exports('getMaxVoiceRange', () => this.maxVoiceRange)
 
         /**
          * Get microphone mute state.
@@ -913,7 +930,9 @@ export class YaCAClientModule {
 
         const currentVoiceRange = this.getVoiceRange()
         if (increase) {
-            const newIndex = this.sharedConfig.voiceRange.ranges.findIndex((range) => range > currentVoiceRange)
+            const newIndex = this.sharedConfig.voiceRange.ranges.findIndex(
+                (range) => ((this.maxVoiceRange !== -1 && range <= this.maxVoiceRange) || this.maxVoiceRange === -1) && range > currentVoiceRange,
+            )
             this.rangeIndex = newIndex !== -1 ? newIndex : 0
         } else {
             const newIndex = this.sharedConfig.voiceRange.ranges
@@ -921,6 +940,15 @@ export class YaCAClientModule {
                 .reverse()
                 .findIndex((range) => range < currentVoiceRange)
             this.rangeIndex = newIndex !== -1 ? this.sharedConfig.voiceRange.ranges.length - 1 - newIndex : this.sharedConfig.voiceRange.ranges.length - 1
+
+            // If maxrange is defined and the range is higher than maxrange, set the range to maxrange
+            if (this.maxVoiceRange !== -1 && this.sharedConfig.voiceRange.ranges[this.rangeIndex] > this.maxVoiceRange) {
+                const newIndex = this.sharedConfig.voiceRange.ranges
+                    .slice()
+                    .reverse()
+                    .findIndex((range) => range <= this.maxVoiceRange)
+                this.rangeIndex = newIndex !== -1 ? this.sharedConfig.voiceRange.ranges.length - 1 - newIndex : this.sharedConfig.voiceRange.ranges.length - 1
+            }
         }
 
         const voiceRange = this.sharedConfig.voiceRange.ranges[this.rangeIndex] ?? 1
@@ -945,6 +973,7 @@ export class YaCAClientModule {
      */
     private changeVoiceRangeInternal(voiceRange: number) {
         if (!this.canChangeVoiceRange) return
+        if (this.maxVoiceRange !== -1 && voiceRange > this.maxVoiceRange) return
 
         this.showRangeVisual(voiceRange)
 
@@ -1485,6 +1514,10 @@ export class YaCAClientModule {
             newValue = Math.max(1, currentVoiceRange - 1)
         } else if (IsControlPressed(0, 241)) {
             newValue = Math.min(this.sharedConfig.voiceRange.ranges[this.sharedConfig.voiceRange.ranges.length - 1], currentVoiceRange + 1)
+
+            if (this.maxVoiceRange !== -1 && newValue > this.maxVoiceRange) {
+                newValue = this.maxVoiceRange
+            }
         }
 
         if (newValue <= 0 || currentVoiceRange === newValue) return
