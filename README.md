@@ -108,6 +108,18 @@ Set the player to spectate.
 
 Get the player the user is spectating as `number`.
 
+#### `setVoiceRangeMarkerColor(red: number, green: number, blue: number, alpha: number)`
+
+Set the voice range marker color.
+
+#### `getVoiceRangeMarkerColor(): [number, number, number, number]`
+
+Get the voice range marker color as `[red, green, blue, alpha]`.
+
+#### `resetVoiceRangeMarkerColor()`
+
+Reset the voice range marker color to the default color defined in the config.
+
 ### Radio
 
 #### `enableRadio(state: boolean)`

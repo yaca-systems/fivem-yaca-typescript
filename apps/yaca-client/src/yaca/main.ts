@@ -289,6 +289,8 @@ export class YaCAClientModule {
 
         /**
          * Get the voice range change allowed state.
+         *
+         * @returns {boolean} The voice range change allowed state.
          */
         exports('getVoiceRangeChangeAllowedState', () => this.canChangeVoiceRange)
 
@@ -365,6 +367,47 @@ export class YaCAClientModule {
          * @returns {number | false} The player that is currently spectated. False if no player is spectated.
          */
         exports('getSpectatingPlayer', () => this.spectatingPlayer)
+
+        /**
+         *  Set the voice range marker color.
+         *
+         * @param {number} r - The red component of the color.
+         * @param {number} g - The green component of the color.
+         * @param {number} b - The blue component of the color.
+         * @param {number} a - The alpha component of the color.
+         */
+        exports('setVoiceRangeMarkerColor', (r: number, g: number, b: number, a: number) => {
+            if (typeof r !== 'number' || typeof g !== 'number' || typeof b !== 'number' || typeof a !== 'number') {
+                console.error('[YaCA] Invalid color value in setVoiceRangeMarkerColor')
+                return
+            }
+
+            this.sharedConfig.voiceRange.markerColor.r = r
+            this.sharedConfig.voiceRange.markerColor.g = g
+            this.sharedConfig.voiceRange.markerColor.b = b
+            this.sharedConfig.voiceRange.markerColor.a = a
+        })
+
+        /**
+         * Get the voice range marker color.
+         *
+         * @returns {number[]} The voice range marker color as an array of [r, g, b, a].
+         */
+        exports('getVoiceRangeMarkerColor', () => {
+            const { r, g, b, a } = this.sharedConfig.voiceRange.markerColor
+            return [r, g, b, a]
+        })
+
+        /**
+         * Reset the voice range marker color to the default value.
+         */
+        exports('resetVoiceRangeMarkerColor', () => {
+            const defaultColor = defaultSharedConfig.voiceRange.markerColor
+            this.sharedConfig.voiceRange.markerColor.r = defaultColor.r
+            this.sharedConfig.voiceRange.markerColor.g = defaultColor.g
+            this.sharedConfig.voiceRange.markerColor.b = defaultColor.b
+            this.sharedConfig.voiceRange.markerColor.a = defaultColor.a
+        })
     }
 
     /**
@@ -1013,6 +1056,8 @@ export class YaCAClientModule {
             const alpha = this.sharedConfig.voiceRange.markerColor.a
             const duration = this.sharedConfig.voiceRange.markerColor.duration
 
+            console.log(red, green, blue, alpha)
+            console.log(typeof red, typeof green, typeof blue, typeof alpha)
             this.visualVoiceRangeTimeout = setTimeout(() => {
                 if (this.visualVoiceRangeTick) {
                     clearInterval(this.visualVoiceRangeTick)
