@@ -258,6 +258,18 @@ Starts or stops talking on the radio.
 | state     | `boolean` | `true` to start talking, `false` to stop |
 | channel   | `number`  | the channel to talk on                   |
 
+#### `setRadioMode(mode: string)`
+
+Sets the radio mode.
+
+| Parameter | Type     | Description                                                      |
+|-----------|-----------------------------------------------------------------------------|
+| mode      | `string` | the radio mode to set. Can be either `None`, `Direct` or `Tower` |
+
+#### `getRadioMode(): string`
+
+Returns the radio mode as `string`.
+
 ### Phone
 
 #### `isInCall(): boolean`

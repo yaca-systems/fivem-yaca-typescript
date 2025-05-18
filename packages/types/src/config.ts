@@ -1,5 +1,7 @@
 import { YacaBuildType } from './enums'
 
+export type radioMode = 'None' | 'Direct' | 'Tower'
+
 export interface YacaSharedConfig {
     versionCheck: boolean
     autoConnectOnJoin: boolean
@@ -36,7 +38,7 @@ export interface YacaSharedConfig {
             rotation: [number, number, number]
         }
         channelCount: number
-        mode: 'None' | 'Direct' | 'Tower'
+        mode: radioMode
         maxDistance: number
     }
     voiceRange: {

@@ -1,5 +1,13 @@
 import { GLOBAL_ERROR_LEVEL_STATE_NAME, clamp, locale } from '@yaca-voice/common'
-import { CommDeviceMode, YacaFilterEnum, YacaNotificationType, type YacaPlayerData, type YacaRadioSettings, YacaStereoMode } from '@yaca-voice/types'
+import {
+    CommDeviceMode,
+    YacaFilterEnum,
+    YacaNotificationType,
+    type YacaPlayerData,
+    type YacaRadioSettings,
+    YacaStereoMode,
+    type radioMode,
+} from '@yaca-voice/types'
 import { cache, calculateDistanceVec3, createProp, registerRdrKeyBind, requestAnimDict } from '../utils'
 import type { YaCAClientModule } from './main'
 
@@ -18,7 +26,7 @@ export class YaCAClientRadioModule {
     playersInRadioChannel = new Map<number, Set<number>>()
     radioTowerCalculation = new Map<number, CitizenTimer | null>()
 
-    radioMode: 'None' | 'Direct' | 'Tower' = 'None'
+    radioMode: radioMode = 'None'
     activeRadioChannel = 1
     secondaryRadioChannel = 2
 
@@ -199,6 +207,22 @@ export class YaCAClientRadioModule {
          * @param {number} channel - The radio channel.
          */
         exports('radioTalkingStart', (state: boolean, channel: number) => this.radioTalkingStart(state, channel))
+
+        /**
+         * Sets the radio mode.
+         *
+         * @param {radioMode} mode - The radio mode to set.
+         */
+        exports('setRadioMode', (mode: radioMode) => {
+            this.radioMode = mode
+        })
+
+        /**
+         * Returns the radio mode.
+         *
+         * @returns {radioMode} The current radio mode.
+         */
+        exports('getRadioMode', () => this.radioMode)
     }
 
     /**
