@@ -55,8 +55,8 @@ export class YaCAServerRadioModule {
          *
          * @param {number} channel - The channel to mute.
          */
-        onNet('server:yaca:muteRadioChannel', (channel: number) => {
-            this.radioChannelMute(source, channel)
+        onNet('server:yaca:muteRadioChannel', (channel: number, state: boolean) => {
+            this.radioChannelMute(source, channel, state)
         })
 
         /**
