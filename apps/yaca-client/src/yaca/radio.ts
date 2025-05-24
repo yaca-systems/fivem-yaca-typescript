@@ -103,16 +103,18 @@ export class YaCAClientRadioModule {
 
         /**
          * Mutes the active radio channel.
+         * @param {boolean} state - The state of the mute. Defaults to true.
          */
-        exports('muteRadioChannel', () => this.muteRadioChannel())
+        exports('muteRadioChannel', (state: boolean = true) => this.muteRadioChannel(state))
 
         /**
          * Exports the `muteRadioChannelRaw` function to the plugin.
          * This function mutes a radio channel.
          *
          * @param {number} channel - The channel number.
+         * @param {boolean} state - The state of the mute. Defaults to true.
          */
-        exports('muteRadioChannelRaw', (channel: number) => this.muteRadioChannelRaw(channel))
+        exports('muteRadioChannelRaw', (channel: number, state: boolean = true) => this.muteRadioChannelRaw(channel, state))
 
         /**
          * Returns the mute state of a radio channel.
@@ -618,17 +620,19 @@ export class YaCAClientRadioModule {
 
     /**
      * Mute the active radio channel.
+     * @param {boolean} state - The state of the mute. Defaults to true.
      */
-    muteRadioChannel() {
-        this.muteRadioChannelRaw()
+    muteRadioChannel(state: boolean = true) {
+        this.muteRadioChannelRaw(this.activeRadioChannel, state)
     }
 
     /**
      * Mute a radio channel.
      *
      * @param {number} channel - The channel to mute. Defaults to the current active channel.
+     * @param {boolean} state - The state of the mute. Defaults to true.
      */
-    muteRadioChannelRaw(channel: number = this.activeRadioChannel) {
+    muteRadioChannelRaw(channel: number = this.activeRadioChannel, state: boolean = true) {
         if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
             return
         }
@@ -643,7 +647,7 @@ export class YaCAClientRadioModule {
             return
         }
 
-        emitNet('server:yaca:muteRadioChannel', channel)
+        emitNet('server:yaca:muteRadioChannel', channel, state)
     }
 
     /**
