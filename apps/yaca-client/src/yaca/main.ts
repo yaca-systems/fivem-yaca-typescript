@@ -1056,8 +1056,6 @@ export class YaCAClientModule {
             const alpha = this.sharedConfig.voiceRange.markerColor.a
             const duration = this.sharedConfig.voiceRange.markerColor.duration
 
-            console.log(red, green, blue, alpha)
-            console.log(typeof red, typeof green, typeof blue, typeof alpha)
             this.visualVoiceRangeTimeout = setTimeout(() => {
                 if (this.visualVoiceRangeTick) {
                     clearInterval(this.visualVoiceRangeTick)
