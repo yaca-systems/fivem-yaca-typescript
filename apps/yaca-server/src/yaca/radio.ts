@@ -55,8 +55,8 @@ export class YaCAServerRadioModule {
          *
          * @param {number} channel - The channel to mute.
          */
-        onNet('server:yaca:muteRadioChannel', (channel: number) => {
-            this.radioChannelMute(source, channel)
+        onNet('server:yaca:muteRadioChannel', (channel: number, state?: boolean) => {
+            this.radioChannelMute(source, channel, state)
         })
 
         /**
@@ -286,7 +286,7 @@ export class YaCAServerRadioModule {
      * @param {number} src - The player to mute the radio channel for.
      * @param {number} channel - The channel to mute.
      */
-    radioChannelMute(src: number, channel: number) {
+    radioChannelMute(src: number, channel: number, state?: boolean) {
         const player = this.serverModule.getPlayer(src)
         if (!player) {
             return
@@ -298,7 +298,7 @@ export class YaCAServerRadioModule {
             return
         }
 
-        foundPlayer.muted = !foundPlayer.muted
+        foundPlayer.muted = typeof state !== 'undefined' ? state : !foundPlayer.muted
         emitNet('client:yaca:setRadioMuteState', src, channel, foundPlayer.muted)
         emit('yaca:external:changedRadioMuteState', src, channel, foundPlayer.muted)
     }

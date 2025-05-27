@@ -159,17 +159,22 @@ Returns the frequency of a radio channel as `string`.
 |-----------|----------|---------------------------------------------------------------------------------------|
 | channel?  | `number` | the channel number. Defaults to the current active channel when no channel is passed. |
 
-#### `muteRadioChannel()`
+#### `muteRadioChannel(state?: boolean)`
 
 Mutes the current active radio channel.
 
-#### `muteRadioChannelRaw(channel: number):ol`
+| Parameter | Type      | Description                                                                 |
+|-----------|-----------|-----------------------------------------------------------------------------|
+| state?    | `boolean` | `true` to mute the channel, `false` to unmute. Defaults to switch if not defined |
+
+#### `muteRadioChannelRaw(channel: number, state?: boolean)`
 
 Mutes a radio channel.
 
 | Parameter | Type     | Description                                                                            |
 |-----------|----------|----------------------------------------------------------------------------------------|
 | channel?  | `number` | the channel to mute. Defaults to the current active channel when no channel is passed. |
+| state?    | `boolean` | `true` to mute the channel, `false` to unmute. Defaults to switch if not defined      |
 
 #### `isRadioChannelMuted(channel: number): boolean`
 
