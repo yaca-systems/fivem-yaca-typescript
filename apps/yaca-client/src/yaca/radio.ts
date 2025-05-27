@@ -104,7 +104,7 @@ export class YaCAClientRadioModule {
         /**
          * Mutes the active radio channel.
          */
-        exports('muteRadioChannel', () => this.muteRadioChannel())
+        exports('muteRadioChannel', (state?: boolean) => this.muteRadioChannel(state))
 
         /**
          * Exports the `muteRadioChannelRaw` function to the plugin.
@@ -112,7 +112,7 @@ export class YaCAClientRadioModule {
          *
          * @param {number} channel - The channel number.
          */
-        exports('muteRadioChannelRaw', (channel: number) => this.muteRadioChannelRaw(channel))
+        exports('muteRadioChannelRaw', (channel: number, state?: boolean) => this.muteRadioChannelRaw(channel, state))
 
         /**
          * Returns the mute state of a radio channel.
@@ -619,8 +619,8 @@ export class YaCAClientRadioModule {
     /**
      * Mute the active radio channel.
      */
-    muteRadioChannel() {
-        this.muteRadioChannelRaw()
+    muteRadioChannel(state?: boolean) {
+        this.muteRadioChannelRaw(this.activeRadioChannel, state)
     }
 
     /**
@@ -628,7 +628,7 @@ export class YaCAClientRadioModule {
      *
      * @param {number} channel - The channel to mute. Defaults to the current active channel.
      */
-    muteRadioChannelRaw(channel: number = this.activeRadioChannel) {
+    muteRadioChannelRaw(channel: number = this.activeRadioChannel, state?: boolean) {
         if (!this.clientModule.isPluginInitialized() || !this.radioEnabled) {
             return
         }
@@ -643,7 +643,7 @@ export class YaCAClientRadioModule {
             return
         }
 
-        emitNet('server:yaca:muteRadioChannel', channel)
+        emitNet('server:yaca:muteRadioChannel', channel, state)
     }
 
     /**
@@ -748,7 +748,7 @@ export class YaCAClientRadioModule {
         }
 
         if (channelSettings.volume === 0 || (oldVolume === 0 && channelSettings.volume > 0)) {
-            emitNet('server:yaca:muteRadioChannel', channel)
+            emitNet('server:yaca:muteRadioChannel', channel, channelSettings.volume === 0)
         }
 
         // Prevent duplicate update, cuz mute has its own update
