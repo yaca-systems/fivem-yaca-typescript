@@ -79,6 +79,7 @@ export class YaCAClientModule {
     isTalking = false
     useWhisper = false
     spectatingPlayer: number | false = false
+    notificationTimeout: Map<string, number> = new Map()
 
     isMicrophoneMuted = false
     isMicrophoneDisabled = false
@@ -902,10 +903,18 @@ export class YaCAClientModule {
             case 'MOVED_CHANNEL':
                 this.handleMovedChannel(parsedPayload.message)
                 return
-            case 'WRONG_TS_SERVER':
+            case 'WRONG_TS_SERVER': {
                 this.setCurrentPluginState(YacaPluginStates.WRONG_TS_SERVER)
+
+                const currentTimeout = this.notificationTimeout.get('WRONG_TS_SERVER')
+                if (currentTimeout && currentTimeout > Date.now()) {
+                    return
+                }
+
+                this.notificationTimeout.set('WRONG_TS_SERVER', Date.now() + 10000)
                 this.notification(locale('wrong_ts_server') ?? 'You are connected to the wrong teamspeak server!', YacaNotificationType.ERROR)
                 return
+            }
             case 'OUTDATED_VERSION':
                 this.setCurrentPluginState(YacaPluginStates.OUTDATED_VERSION)
                 this.notification(
