@@ -203,7 +203,7 @@ export class YaCAClientMegaphoneModule {
      * @param {boolean} [state=false] - The state of the megaphone. Defaults to false if not provided.
      */
     useMegaphone(state = false) {
-        if (!cache.vehicle || !this.canUseMegaphone || state === this.lastMegaphoneState) {
+        if ((!cache.vehicle && this.clientModule.sharedConfig.megaphone.automaticVehicleDetection) || !this.canUseMegaphone || state === this.lastMegaphoneState) {
             return
         }
 
