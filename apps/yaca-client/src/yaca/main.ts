@@ -1557,7 +1557,9 @@ export class YaCAClientModule {
      * Handles the voice range adjustment using the mouse wheel.
      */
     handleVoiceRangeViaMouseWheel() {
-        HudWeaponWheelIgnoreSelection()
+        if (this.isFiveM) {
+            HudWeaponWheelIgnoreSelection()
+        }
 
         let newValue = 0
         const currentVoiceRange = this.getVoiceRange()
