@@ -1,4 +1,4 @@
-import { MEGAPHONE_STATE_NAME, locale } from '@yaca-voice/common'
+import { locale, MEGAPHONE_STATE_NAME } from '@yaca-voice/common'
 import { CommDeviceMode, YacaFilterEnum } from '@yaca-voice/types'
 import { cache, joaat, onCache, registerRdrKeyBind } from '../utils'
 import type { YaCAClientModule } from './main'

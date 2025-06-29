@@ -12,13 +12,13 @@
         "typecheck": "turbo typecheck --env-mode=loose",
         "format": "pnpm biome format --write",
         "lint": "pnpm biome lint --write",
-        "check": "pnpm biome check --formatter-enabled=true --linter-enabled=true --organize-imports-enabled=true --write",
+        "check": "pnpm biome check --formatter-enabled=true --linter-enabled=true --write",
         "build": "turbo build --env-mode=loose",
         "dev": "turbo dev --env-mode=loose",
         "create-resource": "turbo create-resource --env-mode=loose && node scripts/create-resource.js"
     },
     "devDependencies": {
-        "@biomejs/biome": "1.9.4",
+        "@biomejs/biome": "2.0.6",
         "esbuild": "^0.24.2",
         "turbo": "^2.3.4",
         "typescript": "^5.7.3"

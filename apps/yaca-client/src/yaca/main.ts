@@ -1,16 +1,18 @@
 import {
-    GLOBAL_ERROR_LEVEL_STATE_NAME,
-    LIP_SYNC_STATE_NAME,
-    MEGAPHONE_STATE_NAME,
-    VOICE_RANGE_STATE_NAME,
     clamp,
+    GLOBAL_ERROR_LEVEL_STATE_NAME,
     initLocale,
+    LIP_SYNC_STATE_NAME,
     loadConfig,
     locale,
+    MEGAPHONE_STATE_NAME,
+    VOICE_RANGE_STATE_NAME,
 } from '@yaca-voice/common'
 import {
     CommDeviceMode,
     type DataObject,
+    defaultSharedConfig,
+    defaultTowerConfig,
     type YacaClient,
     YacaFilterEnum,
     YacaNotificationType,
@@ -23,12 +25,9 @@ import {
     type YacaSoundStateMessage,
     type YacaStereoMode,
     type YacaTowerConfig,
-    defaultSharedConfig,
-    defaultTowerConfig,
 } from '@yaca-voice/types'
 import { YaCAClientSaltyChatBridge } from '../bridge/saltychat'
 import {
-    WebSocket,
     cache,
     calculateDistanceVec3,
     convertNumberArrayToXYZ,
@@ -38,6 +37,7 @@ import {
     playRdrFacialAnim,
     registerRdrKeyBind,
     vehicleHasOpening,
+    WebSocket,
 } from '../utils'
 import { localLipSyncAnimations } from './data'
 import { YaCAClientIntercomModule } from './intercom'

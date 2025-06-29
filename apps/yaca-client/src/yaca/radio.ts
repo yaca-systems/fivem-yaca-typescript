@@ -1,12 +1,12 @@
-import { GLOBAL_ERROR_LEVEL_STATE_NAME, clamp, locale } from '@yaca-voice/common'
+import { clamp, GLOBAL_ERROR_LEVEL_STATE_NAME, locale } from '@yaca-voice/common'
 import {
     CommDeviceMode,
+    type radioMode,
     YacaFilterEnum,
     YacaNotificationType,
     type YacaPlayerData,
     type YacaRadioSettings,
     YacaStereoMode,
-    type radioMode,
 } from '@yaca-voice/types'
 import { cache, calculateDistanceVec3, createProp, registerRdrKeyBind, requestAnimDict } from '../utils'
 import type { YaCAClientModule } from './main'

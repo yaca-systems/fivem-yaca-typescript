@@ -1,13 +1,13 @@
-import { GLOBAL_ERROR_LEVEL_STATE_NAME, VOICE_RANGE_STATE_NAME, getGlobalErrorLevel, initLocale, loadConfig, setGlobalErrorLevel } from '@yaca-voice/common'
+import { GLOBAL_ERROR_LEVEL_STATE_NAME, getGlobalErrorLevel, initLocale, loadConfig, setGlobalErrorLevel, VOICE_RANGE_STATE_NAME } from '@yaca-voice/common'
 import {
     type DataObject,
+    defaultServerConfig,
+    defaultSharedConfig,
+    defaultTowerConfig,
     type ServerCache,
     type YacaServerConfig,
     type YacaSharedConfig,
     type YacaTowerConfig,
-    defaultServerConfig,
-    defaultSharedConfig,
-    defaultTowerConfig,
 } from '@yaca-voice/types'
 import { YaCAServerSaltyChatBridge } from '../bridge/saltychat'
 import { checkVersion, generateRandomName } from '../utils'
