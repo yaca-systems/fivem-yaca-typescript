@@ -29,5 +29,7 @@
     "change_voice_range_via_mousewheel": "Sprachreichweite je 1 Meter ändern",
 
     "radio_not_activated": "Das Funkgerät ist nicht aktiviert!",
-    "radio_channel_invalid": "Ungültiger Funkkanal!"
+    "radio_channel_invalid": "Ungültiger Funkkanal!",
+    "player_not_found": "Spieler mit der ID %s wurde nicht gefunden.",
+    "ingamename_not_set": "Ingame-Name für Spieler %s ist nicht gesetzt."
 }

@@ -1,4 +1,12 @@
-import { GLOBAL_ERROR_LEVEL_STATE_NAME, getGlobalErrorLevel, initLocale, loadConfig, setGlobalErrorLevel, VOICE_RANGE_STATE_NAME } from '@yaca-voice/common'
+import {
+    GLOBAL_ERROR_LEVEL_STATE_NAME,
+    getGlobalErrorLevel,
+    initLocale,
+    loadConfig,
+    locale,
+    setGlobalErrorLevel,
+    VOICE_RANGE_STATE_NAME,
+} from '@yaca-voice/common'
 import {
     type DataObject,
     defaultServerConfig,
@@ -191,6 +199,25 @@ export class YaCAServerModule {
          * @returns {number} - The global error level.
          */
         exports('getGlobalErrorLevel', () => getGlobalErrorLevel())
+
+        /**
+         * Returns the ingame name of a player.
+         *
+         * @param {number} playerId - The ID of the player.
+         * @returns {string} - The ingame name or an empty string if not found.
+         */
+        exports('getPlayerIngameName', (playerId: number) => {
+            const player = this.getPlayer(playerId)
+            if (!player) {
+                console.error(locale('player_not_found', playerId))
+                return ''
+            }
+            if (!player.voiceSettings?.ingameName) {
+                console.error(locale('ingamename_not_set', playerId))
+                return ''
+            }
+            return player.voiceSettings.ingameName
+        })
     }
 
     /**
