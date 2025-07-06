@@ -5,7 +5,7 @@ import {
     loadConfig,
     locale,
     setGlobalErrorLevel,
-    VOICE_RANGE_STATE_NAME
+    VOICE_RANGE_STATE_NAME,
 } from '@yaca-voice/common'
 import {
     type DataObject,
