@@ -1,4 +1,12 @@
-import { GLOBAL_ERROR_LEVEL_STATE_NAME, getGlobalErrorLevel, initLocale, loadConfig, setGlobalErrorLevel, VOICE_RANGE_STATE_NAME, locale } from '@yaca-voice/common'
+import {
+    GLOBAL_ERROR_LEVEL_STATE_NAME,
+    getGlobalErrorLevel,
+    initLocale,
+    loadConfig,
+    locale,
+    setGlobalErrorLevel,
+    VOICE_RANGE_STATE_NAME
+} from '@yaca-voice/common'
 import {
     type DataObject,
     defaultServerConfig,
