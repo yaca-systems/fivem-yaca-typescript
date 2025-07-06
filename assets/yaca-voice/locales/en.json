@@ -29,5 +29,7 @@
     "change_voice_range_via_mousewheel": "Change voice range by 1 meter",
 
     "radio_not_activated": "Your radio is not activated!",
-    "radio_channel_invalid": "The radio channel is invalid!"
+    "radio_channel_invalid": "The radio channel is invalid!",
+    "player_not_found": "Player with ID %s was not found.",
+    "ingamename_not_set": "Ingame name for player %s is not set."
 }
