@@ -448,6 +448,14 @@ Sets the global error level.
 
 Returns the global error level as `number`.
 
+#### `getPlayerIngameName(playerId: number): string`
+
+Returns the Teamspeak name of a player by their player ID. If the player or the name is not found, an empty string is returned and an error is logged in Console.
+
+| Parameter | Type     | Description        |
+|-----------|----------|--------------------|
+| playerId  | `number` | The player source  |
+
 </details>
 
 # Events
@@ -650,7 +658,6 @@ The event is triggered when the player changes the channel to the ingame or excl
 | channelType | `string` | `INGAME_CHANNEL` when moving into the ingame channel and `EXCLUDED_CHANNEL` when moving into a excluded channel. |
 
 </details>
-
 <details>
 <summary style="font-size: x-large">Server</summary>
 

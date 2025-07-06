@@ -193,19 +193,19 @@ export class YaCAServerModule {
         exports('getGlobalErrorLevel', () => getGlobalErrorLevel())
 
         /**
-         * Gibt den Ingame-Namen eines Spielers zurück.
+         * Returns the ingame name of a player.
          *
-         * @param {number} playerId - Die ID des Spielers.
-         * @returns {string} - Der Ingame-Name oder leerer String bei Fehler.
+         * @param {number} playerId - The ID of the player.
+         * @returns {string} - The ingame name or an empty string if not found.
          */
         exports('getPlayerIngameName', (playerId: number) => {
             const player = this.getPlayer(playerId)
             if (!player) {
-                console.error(`[YaCA] Spieler mit ID ${playerId} nicht gefunden.`)
+                console.error(`[YaCA] Player with ID ${playerId} not found.`)
                 return ''
             }
             if (!player.voiceSettings?.ingameName) {
-                console.error(`[YaCA] Ingame-Name für Spieler ${playerId} nicht gesetzt.`)
+                console.error(`[YaCA] Ingame name for player ${playerId} is not set.`)
                 return ''
             }
             return player.voiceSettings.ingameName
