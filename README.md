@@ -631,6 +631,7 @@ The event is triggered when a player starts or stops receiving on the radio.
 |-----------|-----------|------------------------------------------------|
 | state     | `boolean` | the new receiver state                         |
 | channel   | `number`  | the channel from which the player is receiving |
+| playerId  | `number`  | the server ID of the player who is talking     |
 
 ### yaca:external:notification
 
