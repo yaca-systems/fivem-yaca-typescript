@@ -298,7 +298,7 @@ export class YaCAClientRadioModule {
                         this.playersWithShortRange.set(target, frequency)
                     }
 
-                    emit('yaca:external:isRadioReceiving', true, channel)
+                    emit('yaca:external:isRadioReceiving', true, channel, target)
                     this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(true, channel)
                 } else {
                     this.playersInRadioChannel.get(channel)?.delete(target)
@@ -308,7 +308,7 @@ export class YaCAClientRadioModule {
 
                     const inRadio = this.playersInRadioChannel.get(channel)?.size || 0
                     const state = inRadio > 0
-                    emit('yaca:external:isRadioReceiving', state, channel)
+                    emit('yaca:external:isRadioReceiving', state, channel, target)
                     this.clientModule.saltyChatBridge?.handleRadioReceivingStateChange(state, channel)
                 }
             },
