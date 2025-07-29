@@ -112,7 +112,8 @@
       // The duration the marker should be shown.
       "duration": 1000,
       "type": 1,
-      "rotate": true
+      "rotate": true,
+      "zOffset": 0
     }
   },
   "megaphone": {

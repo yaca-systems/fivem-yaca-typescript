@@ -54,6 +54,7 @@ export interface YacaSharedConfig {
             duration: number
             type: number
             rotate: boolean
+            zOffset: number
         }
     }
     megaphone: {
@@ -132,6 +133,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
             duration: 1000,
             type: 1,
             rotate: true,
+            zOffset: 0,
         },
     },
     megaphone: {

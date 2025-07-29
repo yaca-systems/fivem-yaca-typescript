@@ -1082,7 +1082,7 @@ export class YaCAClientModule {
             this.visualVoiceRangeTick = setInterval(() => {
                 const entity = cache.vehicle || cache.ped
                 const pos = GetEntityCoords(entity, false)
-                const posZ = cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98
+                const posZ = (cache.vehicle ? pos[2] - 0.6 : pos[2] - 0.98) + (this.sharedConfig.voiceRange.markerColor.zOffset ?? 0)
 
                 DrawMarker(
                     this.sharedConfig.voiceRange.markerColor.type,
