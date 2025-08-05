@@ -3,6 +3,11 @@
 import { initCache } from './utils'
 import { YaCAClientModule } from './yaca'
 
-initCache()
+exports('isEnabled', () => GetConvarBool('yaca_enabled', true))
 
-new YaCAClientModule()
+if (GetConvarBool('yaca_enabled', true)) {
+    initCache()
+    new YaCAClientModule()
+} else {
+    console.log('YaCA is disabled. Exiting...')
+}

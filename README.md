@@ -23,6 +23,10 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 
 ### General
 
+#### `isEnabled(): boolean`
+
+Get the enabled status of the voice system as `boolean`.
+
 #### `getVoiceRange(): int`
 
 Get the current voice range of the player as `int`.
@@ -309,6 +313,10 @@ Starts or stops using the megaphone.
 <summary style="font-size: x-large">Server</summary>
 
 ### General
+
+#### `isEnabled(): boolean`
+
+Get the enabled status of the voice system as `boolean`.
 
 #### `connectToVoice(source: number)`
 Connects a player to the voice system.
