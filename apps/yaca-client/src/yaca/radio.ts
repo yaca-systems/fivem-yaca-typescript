@@ -381,6 +381,11 @@ export class YaCAClientRadioModule {
 
             if (client_ids.includes(playerData.clientId)) {
                 this.setRadioFrequency(channel, '0')
+
+                if (this.radioTowerCalculation.has(channel)) {
+                    clearInterval(this.radioTowerCalculation.get(channel) as CitizenTimer)
+                    this.radioTowerCalculation.delete(channel)
+                }
             }
 
             this.clientModule.sendWebsocket({

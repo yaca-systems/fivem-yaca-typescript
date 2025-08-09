@@ -40,6 +40,7 @@ export type YaCAPlayer = {
         activated: boolean
         hasLong: boolean
         frequencies: Record<number, string>
+        permittedRadioFrequencies: { start: string; end?: string }[]
     }
     voicePlugin?: {
         playerId: number
@@ -144,6 +145,7 @@ export class YaCAServerModule {
                 activated: false,
                 hasLong: true,
                 frequencies: {},
+                permittedRadioFrequencies: [],
             },
         })
 

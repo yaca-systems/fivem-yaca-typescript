@@ -13,6 +13,8 @@ export class YaCAServerRadioModule {
 
     radioFrequencyMap = new Map<string, Map<number, { muted: boolean }>>()
 
+    securedRadioFrequencies: { start: string; end?: string }[] = []
+
     /**
      * Creates an instance of the radio module.
      *
@@ -106,6 +108,40 @@ export class YaCAServerRadioModule {
          * @param {boolean} state - The new state of the long range radio.
          */
         exports('setPlayerHasLongRange', (src: number, state: boolean) => this.setPlayerHasLongRange(src, state))
+
+        /**
+         * Set the secured radio frequency.
+         *
+         * @param {boolean} state - The new state of the secured radio frequency.
+         * @param {string} start - The start frequency.
+         * @param {string} [end] - The end frequency.
+         */
+        exports('setSecuredRadioFrequency', (state: boolean, start: string, end?: string) => this.setSecuredRadioFrequency(state, start, end))
+
+        /**
+         * Get the secured radio frequencies.
+         *
+         * @returns {Array<{ start: string, end?: string }>} - The secured radio frequencies.
+         */
+        exports('getSecuredRadioFrequencies', () => this.getSecuredRadioFrequencies())
+
+        /**
+         * Set the permitted radio frequencies for a player.
+         *
+         * @param {number} src - The player to set the permitted radio frequencies for.
+         * @param {boolean} state - The new state of the permitted radio frequencies.
+         * @param {string} start - The start frequency.
+         * @param {string} [end] - The end frequency.
+         */
+        exports('setPermitRadioFrequency', (src: number, state: boolean, start: string, end?: string) => this.setPermitRadioFrequency(src, state, start, end))
+
+        /**
+         * Get the permitted radio frequencies for a player.
+         *
+         * @param {number} src - The player to get the permitted radio frequencies for.
+         * @returns {Array<{ start: string, end?: string }>} - The permitted radio frequencies.
+         */
+        exports('getPermittedRadioFrequencies', (src: number) => this.getPermittedRadioFrequencies(src))
     }
 
     /**
@@ -213,6 +249,11 @@ export class YaCAServerRadioModule {
             this.leaveRadioFrequency(src, channel, oldFrequency)
         }
 
+        // Check if the frequency is secured
+        if (!this.hasAccessToRadioFrequency(src, frequency)) {
+            return
+        }
+
         // Add player to channel map, so we know who is in which channel
         if (!this.radioFrequencyMap.has(frequency)) {
             this.radioFrequencyMap.set(frequency, new Map<number, { muted: boolean }>())
@@ -223,12 +264,6 @@ export class YaCAServerRadioModule {
 
         emitNet('client:yaca:setRadioFreq', src, channel, frequency)
         emit('yaca:external:changedRadioFrequency', src, channel, frequency)
-
-        /*
-         * TODO: Add radio effect to player in new frequency
-         *  const newPlayers = this.getPlayersInRadioFrequency(frequency);
-         *  if (newPlayers.length) alt.emitClientRaw(newPlayers, "client:yaca:setRadioEffectInFrequency", frequency, player.id);
-         */
     }
 
     /**
@@ -327,6 +362,11 @@ export class YaCAServerRadioModule {
             return
         }
 
+        if (!this.hasAccessToRadioFrequency(src, radioFrequency)) {
+            this.leaveRadioFrequency(src, channel, radioFrequency)
+            return
+        }
+
         let targets: number[] = []
         const targetsToSender: number[] = []
         const radioInfos: Record<number, { shortRange: boolean }> = {}
@@ -375,5 +415,197 @@ export class YaCAServerRadioModule {
         if (this.serverConfig.useWhisper) {
             emitNet('client:yaca:radioTalkingWhisper', src, targetsToSender, radioFrequency, state, GetEntityCoords(GetPlayerPed(src.toString())))
         }
+    }
+
+    /**
+     * Sets or removes a secured radio frequency range.
+     *
+     * When enabling (`state` is `true`), adds the specified frequency range (`start` to `end`)
+     * Then, removes all players from secured frequencies for which they do not have access.
+     *
+     * When disabling (`state` is `false`), removes the specified frequency range from the list
+     * of secured radio frequencies.
+     *
+     * @param state - Whether to enable `true` or disable `false` the secured frequency range.
+     * @param start - The start of the frequency range to secure.
+     * @param end - The end of the frequency range to secure (optional).
+     *
+     * @returns A boolean indicating whether the operation was successful.
+     */
+    setSecuredRadioFrequency(state: boolean, start: string, end?: string) {
+        const index = this.securedRadioFrequencies.findIndex((freq) => freq.start === start && freq.end === end)
+
+        if (state && index === -1) {
+            this.securedRadioFrequencies.push({ start: start, end: end })
+
+            // Remove all players from frequency which are not permitted
+            for (const [frequency, players] of this.radioFrequencyMap) {
+                if (!this.isSecuredRadioFrequency(frequency)) continue
+
+                for (const [src] of players) {
+                    const player = this.serverModule.getPlayer(src)
+                    if (!player) continue
+
+                    if (!this.hasAccessToRadioFrequency(src, frequency, false)) {
+                        const channel = Object.keys(player.radioSettings.frequencies).find((key) => player.radioSettings.frequencies[Number(key)] === frequency)
+                        if (typeof channel === 'undefined') continue
+                        this.leaveRadioFrequency(src, Number(channel), frequency)
+                    }
+                }
+            }
+
+            return true
+        } else if (!state && index !== -1) {
+            this.securedRadioFrequencies.splice(index, 1)
+
+            return true
+        }
+
+        return false
+    }
+
+    /**
+     * Returns the list of secured radio frequencies.
+     *
+     * @returns An array containing the secured radio frequencies.
+     */
+    getSecuredRadioFrequencies() {
+        return this.securedRadioFrequencies
+    }
+
+    /**
+     * Grants or revokes a player's permission to access a specific radio frequency range.
+     *
+     * @param src - The player identifier.
+     * @param state - If `true`, grants permission; if `false`, revokes permission.
+     * @param start - The starting frequency of the range.
+     * @param end - The ending frequency of the range (optional).
+     *
+     * @returns A boolean indicating whether the operation was successful.
+     */
+    setPermitRadioFrequency(src: number, state: boolean, start: string, end?: string) {
+        const player = this.serverModule.getPlayer(src)
+        if (!player) {
+            return false
+        }
+
+        const index = player.radioSettings.permittedRadioFrequencies.findIndex((freq) => freq.start === start && freq.end === end)
+        if (state && index === -1) {
+            player.radioSettings.permittedRadioFrequencies.push({ start: start, end: end })
+
+            return true
+        } else if (!state && index !== -1) {
+            player.radioSettings.permittedRadioFrequencies.splice(index, 1)
+
+            for (const [channel, frequency] of Object.entries(player.radioSettings.frequencies)) {
+                if (!this.hasAccessToRadioFrequency(src, frequency)) {
+                    this.leaveRadioFrequency(src, Number(channel), frequency)
+                }
+            }
+
+            return true
+        }
+
+        return false
+    }
+
+    /**
+     * Retrieves the list of radio frequencies that the specified player is permitted to use.
+     *
+     * @param src - The source identifier of the player.
+     * @returns An array of permitted radio frequencies for the player, or an empty array if none are set.
+     */
+    getPermittedRadioFrequencies(src: number) {
+        const player = this.serverModule.getPlayer(src)
+        return player?.radioSettings?.permittedRadioFrequencies ?? []
+    }
+
+    /**
+     * Determines whether a given radio frequency is secured.
+     *
+     * Checks if the provided frequency matches any of the secured radio frequencies,
+     * either as an exact value or within a specified range.
+     *
+     * @param frequency - The radio frequency to check, represented as a string.
+     * @returns `true` if the frequency is secured; otherwise, `false`.
+     */
+    isSecuredRadioFrequency(frequency: string) {
+        return this.securedRadioFrequencies.some((freq) => {
+            const testFreq = this.parseRadioFrequencyAsFloat(frequency)
+            const startFreq = this.parseRadioFrequencyAsFloat(freq.start)
+
+            if (!freq.end) {
+                return testFreq === startFreq
+            }
+
+            const endFreq = this.parseRadioFrequencyAsFloat(freq.end)
+            const minFreq = Math.min(startFreq, endFreq)
+            const maxFreq = Math.max(startFreq, endFreq)
+
+            return testFreq >= minFreq && testFreq <= maxFreq
+        })
+    }
+
+    /**
+     * Parses a radio frequency string and returns its float representation.
+     * Converts a comma (`,`) decimal separator to a dot (`.`) before parsing.
+     *
+     * @param frequency - The radio frequency as a string, which may use a comma or dot as the decimal separator.
+     * @returns The parsed frequency as a number.
+     */
+    parseRadioFrequencyAsFloat(frequency: string): number {
+        return parseFloat(frequency.replace(',', '.'))
+    }
+
+    /**
+     * Checks whether a user has access to a specific radio frequency.
+     *
+     * If the frequency is not secured, access is always granted.
+     * If the frequency is secured, verifies if the user is permitted to access it,
+     * either as an exact match or within a permitted frequency range.
+     *
+     * @param src - The source identifier of the user requesting access.
+     * @param frequency - The radio frequency to check access for.
+     * @param notification - Whether to send a notification to the client if access is denied (default: true).
+     * @returns `true` if the user has access to the frequency, otherwise `false`.
+     */
+    hasAccessToRadioFrequency(src: number, frequency: string, notification = true) {
+        if (!this.isSecuredRadioFrequency(frequency)) {
+            return true
+        }
+
+        const permittedFrequencies = this.getPermittedRadioFrequencies(src)
+        if (permittedFrequencies.length === 0) {
+            if (notification) {
+                emitNet('client:yaca:notification', src, locale('radio_secured_channel'), YacaNotificationType.ERROR)
+            }
+            return false
+        }
+
+        const testFreq = this.parseRadioFrequencyAsFloat(frequency)
+
+        for (const { start, end } of permittedFrequencies) {
+            const startFreq = this.parseRadioFrequencyAsFloat(start)
+
+            if (!end) {
+                if (testFreq === startFreq) {
+                    return true
+                }
+            } else {
+                const endFreq = this.parseRadioFrequencyAsFloat(end)
+                const minFreq = Math.min(startFreq, endFreq)
+                const maxFreq = Math.max(startFreq, endFreq)
+
+                if (testFreq >= minFreq && testFreq <= maxFreq) {
+                    return true
+                }
+            }
+        }
+
+        if (notification) {
+            emitNet('client:yaca:notification', src, locale('radio_secured_channel'), YacaNotificationType.ERROR)
+        }
+
+        return false
     }
 }

@@ -396,6 +396,36 @@ Sets the long range state of a player.
 | source    | `number`  | the player source    |
 | state     | `boolean` | the long range state |
 
+#### `setSecuredRadioFrequency(state: bool, start: string, end?: string): boolean`
+
+Sets a frequency or a range as secured.
+
+| Parameter | Type      | Description          |
+|-----------|-----------|----------------------|
+| state     | `boolean` | the secured state    |
+| start     | `string`  | the start frequency  |
+| end       | `string`  | the end frequency    |
+
+#### `getSecuredRadioFrequencies(): Array<{ start: string, end?: string }>`
+
+Returns all secured radio frequencies as an array of objects.
+
+#### `setPermitRadioFrequency(src: number, state: boolean, start: string, end?: string): boolean`
+
+Sets a frequency or a range as permitted for a specific player.
+
+| Parameter | Type      | Description          |
+|-----------|-----------|----------------------|
+| src       | `number`  | the player source    |
+| state     | `boolean` | the permitted state  |
+| start     | `string`  | the start frequency  |
+| end       | `string`  | the end frequency    |
+
+
+#### `getPermittedRadioFrequencies(src: number): Array<{ start: string, end?: string }>`
+
+Returns all permitted radio frequencies for a specific player as an array of objects.
+
 ### Phone
 
 #### `callPlayer(source: number, target: number, state: bool)`
