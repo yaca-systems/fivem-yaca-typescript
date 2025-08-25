@@ -27,9 +27,13 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 
 Get the enabled status of the voice system as `boolean`.
 
-#### `getVoiceRange(): int`
+#### `getVoiceRange(serverId: number): int`
 
 Get the current voice range of the player as `int`.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| serverId  | `number` | The ID of the remote player, if not provided the local player will be used |
 
 #### `getVoiceRanges(): int[]`
 

@@ -250,9 +250,10 @@ export class YaCAClientModule {
         /**
          * Get the current voice range.
          *
+         * @param {number} serverId - The remote ID of the player.
          * @returns {number} The current voice range.
          */
-        exports('getVoiceRange', () => this.getVoiceRange())
+        exports('getVoiceRange', (serverId: number) => this.getVoiceRange(serverId))
 
         /**
          * Get all voice ranges.
@@ -966,9 +967,15 @@ export class YaCAClientModule {
     /**
      * Get the current voice range.
      *
+     * @param {number} [serverId] - The remoteid of the player. If not provided, the local player's voice range is returned.
      * @returns {number} The current voice range.
      */
-    getVoiceRange(): number {
+    getVoiceRange(serverId?: number): number {
+        if (typeof serverId !== 'undefined') {
+            const playerState = Player(serverId).state
+            return playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
+        }
+
         return LocalPlayer.state[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
     }
 
