@@ -47,6 +47,14 @@ Change the voice range of the player to the next range.
 
 Set the voice range of the player.
 
+#### `isPlayerTalking(serverId: number): boolean`
+
+Check if a player is currently talking.
+
+| Parameter | Type      | Description                                    |
+|-----------|-----------|------------------------------------------------|
+| serverId  | `number`  | The ID of the remote player to check          |
+
 #### `setVoiceRangeChangeAllowedState(state: boolean): void`
 
 Enable or disable the possibility to change the voice range.

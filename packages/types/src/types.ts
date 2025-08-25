@@ -34,6 +34,7 @@ export interface YacaPlayerData {
     forceMuted: boolean
     mutedOnPhone: boolean
     phoneCallMemberIds?: number[]
+    isTalking: boolean
 }
 
 export interface DataObject {

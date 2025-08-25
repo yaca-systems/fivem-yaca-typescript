@@ -225,6 +225,11 @@ export class YaCAClientModule {
                 }
 
                 SetPlayerTalkingOverride(playerId, value)
+
+                const player = this.getPlayerByID(GetPlayerServerId(playerId))
+                if (player) {
+                    player.isTalking = value
+                }
             })
 
             /**
@@ -278,6 +283,18 @@ export class YaCAClientModule {
          */
         exports('setVoiceRange', (range: number) => {
             this.setVoiceRange(range)
+        })
+
+        /**
+         * Check if the player is currently talking.
+         *
+         * @param {number} serverId - The remote ID of the player.
+         *
+         * @returns {boolean} If the player is currently talking.
+         */
+        exports('isPlayerTalking', (serverId: number) => {
+            const playerState = this.getPlayerByID(serverId)
+            return playerState?.isTalking ?? false
         })
 
         /**
@@ -699,6 +716,7 @@ export class YaCAClientModule {
                     forceMuted: dataObj.forceMuted || false,
                     phoneCallMemberIds: currentData?.phoneCallMemberIds || undefined,
                     mutedOnPhone: dataObj.mutedOnPhone || false,
+                    isTalking: currentData?.isTalking || false,
                 })
 
                 newPlayers.push(dataObj.playerId)
