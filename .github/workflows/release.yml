@@ -41,7 +41,7 @@ jobs:
           echo "DATE=$(date +'%D')" >> $GITHUB_OUTPUT
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: "pnpm"
