@@ -2,7 +2,7 @@
     "name": "yaca-voice",
     "type": "module",
     "description": "YACA Voice Integration for FiveM & RedM",
-    "author": "MineMalox & LuftigerLuca",
+    "author": "MineMalox, LuftigerLuca & C0kkie",
     "repository": {
         "type": "git",
         "url": "https://github.com/yaca-systems/fivem-yaca-typescript"
