@@ -236,10 +236,10 @@ Changes the volume of the active radio channel. Returns whether the operation wa
 
 Changes the volume of a radio channel. Returns whether the operation was successful as `bool`.
 
-| Parameter | Type     | Description        |
-|-----------|----------|--------------------|
-| channel   | `number` | the channel number |
-| volume    | `number` | the volume to set  |
+| Parameter | Type     | Description                                   |
+|-----------|----------|-----------------------------------------------|
+| channel   | `number` | the channel number                            |
+| volume    | `number` | the volume to set (float between 0.0 and 1.0) |
 
 #### `getRadioChannelVolume(channel: number): number`
 
