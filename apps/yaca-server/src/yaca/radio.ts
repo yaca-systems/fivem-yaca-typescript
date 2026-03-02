@@ -304,8 +304,10 @@ export class YaCAServerRadioModule {
         }
 
         if (this.serverConfig.useWhisper) {
-            emitNet('client:yaca:radioTalking', src, allTargets, frequency, false, null, true)
-        } else if (player.voicePlugin) {
+            emitNet('client:yaca:radioTalkingWhisper', src, allTargets, frequency, false, null)
+        }
+
+        if (player.voicePlugin) {
             triggerClientEvent('client:yaca:leaveRadioChannel', playersArray, player.voicePlugin.clientId, frequency)
         }
 
@@ -498,7 +500,7 @@ export class YaCAServerRadioModule {
             player.radioSettings.permittedRadioFrequencies.splice(index, 1)
 
             for (const [channel, frequency] of Object.entries(player.radioSettings.frequencies)) {
-                if (!this.hasAccessToRadioFrequency(src, frequency)) {
+                if (!this.hasAccessToRadioFrequency(src, frequency, false)) {
                     this.leaveRadioFrequency(src, Number(channel), frequency)
                 }
             }
