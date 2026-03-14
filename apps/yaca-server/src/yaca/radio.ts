@@ -259,16 +259,16 @@ export class YaCAServerRadioModule {
             this.radioFrequencyMap.set(frequency, new Map<number, { muted: boolean }>())
         }
 
-        const radioFrequencyMap = this.radioFrequencyMap.get(frequency)!
+        const radioFrequencyMap = this.radioFrequencyMap.get(frequency)
 
-        radioFrequencyMap.set(src, { muted: false })
+        radioFrequencyMap?.set(src, { muted: false })
 
         player.radioSettings.frequencies[channel] = frequency
 
         emitNet('client:yaca:setRadioFreq', src, channel, frequency)
         emit('yaca:external:changedRadioFrequency', src, channel, frequency)
 
-        if (player.voicePlugin) {
+        if (player.voicePlugin && radioFrequencyMap) {
             const playersArray = []
             for (const [key] of radioFrequencyMap) {
                 const target = this.serverModule.getPlayer(key)

@@ -375,7 +375,7 @@ export class YaCAClientRadioModule {
                 return
             }
 
-            if (playerData.clientId == client_id) {
+            if (playerData.clientId === client_id) {
                 this.setRadioFrequency(channel, '0')
 
                 if (this.radioTowerCalculation.has(channel)) {
