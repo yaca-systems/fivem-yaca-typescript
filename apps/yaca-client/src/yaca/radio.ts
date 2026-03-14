@@ -364,11 +364,7 @@ export class YaCAClientRadioModule {
          * @param {number | number[]} client_ids - The IDs of the clients.
          * @param {string} frequency - The frequency of the radio.
          */
-        onNet('client:yaca:leaveRadioChannel', (client_ids: number | number[], frequency: string) => {
-            if (!Array.isArray(client_ids)) {
-                client_ids = [client_ids]
-            }
-
+        onNet('client:yaca:leaveRadioChannel', (client_id: number, _playerId: number, frequency: string) => {
             const channel = this.findRadioChannelByFrequency(frequency)
             if (!channel) {
                 return
@@ -379,7 +375,7 @@ export class YaCAClientRadioModule {
                 return
             }
 
-            if (client_ids.includes(playerData.clientId)) {
+            if (playerData.clientId == client_id) {
                 this.setRadioFrequency(channel, '0')
 
                 if (this.radioTowerCalculation.has(channel)) {
@@ -392,7 +388,7 @@ export class YaCAClientRadioModule {
                 base: { request_type: 'INGAME' },
                 comm_device_left: {
                     comm_type: YacaFilterEnum.RADIO,
-                    client_ids,
+                    client_ids: [client_id],
                     channel,
                 },
             })
