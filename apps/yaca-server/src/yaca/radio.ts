@@ -258,12 +258,29 @@ export class YaCAServerRadioModule {
         if (!this.radioFrequencyMap.has(frequency)) {
             this.radioFrequencyMap.set(frequency, new Map<number, { muted: boolean }>())
         }
-        this.radioFrequencyMap.get(frequency)?.set(src, { muted: false })
+
+        const radioFrequencyMap = this.radioFrequencyMap.get(frequency)
+
+        radioFrequencyMap?.set(src, { muted: false })
 
         player.radioSettings.frequencies[channel] = frequency
 
         emitNet('client:yaca:setRadioFreq', src, channel, frequency)
         emit('yaca:external:changedRadioFrequency', src, channel, frequency)
+
+        if (player.voicePlugin && radioFrequencyMap) {
+            const playersArray = []
+            for (const [key] of radioFrequencyMap) {
+                const target = this.serverModule.getPlayer(key)
+                if (!target) {
+                    continue
+                }
+
+                playersArray.push(key)
+            }
+
+            triggerClientEvent('yaca:external:updateRadioFrequency', playersArray, player.voicePlugin.clientId, player.voicePlugin.playerId, frequency)
+        }
     }
 
     /**
@@ -308,7 +325,9 @@ export class YaCAServerRadioModule {
         }
 
         if (player.voicePlugin) {
-            triggerClientEvent('client:yaca:leaveRadioChannel', playersArray, player.voicePlugin.clientId, frequency)
+            //see apps\yaca-server\src\yaca\main.ts - addNewPlayer
+            //playerId is for lua code...
+            triggerClientEvent('client:yaca:leaveRadioChannel', playersArray, player.voicePlugin.clientId, player.voicePlugin.playerId, frequency)
         }
 
         allPlayersInChannel.delete(src)
