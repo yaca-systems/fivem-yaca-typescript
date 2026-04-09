@@ -809,14 +809,7 @@ export class YaCAClientModule {
      * @param {DataObject} dataObj - The data object to initialize the plugin with.
      */
     initRequest(dataObj: DataObject) {
-        if (
-            !dataObj ||
-            !dataObj.suid ||
-            typeof dataObj.chid !== 'number' ||
-            !dataObj.deChid ||
-            !dataObj.ingameName ||
-            typeof dataObj.channelPassword === 'undefined'
-        ) {
+        if (!dataObj?.suid || typeof dataObj.chid !== 'number' || !dataObj.deChid || !dataObj.ingameName || typeof dataObj.channelPassword === 'undefined') {
             console.log('[YACA-Websocket]: Error while initializing plugin')
             this.notification(locale('connect_error'), YacaNotificationType.ERROR)
             return
@@ -890,7 +883,7 @@ export class YaCAClientModule {
         switch (parsedPayload.code) {
             case 'OK':
                 if (parsedPayload.requestType === 'JOIN') {
-                    const clientId = Number.parseInt(parsedPayload.message)
+                    const clientId = Number.parseInt(parsedPayload.message, 10)
                     emitNet('server:yaca:addPlayer', clientId)
 
                     if (this.rangeInterval) {
@@ -1393,7 +1386,7 @@ export class YaCAClientModule {
 
         const player = this.getPlayerByClientId(talkData.clientId)
 
-        if (!player || !player.remoteID) {
+        if (!player?.remoteID) {
             return
         }
 
@@ -1651,7 +1644,7 @@ export class YaCAClientModule {
 
             // Get the player data and check if the player is initialized and has a client ID set.
             const voiceSetting = this.getPlayerByID(remoteId)
-            if (!voiceSetting || !voiceSetting.clientId) continue
+            if (!voiceSetting?.clientId) continue
 
             // Get the player state and the voice range of the player.
             const playerState = Player(remoteId).state
@@ -1707,7 +1700,7 @@ export class YaCAClientModule {
             // Add all players which are in the call to the players list and give them the phone speaker effect.
             for (const phoneCallMemberId of voiceSetting.phoneCallMemberIds) {
                 const phoneCallMember = this.getPlayerByID(phoneCallMemberId)
-                if (!phoneCallMember || !phoneCallMember.clientId || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) continue
+                if (!phoneCallMember?.clientId || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) continue
 
                 players.delete(phoneCallMemberId)
                 players.set(phoneCallMemberId, {

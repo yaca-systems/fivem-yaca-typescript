@@ -12,7 +12,7 @@ build({
     },
     write: true,
     platform: 'node',
-    target: 'node16',
+    target: 'node22',
     sourcemap: production ? false : 'inline',
     dropLabels: production ? ['DEV'] : undefined,
 })

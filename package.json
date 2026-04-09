@@ -18,10 +18,11 @@
         "create-resource": "turbo create-resource --env-mode=loose && node scripts/create-resource.js"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.1.2",
-        "esbuild": "^0.25.0",
-        "turbo": "^2.3.4",
-        "typescript": "^5.7.3"
+        "@biomejs/biome": "2.4.11",
+        "esbuild": "^0.28.0",
+        "turbo": "^2.9.5",
+        "typescript": "^6.0.2",
+        "@types/node": "^22.7.4"
     },
     "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad"
 }

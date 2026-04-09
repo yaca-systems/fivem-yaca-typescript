@@ -375,7 +375,7 @@ export class YaCAClientRadioModule {
             }
 
             const playerData = this.clientModule.getPlayerByID(cache.serverId)
-            if (!playerData || !playerData.clientId) {
+            if (!playerData?.clientId) {
                 return
             }
 
@@ -971,14 +971,14 @@ export class YaCAClientRadioModule {
      */
     disableRadioFromPlayerInChannel(channel: number) {
         const players = this.playersInRadioChannel.get(channel)
-        if (!players || !players.size) {
+        if (!players?.size) {
             return
         }
 
         const targets: YacaPlayerData[] = []
         for (const playerId of players) {
             const player = this.clientModule.getPlayerByID(playerId)
-            if (!player || !player.remoteID) {
+            if (!player?.remoteID) {
                 continue
             }
 

@@ -31,8 +31,8 @@ Get the enabled status of the voice system as `boolean`.
 
 Get the current voice range of the player as `int`.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter | Type     | Description                                                                |
+|-----------|----------|----------------------------------------------------------------------------|
 | serverId  | `number` | The ID of the remote player, if not provided the local player will be used |
 
 #### `getVoiceRanges(): int[]`
@@ -51,16 +51,16 @@ Set the voice range of the player.
 
 Check if a player is currently talking.
 
-| Parameter | Type      | Description                                    |
-|-----------|-----------|------------------------------------------------|
-| serverId  | `number`  | The ID of the remote player to check          |
+| Parameter | Type     | Description                          |
+|-----------|----------|--------------------------------------|
+| serverId  | `number` | The ID of the remote player to check |
 
 #### `setVoiceRangeChangeAllowedState(state: boolean): void`
 
 Enable or disable the possibility to change the voice range.
 
-| Parameter | Type      | Description                                    |
-|-----------|-----------|------------------------------------------------|
+| Parameter | Type      | Description                                                |
+|-----------|-----------|------------------------------------------------------------|
 | state     | `boolean` | `true` to allow the voice range change, `false` to disable |
 
 #### `getVoiceRangeChangeAllowedState(): boolean`
@@ -71,9 +71,9 @@ Get the voice range change allowed state of the player as `boolean`.
 
 Set the maximum allowed voice range of the player in meters to limit the voice range temporarily.
 
-| Parameter | Type     | Description                                    |
-|-----------|-----------|------------------------------------------------|
-| range     | `number`  | `-1` to disable the limit, or a number in meters to set the limit |
+| Parameter | Type     | Description                                                       |
+|-----------|----------|-------------------------------------------------------------------|
+| range     | `number` | `-1` to disable the limit, or a number in meters to set the limit |
 
 #### `getMaxVoiceRange(): number`
 
@@ -179,18 +179,18 @@ Returns the frequency of a radio channel as `string`.
 
 Mutes the current active radio channel.
 
-| Parameter | Type      | Description                                                                 |
-|-----------|-----------|-----------------------------------------------------------------------------|
+| Parameter | Type      | Description                                                                      |
+|-----------|-----------|----------------------------------------------------------------------------------|
 | state?    | `boolean` | `true` to mute the channel, `false` to unmute. Defaults to switch if not defined |
 
 #### `muteRadioChannelRaw(channel: number, state?: boolean)`
 
 Mutes a radio channel.
 
-| Parameter | Type     | Description                                                                            |
-|-----------|----------|----------------------------------------------------------------------------------------|
-| channel?  | `number` | the channel to mute. Defaults to the current active channel when no channel is passed. |
-| state?    | `boolean` | `true` to mute the channel, `false` to unmute. Defaults to switch if not defined      |
+| Parameter | Type      | Description                                                                            |
+|-----------|-----------|----------------------------------------------------------------------------------------|
+| channel?  | `number`  | the channel to mute. Defaults to the current active channel when no channel is passed. |
+| state?    | `boolean` | `true` to mute the channel, `false` to unmute. Defaults to switch if not defined       |
 
 #### `isRadioChannelMuted(channel: number): boolean`
 

@@ -76,4 +76,4 @@ export const onCache = <T = never>(key: keyof ClientCache, cb: (value: T) => voi
     on(`yaca:cache:${key}`, cb)
 }
 
-export { initCache, cache }
+export { cache, initCache }

@@ -111,7 +111,7 @@ export class YaCAServerPhoneModle {
 
                 for (const enableTarget of enableForTargets) {
                     const target = this.serverModule.players.get(enableTarget)
-                    if (!target || !target.voicePlugin) continue
+                    if (!target?.voicePlugin) continue
 
                     enableForTargetsData.add(target.voicePlugin.clientId)
                 }
@@ -124,7 +124,7 @@ export class YaCAServerPhoneModle {
 
                 for (const disableTarget of disableForTargets) {
                     const target = this.serverModule.players.get(disableTarget)
-                    if (!target || !target.voicePlugin) continue
+                    if (!target?.voicePlugin) continue
 
                     disableForTargetsData.add(target.voicePlugin.clientId)
                 }
