@@ -31,7 +31,7 @@ export class YaCAClientRadioModule {
     secondaryRadioChannel = 2
 
     radioOnCooldown = false
-    currentRadioProp: number | null
+    currentRadioProp: number | null = null
 
     defaultRadioSettings: YacaRadioSettings = {
         frequency: '0',

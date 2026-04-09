@@ -93,7 +93,7 @@ export class YaCAClientModule {
     isFiveM = cache.game === 'fivem'
     isRedM = cache.game === 'redm'
 
-    private currentPluginState: YacaPluginStates
+    private currentPluginState: YacaPluginStates | undefined
 
     /**
      * Sets the current plugin state and emits an event.

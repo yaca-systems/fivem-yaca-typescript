@@ -54,7 +54,7 @@ export type YaCAPlayer = {
  * The main server module for YaCA.
  */
 export class YaCAServerModule {
-    cache: ServerCache
+    cache: ServerCache | undefined
 
     nameSet: Set<string> = new Set()
     players: Map<number, YaCAPlayer> = new Map()
