@@ -231,17 +231,17 @@ export class YaCAClientModule {
                     player.isTalking = value
                 }
             })
-
-            /**
-             * Add a state bag change handler for the global error level state bag.
-             * Which is used to override the global error level.
-             */
-            AddStateBagChangeHandler(GLOBAL_ERROR_LEVEL_STATE_NAME, '', (_bagName: string, _key: string, _value: number, __: number) => {
-                setImmediate(() => {
-                    this.phoneModule.enablePhoneCall(Array.from(this.phoneModule.inCallWith), true)
-                })
-            })
         }
+
+        /**
+         * Add a state bag change handler for the global error level state bag.
+         * Which is used to override the global error level.
+         */
+        AddStateBagChangeHandler(GLOBAL_ERROR_LEVEL_STATE_NAME, '', (_bagName: string, _key: string, _value: number, __: number) => {
+            setImmediate(() => {
+                this.phoneModule.enablePhoneCall(Array.from(this.phoneModule.inCallWith), true)
+            })
+        })
 
         if (this.sharedConfig.saltyChatBridge) {
             this.radioModule.secondaryRadioChannel = 2
@@ -1311,7 +1311,10 @@ export class YaCAClientModule {
             this.isTalking = isTalking
 
             this.syncLipsPlayer(cache.ped, cache.serverId, isTalking)
-            LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true)
+
+            if (!this.sharedConfig.useLocalLipSync) {
+                LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true)
+            }
 
             emit('yaca:external:isTalking', isTalking)
 
