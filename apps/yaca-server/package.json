@@ -13,13 +13,12 @@
     },
     "devDependencies": {
         "@citizenfx/server": "latest",
-        "@types/luxon": "^3.4.2",
-        "@types/node": "^20.16.10",
+        "@types/luxon": "^3.7.1",
         "@yaca-voice/common": "workspace:*",
         "@yaca-voice/types": "workspace:*",
         "@yaca-voice/typescript-config": "workspace:*"
     },
     "engines": {
-        "node": ">=16.9.1"
+        "node": ">=22.0.0"
     }
 }

@@ -12,7 +12,7 @@ build({
     },
     write: true,
     platform: 'browser',
-    target: 'es2021',
+    target: 'es2024',
     format: 'iife',
     minify: production,
     sourcemap: production ? false : 'inline',

@@ -350,7 +350,7 @@ export class YaCAServerRadioModule {
      */
     radioTalkingState(src: number, state: boolean, channel: number, distanceToTower: number) {
         const player = this.serverModule.getPlayer(src)
-        if (!player || !player.radioSettings.activated) {
+        if (!player?.radioSettings.activated) {
             return
         }
 
@@ -387,7 +387,7 @@ export class YaCAServerRadioModule {
             }
 
             const target = this.serverModule.getPlayer(key)
-            if (!target || !target.radioSettings.activated) {
+            if (!target?.radioSettings.activated) {
                 continue
             }
 

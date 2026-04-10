@@ -1,6 +1,6 @@
 /// <reference types="@citizenfx/server" />
 
-import { YaCAServerModule } from 'src/yaca'
+import { YaCAServerModule } from './yaca'
 
 exports('isEnabled', () => GetConvarBool('yaca_enabled', true))
 

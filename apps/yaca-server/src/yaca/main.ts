@@ -54,7 +54,7 @@ export type YaCAPlayer = {
  * The main server module for YaCA.
  */
 export class YaCAServerModule {
-    cache: ServerCache
+    cache: ServerCache | undefined
 
     nameSet: Set<string> = new Set()
     players: Map<number, YaCAPlayer> = new Map()
@@ -276,7 +276,7 @@ export class YaCAServerModule {
 
         for (const [targetId, emitterTargets] of player.voiceSettings.emittedPhoneSpeaker) {
             const target = this.players.get(targetId)
-            if (!target || !target.voicePlugin) {
+            if (!target?.voicePlugin) {
                 continue
             }
 
@@ -405,7 +405,7 @@ export class YaCAServerModule {
 
         const allPlayersData = []
         for (const playerSource of getPlayers()) {
-            const intPlayerSource = Number.parseInt(playerSource)
+            const intPlayerSource = Number.parseInt(playerSource, 10)
             const playerServer = this.players.get(intPlayerSource)
             if (!playerServer) {
                 continue

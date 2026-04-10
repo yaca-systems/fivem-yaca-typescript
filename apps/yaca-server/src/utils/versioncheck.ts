@@ -41,8 +41,8 @@ export const checkVersion = async () => {
     }
 
     for (let i = 0; i < parsedVersion.length; i++) {
-        const current = Number.parseInt(parsedVersion[i])
-        const latest = Number.parseInt(parsedLatestVersion[i])
+        const current = Number.parseInt(parsedVersion[i], 10)
+        const latest = Number.parseInt(parsedLatestVersion[i], 10)
 
         if (current !== latest) {
             if (current < latest) {

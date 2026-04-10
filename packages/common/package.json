@@ -11,13 +11,12 @@
         "typecheck": "tsc --project tsconfig.json"
     },
     "dependencies": {
-        "fast-printf": "^1.6.9",
+        "fast-printf": "^1.6.10",
         "json5": "^2.2.3"
     },
     "devDependencies": {
         "@citizenfx/client": "latest",
         "@citizenfx/server": "latest",
-        "@types/node": "^22.7.4",
         "@yaca-voice/typescript-config": "workspace:*"
     }
 }

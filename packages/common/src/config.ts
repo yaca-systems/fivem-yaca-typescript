@@ -14,7 +14,7 @@ function mergeAndValidate<T extends object>(defaultObj: T, parsedObj: T, path: s
     const result: T = { ...defaultObj }
 
     for (const key in defaultObj) {
-        if (Object.prototype.hasOwnProperty.call(defaultObj, key) === false) {
+        if (Object.hasOwn(defaultObj, key) === false) {
             continue
         }
 
