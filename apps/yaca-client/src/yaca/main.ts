@@ -75,6 +75,7 @@ export class YaCAClientModule {
     visualVoiceRangeTimeout: CitizenTimer | null = null
     visualVoiceRangeTick: CitizenTimer | null = null
     voiceRangeViaMouseWheelTick: CitizenTimer | null = null
+    voiceRangeChangeTimeout: CitizenTimer | null = null
 
     isTalking = false
     useWhisper = false
@@ -89,6 +90,8 @@ export class YaCAClientModule {
     currentlyPhoneSpeakerApplied = new Set<number>()
     currentlySendingPhoneSpeakerSender = new Set<number>()
     phoneHearNearbyPlayer = new Set<number>()
+
+    currentVoiceRange = this.defaultVoiceRange
 
     isFiveM = cache.game === 'fivem'
     isRedM = cache.game === 'redm'
@@ -231,22 +234,31 @@ export class YaCAClientModule {
                     player.isTalking = value
                 }
             })
-
-            /**
-             * Add a state bag change handler for the global error level state bag.
-             * Which is used to override the global error level.
-             */
-            AddStateBagChangeHandler(GLOBAL_ERROR_LEVEL_STATE_NAME, '', (_bagName: string, _key: string, _value: number, __: number) => {
-                setImmediate(() => {
-                    this.phoneModule.enablePhoneCall(Array.from(this.phoneModule.inCallWith), true)
-                })
-            })
         }
+
+        /**
+         * Add a state bag change handler for the global error level state bag.
+         * Which is used to override the global error level.
+         */
+        AddStateBagChangeHandler(GLOBAL_ERROR_LEVEL_STATE_NAME, '', (_bagName: string, _key: string, _value: number, __: number) => {
+            setImmediate(() => {
+                this.phoneModule.enablePhoneCall(Array.from(this.phoneModule.inCallWith), true)
+            })
+        })
 
         if (this.sharedConfig.saltyChatBridge) {
             this.radioModule.secondaryRadioChannel = 2
             this.saltyChatBridge = new YaCAClientSaltyChatBridge(this)
         }
+
+        AddStateBagChangeHandler(VOICE_RANGE_STATE_NAME, '', (bagName: string, _: string, value: number, __: number) => {
+            const playerId = GetPlayerFromStateBagName(bagName)
+            if (playerId !== cache.playerId) {
+                return
+            }
+
+            this.currentVoiceRange = value
+        })
 
         console.log('[Client] YaCA Client loaded.')
     }
@@ -987,7 +999,7 @@ export class YaCAClientModule {
             return playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
         }
 
-        return LocalPlayer.state[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
+        return this.currentVoiceRange ?? this.defaultVoiceRange
     }
 
     /**
@@ -1047,7 +1059,15 @@ export class YaCAClientModule {
 
         this.showRangeVisual(voiceRange)
 
-        LocalPlayer.state.set(VOICE_RANGE_STATE_NAME, voiceRange, true)
+        if (this.voiceRangeChangeTimeout) {
+            clearTimeout(this.voiceRangeChangeTimeout)
+        }
+
+        this.currentVoiceRange = voiceRange
+        this.voiceRangeChangeTimeout = setTimeout(() => {
+            LocalPlayer.state.set(VOICE_RANGE_STATE_NAME, voiceRange, true)
+            this.voiceRangeChangeTimeout = null
+        }, 300)
 
         emit('yaca:external:voiceRangeUpdate', voiceRange, this.rangeIndex)
         // SaltyChat bridge
@@ -1304,7 +1324,10 @@ export class YaCAClientModule {
             this.isTalking = isTalking
 
             this.syncLipsPlayer(cache.ped, cache.serverId, isTalking)
-            LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true)
+
+            if (!this.sharedConfig.useLocalLipSync) {
+                LocalPlayer.state.set(LIP_SYNC_STATE_NAME, isTalking, true)
+            }
 
             emit('yaca:external:isTalking', isTalking)
 

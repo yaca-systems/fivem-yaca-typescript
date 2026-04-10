@@ -32,7 +32,7 @@ repository '${packageJson.repository.url}'
 description '${packageJson.description}'
 
 dependencies {
-    '/server:7290',
+    '/server:27092',
     '/onesync',
 }
 
