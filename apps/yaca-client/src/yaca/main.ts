@@ -253,7 +253,7 @@ export class YaCAClientModule {
 
         AddStateBagChangeHandler(VOICE_RANGE_STATE_NAME, '', (bagName: string, _: string, value: number, __: number) => {
             const playerId = GetPlayerFromStateBagName(bagName)
-            if (playerId === 0 || playerId === cache.playerId) {
+            if (playerId !== cache.playerId) {
                 return
             }
 
