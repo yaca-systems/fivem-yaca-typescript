@@ -66,6 +66,7 @@ export interface YacaSharedConfig {
     saltyChatBridge: boolean
     mufflingSettings: {
         mufflingRange: number
+        whitelistedRoomIds: number[]
         vehicleMuffling: {
             enabled: boolean
             vehicleWhitelist: string[]
@@ -145,6 +146,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     saltyChatBridge: false,
     mufflingSettings: {
         mufflingRange: -1,
+        whitelistedRoomIds: [],
         vehicleMuffling: {
             enabled: true,
             vehicleWhitelist: [

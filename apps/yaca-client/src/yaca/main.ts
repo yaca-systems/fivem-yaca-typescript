@@ -1477,7 +1477,12 @@ export class YaCAClientModule {
         ownVehicleHasOpening: boolean,
         nearbyUsesMegaphone = false,
     ) {
-        if (ownCurrentRoom !== GetRoomKeyFromEntity(nearbyPlayerPed) && !HasEntityClearLosToEntity(playerPed, nearbyPlayerPed, 17)) {
+        const targetRoom = GetRoomKeyFromEntity(nearbyPlayerPed)
+        if (ownCurrentRoom !== targetRoom && !HasEntityClearLosToEntity(playerPed, nearbyPlayerPed, 17)) {
+            if (targetRoom !== 0 && !this.sharedConfig.mufflingSettings.whitelistedRoomIds.includes(targetRoom)) {
+                return 0
+            }
+
             return this.sharedConfig.mufflingSettings.intensities.differentRoom
         }
 
