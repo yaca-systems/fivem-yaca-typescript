@@ -136,6 +136,7 @@
   "mufflingSettings": {
     // If set to -1, the player voice range is used, all values >= 0 sets the muffling range before it gets completely cut off
     "mufflingRange": -1,
+    "whitelistedRoomIds": [], // Whitelist of room ids that should not be muffled, even if the player is in a different room.
     "vehicleMuffling": {
       // If set to true, the vehicle muffling feature is enabled. (FiveM only)
       "enabled": true,
