@@ -1479,7 +1479,7 @@ export class YaCAClientModule {
     ) {
         const targetRoom = GetRoomKeyFromEntity(nearbyPlayerPed)
         if (ownCurrentRoom !== targetRoom && !HasEntityClearLosToEntity(playerPed, nearbyPlayerPed, 17)) {
-            if (targetRoom !== 0 && !this.sharedConfig.mufflingSettings.whitelistedRoomIds.includes(targetRoom)) {
+            if (targetRoom !== 0 && this.sharedConfig.mufflingSettings.whitelistedRoomIds.includes(targetRoom)) {
                 return 0
             }
 
