@@ -88,7 +88,7 @@ export class YaCAClientPhoneModule {
                 this.clientModule.setPlayersCommType(
                     target,
                     YacaFilterEnum.PHONE,
-                    state,
+                    !state,
                     undefined,
                     undefined,
                     CommDeviceMode.TRANSCEIVER,
