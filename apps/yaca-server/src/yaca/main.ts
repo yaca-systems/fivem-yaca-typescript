@@ -284,6 +284,8 @@ export class YaCAServerModule {
         }
 
         emitNet('client:yaca:disconnect', -1, src)
+
+        this.players.delete(src)
     }
 
     /**
