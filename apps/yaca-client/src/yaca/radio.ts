@@ -1,4 +1,4 @@
-import { clamp, GLOBAL_ERROR_LEVEL_STATE_NAME, locale } from '@yaca-voice/common'
+import { clamp, GLOBAL_ERROR_LEVEL_STATE_NAME, locale, RADIO_PROP_STATE_NAME } from '@yaca-voice/common'
 import {
     CommDeviceMode,
     type radioMode,
@@ -51,6 +51,7 @@ export class YaCAClientRadioModule {
         this.radioMode = this.clientModule.sharedConfig.radioSettings.mode
 
         this.registerExports()
+        this.registerStateBagHandlers()
         this.registerEvents()
 
         if (this.clientModule.isFiveM) {
@@ -225,10 +226,65 @@ export class YaCAClientRadioModule {
         exports('getRadioMode', () => this.radioMode)
     }
 
+    registerStateBagHandlers() {
+        AddStateBagChangeHandler(RADIO_PROP_STATE_NAME, '', async (bagName: string, _: string, value: number | null, __: number, replicated: boolean) => {
+            if (replicated) {
+                return
+            }
+
+            const playerId = GetPlayerFromStateBagName(bagName)
+            if (playerId === 0) {
+                return
+            }
+
+            const playerSource = GetPlayerServerId(playerId)
+            if (playerSource === 0) {
+                return
+            }
+
+            const player = this.clientModule.getPlayerByID(playerSource)
+            if (!player) {
+                return
+            }
+
+            if (value) {
+                const prop = await createProp(
+                    GetPlayerPed(playerId),
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop as string,
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
+                    this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
+                    false,
+                )
+
+                player.radioProp = prop as number
+            } else {
+                this.removeRadioProp(player)
+            }
+        })
+    }
+
     /**
      * Registers the events for the radio module.
      */
     registerEvents() {
+        /**
+         * Handles the "onPlayerDropped" server event.
+         *
+         * @param {number} target - The ID of the target.
+         */
+        onNet('onPlayerDropped', (target: number) => {
+            if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.createMode !== 'stateBag') {
+                return
+            }
+
+            const player = this.clientModule.getPlayerByID(target)
+            if (!player) {
+                return
+            }
+
+            this.removeRadioProp(player)
+        })
         /**
          * Handles the "client:yaca:setRadioFreq" server event.
          *
@@ -1025,16 +1081,22 @@ export class YaCAClientRadioModule {
                 )
                 RemoveAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary)
 
-                if (this.currentRadioProp !== null) {
-                    if (DoesEntityExist(this.currentRadioProp)) {
-                        DeleteEntity(this.currentRadioProp)
-                    }
+                switch (this.clientModule.sharedConfig.radioSettings.propWhileTalking.createMode) {
+                    case 'stateBag':
+                        LocalPlayer.state.set(RADIO_PROP_STATE_NAME, false, true)
+                        break
+                    case 'client':
+                        if (this.currentRadioProp !== null) {
+                            if (DoesEntityExist(this.currentRadioProp)) {
+                                DeleteEntity(this.currentRadioProp)
+                            }
 
-                    if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
-                        SetModelAsNoLongerNeeded(this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop)
-                    }
+                            if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
+                                SetModelAsNoLongerNeeded(this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop)
+                            }
 
-                    this.currentRadioProp = null
+                            this.currentRadioProp = null
+                        }
                 }
             }
 
@@ -1064,14 +1126,25 @@ export class YaCAClientRadioModule {
         }
 
         if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
-            const prop = await createProp(
-                this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop,
-                this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
-                this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
-                this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
-            )
+            switch (this.clientModule.sharedConfig.radioSettings.propWhileTalking.createMode) {
+                case 'stateBag': {
+                    LocalPlayer.state.set(RADIO_PROP_STATE_NAME, true, true)
+                    break
+                }
+                case 'client': {
+                    const prop = await createProp(
+                        cache.ped,
+                        this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop as string,
+                        this.clientModule.sharedConfig.radioSettings.propWhileTalking.boneId,
+                        this.clientModule.sharedConfig.radioSettings.propWhileTalking.position,
+                        this.clientModule.sharedConfig.radioSettings.propWhileTalking.rotation,
+                        true,
+                    )
 
-            this.currentRadioProp = prop ?? null
+                    this.currentRadioProp = prop ?? null
+                    break
+                }
+            }
         }
 
         const animDict = await requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary)
@@ -1125,5 +1198,21 @@ export class YaCAClientRadioModule {
         if (channel !== this.activeRadioChannel || GetResourceState('yaca-ui') !== 'started') return
 
         exports['yaca-ui'].setRadioChannelData(this.radioChannelSettings.get(channel))
+    }
+
+    removeRadioProp(player: YacaPlayerData) {
+        if (!player.radioProp) {
+            return
+        }
+
+        if (DoesEntityExist(player.radioProp)) {
+            DeleteEntity(player.radioProp)
+        }
+
+        if (this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop !== false) {
+            SetModelAsNoLongerNeeded(this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop)
+        }
+
+        player.radioProp = undefined
     }
 }
