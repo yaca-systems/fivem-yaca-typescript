@@ -55,6 +55,10 @@
       "flag": 49
     },
     "propWhileTalking": {
+      // Define how the prop is created
+      // - client - networked, spawned on client
+      // - stateBag - spawned on each client, not networked
+      "createMode": "stateBag",
       // The prop that should be shown while talking on the radio.
       "prop": false,
       // The bone that the prop should be attached to.

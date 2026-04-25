@@ -32,6 +32,7 @@ export interface YacaSharedConfig {
             flag: number
         }
         propWhileTalking: {
+            createMode: 'stateBag' | 'client'
             prop: string | false
             boneId: number
             position: [number, number, number]
@@ -112,6 +113,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
             flag: 49,
         },
         propWhileTalking: {
+            createMode: 'stateBag',
             prop: false,
             boneId: 28422,
             position: [0.0, 0.0, 0.0],

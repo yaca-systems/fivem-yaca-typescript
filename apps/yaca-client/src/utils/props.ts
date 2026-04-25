@@ -1,4 +1,3 @@
-import { cache } from './cache'
 import { requestModel } from './streaming'
 
 export const joaat = (input: string, ignore_casing = true) => {
@@ -30,20 +29,26 @@ export const joaat = (input: string, ignore_casing = true) => {
  * @param rotation - The rotation of the prop.
  */
 export const createProp = async (
+    targetPed: number | undefined,
     model: string | number,
     boneId: number,
     offset: [number, number, number] = [0.0, 0.0, 0.0],
     rotation: [number, number, number] = [0.0, 0.0, 0.0],
+    networked = true,
 ) => {
+    if (!targetPed || !DoesEntityExist(targetPed)) {
+        return
+    }
+
     const modelHash = await requestModel(model)
     if (!modelHash) return
 
-    const [x, y, z] = GetEntityCoords(cache.ped, true)
+    const [x, y, z] = GetEntityCoords(targetPed, true)
     const [ox, oy, oz] = offset
     const [rx, ry, rz] = rotation
-    const object = CreateObject(modelHash, x, y, z, true, true, false)
+    const object = CreateObject(modelHash, x, y, z, networked, true, false)
     SetEntityCollision(object, false, false)
-    AttachEntityToEntity(object, cache.ped, GetPedBoneIndex(cache.ped, boneId), ox, oy, oz, rx, ry, rz, true, false, false, true, 2, true)
+    AttachEntityToEntity(object, targetPed, GetPedBoneIndex(targetPed, boneId), ox, oy, oz, rx, ry, rz, true, false, false, true, 2, true)
 
     return object
 }
