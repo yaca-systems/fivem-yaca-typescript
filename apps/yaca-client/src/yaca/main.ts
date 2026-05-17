@@ -81,6 +81,7 @@ export class YaCAClientModule {
     useWhisper = false
     spectatingPlayer: number | false = false
     notificationTimeout: Map<string, number> = new Map()
+    overrideOtherVoiceRangeWithOwn = false
 
     isMicrophoneMuted = false
     isMicrophoneDisabled = false
@@ -295,6 +296,15 @@ export class YaCAClientModule {
          */
         exports('setVoiceRange', (range: number) => {
             this.setVoiceRange(range)
+        })
+
+        /**
+         * Toggle the target voicerange if its based on our or target voicerange
+         *
+         * @param {boolean} state - Should the other player range based on own range?
+         */
+        exports('setVoiceRangeUseOwnForOthers', (state: boolean) => {
+            this.overrideOtherVoiceRangeWithOwn = state
         })
 
         /**
@@ -1674,9 +1684,8 @@ export class YaCAClientModule {
             const voiceSetting = this.getPlayerByID(remoteId)
             if (!voiceSetting?.clientId) continue
 
-            // Get the player state and the voice range of the player.
+            // Get the player state
             const playerState = Player(remoteId).state
-            const range = playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
 
             // Get the muffle intensity for the player.
             const muffleIntensity = this.getMuffleIntensity(
@@ -1694,6 +1703,11 @@ export class YaCAClientModule {
             const playerDirection = GetEntityForwardVector(playerPed)
             // @ts-expect-error Type error in the native
             const isUnderwater = IsPedSwimmingUnderWater(playerPed) === 1
+
+            let range = playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
+            if (this.overrideOtherVoiceRangeWithOwn && !voiceSetting.forceMuted && distanceToPlayer <= this.currentVoiceRange) {
+                range = this.currentVoiceRange
+            }
 
             if (!playersOnPhoneSpeaker.has(remoteId)) {
                 players.set(remoteId, {
