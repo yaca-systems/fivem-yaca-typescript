@@ -72,6 +72,9 @@ export class YaCAClientModule {
     maxVoiceRange = -1
     rangeIndex: number
     rangeInterval: CitizenTimer | null = null
+    reconnectTimeout: CitizenTimer | null = null
+    reconnectAttempts = 0
+    readonly maxReconnectAttempts = 10
     visualVoiceRangeTimeout: CitizenTimer | null = null
     visualVoiceRangeTick: CitizenTimer | null = null
     voiceRangeViaMouseWheelTick: CitizenTimer | null = null
@@ -668,10 +671,18 @@ export class YaCAClientModule {
                     this.setCurrentPluginState(YacaPluginStates.NOT_CONNECTED)
 
                     console.error('[YACA-Websocket]: client disconnected', code, reason)
+
+                    this.scheduleReconnect()
                 })
 
                 this.websocket.on('open', () => {
                     this.setCurrentPluginState(YacaPluginStates.CONNECTED)
+
+                    this.reconnectAttempts = 0
+                    if (this.reconnectTimeout) {
+                        clearTimeout(this.reconnectTimeout)
+                        this.reconnectTimeout = null
+                    }
 
                     if (this.firstConnect) {
                         this.initRequest(dataObj)
@@ -813,6 +824,31 @@ export class YaCAClientModule {
         }
 
         return null
+    }
+
+    /**
+     * Schedules a reconnect attempt to the voice plugin after the websocket connection was lost.
+     * Uses an exponential backoff (capped at 30s) so a persistently unreachable plugin doesn't spam reconnect attempts.
+     */
+    scheduleReconnect() {
+        if (this.reconnectTimeout) {
+            return
+        }
+
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.error(`[YACA-Websocket]: giving up reconnecting to the voice plugin after ${this.reconnectAttempts} attempts`)
+            this.notification(locale('connect_error'), YacaNotificationType.ERROR)
+            return
+        }
+
+        const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000)
+        this.reconnectAttempts++
+
+        this.reconnectTimeout = setTimeout(() => {
+            this.reconnectTimeout = null
+            console.log(`[YACA-Websocket]: attempting to reconnect to the voice plugin (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
+            this.websocket.start()
+        }, delay)
     }
 
     /**
