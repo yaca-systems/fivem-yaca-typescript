@@ -1,6 +1,7 @@
 import { cache } from './cache'
 
 export * from './cache'
+export * from './interior'
 export * from './props'
 export * from './redm'
 export * from './streaming'

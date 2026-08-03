@@ -35,7 +35,10 @@ import {
     convertNumberArrayToXYZ,
     displayRdrNotification,
     getCamDirection,
+    getInteriorRoomPair,
+    type InteriorRoomPair,
     joaat,
+    OUTSIDE_ROOM_PAIR,
     playRdrFacialAnim,
     registerRdrKeyBind,
     vehicleHasOpening,
@@ -1763,6 +1766,7 @@ export class YaCAClientModule {
 
         const localPos = GetEntityCoords(localPlayerPed, false)
         const currentRoom = GetRoomKeyFromEntity(localPlayerPed)
+        const localRoomPair = this.getRoomPair(localPlayerPed, Boolean(localPlayerVehicle))
         const hasVehicleOpening = this.isFiveM ? this.checkIfVehicleHasOpening(localPlayerVehicle) : true
         const phoneSpeakerActive = this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size
         const localVehicleIsAirborne = this.isAirborneVehicle(localPlayerVehicle)
@@ -1799,16 +1803,16 @@ export class YaCAClientModule {
             const playerDirection = GetEntityForwardVector(playerPed)
             // @ts-expect-error Type error in the native
             const isUnderwater = IsPedSwimmingUnderWater(playerPed) === 1
-
             const playerVehicle = GetVehiclePedIsIn(playerPed, false)
             const sharesLocalVehicle = Boolean(localPlayerVehicle) && playerVehicle === localPlayerVehicle
+            const playerRoomPair = this.getRoomPair(playerPed, sharesLocalVehicle)
 
             if (localVehicleIsAirborne && sharesLocalVehicle) {
                 airborneCrewMembers.add(remoteId)
             }
 
             if (!playersOnPhoneSpeaker.has(remoteId)) {
-                players.set(remoteId, {
+                const obj: YacaPluginPlayerData = {
                     client_id: voiceSetting.clientId,
                     position: convertNumberArrayToXYZ(playerPos),
                     direction: convertNumberArrayToXYZ(playerDirection),
@@ -1816,7 +1820,14 @@ export class YaCAClientModule {
                     is_underwater: isUnderwater,
                     muffle_intensity: muffleIntensity,
                     is_muted: voiceSetting.forceMuted ?? false,
-                })
+                }
+
+                if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {
+                    obj.interior_key = playerRoomPair.interiorKey
+                    obj.room_key = playerRoomPair.roomKey
+                }
+
+                players.set(remoteId, obj)
             }
 
             // Who can be heard on the phone.
@@ -1843,7 +1854,7 @@ export class YaCAClientModule {
                 if (!phoneCallMember?.clientId || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) continue
 
                 players.delete(phoneCallMemberId)
-                players.set(phoneCallMemberId, {
+                const obj: YacaPluginPlayerData = {
                     client_id: phoneCallMember.clientId,
                     position: convertNumberArrayToXYZ(playerPos),
                     direction: convertNumberArrayToXYZ(playerDirection),
@@ -1851,7 +1862,14 @@ export class YaCAClientModule {
                     is_underwater: isUnderwater,
                     muffle_intensity: muffleIntensity,
                     is_muted: false,
-                })
+                }
+
+                if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {
+                    obj.interior_key = playerRoomPair.interiorKey
+                    obj.room_key = playerRoomPair.roomKey
+                }
+
+                players.set(phoneCallMemberId, obj)
 
                 playersOnPhoneSpeaker.add(phoneCallMemberId)
 
@@ -1886,7 +1904,28 @@ export class YaCAClientModule {
                 player_is_underwater: IsPedSwimmingUnderWater(localPlayerPed) === 1,
                 player_is_muted: localData.forceMuted ?? false,
                 players_list: Array.from(players.values()),
+                room_key: localRoomPair.roomKey || undefined,
+                interior_key: localRoomPair.interiorKey || undefined,
             },
         })
+    }
+
+    /**
+     * Get the (interior, room) pair of a ped, which the plugin uses to resolve the room acoustics.
+     *
+     * A closed cabin keeps the voice out of the room, so a voice that never leaves it stays dry. Whether that is the
+     * case depends on the listener: for another player it is only true while both share the cabin, for the own
+     * self monitored voice it is true as soon as the local player sits in one.
+     *
+     * @param ped - The ped to get the pair for.
+     * @param isolatedFromRoom - Whether the voice stays inside a cabin instead of travelling through the room.
+     * @returns {InteriorRoomPair} The pair, `OUTSIDE_ROOM_PAIR` outside of an interior, inside a cabin and in RedM.
+     */
+    getRoomPair(ped: number, isolatedFromRoom = false): InteriorRoomPair {
+        if (!this.isFiveM || isolatedFromRoom) {
+            return OUTSIDE_ROOM_PAIR
+        }
+
+        return getInteriorRoomPair(ped)
     }
 }

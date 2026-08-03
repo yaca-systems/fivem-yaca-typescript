@@ -1,4 +1,9 @@
 import type { CommDeviceMode, YacaFilterEnum, YacaStereoMode } from './enums'
+export interface YacaVector3 {
+    x: number
+    y: number
+    z: number
+}
 
 export type YacaResponseCode =
     | 'SOUND_STATE'
@@ -92,10 +97,16 @@ export type ServerCache = {
 
 export type YacaPluginPlayerData = {
     client_id: number
-    position: { x: number; y: number; z: number }
-    direction: { x: number; y: number; z: number }
+    position: YacaVector3
+    direction: YacaVector3
     range: number
     is_underwater: boolean
     muffle_intensity: number
     is_muted: boolean
+    /**
+     * The GTA interior room of the player, addressed by the (interior, room) pair. Both halves are uint32 jenkins
+     * hashes and both are required, a missing half means the player counts as outside and stays dry.
+     */
+    room_key?: number
+    interior_key?: number
 }
