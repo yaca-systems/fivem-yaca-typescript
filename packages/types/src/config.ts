@@ -42,6 +42,10 @@ export interface YacaSharedConfig {
         mode: radioMode
         maxDistance: number
     }
+    airborne: {
+        enabled: boolean
+        vehicleClasses: number[]
+    }
     voiceRange: {
         defaultIndex: number
         ranges: number[]
@@ -123,6 +127,10 @@ export const defaultSharedConfig: YacaSharedConfig = {
         channelCount: 9,
         mode: 'None',
         maxDistance: 1000,
+    },
+    airborne: {
+        enabled: false,
+        vehicleClasses: [15, 16],
     },
     voiceRange: {
         defaultIndex: 1,

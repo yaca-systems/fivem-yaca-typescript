@@ -95,6 +95,7 @@ export class YaCAClientModule {
     currentlyPhoneSpeakerApplied = new Set<number>()
     currentlySendingPhoneSpeakerSender = new Set<number>()
     phoneHearNearbyPlayer = new Set<number>()
+    currentlyAirborneApplied = new Set<number>()
 
     currentVoiceRange = this.defaultVoiceRange
 
@@ -715,6 +716,7 @@ export class YaCAClientModule {
          */
         onNet('client:yaca:disconnect', (remoteId: number) => {
             this.phoneModule.handleDisconnect(remoteId)
+            this.currentlyAirborneApplied.delete(remoteId)
             this.allPlayers.delete(remoteId)
         })
 
@@ -1608,6 +1610,66 @@ export class YaCAClientModule {
     }
 
     /**
+     * Whether the airborne filter is enabled. It needs a plugin build that knows the filter.
+     */
+    get airborneEnabled(): boolean {
+        return this.sharedConfig.airborne.enabled && this.isFiveM
+    }
+
+    /**
+     * Checks whether a vehicle counts as an aircraft for the airborne filter.
+     *
+     * @param vehicle - The vehicle to check.
+     * @returns {boolean} Whether the vehicle is an aircraft.
+     */
+    isAirborneVehicle(vehicle: number | false): boolean {
+        if (!this.airborneEnabled || !vehicle) {
+            return false
+        }
+
+        return this.sharedConfig.airborne.vehicleClasses.includes(GetVehicleClass(vehicle))
+    }
+
+    /**
+     * Applies and removes the airborne filter for the crew of the local aircraft.
+     *
+     * The filter only sits between players sharing the same aircraft. Someone standing outside is not part of the
+     * crew and keeps the normal voice, which is why the vehicle has to match and not just the airborne state.
+     *
+     * @param crewMembers - The players sitting in the same aircraft as the local player.
+     */
+    handleAirborneEmit(crewMembers: Set<number>) {
+        for (const playerId of this.currentlyAirborneApplied) {
+            if (crewMembers.has(playerId)) {
+                continue
+            }
+
+            this.currentlyAirborneApplied.delete(playerId)
+
+            const player = this.getPlayerByID(playerId)
+            if (!player) {
+                continue
+            }
+
+            this.setPlayersCommType(player, YacaFilterEnum.AIRBORNE, false, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER)
+        }
+
+        for (const playerId of crewMembers) {
+            if (this.currentlyAirborneApplied.has(playerId)) {
+                continue
+            }
+
+            const player = this.getPlayerByID(playerId)
+            if (!player) {
+                continue
+            }
+
+            this.setPlayersCommType(player, YacaFilterEnum.AIRBORNE, true, undefined, undefined, CommDeviceMode.TRANSCEIVER, CommDeviceMode.TRANSCEIVER)
+            this.currentlyAirborneApplied.add(playerId)
+        }
+    }
+
+    /**
      * Handles around phone emit.
      *
      * @param playerToHearOnPhone - The players to hear on the phone.
@@ -1703,6 +1765,8 @@ export class YaCAClientModule {
         const currentRoom = GetRoomKeyFromEntity(localPlayerPed)
         const hasVehicleOpening = this.isFiveM ? this.checkIfVehicleHasOpening(localPlayerVehicle) : true
         const phoneSpeakerActive = this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size
+        const localVehicleIsAirborne = this.isAirborneVehicle(localPlayerVehicle)
+        const airborneCrewMembers = new Set<number>()
 
         for (const player of GetActivePlayers()) {
             // Get the remote ID of the player and check if it is the local player or the server.
@@ -1735,6 +1799,13 @@ export class YaCAClientModule {
             const playerDirection = GetEntityForwardVector(playerPed)
             // @ts-expect-error Type error in the native
             const isUnderwater = IsPedSwimmingUnderWater(playerPed) === 1
+
+            const playerVehicle = GetVehiclePedIsIn(playerPed, false)
+            const sharesLocalVehicle = Boolean(localPlayerVehicle) && playerVehicle === localPlayerVehicle
+
+            if (localVehicleIsAirborne && sharesLocalVehicle) {
+                airborneCrewMembers.add(remoteId)
+            }
 
             if (!playersOnPhoneSpeaker.has(remoteId)) {
                 players.set(remoteId, {
@@ -1802,6 +1873,7 @@ export class YaCAClientModule {
 
         this.handlePhoneSpeakerEmit(playersToPhoneSpeaker, playersOnPhoneSpeaker)
         this.handlePhoneEmit(playerToHearOnPhone)
+        this.handleAirborneEmit(airborneCrewMembers)
 
         // Send the collected data to the voice plugin.
         this.sendWebsocket({

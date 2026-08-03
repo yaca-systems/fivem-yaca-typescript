@@ -89,6 +89,18 @@
     // The maximum distance between two players or to the tower to be able to hear each other.
     "maxDistance": 5000
   },
+  /* The airborne filter, applied to the crew of a helicopter or aircraft while they talk to each other inside it.
+   * The voice stays thin so it cuts through the rotor noise instead of sitting in it. It only applies between
+   * players sitting in the same aircraft, someone standing outside hears the normal voice.
+   */
+  "airborne": {
+    "enabled": false,
+    // The vehicle classes that count as airborne. 15 = helicopters, 16 = planes. (FiveM only)
+    "vehicleClasses": [
+      15,
+      16
+    ]
+  },
   "voiceRange": {
     // The default index which should be used for the voice range when a player joins the server.
     "defaultIndex": 1,
