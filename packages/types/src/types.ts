@@ -1,4 +1,5 @@
 import type { CommDeviceMode, YacaFilterEnum, YacaStereoMode } from './enums'
+
 export interface YacaVector3 {
     x: number
     y: number
@@ -42,6 +43,7 @@ export interface YacaPlayerData {
     phoneCallMemberIds?: number[]
     isTalking: boolean
     radioProp?: number
+    volumeModifier?: number
 }
 
 export interface DataObject {
@@ -56,6 +58,7 @@ export interface DataObject {
     ingameName?: string
     useWhisper?: boolean
     excludeChannels?: number[]
+    volumeModifier?: number
 }
 
 export interface YacaClient {
@@ -103,6 +106,7 @@ export type YacaPluginPlayerData = {
     is_underwater: boolean
     muffle_intensity: number
     is_muted: boolean
+    volume_modifier?: number
     /**
      * The GTA interior room of the player, addressed by the (interior, room) pair. Both halves are uint32 jenkins
      * hashes and both are required, a missing half means the player counts as outside and stays dry.

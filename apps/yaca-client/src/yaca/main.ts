@@ -395,6 +395,24 @@ export class YaCAClientModule {
         exports('getTeamSpeakUniqueIdentifier', () => this.teamSpeakUniqueIdentifier)
 
         /**
+         * Set a temporary volume factor for a player, e.g. for a whisper or shout system.
+         *
+         * @param {number} serverId - The remote ID of the player.
+         * @param {number} volumeModifier - The volume factor, clamped to 0.1 - 2.0. 1.0 resets it.
+         */
+        exports('setPlayerVolumeModifier', (serverId: number, volumeModifier: number) => {
+            this.setPlayerVolumeModifier(serverId, volumeModifier)
+        })
+
+        /**
+         * Get the temporary volume factor of a player.
+         *
+         * @param {number} serverId - The remote ID of the player.
+         * @returns {number} The volume factor, 1.0 if none is set.
+         */
+        exports('getPlayerVolumeModifier', (serverId: number) => this.getPlayerByID(serverId)?.volumeModifier ?? 1)
+
+        /**
          * Get the global error level.
          *
          * @returns {number} The global error level.
@@ -748,6 +766,7 @@ export class YaCAClientModule {
                     phoneCallMemberIds: currentData?.phoneCallMemberIds || undefined,
                     mutedOnPhone: dataObj.mutedOnPhone || false,
                     isTalking: currentData?.isTalking || false,
+                    volumeModifier: dataObj.volumeModifier ?? currentData?.volumeModifier,
                 })
 
                 newPlayers.push(dataObj.playerId)
@@ -767,6 +786,16 @@ export class YaCAClientModule {
             if (!player) return
 
             player.forceMuted = muted
+        })
+
+        /**
+         * Handles the "client:yaca:setPlayerVolumeModifier" server event.
+         *
+         * @param {number} target - The target to set the volume modifier for.
+         * @param {number} volumeModifier - The volume factor, clamped to 0.1 - 2.0.
+         */
+        onNet('client:yaca:setPlayerVolumeModifier', (target: number, volumeModifier: number) => {
+            this.setPlayerVolumeModifier(target, volumeModifier)
         })
 
         /**
@@ -816,6 +845,29 @@ export class YaCAClientModule {
      */
     getPlayerByID(remoteId: number) {
         return this.allPlayers.get(remoteId)
+    }
+
+    /**
+     * Set a temporary volume factor for a player.
+     *
+     * The plugin validates the value hard: a value outside of 0.1 - 2.0 makes it drop the whole position update of
+     * that tick and answer with a general error, so the value is clamped here.
+     *
+     * @param serverId - The remote ID of the player.
+     * @param volumeModifier - The volume factor, clamped to 0.1 - 2.0. 1.0 resets it.
+     */
+    setPlayerVolumeModifier(serverId: number, volumeModifier: number) {
+        const player = this.getPlayerByID(serverId)
+        if (!player) {
+            return
+        }
+
+        if (typeof volumeModifier !== 'number' || Number.isNaN(volumeModifier)) {
+            console.error(`[YaCA] Invalid volume modifier for player ${serverId}: ${volumeModifier}`)
+            return
+        }
+
+        player.volumeModifier = clamp(volumeModifier, 0.1, 2)
     }
 
     /**
@@ -1820,6 +1872,7 @@ export class YaCAClientModule {
                     is_underwater: isUnderwater,
                     muffle_intensity: muffleIntensity,
                     is_muted: voiceSetting.forceMuted ?? false,
+                    volume_modifier: typeof voiceSetting.volumeModifier === 'number' ? voiceSetting.volumeModifier : undefined,
                 }
 
                 if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {
@@ -1862,6 +1915,7 @@ export class YaCAClientModule {
                     is_underwater: isUnderwater,
                     muffle_intensity: muffleIntensity,
                     is_muted: false,
+                    volume_modifier: typeof phoneCallMember.volumeModifier === 'number' ? phoneCallMember.volumeModifier : undefined,
                 }
 
                 if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {

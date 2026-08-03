@@ -1,4 +1,5 @@
 import {
+    clamp,
     GLOBAL_ERROR_LEVEL_STATE_NAME,
     getGlobalErrorLevel,
     initLocale,
@@ -36,6 +37,7 @@ export type YaCAPlayer = {
         inCallWith: Set<number>
         emittedPhoneSpeaker: Map<number, Set<number>>
         tsUniqueIdentifier?: string
+        volumeModifier?: number
     }
     radioSettings: {
         activated: boolean
@@ -48,6 +50,7 @@ export type YaCAPlayer = {
         clientId: number
         forceMuted: boolean
         mutedOnPhone: boolean
+        volumeModifier?: number
     }
 }
 
@@ -212,6 +215,22 @@ export class YaCAServerModule {
         exports('getPlayerTeamSpeakUniqueIdentifier', (playerId: number) => this.getPlayer(playerId)?.voiceSettings.tsUniqueIdentifier ?? '')
 
         /**
+         * Set a temporary volume factor for a player, e.g. for a whisper or shout system.
+         *
+         * @param {number} playerId - The ID of the player the volume factor applies to.
+         * @param {number} volumeModifier - The volume factor, clamped to 0.1 - 2.0 on the client. 1.0 resets it.
+         */
+        exports('setPlayerVolumeModifier', (playerId: number, volumeModifier: number) => this.setPlayerVolumeModifier(playerId, volumeModifier))
+
+        /**
+         * Get the temporary volume factor of a player.
+         *
+         * @param {number} playerId - The ID of the player.
+         * @returns {number} - The volume factor, 1.0 if none is set.
+         */
+        exports('getPlayerVolumeModifier', (playerId: number) => this.getPlayer(playerId)?.voiceSettings.volumeModifier ?? 1)
+
+        /**
          * Returns the ingame name of a player.
          *
          * @param {number} playerId - The ID of the player.
@@ -318,6 +337,38 @@ export class YaCAServerModule {
     }
 
     /**
+     * Set a temporary volume factor for a player, e.g. for a whisper or shout system.
+     *
+     * The factor is kept server side so it can be replayed to players who connect later, the same way the mute state
+     * is. The live event only reaches the players who are already connected.
+     *
+     * @param {number} src - The source-id of the player the volume factor applies to.
+     * @param {number} volumeModifier - The volume factor, clamped to 0.1 - 2.0. 1.0 resets it.
+     */
+    setPlayerVolumeModifier(src: number, volumeModifier: number) {
+        const player = this.players.get(src)
+        if (!player) {
+            console.error(locale('player_not_found', src))
+            return
+        }
+
+        if (typeof volumeModifier !== 'number' || Number.isNaN(volumeModifier)) {
+            console.error(`[YaCA] Invalid volume modifier for player ${src}: ${volumeModifier}`)
+            return
+        }
+
+        const clampedModifier = clamp(volumeModifier, 0.1, 2)
+
+        player.voiceSettings.volumeModifier = clampedModifier
+
+        if (player.voicePlugin) {
+            player.voicePlugin.volumeModifier = clampedModifier
+        }
+
+        emitNet('client:yaca:setPlayerVolumeModifier', -1, src, clampedModifier)
+    }
+
+    /**
      * Get the alive status of a player.
      *
      * @param playerId - The ID of the player to get the alive status for.
@@ -416,6 +467,7 @@ export class YaCAServerModule {
             clientId,
             forceMuted: player.voiceSettings.forceMuted,
             mutedOnPhone: player.voiceSettings.mutedOnPhone,
+            volumeModifier: player.voiceSettings.volumeModifier,
         }
 
         emitNet('client:yaca:addPlayers', -1, player.voicePlugin)

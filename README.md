@@ -141,6 +141,23 @@ Reset the voice range marker color to the default color defined in the config.
 Get the TeamSpeak client unique identifier (UID) of the local user, reported by the plugin when it joined.
 Returns `undefined` as long as the plugin has not joined yet.
 
+#### `setPlayerVolumeModifier(serverId: number, volumeModifier: number)`
+
+Set a temporary volume factor for a player, e.g. for a whisper or shout system. The value is clamped to `0.1` - `2.0`,
+`1.0` resets it.
+
+| Parameter      | Type     | Description                             |
+|----------------|----------|-----------------------------------------|
+| serverId       | `number` | The ID of the remote player             |
+| volumeModifier | `number` | The volume factor, between 0.1 and 2.0  |
+
+#### `getPlayerVolumeModifier(serverId: number): number`
+
+Get the temporary volume factor of a player as `number`, `1.0` if none is set.
+
+| Parameter | Type     | Description                 |
+|-----------|----------|-----------------------------|
+| serverId  | `number` | The ID of the remote player |
 
 ### Radio
 
@@ -521,6 +538,23 @@ empty string as long as it is not known. Use it to bind a player to their TeamSp
 |-----------|----------|--------------------|
 | playerId  | `number` | The player source  |
 
+#### `setPlayerVolumeModifier(playerId: number, volumeModifier: number)`
+
+Set a temporary volume factor for a player on all clients, e.g. for a whisper or shout system. The value is clamped
+to `0.1` - `2.0`, `1.0` resets it. The factor is kept server side and replayed to players who connect later.
+
+| Parameter      | Type     | Description                             |
+|----------------|----------|-----------------------------------------|
+| playerId       | `number` | The player source                       |
+| volumeModifier | `number` | The volume factor, between 0.1 and 2.0  |
+
+#### `getPlayerVolumeModifier(playerId: number): number`
+
+Returns the temporary volume factor of a player as `number`, `1.0` if none is set.
+
+| Parameter | Type     | Description        |
+|-----------|----------|--------------------|
+| playerId  | `number` | The player source  |
 
 </details>
 
