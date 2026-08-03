@@ -1,4 +1,4 @@
-import { YacaBuildType } from './enums'
+import { YacaBuildType, type YacaDisableableFilter } from './enums'
 
 export type radioMode = 'None' | 'Direct' | 'Tower'
 
@@ -81,6 +81,7 @@ export interface YacaSharedConfig {
     }
     radioAntiSpamCooldown: number | false
     useLocalLipSync: boolean
+    disabledFilters: YacaDisableableFilter[]
 }
 
 export const defaultSharedConfig: YacaSharedConfig = {
@@ -176,6 +177,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     },
     radioAntiSpamCooldown: false,
     useLocalLipSync: false,
+    disabledFilters: [],
 }
 
 export interface YacaServerConfig {

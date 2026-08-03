@@ -14,6 +14,8 @@ import {
     defaultSharedConfig,
     defaultTowerConfig,
     type YacaClient,
+    type YacaDisableableFilter,
+    YacaEffectFilterEnum,
     YacaFilterEnum,
     YacaNotificationType,
     type YacaPlayerData,
@@ -59,6 +61,8 @@ export class YaCAClientModule {
     mufflingVehicleWhitelistHash = new Set<number>()
     allPlayers = new Map<number, YacaPlayerData>()
     firstConnect = true
+
+    disabledFilters: YacaDisableableFilter[] = []
     teamSpeakUniqueIdentifier: string | undefined
 
     radioModule: YaCAClientRadioModule
@@ -183,6 +187,8 @@ export class YaCAClientModule {
                 this.mufflingVehicleWhitelistHash.add(joaat(vehicleModel))
             }
         }
+
+        this.disabledFilters = this.parseDisabledFilters(this.sharedConfig.disabledFilters)
 
         this.websocket = new WebSocket()
         this.setCurrentPluginState(YacaPluginStates.NOT_CONNECTED)
@@ -824,6 +830,29 @@ export class YaCAClientModule {
     }
 
     /**
+     * Validates the configured disabled filters and drops unknown values.
+     *
+     * An unknown value would make the plugin reject the whole init request, so it is filtered out here.
+     *
+     * @param {string[]} filters - The filters from the shared config.
+     * @returns {YacaDisableableFilter[]} The filters the plugin knows about.
+     */
+    parseDisabledFilters(filters: string[]): YacaDisableableFilter[] {
+        const parsedFilters: YacaDisableableFilter[] = []
+
+        for (const filter of filters ?? []) {
+            if (filter in YacaFilterEnum || filter in YacaEffectFilterEnum) {
+                parsedFilters.push(filter as YacaDisableableFilter)
+                continue
+            }
+
+            console.error(`[YaCA] Unknown filter '${filter}' in disabledFilters, it will be ignored.`)
+        }
+
+        return parsedFilters
+    }
+
+    /**
      * Initializes the plugin.
      *
      * @param {DataObject} dataObj - The data object to initialize the plugin with.
@@ -847,6 +876,7 @@ export class YaCAClientModule {
             build_type: this.sharedConfig.buildType,
             unmute_delay: this.sharedConfig.unmuteDelay,
             operation_mode: dataObj.useWhisper ? 1 : 0,
+            disabled_filters: this.disabledFilters,
         })
 
         this.useWhisper = dataObj.useWhisper ?? false
