@@ -136,6 +136,12 @@ Get the voice range marker color as `[red, green, blue, alpha]`.
 
 Reset the voice range marker color to the default color defined in the config.
 
+#### `getTeamSpeakUniqueIdentifier(): string | undefined`
+
+Get the TeamSpeak client unique identifier (UID) of the local user, reported by the plugin when it joined.
+Returns `undefined` as long as the plugin has not joined yet.
+
+
 ### Radio
 
 #### `enableRadio(state: boolean)`
@@ -506,6 +512,16 @@ Returns the Teamspeak name of a player by their player ID. If the player or the 
 |-----------|----------|--------------------|
 | playerId  | `number` | The player source  |
 
+#### `getPlayerTeamSpeakUniqueIdentifier(playerId: number): string`
+
+Returns the TeamSpeak client unique identifier (UID) of a player, reported by the plugin when it joined. Returns an
+empty string as long as it is not known. Use it to bind a player to their TeamSpeak identity server side.
+
+| Parameter | Type     | Description        |
+|-----------|----------|--------------------|
+| playerId  | `number` | The player source  |
+
+
 </details>
 
 # Events
@@ -517,9 +533,10 @@ Returns the Teamspeak name of a player by their player ID. If the player or the 
 
 The event is triggered when the plugin is initialized.
 
-| Parameter | Type  | Description                                  |
-|-----------|-------|----------------------------------------------|
-| clientId  | `int` | the client id of the local user in teamspeak |
+| Parameter                 | Type                  | Description                                       |
+|---------------------------|-----------------------|---------------------------------------------------|
+| clientId                  | `int`                 | the client id of the local user in teamspeak      |
+| teamSpeakUniqueIdentifier | `string \| undefined` | the teamspeak unique identifier of the local user |
 
 ### yaca:external:pluginStateChanged
 
@@ -740,6 +757,16 @@ The event is triggered when the phone speaker state of a player changes.
 |-----------|-----------|-----------------------------|
 | source    | `int`     | the player source           |
 | state     | `boolean` | the new phone speaker state |
+
+### yaca:external:playerTeamSpeakIdentifier
+
+The event is triggered when the plugin of a player reported its TeamSpeak client unique identifier (UID) on join.
+Use it to bind the player to their TeamSpeak identity server side.
+
+| Parameter                 | Type     | Description                                   |
+|---------------------------|----------|-----------------------------------------------|
+| source                    | `int`    | the player source                             |
+| teamSpeakUniqueIdentifier | `string` | the teamspeak unique identifier of the player |
 
 ### yaca:external:changedRadioFrequency
 

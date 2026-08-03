@@ -59,6 +59,7 @@ export class YaCAClientModule {
     mufflingVehicleWhitelistHash = new Set<number>()
     allPlayers = new Map<number, YacaPlayerData>()
     firstConnect = true
+    teamSpeakUniqueIdentifier: string | undefined
 
     radioModule: YaCAClientRadioModule
     phoneModule: YaCAClientPhoneModule
@@ -375,6 +376,13 @@ export class YaCAClientModule {
          * @returns {YacaPluginStates} The current plugin state.
          */
         exports('getPluginState', () => this.currentPluginState ?? YacaPluginStates.NOT_CONNECTED)
+
+        /**
+         * Get the TeamSpeak client unique identifier of the own client.
+         *
+         * @returns {string | undefined} The unique identifier, undefined if the plugin did not join yet.
+         */
+        exports('getTeamSpeakUniqueIdentifier', () => this.teamSpeakUniqueIdentifier)
 
         /**
          * Get the global error level.
@@ -896,7 +904,10 @@ export class YaCAClientModule {
             case 'OK':
                 if (parsedPayload.requestType === 'JOIN') {
                     const clientId = Number.parseInt(parsedPayload.message, 10)
-                    emitNet('server:yaca:addPlayer', clientId)
+                    // The JOIN response carries the TeamSpeak client unique identifier of the own client.
+                    this.teamSpeakUniqueIdentifier = parsedPayload.additionalMessage || undefined
+
+                    emitNet('server:yaca:addPlayer', clientId, this.teamSpeakUniqueIdentifier)
 
                     if (this.rangeInterval) {
                         clearInterval(this.rangeInterval)
@@ -910,7 +921,7 @@ export class YaCAClientModule {
                         this.radioModule.initRadioSettings()
                     }
 
-                    emit('yaca:external:pluginInitialized', clientId)
+                    emit('yaca:external:pluginInitialized', clientId, this.teamSpeakUniqueIdentifier)
                     return
                 }
 

@@ -19,6 +19,7 @@ export interface YacaResponse {
     code: YacaResponseCode
     requestType: string
     message: string
+    additionalMessage?: string
 }
 
 export interface YacaSoundStateMessage {

@@ -35,6 +35,7 @@ export type YaCAPlayer = {
         mutedOnPhone: boolean
         inCallWith: Set<number>
         emittedPhoneSpeaker: Map<number, Set<number>>
+        tsUniqueIdentifier?: string
     }
     radioSettings: {
         activated: boolean
@@ -203,6 +204,14 @@ export class YaCAServerModule {
         exports('getGlobalErrorLevel', () => getGlobalErrorLevel())
 
         /**
+         * Returns the TeamSpeak client unique identifier of a player.
+         *
+         * @param {number} playerId - The ID of the player.
+         * @returns {string} - The unique identifier or an empty string if it is not known yet.
+         */
+        exports('getPlayerTeamSpeakUniqueIdentifier', (playerId: number) => this.getPlayer(playerId)?.voiceSettings.tsUniqueIdentifier ?? '')
+
+        /**
          * Returns the ingame name of a player.
          *
          * @param {number} playerId - The ID of the player.
@@ -238,8 +247,8 @@ export class YaCAServerModule {
         })
 
         // YaCA:successful voice connection and client-id sync
-        onNet('server:yaca:addPlayer', (clientId: number) => {
-            this.addNewPlayer(source, clientId)
+        onNet('server:yaca:addPlayer', (clientId: number, tsUniqueIdentifier?: string) => {
+            this.addNewPlayer(source, clientId, tsUniqueIdentifier)
         })
 
         // YaCa: voice restart
@@ -389,11 +398,17 @@ export class YaCAServerModule {
      *
      * @param src - The source-id of the player to add.
      * @param {number} clientId - The client ID of the player.
+     * @param {string} tsUniqueIdentifier - The TeamSpeak client unique identifier of the player, if reported.
      */
-    addNewPlayer(src: number, clientId: number) {
+    addNewPlayer(src: number, clientId: number, tsUniqueIdentifier?: string) {
         const player = this.players.get(src)
         if (!player || !clientId) {
             return
+        }
+
+        if (tsUniqueIdentifier) {
+            player.voiceSettings.tsUniqueIdentifier = tsUniqueIdentifier
+            emit('yaca:external:playerTeamSpeakIdentifier', src, tsUniqueIdentifier)
         }
 
         player.voicePlugin = {
