@@ -50,7 +50,7 @@ function initCache() {
             cache.vehicle = vehicle
 
             if (!cache.seat || GetPedInVehicleSeat(vehicle, cache.seat) !== ped) {
-                for (let i = -1; i < GetVehicleMaxNumberOfPassengers(vehicle) - 1; i++) {
+                for (let i = -1; i < GetVehicleMaxNumberOfPassengers(vehicle); i++) {
                     if (GetPedInVehicleSeat(vehicle, i) === ped) {
                         cache.seat = i
                         break
