@@ -77,6 +77,32 @@ export interface YacaProtocol {
     range?: number
 }
 
+/**
+ * A single room acoustics entry, as sent to the plugin in the init request.
+ */
+export interface YacaRoomAcoustics {
+    interior_key: number
+    room_key: number
+    small_send: number
+    medium_send: number
+    large_send: number
+}
+
+/**
+ * The room acoustics file produced by the `room-acoustics` tool, nested by decimal
+ * interior key and then by decimal room key.
+ */
+export interface YacaRoomAcousticsFile {
+    version: number
+    interiors: Record<
+        string,
+        {
+            name?: string
+            rooms: Record<string, { small?: number; medium?: number; large?: number; name?: string }>
+        }
+    >
+}
+
 export interface YacaRadioSettings {
     frequency: string
     muted: boolean

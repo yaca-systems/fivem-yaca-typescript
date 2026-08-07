@@ -23,6 +23,8 @@ import {
     YacaPluginStates,
     type YacaProtocol,
     type YacaResponse,
+    type YacaRoomAcoustics,
+    type YacaRoomAcousticsFile,
     type YacaSharedConfig,
     type YacaSoundStateMessage,
     type YacaStereoMode,
@@ -41,6 +43,7 @@ import {
     OUTSIDE_ROOM_PAIR,
     playRdrFacialAnim,
     registerRdrKeyBind,
+    toUInt32,
     vehicleHasOpening,
     WebSocket,
 } from '../utils'
@@ -49,6 +52,8 @@ import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
 import { YaCAClientPhoneModule } from './phone'
 import { YaCAClientRadioModule } from './radio'
+
+const ROOM_ACOUSTICS_FILE = 'config/room_acoustics.json'
 
 /**
  * The YaCA client module.
@@ -66,6 +71,7 @@ export class YaCAClientModule {
     firstConnect = true
 
     disabledFilters: YacaDisableableFilter[] = []
+    customRoomAcoustics: YacaRoomAcoustics[] = []
     teamSpeakUniqueIdentifier: string | undefined
 
     radioModule: YaCAClientRadioModule
@@ -193,6 +199,7 @@ export class YaCAClientModule {
         }
 
         this.disabledFilters = this.parseDisabledFilters(this.sharedConfig.disabledFilters)
+        this.customRoomAcoustics = this.loadCustomRoomAcoustics()
 
         this.websocket = new WebSocket()
         this.setCurrentPluginState(YacaPluginStates.NOT_CONNECTED)
@@ -910,6 +917,62 @@ export class YaCAClientModule {
     }
 
     /**
+     * Loads the room acoustics of the custom MLOs.
+     *
+     * The file ships with the resource and is produced by the "room-acoustics" tool. It is
+     * sent to the plugin on init, where it is merged on top of the room acoustics the plugin ships with, so custom
+     * rooms and overrides of stock rooms both work. The shipped file is empty, since the plugin already knows the
+     * stock rooms - drop the output of the tool in to add your own MLOs.
+     *
+     * @returns {YacaRoomAcoustics[]} The room acoustics entries, empty if the file is missing or invalid.
+     */
+    loadCustomRoomAcoustics(): YacaRoomAcoustics[] {
+        const fileData = LoadResourceFile(cache.resource, ROOM_ACOUSTICS_FILE)
+        if (!fileData) {
+            console.warn(`[YaCA] Could not read '${ROOM_ACOUSTICS_FILE}', custom MLOs will stay dry.`)
+            return []
+        }
+
+        let parsedFile: YacaRoomAcousticsFile
+        try {
+            parsedFile = JSON.parse(fileData)
+        } catch (e) {
+            console.error(`[YaCA] Error while parsing '${ROOM_ACOUSTICS_FILE}': `, e)
+            return []
+        }
+
+        if (parsedFile?.version !== 1) {
+            console.error(`[YaCA] Unexpected room acoustics file version '${parsedFile?.version}', expected 1.`)
+            return []
+        }
+
+        const roomAcoustics: YacaRoomAcoustics[] = []
+        for (const [interiorKeyString, interior] of Object.entries(parsedFile?.interiors ?? {})) {
+            const interiorKey = toUInt32(Number.parseInt(interiorKeyString, 10))
+            if (!interiorKey) {
+                continue
+            }
+
+            for (const [roomKeyString, room] of Object.entries(interior?.rooms ?? {})) {
+                const roomKey = toUInt32(Number.parseInt(roomKeyString, 10))
+                if (!roomKey) {
+                    continue
+                }
+
+                roomAcoustics.push({
+                    interior_key: interiorKey,
+                    room_key: roomKey,
+                    small_send: clamp(room.small ?? 0, 0, 1),
+                    medium_send: clamp(room.medium ?? 0, 0, 1),
+                    large_send: clamp(room.large ?? 0, 0, 1),
+                })
+            }
+        }
+
+        return roomAcoustics
+    }
+
+    /**
      * Initializes the plugin.
      *
      * @param {DataObject} dataObj - The data object to initialize the plugin with.
@@ -934,6 +997,7 @@ export class YaCAClientModule {
             unmute_delay: this.sharedConfig.unmuteDelay,
             operation_mode: dataObj.useWhisper ? 1 : 0,
             disabled_filters: this.disabledFilters,
+            custom_room_acoustics: this.customRoomAcoustics,
         })
 
         this.useWhisper = dataObj.useWhisper ?? false

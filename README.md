@@ -15,6 +15,10 @@ Before you start, make sure you have OneSync enabled and your server artifacts a
 2. Add `start yaca-voice` into your `server.cfg`.
 3. Open `config/server.json5` and adjust the variables to your needs.
 4. Open `config/shared.json5` and adjust the variables to your needs.
+5. Optional, only for custom MLOs: replace `config/room_acoustics.json` with the output of the `room-acoustics` tool,
+   run over the `*.dat151.rel.xml` of your MLOs. It tells the plugin how much reverb each of
+   your rooms has. The shipped file is empty on purpose — the plugin already knows the stock GTA rooms, and the entries
+   in this file are merged on top of them, so it can also override a stock room.
 
 # Exports
 

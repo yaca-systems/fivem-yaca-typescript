@@ -198,5 +198,5 @@
    *
    * This list always describes the complete set, the plugin resets all filters before applying it.
    */
-  "disabledFilters": [],
+  "disabledFilters": []
 }
