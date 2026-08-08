@@ -75,6 +75,28 @@ export interface YacaProtocol {
     volume?: number
     channel?: number
     range?: number
+    speaker_positions?: YacaVector3[]
+    speaker_room_key?: number
+    speaker_interior_key?: number
+}
+
+/**
+ * Fixed loudspeakers a communication device is heard from.
+ */
+export interface YacaSpeakerSettings {
+    positions: (YacaVector3 | number[])[]
+    interiorKey?: number
+    roomKey?: number
+}
+
+/**
+ * A microphone a player talks into, and whatever it is plugged into.
+ */
+export interface YacaMicrophoneSettings {
+    positions?: (YacaVector3 | number[])[]
+    interiorKey?: number
+    roomKey?: number
+    range?: number
 }
 
 /**

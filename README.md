@@ -560,6 +560,40 @@ Returns the temporary volume factor of a player as `number`, `1.0` if none is se
 |-----------|----------|--------------------|
 | playerId  | `number` | The player source  |
 
+#### `setPlayerMicrophone(playerId: number, state: boolean, settings?: object)`
+
+Turn a microphone on or off for a player, e.g. when they step up to a PA microphone on a stage. With loudspeaker
+positions the voice is miked at the player and radiated from those loudspeakers, without them it is emitted from the
+player holding it. The player keeps their proximity voice, so someone next to them hears both the PA and the real
+voice. Calling again while on updates the loudspeakers and the range of a running microphone.
+
+| Parameter | Type      | Description                                |
+|-----------|-----------|--------------------------------------------|
+| playerId  | `number`  | The player at the microphone               |
+| state     | `boolean` | Whether the microphone is turned on or off |
+| settings  | `object`  | The microphone settings below, optional    |
+
+The `settings` object:
+
+| Key           | Type          | Description                                                                                                     |
+|---------------|---------------|-----------------------------------------------------------------------------------------------------------------|
+| `positions`   | `[x, y, z][]` | The loudspeakers the voice is radiated from. Omitted means it is emitted from the player holding the microphone |
+| `range`       | `number`      | How far it is heard, measured against the nearest loudspeaker. Omitted means it is not distance gated at all    |
+| `interiorKey` | `number`      | The room the loudspeakers stand in. Normally left out, see below                                                |
+| `roomKey`     | `number`      | See `interiorKey`, both halves are required together                                                            |
+
+You normally do not pass `interiorKey` / `roomKey` at all. The client resolves the room from the **loudspeaker
+position** itself: it looks up the interior at those coordinates and picks the room whose extents contain them. That
+is the honest answer, because the room of a loudspeaker is the room it hangs in, no matter where anybody stands.
+
+#### `getPlayerMicrophone(playerId: number): object | false`
+
+Returns the settings of the running microphone of a player, `false` if none is on.
+
+| Parameter | Type     | Description        |
+|-----------|----------|--------------------|
+| playerId  | `number` | The player source  |
+
 </details>
 
 # Events
@@ -658,6 +692,14 @@ The event is triggered when the megaphone state of a player changes.
 | Parameter | Type      | Description             |
 |-----------|-----------|-------------------------|
 | state     | `boolean` | the new megaphone state |
+
+### yaca:external:microphoneState
+
+The event is triggered when the microphone (PA) state of the local player changes.
+
+| Parameter | Type      | Description              |
+|-----------|-----------|--------------------------|
+| state     | `boolean` | the new microphone state |
 
 ### yaca:external:setRadioMuteState
 

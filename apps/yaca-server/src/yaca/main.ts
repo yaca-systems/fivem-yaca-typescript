@@ -14,6 +14,7 @@ import {
     defaultSharedConfig,
     defaultTowerConfig,
     type ServerCache,
+    type YacaMicrophoneSettings,
     type YacaServerConfig,
     type YacaSharedConfig,
     type YacaTowerConfig,
@@ -38,6 +39,7 @@ export type YaCAPlayer = {
         emittedPhoneSpeaker: Map<number, Set<number>>
         tsUniqueIdentifier?: string
         volumeModifier?: number
+        microphone?: YacaMicrophoneSettings
     }
     radioSettings: {
         activated: boolean
@@ -231,6 +233,26 @@ export class YaCAServerModule {
         exports('getPlayerVolumeModifier', (playerId: number) => this.getPlayer(playerId)?.voiceSettings.volumeModifier ?? 1)
 
         /**
+         * Turn a microphone on or off for a player, e.g. when they step up to a PA microphone on a stage.
+         *
+         * @param {number} playerId - The ID of the player at the microphone.
+         * @param {boolean} state - Whether the microphone is turned on or off.
+         * @param {YacaMicrophoneSettings} settings - The loudspeakers, their room and the range. Optional. Calling
+         *                                           again while on updates them for a running microphone.
+         */
+        exports('setPlayerMicrophone', (playerId: number, state: boolean, settings?: YacaMicrophoneSettings) => {
+            this.setPlayerMicrophone(playerId, state, settings)
+        })
+
+        /**
+         * Get the active microphone of a player.
+         *
+         * @param {number} playerId - The ID of the player.
+         * @returns {YacaMicrophoneSettings | false} - The settings of the running microphone, false if none is on.
+         */
+        exports('getPlayerMicrophone', (playerId: number) => this.getPlayer(playerId)?.voiceSettings.microphone ?? false)
+
+        /**
          * Returns the ingame name of a player.
          *
          * @param {number} playerId - The ID of the player.
@@ -311,6 +333,10 @@ export class YaCAServerModule {
             triggerClientEvent('client:yaca:phoneHearAround', Array.from(emitterTargets), [target.voicePlugin.clientId], false)
         }
 
+        if (player.voiceSettings.microphone) {
+            emitNet('client:yaca:microphone', -1, src, false)
+        }
+
         emitNet('client:yaca:disconnect', -1, src)
 
         this.players.delete(src)
@@ -366,6 +392,28 @@ export class YaCAServerModule {
         }
 
         emitNet('client:yaca:setPlayerVolumeModifier', -1, src, clampedModifier)
+    }
+
+    /**
+     * Turn a microphone on or off for a player, e.g. when they step up to a PA microphone on a stage.
+     *
+     * The state is kept server side so it can be replayed to players who connect later, and so the microphone can be
+     * turned off for everyone when the player disconnects.
+     *
+     * @param {number} src - The source-id of the player at the microphone.
+     * @param {boolean} state - Whether the microphone is turned on or off.
+     * @param {YacaMicrophoneSettings} settings - The loudspeakers, their room and the range. Optional.
+     */
+    setPlayerMicrophone(src: number, state: boolean, settings?: YacaMicrophoneSettings) {
+        const player = this.getPlayer(src)
+        if (!player) {
+            console.error(locale('player_not_found', src))
+            return
+        }
+
+        player.voiceSettings.microphone = state ? (settings ?? {}) : undefined
+
+        emitNet('client:yaca:microphone', -1, src, state, settings)
     }
 
     /**
@@ -473,6 +521,7 @@ export class YaCAServerModule {
         emitNet('client:yaca:addPlayers', -1, player.voicePlugin)
 
         const allPlayersData = []
+        const activeMicrophones: [number, NonNullable<YaCAPlayer['voiceSettings']['microphone']>][] = []
         for (const playerSource of getPlayers()) {
             const intPlayerSource = Number.parseInt(playerSource, 10)
             const playerServer = this.players.get(intPlayerSource)
@@ -485,8 +534,16 @@ export class YaCAServerModule {
             }
 
             allPlayersData.push(playerServer.voicePlugin)
+
+            if (playerServer.voiceSettings.microphone) {
+                activeMicrophones.push([intPlayerSource, playerServer.voiceSettings.microphone])
+            }
         }
 
         emitNet('client:yaca:addPlayers', src, allPlayersData)
+
+        for (const [microphoneSource, microphone] of activeMicrophones) {
+            emitNet('client:yaca:microphone', src, microphoneSource, true, microphone)
+        }
     }
 }

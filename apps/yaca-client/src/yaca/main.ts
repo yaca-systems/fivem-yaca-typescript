@@ -27,6 +27,7 @@ import {
     type YacaRoomAcousticsFile,
     type YacaSharedConfig,
     type YacaSoundStateMessage,
+    type YacaSpeakerSettings,
     type YacaStereoMode,
     type YacaTowerConfig,
 } from '@yaca-voice/types'
@@ -50,6 +51,7 @@ import {
 import { localLipSyncAnimations } from './data'
 import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
+import { YaCAClientMicrophoneModule } from './microphone'
 import { YaCAClientPhoneModule } from './phone'
 import { YaCAClientRadioModule } from './radio'
 
@@ -78,6 +80,7 @@ export class YaCAClientModule {
     phoneModule: YaCAClientPhoneModule
     megaphoneModule: YaCAClientMegaphoneModule
     intercomModule: YaCAClientIntercomModule
+    microphoneModule: YaCAClientMicrophoneModule
 
     saltyChatBridge?: YaCAClientSaltyChatBridge
 
@@ -230,6 +233,7 @@ export class YaCAClientModule {
         }
 
         this.intercomModule = new YaCAClientIntercomModule(this)
+        this.microphoneModule = new YaCAClientMicrophoneModule(this)
         this.megaphoneModule = new YaCAClientMegaphoneModule(this)
         this.phoneModule = new YaCAClientPhoneModule(this)
         this.radioModule = new YaCAClientRadioModule(this)
@@ -1341,6 +1345,10 @@ export class YaCAClientModule {
      * @param {CommDeviceMode} ownMode - The mode for the player. Optional.
      * @param {CommDeviceMode} otherPlayersMode - The mode for the other players. Optional.
      * @param {number} errorLevel - The error level for the communication. Optional.
+     * @param {YacaSpeakerSettings} speakerSettings - The fixed loudspeakers the device is heard from. Optional, the
+     *                                               device is emitted from its owner when omitted. The positions belong
+     *                                               to the channel, so all members of the channel share them. Sending
+     *                                               `on: true` again for an already active channel updates them.
      */
     setPlayersCommType(
         players: { clientId: number } | { clientId: number }[],
@@ -1351,6 +1359,7 @@ export class YaCAClientModule {
         ownMode?: CommDeviceMode,
         otherPlayersMode?: CommDeviceMode,
         errorLevel?: number | null,
+        speakerSettings?: YacaSpeakerSettings,
     ) {
         if (!Array.isArray(players)) {
             players = [players]
@@ -1392,6 +1401,15 @@ export class YaCAClientModule {
         }
         if (typeof range !== 'undefined' && range !== null) {
             protocol.range = range
+        }
+
+        if (speakerSettings?.positions?.length) {
+            protocol.speaker_positions = speakerSettings.positions.map((position) => (Array.isArray(position) ? convertNumberArrayToXYZ(position) : position))
+
+            if (speakerSettings.interiorKey && speakerSettings.roomKey) {
+                protocol.speaker_interior_key = toUInt32(speakerSettings.interiorKey)
+                protocol.speaker_room_key = toUInt32(speakerSettings.roomKey)
+            }
         }
 
         this.sendWebsocket({

@@ -2,14 +2,11 @@ export enum YacaFilterEnum {
     RADIO = 'RADIO',
     MEGAPHONE = 'MEGAPHONE',
     PHONE = 'PHONE',
-    /**
-     * @deprecated The plugin marks this filter as deprecated, but it is still fully functional and has its own
-     * communication device. Do not migrate to {@link YacaFilterEnum.PHONE} until the speaker stage landed in the plugin.
-     */
     PHONE_SPEAKER = 'PHONE_SPEAKER',
     INTERCOM = 'INTERCOM',
     PHONE_HISTORICAL = 'PHONE_HISTORICAL',
     AIRBORNE = 'AIRBORNE',
+    MICROPHONE = 'MICROPHONE',
 }
 
 /**
@@ -23,6 +20,7 @@ export enum YacaEffectFilterEnum {
     WATER = 'WATER',
     ECHO = 'ECHO',
     REVERB = 'REVERB',
+    LOUDSPEAKER = 'LOUDSPEAKER',
 }
 
 /**

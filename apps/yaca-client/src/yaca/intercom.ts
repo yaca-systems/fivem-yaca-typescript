@@ -1,4 +1,4 @@
-import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData } from '@yaca-voice/types'
+import { CommDeviceMode, YacaFilterEnum, type YacaPlayerData, type YacaSpeakerSettings } from '@yaca-voice/types'
 import type { YaCAClientModule } from './main'
 
 /**
@@ -27,8 +27,11 @@ export class YaCAClientIntercomModule {
          *
          * @param {number[] | number} playerIDs - The IDs of the players to be added or removed from the intercom filter.
          * @param {boolean} state - The state indicating whether to add or remove the players.
+         * @param {YacaSpeakerSettings} speakerSettings - The fixed loudspeakers the intercom is heard from, e.g. an
+         *                                               intercom with several horns. Optional, the intercom is heard
+         *                                               from its owner when omitted.
          */
-        onNet('client:yaca:addRemovePlayerIntercomFilter', (playerIDs: number | number[], state: boolean) => {
+        onNet('client:yaca:addRemovePlayerIntercomFilter', (playerIDs: number | number[], state: boolean, speakerSettings?: YacaSpeakerSettings) => {
             if (!Array.isArray(playerIDs)) {
                 playerIDs = [playerIDs]
             }
@@ -53,6 +56,8 @@ export class YaCAClientIntercomModule {
                 undefined,
                 CommDeviceMode.TRANSCEIVER,
                 CommDeviceMode.TRANSCEIVER,
+                undefined,
+                speakerSettings,
             )
         })
     }

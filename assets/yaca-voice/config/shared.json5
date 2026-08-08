@@ -193,8 +193,11 @@
    * transmits and the range still applies, only the sound colouring is skipped.
    *
    * Following values are available:
-   * - Communication devices: "RADIO", "PHONE", "PHONE_SPEAKER", "PHONE_HISTORICAL", "MEGAPHONE", "INTERCOM"
-   * - Effects without a device: "MUFFLE", "WATER", "REVERB", "ECHO"
+   * - Communication devices: "RADIO", "PHONE", "PHONE_SPEAKER", "PHONE_HISTORICAL", "MEGAPHONE", "INTERCOM",
+   *   "AIRBORNE", "MICROPHONE"
+   * - Effects without a device: "MUFFLE", "WATER", "REVERB", "ECHO", "LOUDSPEAKER"
+   *   ("LOUDSPEAKER" is the cabinet colouring of devices with speaker positions - disabling it keeps the PA
+   *   positioned in the world, the signal is just no longer coloured by the box)
    *
    * This list always describes the complete set, the plugin resets all filters before applying it.
    */
