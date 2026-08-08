@@ -1948,7 +1948,7 @@ export class YaCAClientModule {
             }
 
             // Who can be heard on the phone.
-            if (this.sharedConfig.phoneHearPlayersNearby && !localData.mutedOnPhone && !voiceSetting.forceMuted && distanceToPlayer <= range) {
+            if (this.sharedConfig.phoneHearPlayersNearby && !localData.mutedOnPhone && !voiceSetting.forceMuted && distanceToPlayer <= range && (this.disabledFilters.includes(YacaEffectFilterEnum.MUFFLE) || muffleIntensity < 10)) {
                 if (this.sharedConfig.phoneHearPlayersNearby === 'PHONE_SPEAKER' && phoneSpeakerActive) {
                     playerToHearOnPhone.add(remoteId)
                 } else if (this.sharedConfig.phoneHearPlayersNearby === true && this.phoneModule.inCallWith.size) {
