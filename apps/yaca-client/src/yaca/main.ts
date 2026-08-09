@@ -1900,7 +1900,8 @@ export class YaCAClientModule {
 
         const localPos = GetEntityCoords(localPlayerPed, false)
         const currentRoom = GetRoomKeyFromEntity(localPlayerPed)
-        const localRoomPair = this.getRoomPair(localPlayerPed, Boolean(localPlayerVehicle))
+        const localVehicleEncloses = this.vehicleEnclosesFromRoom(localPlayerVehicle)
+        const localRoomPair = this.getRoomPair(localPlayerPed, localVehicleEncloses)
         const hasVehicleOpening = this.isFiveM ? this.checkIfVehicleHasOpening(localPlayerVehicle) : true
         const phoneSpeakerActive = this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size
         const localVehicleIsAirborne = this.isAirborneVehicle(localPlayerVehicle)
@@ -1939,7 +1940,7 @@ export class YaCAClientModule {
             const isUnderwater = IsPedSwimmingUnderWater(playerPed) === 1
             const playerVehicle = GetVehiclePedIsIn(playerPed, false)
             const sharesLocalVehicle = Boolean(localPlayerVehicle) && playerVehicle === localPlayerVehicle
-            const playerRoomPair = this.getRoomPair(playerPed, sharesLocalVehicle)
+            const playerRoomPair = this.getRoomPair(playerPed, sharesLocalVehicle && localVehicleEncloses)
 
             if (localVehicleIsAirborne && sharesLocalVehicle) {
                 airborneCrewMembers.add(remoteId)
@@ -2063,5 +2064,22 @@ export class YaCAClientModule {
         }
 
         return getInteriorRoomPair(ped)
+    }
+
+    /**
+     * Checks whether a vehicle encloses its occupants enough to keep their voice out of the room it stands in.
+     *
+     * Not every vehicle does. A motorcycle or a bicycle has no cabin at all, so its rider is acoustically standing in
+     * the room and has to keep its reverb.
+     *
+     * @param vehicle - The vehicle to check, false when the player is on foot.
+     * @returns {boolean} Whether the vehicle shuts its occupants off from the room.
+     */
+    vehicleEnclosesFromRoom(vehicle: number | false): boolean {
+        if (!this.isFiveM || !vehicle) {
+            return false
+        }
+
+        return !this.sharedConfig.reverb.openVehicleClasses.includes(GetVehicleClass(vehicle))
     }
 }

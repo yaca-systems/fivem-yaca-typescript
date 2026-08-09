@@ -101,6 +101,19 @@
       16
     ]
   },
+  /* Room reverb, applied to a voice from the interior room it travels through.
+   *
+   * Sitting in a vehicle normally keeps a voice out of that room, so two people in the same cabin hear each other
+   * dry. Vehicles without a cabin are the exception: their rider is acoustically standing in the room and keeps
+   * its reverb, both when speaking and when listening.
+   */
+  "reverb": {
+    // The vehicle classes that have no cabin. 8 = motorcycles, 13 = cycles. (FiveM only)
+    "openVehicleClasses": [
+      8,
+      13
+    ]
+  },
   "voiceRange": {
     // The default index which should be used for the voice range when a player joins the server.
     "defaultIndex": 1,

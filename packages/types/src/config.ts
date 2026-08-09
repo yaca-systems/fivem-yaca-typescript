@@ -46,6 +46,9 @@ export interface YacaSharedConfig {
         enabled: boolean
         vehicleClasses: number[]
     }
+    reverb: {
+        openVehicleClasses: number[]
+    }
     voiceRange: {
         defaultIndex: number
         ranges: number[]
@@ -131,6 +134,9 @@ export const defaultSharedConfig: YacaSharedConfig = {
     airborne: {
         enabled: false,
         vehicleClasses: [15, 16],
+    },
+    reverb: {
+        openVehicleClasses: [8, 13],
     },
     voiceRange: {
         defaultIndex: 1,
