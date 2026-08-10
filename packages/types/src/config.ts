@@ -180,6 +180,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
                 'swinger',
                 'locust',
                 'hotring',
+                'draugur',
             ],
         },
         intensities: {

@@ -183,7 +183,8 @@
         "tornado4",
         "swinger",
         "locust",
-        "hotring"
+        "hotring",
+        "draugur"
       ],
     },
     // The intensities of the muffling. (0 = no muffling, 10 = full muffling)
