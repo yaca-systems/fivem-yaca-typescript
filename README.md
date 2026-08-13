@@ -311,7 +311,7 @@ Starts or stops talking on the radio.
 Sets the radio mode.
 
 | Parameter | Type     | Description                                                      |
-|-----------|-----------------------------------------------------------------------------|
+|-----------|----------|------------------------------------------------------------------|
 | mode      | `string` | the radio mode to set. Can be either `None`, `Direct` or `Tower` |
 
 #### `getRadioMode(): string`
@@ -330,13 +330,23 @@ Returns whether the player is in a phone call as a `boolean`.
 
 Returns whether the player can use the megaphone as a `boolean`.
 
-#### `setCanUseMegaphone(state: boolean)`
+#### `getCurrentMegaphoneState(): boolean`
+
+Returns whether the player is using the megaphone as a `boolean`.
+
+#### `setCanUseMegaphone(state: boolean, force?: boolean)`
 
 Sets whether the player can use the megaphone.
 
-| Parameter | Type      | Description                                             |
-|-----------|-----------|---------------------------------------------------------|
-| state     | `boolean` | `true` to allow using of megaphone, `false` to disallow |
+| Parameter | Type      | Description                                                                                         |
+|-----------|-----------|-----------------------------------------------------------------------------------------------------|
+| state     | `boolean` | `true` to allow using of megaphone, `false` to disallow                                             |
+| force     | `boolean` | `true` to also allow using the megaphone outside of a vehicle, ignoring `automaticVehicleDetection` |
+
+Use `force` for a megaphone item, which should work on foot. As long as it is set, the automatic vehicle
+detection will neither stop the megaphone nor revoke the permission when the player leaves a vehicle.
+Call `setCanUseMegaphone(false)` when the item is removed to stop a running megaphone and hand the
+control back to the automatic vehicle detection.
 
 ### `useMegaphone(state: boolean)`
 

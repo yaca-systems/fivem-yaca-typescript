@@ -10,6 +10,7 @@ export class YaCAClientMegaphoneModule {
     clientModule: YaCAClientModule
 
     canUseMegaphone = false
+    forceCanUseMegaphone = false
     lastMegaphoneState = false
 
     megaphoneVehicleWhitelistHashes = new Set<number>()
@@ -52,11 +53,15 @@ export class YaCAClientMegaphoneModule {
              * If they can, it sets the `canUseMegaphone` property to `true`.
              * If they can't, it sets the `canUseMegaphone` property to `false`.
              * If the player is not in a vehicle, it sets the `canUseMegaphone` property to `false` and emits the "server:yaca:playerLeftVehicle" event.
+             * If the megaphone was force enabled, e.g. by a megaphone item, the megaphone is not stopped.
              */
             onCache<number | false>('seat', (seat) => {
                 if (seat === false || seat > 0 || !cache.vehicle) {
                     this.canUseMegaphone = false
-                    emitNet('server:yaca:playerLeftVehicle')
+
+                    if (!this.forceCanUseMegaphone) {
+                        emitNet('server:yaca:playerLeftVehicle')
+                    }
                     return
                 }
 
@@ -118,21 +123,32 @@ export class YaCAClientMegaphoneModule {
 
     registerExports() {
         /**
-         * Gets the `canUseMegaphone` property.
+         * Gets whether the player can currently use the megaphone.
          *
-         * @returns {boolean} - The `canUseMegaphone` property.
+         * @returns {boolean} - Whether the megaphone can be used.
          */
         exports('getCanUseMegaphone', () => {
-            return this.canUseMegaphone
+            return this.isMegaphoneUsable
+        })
+
+        /**
+         * Gets the current state of the megaphone.
+         *
+         * @returns {boolean} - Whether the megaphone is used.
+         */
+        exports('getCurrentMegaphoneState', () => {
+            return this.lastMegaphoneState
         })
 
         /**
          * Sets the `canUseMegaphone` property.
          *
          * @param {boolean} state - The state to set the `canUseMegaphone` property to.
+         * @param {boolean} [force=false] - Whether the megaphone can be used outside of a vehicle, e.g. for a megaphone item.
          */
-        exports('setCanUseMegaphone', (state: boolean) => {
+        exports('setCanUseMegaphone', (state: boolean, force = false) => {
             this.canUseMegaphone = state
+            this.forceCanUseMegaphone = state && force
 
             if (!state && this.lastMegaphoneState) {
                 emitNet('server:yaca:playerLeftVehicle')
@@ -198,16 +214,30 @@ export class YaCAClientMegaphoneModule {
     }
 
     /**
+     * Whether the player is currently allowed to use the megaphone.
+     * A force enabled megaphone, e.g. a megaphone item, ignores the automatic vehicle detection.
+     *
+     * @returns {boolean} - Whether the megaphone can be used.
+     */
+    get isMegaphoneUsable(): boolean {
+        if (this.forceCanUseMegaphone) {
+            return true
+        }
+
+        if (!cache.vehicle && this.clientModule.sharedConfig.megaphone.automaticVehicleDetection) {
+            return false
+        }
+
+        return this.canUseMegaphone
+    }
+
+    /**
      * Toggles the use of the megaphone.
      *
      * @param {boolean} [state=false] - The state of the megaphone. Defaults to false if not provided.
      */
     useMegaphone(state = false) {
-        if (
-            (!cache.vehicle && this.clientModule.sharedConfig.megaphone.automaticVehicleDetection) ||
-            !this.canUseMegaphone ||
-            state === this.lastMegaphoneState
-        ) {
+        if (!this.isMegaphoneUsable || state === this.lastMegaphoneState) {
             return
         }
 
