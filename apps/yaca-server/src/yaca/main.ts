@@ -21,7 +21,6 @@ import {
 } from '@yaca-voice/types'
 import { YaCAServerSaltyChatBridge } from '../bridge/saltychat'
 import { checkVersion, generateRandomName } from '../utils'
-import { triggerClientEvent } from '../utils/events'
 import { YaCAServerMegaphoneModule } from './megaphone'
 import { YaCAServerPhoneModle } from './phone'
 import { YaCAServerRadioModule } from './radio'
@@ -324,14 +323,7 @@ export class YaCAServerModule {
             }
         }
 
-        for (const [targetId, emitterTargets] of player.voiceSettings.emittedPhoneSpeaker) {
-            const target = this.players.get(targetId)
-            if (!target?.voicePlugin) {
-                continue
-            }
-
-            triggerClientEvent('client:yaca:phoneHearAround', Array.from(emitterTargets), [target.voicePlugin.clientId], false)
-        }
+        this.phoneModule.dropAllPhoneHearAround(src)
 
         if (player.voiceSettings.microphone) {
             emitNet('client:yaca:microphone', -1, src, false)

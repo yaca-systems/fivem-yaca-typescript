@@ -11,6 +11,8 @@ export class YaCAClientPhoneModule {
 
     inCallWith = new Set<number>()
     phoneSpeakerActive = false
+    phoneHearAroundWhisperTargets = new Set<number>()
+    phoneSpeakerWhisperTargets = new Set<number>()
 
     /**
      * Creates an instance of the phone module.
@@ -49,7 +51,10 @@ export class YaCAClientPhoneModule {
         onNet('client:yaca:phoneHearAround', (targetClientIds: number[], state: boolean) => {
             if (!targetClientIds.length) return
 
-            const commTargets = Array.from(targetClientIds).map((clientId) => ({ clientId }))
+            const ownClientId = this.clientModule.getPlayerByID(cache.serverId)?.clientId
+            const commTargets = targetClientIds.filter((clientId) => clientId !== ownClientId).map((clientId) => ({ clientId }))
+
+            if (!commTargets.length) return
 
             this.clientModule.setPlayersCommType(
                 commTargets,
@@ -61,6 +66,33 @@ export class YaCAClientPhoneModule {
                 CommDeviceMode.TRANSCEIVER,
                 GlobalState[PHONE_SPEAKER_STATE_NAME] ?? undefined,
             )
+        })
+
+        /**
+         * Handles the "client:yaca:phoneHearAroundWhisper" server event.
+         *
+         * @param {number[]} callMemberClientIds - The client IDs of the call members to be heard by this player.
+         * @param {boolean} state - The state of the phone hear around.
+         */
+        onNet('client:yaca:phoneHearAroundWhisper', (callMemberClientIds: number[], state: boolean) => {
+            if (!this.clientModule.useWhisper || !callMemberClientIds.length) return
+
+            const ownClientId = this.clientModule.getPlayerByID(cache.serverId)?.clientId
+            const commTargets = callMemberClientIds.filter((clientId) => clientId !== ownClientId).map((clientId) => ({ clientId }))
+
+            if (!commTargets.length) return
+
+            for (const commTarget of commTargets) {
+                if (state) {
+                    this.phoneHearAroundWhisperTargets.add(commTarget.clientId)
+                } else {
+                    this.phoneHearAroundWhisperTargets.delete(commTarget.clientId)
+                }
+            }
+
+            const ownMode = state || !this.phoneHearAroundWhisperTargets.size ? CommDeviceMode.SENDER : undefined
+
+            this.clientModule.setPlayersCommType(commTargets, YacaFilterEnum.PHONE, state, undefined, undefined, ownMode, CommDeviceMode.RECEIVER)
         })
 
         /**
@@ -83,7 +115,11 @@ export class YaCAClientPhoneModule {
             }
 
             if (this.clientModule.useWhisper && target.remoteID === cache.serverId) {
-                this.clientModule.setPlayersCommType([], YacaFilterEnum.PHONE, !state, undefined, undefined, CommDeviceMode.SENDER)
+                this.clientModule.setPlayersCommType([], YacaFilterEnum.PHONE, !state, undefined, undefined, CommDeviceMode.TRANSCEIVER)
+
+                if (this.phoneSpeakerWhisperTargets.size) {
+                    this.clientModule.setPlayersCommType([], YacaFilterEnum.PHONE_SPEAKER, !state, undefined, undefined, CommDeviceMode.SENDER)
+                }
             } else if (!this.clientModule.useWhisper && this.inCallWith.has(targetID)) {
                 this.clientModule.setPlayersCommType(
                     target,
@@ -124,13 +160,21 @@ export class YaCAClientPhoneModule {
                 return
             }
 
+            for (const target of targets) {
+                if (state) {
+                    this.phoneSpeakerWhisperTargets.add(target.clientId)
+                } else {
+                    this.phoneSpeakerWhisperTargets.delete(target.clientId)
+                }
+            }
+
             this.clientModule.setPlayersCommType(
                 Array.from(targets),
                 YacaFilterEnum.PHONE_SPEAKER,
                 state,
                 undefined,
                 undefined,
-                CommDeviceMode.SENDER,
+                this.ownPhoneSpeakerMode(state),
                 CommDeviceMode.RECEIVER,
             )
         })
@@ -170,6 +214,23 @@ export class YaCAClientPhoneModule {
                 this.clientModule.setPlayerVariable(playerSource, 'phoneCallMemberIds', Array.isArray(value) ? value : [value])
             }
         })
+    }
+
+    /**
+     * The own SENDER role on the phone speaker device.
+     *
+     * It is one membership for every bystander at once, so it is only given up together with the last of them - and
+     * it is not claimed at all while muted on the phone, or the next bystander arriving at the other end would hand
+     * the muted player his voice back.
+     *
+     * @param {boolean} state - Whether the bystanders in this message are being added or removed.
+     */
+    private ownPhoneSpeakerMode(state: boolean): CommDeviceMode | undefined {
+        if (this.clientModule.getPlayerByID(cache.serverId)?.mutedOnPhone) {
+            return undefined
+        }
+
+        return state || !this.phoneSpeakerWhisperTargets.size ? CommDeviceMode.SENDER : undefined
     }
 
     /**
@@ -274,13 +335,18 @@ export class YaCAClientPhoneModule {
             commTargets.push(target)
         }
 
+        // one membership for every call at once, so it is only given up with the last one - and not claimed again
+        // while muted, or joining a further call would hand the muted player his voice back
+        const mutedOnPhone = this.clientModule.getPlayerByID(cache.serverId)?.mutedOnPhone
+        const ownMode = (state && mutedOnPhone) || (!state && this.inCallWith.size) ? undefined : CommDeviceMode.TRANSCEIVER
+
         this.clientModule.setPlayersCommType(
             commTargets,
             filter,
             state,
             undefined,
             undefined,
-            state || (!state && this.inCallWith.size) ? CommDeviceMode.TRANSCEIVER : undefined,
+            ownMode,
             CommDeviceMode.TRANSCEIVER,
             GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] ?? undefined,
         )

@@ -104,7 +104,7 @@ export class YaCAClientModule {
     isSoundMuted = false
     isSoundDisabled = false
 
-    currentlyPhoneSpeakerApplied = new Set<number>()
+    currentlyPhoneSpeakerApplied = new Map<number, number>()
     currentlySendingPhoneSpeakerSender = new Set<number>()
     phoneHearNearbyPlayer = new Set<number>()
     currentlyAirborneApplied = new Set<number>()
@@ -1349,6 +1349,11 @@ export class YaCAClientModule {
      *                                               device is emitted from its owner when omitted. The positions belong
      *                                               to the channel, so all members of the channel share them. Sending
      *                                               `on: true` again for an already active channel updates them.
+     * @param {number} speakerClient - The player whose device radiates this voice, when that is somebody other than
+     *                                 the one speaking - a phone held on speaker by the other end of the call. The
+     *                                 device stays carried and is emitted, muffled and ranged from that player, so
+     *                                 this is not the field for a fixed array. Naming the speaker himself is the same
+     *                                 as omitting it. Optional.
      */
     setPlayersCommType(
         players: { clientId: number } | { clientId: number }[],
@@ -1360,6 +1365,7 @@ export class YaCAClientModule {
         otherPlayersMode?: CommDeviceMode,
         errorLevel?: number | null,
         speakerSettings?: YacaSpeakerSettings,
+        speakerClient?: number | null,
     ) {
         if (!Array.isArray(players)) {
             players = [players]
@@ -1410,6 +1416,10 @@ export class YaCAClientModule {
                 protocol.speaker_interior_key = toUInt32(speakerSettings.interiorKey)
                 protocol.speaker_room_key = toUInt32(speakerSettings.roomKey)
             }
+        }
+
+        if (typeof speakerClient === 'number') {
+            protocol.speaker_client_id = speakerClient
         }
 
         this.sendWebsocket({
@@ -1703,9 +1713,10 @@ export class YaCAClientModule {
      * Handles the phone speaker emit.
      *
      * @param playersToPhoneSpeaker - The players to send the phone speaker to.
-     * @param playersOnPhoneSpeaker - The players who are on phone speaker.
+     * @param phoneSpeakerHolders - The players who are on phone speaker, mapped to the client id of the handset
+     *                              radiating them.
      */
-    handlePhoneSpeakerEmit(playersToPhoneSpeaker: Set<number>, playersOnPhoneSpeaker: Set<number>): void {
+    handlePhoneSpeakerEmit(playersToPhoneSpeaker: Set<number>, phoneSpeakerHolders: Map<number, number>): void {
         if (this.useWhisper) {
             if (
                 (this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) ||
@@ -1722,8 +1733,35 @@ export class YaCAClientModule {
             }
         }
 
-        for (const playerId of this.currentlyPhoneSpeakerApplied) {
-            if (playersOnPhoneSpeaker.has(playerId)) {
+        for (const [playerId, holderClientId] of phoneSpeakerHolders) {
+            if (this.currentlyPhoneSpeakerApplied.get(playerId) === holderClientId) {
+                continue
+            }
+
+            const player = this.getPlayerByID(playerId)
+
+            if (!player?.clientId) {
+                continue
+            }
+
+            this.setPlayersCommType(
+                player,
+                YacaFilterEnum.PHONE_SPEAKER,
+                true,
+                undefined,
+                this.sharedConfig.maxPhoneSpeakerRange,
+                CommDeviceMode.RECEIVER,
+                CommDeviceMode.SENDER,
+                undefined,
+                undefined,
+                holderClientId,
+            )
+
+            this.currentlyPhoneSpeakerApplied.set(playerId, holderClientId)
+        }
+
+        for (const playerId of this.currentlyPhoneSpeakerApplied.keys()) {
+            if (phoneSpeakerHolders.has(playerId)) {
                 continue
             }
 
@@ -1875,7 +1913,7 @@ export class YaCAClientModule {
 
         const players = new Map<number, YacaPluginPlayerData>()
         const playersToPhoneSpeaker = new Set<number>()
-        const playersOnPhoneSpeaker = new Set<number>()
+        const phoneSpeakerHolders = new Map<number, number>()
         const playerToHearOnPhone = new Set<number>()
 
         let localPlayerPed = cache.ped
@@ -1946,25 +1984,23 @@ export class YaCAClientModule {
                 airborneCrewMembers.add(remoteId)
             }
 
-            if (!playersOnPhoneSpeaker.has(remoteId)) {
-                const obj: YacaPluginPlayerData = {
-                    client_id: voiceSetting.clientId,
-                    position: convertNumberArrayToXYZ(playerPos),
-                    direction: convertNumberArrayToXYZ(playerDirection),
-                    range,
-                    is_underwater: isUnderwater,
-                    muffle_intensity: muffleIntensity,
-                    is_muted: voiceSetting.forceMuted ?? false,
-                    volume_modifier: typeof voiceSetting.volumeModifier === 'number' ? voiceSetting.volumeModifier : undefined,
-                }
-
-                if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {
-                    obj.interior_key = playerRoomPair.interiorKey
-                    obj.room_key = playerRoomPair.roomKey
-                }
-
-                players.set(remoteId, obj)
+            const obj: YacaPluginPlayerData = {
+                client_id: voiceSetting.clientId,
+                position: convertNumberArrayToXYZ(playerPos),
+                direction: convertNumberArrayToXYZ(playerDirection),
+                range,
+                is_underwater: isUnderwater,
+                muffle_intensity: muffleIntensity,
+                is_muted: voiceSetting.forceMuted ?? false,
+                volume_modifier: typeof voiceSetting.volumeModifier === 'number' ? voiceSetting.volumeModifier : undefined,
             }
+
+            if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {
+                obj.interior_key = playerRoomPair.interiorKey
+                obj.room_key = playerRoomPair.roomKey
+            }
+
+            players.set(remoteId, obj)
 
             // Who can be heard on the phone.
             if (this.sharedConfig.phoneHearPlayersNearby && !localData.mutedOnPhone && !voiceSetting.forceMuted && distanceToPlayer <= range) {
@@ -1989,44 +2025,13 @@ export class YaCAClientModule {
                 const phoneCallMember = this.getPlayerByID(phoneCallMemberId)
                 if (!phoneCallMember?.clientId || phoneCallMember.mutedOnPhone || phoneCallMember.forceMuted) continue
 
-                players.delete(phoneCallMemberId)
-                const obj: YacaPluginPlayerData = {
-                    client_id: phoneCallMember.clientId,
-                    position: convertNumberArrayToXYZ(playerPos),
-                    direction: convertNumberArrayToXYZ(playerDirection),
-                    range: this.sharedConfig.maxPhoneSpeakerRange,
-                    is_underwater: isUnderwater,
-                    muffle_intensity: muffleIntensity,
-                    is_muted: false,
-                    volume_modifier: typeof phoneCallMember.volumeModifier === 'number' ? phoneCallMember.volumeModifier : undefined,
+                if (!phoneSpeakerHolders.has(phoneCallMemberId) || this.currentlyPhoneSpeakerApplied.get(phoneCallMemberId) === voiceSetting.clientId) {
+                    phoneSpeakerHolders.set(phoneCallMemberId, voiceSetting.clientId)
                 }
-
-                if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {
-                    obj.interior_key = playerRoomPair.interiorKey
-                    obj.room_key = playerRoomPair.roomKey
-                }
-
-                players.set(phoneCallMemberId, obj)
-
-                playersOnPhoneSpeaker.add(phoneCallMemberId)
-
-                if (this.currentlyPhoneSpeakerApplied.has(phoneCallMemberId)) continue
-
-                this.setPlayersCommType(
-                    phoneCallMember,
-                    YacaFilterEnum.PHONE_SPEAKER,
-                    true,
-                    undefined,
-                    this.sharedConfig.maxPhoneSpeakerRange,
-                    CommDeviceMode.RECEIVER,
-                    CommDeviceMode.SENDER,
-                )
-
-                this.currentlyPhoneSpeakerApplied.add(phoneCallMemberId)
             }
         }
 
-        this.handlePhoneSpeakerEmit(playersToPhoneSpeaker, playersOnPhoneSpeaker)
+        this.handlePhoneSpeakerEmit(playersToPhoneSpeaker, phoneSpeakerHolders)
         this.handlePhoneEmit(playerToHearOnPhone)
         this.handleAirborneEmit(airborneCrewMembers)
 

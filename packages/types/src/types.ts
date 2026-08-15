@@ -78,6 +78,7 @@ export interface YacaProtocol {
     speaker_positions?: YacaVector3[]
     speaker_room_key?: number
     speaker_interior_key?: number
+    speaker_client_id?: number
 }
 
 /**
