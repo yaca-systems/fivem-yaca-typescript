@@ -912,11 +912,15 @@ Use it to bind the player to their TeamSpeak identity server side.
 
 The event is triggered when the radio frequency of a player changes.
 
-| Parameter | Type     | Description                             |
-|-----------|----------|-----------------------------------------|
-| source    | `int`    | the player source                       |
-| channel   | `int`    | the channel where the frequency was set |
-| frequency | `string` | the frequency to set                    |
+| Parameter | Type     | Description                                                      |
+|-----------|----------|------------------------------------------------------------------|
+| source    | `int`    | the player source                                                |
+| channel   | `int`    | the channel where the frequency was set                          |
+| frequency | `string` | the frequency to set, `"0"` when the player has left the channel |
+
+Like the client side `yaca:external:setRadioFrequency`, leaving a channel is reported as the frequency `"0"`. This
+covers all ways out of a channel: setting the frequency to `"0"`, switching to another frequency and losing the access
+to a secured frequency. Switching from one frequency to another emits the event once, with the new frequency.
 
 ### yaca:external:changedRadioMuteState
 

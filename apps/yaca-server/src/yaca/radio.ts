@@ -324,13 +324,18 @@ export class YaCAServerRadioModule {
             return
         }
 
-        // Leave the old frequency if it's different from the new one
+        // Leave the old frequency if it's different from the new one, the event is emitted below with the new frequency
+        let leftOldFrequency = false
         if (oldFrequency !== frequency) {
-            this.leaveRadioFrequency(src, channel, oldFrequency)
+            leftOldFrequency = this.leaveRadioFrequency(src, channel, oldFrequency, false)
         }
 
         // Check if the frequency is secured
         if (!this.hasAccessToRadioFrequency(src, frequency)) {
+            if (leftOldFrequency) {
+                emit('yaca:external:changedRadioFrequency', src, channel, '0')
+            }
+
             return
         }
 
@@ -352,16 +357,18 @@ export class YaCAServerRadioModule {
      * @param {number} src - The player to leave the radio frequency.
      * @param {number} channel - The channel to leave.
      * @param {string} frequency - The frequency to leave.
+     * @param {boolean} emitEvent - Whether to emit `yaca:external:changedRadioFrequency`, disable it if the caller emits it with the new frequency.
+     * @returns {boolean} Whether the player was in the frequency and left it.
      */
-    leaveRadioFrequency(src: number, channel: number, frequency: string) {
+    leaveRadioFrequency(src: number, channel: number, frequency: string, emitEvent = true): boolean {
         const player = this.serverModule.getPlayer(src)
         if (!player) {
-            return
+            return false
         }
 
         const allPlayersInChannel = this.radioFrequencyMap.get(frequency)
         if (!allPlayersInChannel) {
-            return
+            return false
         }
 
         player.radioSettings.frequencies[channel] = '0'
@@ -395,6 +402,12 @@ export class YaCAServerRadioModule {
         if (!allPlayersInChannel.size) {
             this.radioFrequencyMap.delete(frequency)
         }
+
+        if (emitEvent) {
+            emit('yaca:external:changedRadioFrequency', src, channel, '0')
+        }
+
+        return true
     }
 
     /**
