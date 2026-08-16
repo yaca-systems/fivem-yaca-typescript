@@ -259,7 +259,7 @@ Changes the volume of the active radio channel. Returns whether the operation wa
 |-----------|-----------|--------------------------------|
 | higher    | `boolean` | whether to increase the volume |
 
-#### `changeRadioChannelVolumeRaw(channel: number, volume: number): bool`
+#### `changeRadioChannelVolumeRaw(volume: number, channel: number): bool`
 
 Changes the volume of a radio channel. Returns whether the operation was successful as `bool`.
 
