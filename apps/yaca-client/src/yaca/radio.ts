@@ -164,10 +164,10 @@ export class YaCAClientRadioModule {
          * Exports the `changeRadioChannelVolumeRaw` function to the plugin.
          * This function changes the volume of a radio channel.
          *
-         * @param {number} channel - The channel number.
          * @param {number} volume - The volume to set.
+         * @param {number} channel - The channel number.
          */
-        exports('changeRadioChannelVolumeRaw', (channel: number, volume: number) => this.changeRadioChannelVolumeRaw(volume, channel))
+        exports('changeRadioChannelVolumeRaw', (volume: number, channel: number) => this.changeRadioChannelVolumeRaw(volume, channel))
 
         /**
          * Returns the volume of a radio channel.
