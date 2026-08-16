@@ -13,7 +13,6 @@
     },
     "devDependencies": {
         "@citizenfx/client": "latest",
-        "@types/luxon": "^3.7.1",
         "@yaca-voice/common": "workspace:*",
         "@yaca-voice/types": "workspace:*",
         "@yaca-voice/typescript-config": "workspace:*"
