@@ -84,7 +84,7 @@ export class YaCAServerModule {
 
         this.serverConfig = loadConfig<YacaServerConfig>('config/server.json5', defaultServerConfig)
         this.sharedConfig = loadConfig<YacaSharedConfig>('config/shared.json5', defaultSharedConfig)
-        this.towerConfig = loadConfig<YacaTowerConfig>('config/tower.json5', defaultTowerConfig)
+        this.towerConfig = loadConfig<YacaTowerConfig>('config/towers.json5', defaultTowerConfig)
 
         initLocale(this.sharedConfig.locale)
 
