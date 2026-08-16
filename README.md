@@ -335,6 +335,22 @@ Resets the radio towers to the ones from `config/towers.json5`.
 
 Returns the radio towers which are currently in use as an array of `[x, y, z]` coordinates.
 
+#### `getRadioSignalStrength(serverId?: number): number`
+
+Returns the current radio signal strength as a `number` between `0` (no signal) and `1` (perfect signal). The global
+error level is included in the result.
+
+Depending on the radio mode the value is calculated differently:
+
+- `Tower`: based on the distance to the nearest radio tower
+- `Direct`: based on the distance to the player given via `serverId`. Returns `0` if no `serverId` is given or the
+  player is not in scope
+- `None`: only the global error level is taken into account
+
+| Parameter | Type     | Description                                                           |
+|-----------|----------|-----------------------------------------------------------------------|
+| serverId  | `number` | the player to calculate the signal strength to, only used in `Direct` |
+
 ### Phone
 
 #### `isInCall(): boolean`

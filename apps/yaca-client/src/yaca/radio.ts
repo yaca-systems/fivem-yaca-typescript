@@ -247,6 +247,14 @@ export class YaCAClientRadioModule {
          * @returns {[number, number, number][]} The tower positions.
          */
         exports('getRadioTowers', () => this.getRadioTowers())
+
+        /**
+         * Returns the current radio signal strength of the player.
+         *
+         * @param {number} [serverId] - The player to calculate the signal strength to, only used in the `Direct` radio mode.
+         * @returns {number} The signal strength, from 0 (no signal) to 1 (perfect signal).
+         */
+        exports('getRadioSignalStrength', (serverId?: number) => this.getRadioSignalStrength(serverId))
     }
 
     registerStateBagHandlers() {
@@ -659,6 +667,42 @@ export class YaCAClientRadioModule {
     calculateSignalStrength(distance: number, maxDistance: number = this.clientModule.sharedConfig.radioSettings.maxDistance): number {
         const ratio = distance / maxDistance
         return clamp(Math.log10(1 + ratio * 8.5) / Math.log10(10), 0, 1)
+    }
+
+    /**
+     * Get the current radio signal strength of the local player, including the global error level.
+     *
+     * In the `Tower` radio mode the distance to the nearest radio tower is used, in the `Direct` radio mode the
+     * distance to the given player and in the `None` radio mode only the global error level is taken into account.
+     *
+     * @param {number} [serverId] - The player to calculate the signal strength to, only used in the `Direct` radio mode.
+     *
+     * @returns {number} The signal strength, from 0 (no signal) to 1 (perfect signal).
+     */
+    getRadioSignalStrength(serverId?: number): number {
+        const globalErrorLevel = GlobalState[GLOBAL_ERROR_LEVEL_STATE_NAME] || 0
+
+        if (this.radioMode === 'None') {
+            return clamp(1 - globalErrorLevel, 0, 1)
+        }
+
+        let distance = Number.MAX_VALUE
+
+        if (this.radioMode === 'Tower') {
+            distance = this.getNearestRadioTower()
+        } else if (typeof serverId === 'number') {
+            const playerId = GetPlayerFromServerId(serverId)
+
+            if (playerId !== -1) {
+                distance = calculateDistanceVec3(GetEntityCoords(cache.ped, false), GetEntityCoords(GetPlayerPed(playerId), false))
+            }
+        }
+
+        if (distance > this.clientModule.sharedConfig.radioSettings.maxDistance) {
+            return 0
+        }
+
+        return clamp(1 - Math.max(this.calculateSignalStrength(distance), globalErrorLevel), 0, 1)
     }
 
     /**
