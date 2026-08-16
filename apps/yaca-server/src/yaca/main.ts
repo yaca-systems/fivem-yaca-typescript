@@ -482,6 +482,8 @@ export class YaCAServerModule {
             excludeChannels: this.serverConfig.excludeChannels,
         }
         emitNet('client:yaca:init', src, initObject)
+
+        this.radioModule.syncRadioTowers(src)
     }
 
     /**

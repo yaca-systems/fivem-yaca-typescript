@@ -1,4 +1,4 @@
-import { clamp, GLOBAL_ERROR_LEVEL_STATE_NAME, locale, RADIO_PROP_STATE_NAME } from '@yaca-voice/common'
+import { clamp, GLOBAL_ERROR_LEVEL_STATE_NAME, isValidTowerPositions, locale, RADIO_PROP_STATE_NAME } from '@yaca-voice/common'
 import {
     CommDeviceMode,
     type radioMode,
@@ -30,6 +30,8 @@ export class YaCAClientRadioModule {
     activeRadioChannel = 1
     secondaryRadioChannel = 2
 
+    defaultTowerPositions: [number, number, number][] = []
+
     radioOnCooldown = false
     currentRadioProp: number | null = null
 
@@ -49,6 +51,7 @@ export class YaCAClientRadioModule {
         this.clientModule = clientModule
 
         this.radioMode = this.clientModule.sharedConfig.radioSettings.mode
+        this.defaultTowerPositions = [...this.clientModule.towerConfig.towerPositions]
 
         this.registerExports()
         this.registerStateBagHandlers()
@@ -224,6 +227,26 @@ export class YaCAClientRadioModule {
          * @returns {radioMode} The current radio mode.
          */
         exports('getRadioMode', () => this.radioMode)
+
+        /**
+         * Overrides the radio towers used in the `Tower` radio mode.
+         *
+         * @param {[number, number, number][]} towers - The tower positions to use.
+         * @returns {boolean} Whether the towers were applied.
+         */
+        exports('setRadioTowers', (towers: [number, number, number][]) => this.setRadioTowers(towers))
+
+        /**
+         * Resets the radio towers to the ones from the config.
+         */
+        exports('resetRadioTowers', () => this.resetRadioTowers())
+
+        /**
+         * Returns the radio towers which are currently in use.
+         *
+         * @returns {[number, number, number][]} The tower positions.
+         */
+        exports('getRadioTowers', () => this.getRadioTowers())
     }
 
     registerStateBagHandlers() {
@@ -293,6 +316,20 @@ export class YaCAClientRadioModule {
          */
         onNet('client:yaca:setRadioFreq', (channel: number, frequency: string) => {
             this.setRadioFrequency(channel, frequency)
+        })
+
+        /**
+         * Handles the "client:yaca:setRadioTowers" server event.
+         *
+         * @param {[number, number, number][] | null} towers - The tower positions to use, `null` resets them to the ones from the config.
+         */
+        onNet('client:yaca:setRadioTowers', (towers: [number, number, number][] | null) => {
+            if (towers === null) {
+                this.resetRadioTowers()
+                return
+            }
+
+            this.setRadioTowers(towers)
         })
 
         /**
@@ -645,6 +682,40 @@ export class YaCAClientRadioModule {
         }
 
         return nearestTowerDistance
+    }
+
+    /**
+     * Override the radio towers used in the `Tower` radio mode.
+     *
+     * @param {[number, number, number][]} towers - The tower positions to use, each one as a `[x, y, z]` coordinate.
+     *
+     * @returns {boolean} Whether the towers were applied.
+     */
+    setRadioTowers(towers: [number, number, number][]): boolean {
+        if (!isValidTowerPositions(towers)) {
+            console.error('[YaCA] Invalid radio towers given, expected an array of [x, y, z] coordinates.')
+            return false
+        }
+
+        this.clientModule.towerConfig.towerPositions = towers.map((tower) => [...tower] as [number, number, number])
+
+        return true
+    }
+
+    /**
+     * Reset the radio towers to the ones from the config.
+     */
+    resetRadioTowers() {
+        this.clientModule.towerConfig.towerPositions = [...this.defaultTowerPositions]
+    }
+
+    /**
+     * Get the radio towers which are currently in use.
+     *
+     * @returns {[number, number, number][]} The tower positions.
+     */
+    getRadioTowers(): [number, number, number][] {
+        return this.clientModule.towerConfig.towerPositions.map((tower) => [...tower] as [number, number, number])
     }
 
     /**

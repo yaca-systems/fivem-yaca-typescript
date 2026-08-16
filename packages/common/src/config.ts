@@ -51,6 +51,22 @@ function mergeAndValidate<T extends object>(defaultObj: T, parsedObj: T, path: s
 }
 
 /**
+ * Check if a value is a valid list of radio tower positions.
+ *
+ * @param towers - The value to check.
+ *
+ * @returns Whether the value is a list of `[x, y, z]` coordinates.
+ */
+export function isValidTowerPositions(towers: unknown): towers is [number, number, number][] {
+    return (
+        Array.isArray(towers) &&
+        towers.every(
+            (tower) => Array.isArray(tower) && tower.length === 3 && tower.every((coordinate) => typeof coordinate === 'number' && Number.isFinite(coordinate)),
+        )
+    )
+}
+
+/**
  * Load a config file from the resource and merge it with the default values.
  *
  * @param filePath - The path to the config file.

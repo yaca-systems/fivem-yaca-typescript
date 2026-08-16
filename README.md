@@ -318,6 +318,23 @@ Sets the radio mode.
 
 Returns the radio mode as `string`.
 
+#### `setRadioTowers(towers: number[][]): boolean`
+
+Overrides the radio towers from `config/towers.json5` for this player. Only used when the radio mode is `Tower`.
+Returns `false` if the given towers are invalid.
+
+| Parameter | Type         | Description                                  |
+|-----------|--------------|----------------------------------------------|
+| towers    | `number[][]` | the tower positions, each one as `[x, y, z]` |
+
+#### `resetRadioTowers()`
+
+Resets the radio towers to the ones from `config/towers.json5`.
+
+#### `getRadioTowers(): number[][]`
+
+Returns the radio towers which are currently in use as an array of `[x, y, z]` coordinates.
+
 ### Phone
 
 #### `isInCall(): boolean`
@@ -474,6 +491,23 @@ Sets a frequency or a range as permitted for a specific player.
 #### `getPermittedRadioFrequencies(src: number): Array<{ start: string, end?: string }>`
 
 Returns all permitted radio frequencies for a specific player as an array of objects.
+
+#### `setRadioTowers(towers: number[][]): boolean`
+
+Overrides the radio towers from `config/towers.json5` for all players, also for the ones joining afterwards.
+Only used when the radio mode is `Tower`. Returns `false` if the given towers are invalid.
+
+| Parameter | Type         | Description                                  |
+|-----------|--------------|----------------------------------------------|
+| towers    | `number[][]` | the tower positions, each one as `[x, y, z]` |
+
+#### `resetRadioTowers()`
+
+Resets the radio towers to the ones from `config/towers.json5` for all players.
+
+#### `getRadioTowers(): number[][]`
+
+Returns the radio towers which are currently in use as an array of `[x, y, z]` coordinates.
 
 ### Phone
 

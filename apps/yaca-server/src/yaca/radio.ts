@@ -1,5 +1,5 @@
-import { locale } from '@yaca-voice/common'
-import { YacaNotificationType, type YacaServerConfig, type YacaSharedConfig } from '@yaca-voice/types'
+import { isValidTowerPositions, locale } from '@yaca-voice/common'
+import { YacaNotificationType, type YacaServerConfig, type YacaSharedConfig, type YacaTowerConfig } from '@yaca-voice/types'
 import { triggerClientEvent } from '../utils/events'
 import type { YaCAServerModule } from './main'
 
@@ -10,10 +10,15 @@ export class YaCAServerRadioModule {
     private serverModule: YaCAServerModule
     private sharedConfig: YacaSharedConfig
     private serverConfig: YacaServerConfig
+    private towerConfig: YacaTowerConfig
 
     radioFrequencyMap = new Map<string, Map<number, { muted: boolean }>>()
 
     securedRadioFrequencies: { start: string; end?: string }[] = []
+
+    defaultTowerPositions: [number, number, number][] = []
+
+    towersOverridden = false
 
     /**
      * Creates an instance of the radio module.
@@ -24,6 +29,8 @@ export class YaCAServerRadioModule {
         this.serverModule = serverModule
         this.sharedConfig = serverModule.sharedConfig
         this.serverConfig = serverModule.serverConfig
+        this.towerConfig = serverModule.towerConfig
+        this.defaultTowerPositions = [...this.towerConfig.towerPositions]
 
         this.registerEvents()
         this.registerExports()
@@ -142,6 +149,79 @@ export class YaCAServerRadioModule {
          * @returns {Array<{ start: string, end?: string }>} - The permitted radio frequencies.
          */
         exports('getPermittedRadioFrequencies', (src: number) => this.getPermittedRadioFrequencies(src))
+
+        /**
+         * Override the radio towers used in the `Tower` radio mode for all players.
+         *
+         * @param {[number, number, number][]} towers - The tower positions to use.
+         * @returns {boolean} - Whether the towers were applied.
+         */
+        exports('setRadioTowers', (towers: [number, number, number][]) => this.setRadioTowers(towers))
+
+        /**
+         * Reset the radio towers to the ones from the config for all players.
+         */
+        exports('resetRadioTowers', () => this.resetRadioTowers())
+
+        /**
+         * Get the radio towers which are currently in use.
+         *
+         * @returns {[number, number, number][]} - The tower positions.
+         */
+        exports('getRadioTowers', () => this.getRadioTowers())
+    }
+
+    /**
+     * Override the radio towers used in the `Tower` radio mode for all players.
+     *
+     * @param towers - The tower positions to use, each one as a `[x, y, z]` coordinate.
+     *
+     * @returns {boolean} Whether the towers were applied.
+     */
+    setRadioTowers(towers: [number, number, number][]): boolean {
+        if (!isValidTowerPositions(towers)) {
+            console.error('[YaCA] Invalid radio towers given, expected an array of [x, y, z] coordinates.')
+            return false
+        }
+
+        this.towerConfig.towerPositions = towers.map((tower) => [...tower] as [number, number, number])
+        this.towersOverridden = true
+
+        emitNet('client:yaca:setRadioTowers', -1, this.towerConfig.towerPositions)
+
+        return true
+    }
+
+    /**
+     * Reset the radio towers to the ones from the config for all players.
+     */
+    resetRadioTowers() {
+        this.towerConfig.towerPositions = [...this.defaultTowerPositions]
+        this.towersOverridden = false
+
+        emitNet('client:yaca:setRadioTowers', -1, null)
+    }
+
+    /**
+     * Get the radio towers which are currently in use.
+     *
+     * @returns {[number, number, number][]} The tower positions.
+     */
+    getRadioTowers(): [number, number, number][] {
+        return this.towerConfig.towerPositions.map((tower) => [...tower] as [number, number, number])
+    }
+
+    /**
+     * Send the overridden radio towers to a player, so they use them after joining or reconnecting.
+     *
+     * @param src - The player to send the radio towers to.
+     */
+    syncRadioTowers(src: number) {
+        if (!this.towersOverridden) {
+            return
+        }
+
+        emitNet('client:yaca:setRadioTowers', src, this.towerConfig.towerPositions)
     }
 
     /**
