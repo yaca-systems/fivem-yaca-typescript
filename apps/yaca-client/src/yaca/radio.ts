@@ -1148,18 +1148,36 @@ export class YaCAClientRadioModule {
 
         const targets: YacaPlayerData[] = []
         for (const playerId of players) {
+            players.delete(playerId)
+
             const player = this.clientModule.getPlayerByID(playerId)
             if (!player?.remoteID) {
                 continue
             }
 
             targets.push(player)
-            players.delete(player.remoteID)
         }
 
         if (targets.length) {
             this.clientModule.setPlayersCommType(targets, YacaFilterEnum.RADIO, false, channel, undefined, CommDeviceMode.RECEIVER, CommDeviceMode.SENDER)
         }
+    }
+
+    /**
+     * Removes a player who has left the server from every channel he was a member of.
+     *
+     * Without this his membership only goes away if and when the local player happens
+     * to leave that same channel, so on a channel nobody leaves he stays for the whole
+     * session - see disableRadioFromPlayerInChannel for the second half of that.
+     *
+     * @param {number} remoteId - The remote ID of the player who left.
+     */
+    handleDisconnect(remoteId: number) {
+        for (const players of this.playersInRadioChannel.values()) {
+            players.delete(remoteId)
+        }
+
+        this.playersWithShortRange.delete(remoteId)
     }
 
     /**

@@ -749,7 +749,10 @@ export class YaCAClientModule {
          *
          */
         onNet('client:yaca:disconnect', (remoteId: number) => {
-            this.phoneModule.handleDisconnect(remoteId)
+            const clientId = this.getPlayerByID(remoteId)?.clientId
+
+            this.phoneModule.handleDisconnect(remoteId, clientId)
+            this.radioModule.handleDisconnect(remoteId)
             this.currentlyAirborneApplied.delete(remoteId)
             this.allPlayers.delete(remoteId)
         })

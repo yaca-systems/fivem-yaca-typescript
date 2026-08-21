@@ -270,10 +270,26 @@ export class YaCAClientPhoneModule {
     /**
      * Handles the disconnection of a player from a phone call.
      *
-     * @param {number} targetID - The ID of the target.
+     * The whisper target sets are keyed by teamspeak client id and are only ever
+     * maintained by the paired on/off events from the server - a player who drops out
+     * sends no "off", so his entry stays. That is not a cosmetic leak: the size of
+     * these sets decides whether our *own* membership is ever given up (see
+     * ownPhoneSpeakerMode and the phoneHearAround branch), so one stale entry leaves us
+     * holding an unlimited sender device for the rest of the session, whispering at
+     * everyone who will take it.
+     *
+     * @param {number} targetID - The remote ID of the target.
+     * @param {number} [clientId] - The target's teamspeak client id, if it is still
+     *                              resolvable. Must be read before the player is
+     *                              dropped from allPlayers.
      */
-    handleDisconnect(targetID: number) {
+    handleDisconnect(targetID: number, clientId?: number) {
         this.inCallWith.delete(targetID)
+
+        if (typeof clientId === 'number') {
+            this.phoneSpeakerWhisperTargets.delete(clientId)
+            this.phoneHearAroundWhisperTargets.delete(clientId)
+        }
     }
 
     /**
