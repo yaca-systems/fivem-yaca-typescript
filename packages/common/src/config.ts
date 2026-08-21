@@ -67,6 +67,22 @@ export function isValidTowerPositions(towers: unknown): towers is [number, numbe
 }
 
 /**
+ * Parse a JSON5 document.
+ *
+ * Every config file of this resource ships as .json5 and the shipped ones are full of
+ * comments, so anything that reads one has to come through here. JSON.parse looks like it
+ * works right up until the first file that actually uses a comment, and then it throws and
+ * the caller silently falls back to "no config".
+ *
+ * @param fileData - The raw file contents.
+ *
+ * @returns The parsed document.
+ */
+export function parseJson5<T>(fileData: string): T {
+    return JSON5.parse(fileData) as T
+}
+
+/**
  * Load a config file from the resource and merge it with the default values.
  *
  * @param filePath - The path to the config file.

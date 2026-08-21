@@ -6,6 +6,7 @@ import {
     loadConfig,
     locale,
     MEGAPHONE_STATE_NAME,
+    parseJson5,
     VOICE_RANGE_STATE_NAME,
 } from '@yaca-voice/common'
 import {
@@ -55,7 +56,7 @@ import { YaCAClientMicrophoneModule } from './microphone'
 import { YaCAClientPhoneModule } from './phone'
 import { YaCAClientRadioModule } from './radio'
 
-const ROOM_ACOUSTICS_FILE = 'config/room_acoustics.json'
+const ROOM_ACOUSTICS_FILE = 'config/room_acoustics.json5'
 
 /**
  * The YaCA client module.
@@ -944,7 +945,11 @@ export class YaCAClientModule {
 
         let parsedFile: YacaRoomAcousticsFile
         try {
-            parsedFile = JSON.parse(fileData)
+            // JSON5 and not JSON.parse: the file ships as .json5 like every other config
+            // here, and a single comment in it made the parse throw, which put this in the
+            // catch below and sent the plugin an empty list - indistinguishable from a
+            // server that has no custom MLOs at all
+            parsedFile = parseJson5<YacaRoomAcousticsFile>(fileData)
         } catch (e) {
             console.error(`[YaCA] Error while parsing '${ROOM_ACOUSTICS_FILE}': `, e)
             return []

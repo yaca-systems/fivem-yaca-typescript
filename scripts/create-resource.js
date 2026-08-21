@@ -43,7 +43,7 @@ files {
     'web/script.js',
     'config/shared.json5',
     'config/towers.json5',
-    'config/room_acoustics.json',
+    'config/room_acoustics.json5',
     'locales/*.json',
 }
 
@@ -63,8 +63,8 @@ if (existsSync('config/yaca-voice/server.json5')) {
     copyFileSync('config/yaca-voice/server.json5', 'resource/yaca-voice/config/server.json5')
 }
 
-if (existsSync('config/yaca-voice/room_acoustics.json')) {
-    copyFileSync('config/yaca-voice/room_acoustics.json', 'resource/yaca-voice/config/room_acoustics.json')
+if (existsSync('config/yaca-voice/room_acoustics.json5')) {
+    copyFileSync('config/yaca-voice/room_acoustics.json5', 'resource/yaca-voice/config/room_acoustics.json5')
 }
 
 copyFileSync('README.md', 'resource/yaca-voice/README.md')
