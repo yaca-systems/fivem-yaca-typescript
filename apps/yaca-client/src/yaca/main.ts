@@ -789,6 +789,7 @@ export class YaCAClientModule {
             }
 
             this.phoneModule.reestablishCalls(newPlayers)
+            this.megaphoneModule.reestablishMegaphone(newPlayers)
         })
 
         /**

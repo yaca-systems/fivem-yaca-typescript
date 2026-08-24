@@ -184,33 +184,61 @@ export class YaCAClientMegaphoneModule {
                 return
             }
 
-            if (playerSource === cache.serverId) {
-                this.clientModule.setPlayersCommType(
-                    [],
-                    YacaFilterEnum.MEGAPHONE,
-                    typeof value === 'number',
-                    undefined,
-                    value,
-                    CommDeviceMode.SENDER,
-                    CommDeviceMode.RECEIVER,
-                )
-            } else {
-                const player = this.clientModule.getPlayerByID(playerSource)
-                if (!player) {
-                    return
-                }
-
-                this.clientModule.setPlayersCommType(
-                    player,
-                    YacaFilterEnum.MEGAPHONE,
-                    typeof value === 'number',
-                    undefined,
-                    value,
-                    CommDeviceMode.RECEIVER,
-                    CommDeviceMode.SENDER,
-                )
-            }
+            this.applyMegaphoneEffect(playerSource, value)
         })
+    }
+
+    /**
+     * Applies or removes the megaphone effect for a player.
+     *
+     * @param {number} playerSource - The source-id of the player the megaphone state belongs to.
+     * @param {number | null} value - The megaphone range or null if the megaphone is not used.
+     */
+    applyMegaphoneEffect(playerSource: number, value: number | null) {
+        if (playerSource === cache.serverId) {
+            this.clientModule.setPlayersCommType(
+                [],
+                YacaFilterEnum.MEGAPHONE,
+                typeof value === 'number',
+                undefined,
+                value,
+                CommDeviceMode.SENDER,
+                CommDeviceMode.RECEIVER,
+            )
+            return
+        }
+
+        const player = this.clientModule.getPlayerByID(playerSource)
+        if (!player) {
+            return
+        }
+
+        this.clientModule.setPlayersCommType(
+            player,
+            YacaFilterEnum.MEGAPHONE,
+            typeof value === 'number',
+            undefined,
+            value,
+            CommDeviceMode.RECEIVER,
+            CommDeviceMode.SENDER,
+        )
+    }
+
+    /**
+     * Reapplies the megaphone effect for players which were just added, e.g. on connect or when the resource restarted.
+     * The state bag change handler alone is not enough, as the megaphone state is already set when the player is added.
+     *
+     * @param {number[]} targetIDs - The remote IDs of the players to reestablish the megaphone effect for.
+     */
+    reestablishMegaphone(targetIDs: number[]) {
+        for (const targetId of targetIDs) {
+            const value = Player(targetId).state[MEGAPHONE_STATE_NAME]
+            if (typeof value !== 'number') {
+                continue
+            }
+
+            this.applyMegaphoneEffect(targetId, value)
+        }
     }
 
     /**
