@@ -57,7 +57,6 @@ import { YaCAClientPhoneModule } from './phone'
 import { YaCAClientRadioModule } from './radio'
 
 const ROOM_ACOUSTICS_FILE = 'config/room_acoustics.json5'
-
 /**
  * The YaCA client module.
  * This module is responsible for handling the client side of the voice plugin.
@@ -1720,6 +1719,29 @@ export class YaCAClientModule {
     }
 
     /**
+     * Whether a nearby player actually reaches this one through the game world - his voice range
+     * and the occlusion between the two.
+     *
+     * @param {number} distance - Distance between the two players.
+     * @param {number} range - The other player's voice range.
+     * @param {number} muffleIntensity - What getMuffleIntensity() measured between the two.
+     * @param {number} verticalDistance - Height difference between the two.
+     */
+    canHearThroughWorld(distance: number, range: number, muffleIntensity: number, verticalDistance: number): boolean {
+        if (distance > range) {
+            return false
+        }
+
+        if (muffleIntensity <= 0) {
+            return true
+        }
+
+        const mufflingRange = this.sharedConfig.mufflingSettings.mufflingRange
+
+        return verticalDistance < 3 && (mufflingRange < 0 || distance < mufflingRange)
+    }
+
+    /**
      * Handles the phone speaker emit.
      *
      * @param playersToPhoneSpeaker - The players to send the phone speaker to.
@@ -2012,8 +2034,14 @@ export class YaCAClientModule {
 
             players.set(remoteId, obj)
 
-            // Who can be heard on the phone.
-            if (this.sharedConfig.phoneHearPlayersNearby && !localData.mutedOnPhone && !voiceSetting.forceMuted && distanceToPlayer <= range) {
+            // Who can be heard on the phone. What the phone picks up is what we hear ourselves,
+            // occlusion included - see canHearThroughWorld
+            if (
+                this.sharedConfig.phoneHearPlayersNearby &&
+                !localData.mutedOnPhone &&
+                !voiceSetting.forceMuted &&
+                this.canHearThroughWorld(distanceToPlayer, range, muffleIntensity, Math.abs(localPos[2] - playerPos[2]))
+            ) {
                 if (this.sharedConfig.phoneHearPlayersNearby === 'PHONE_SPEAKER' && phoneSpeakerActive) {
                     playerToHearOnPhone.add(remoteId)
                 } else if (this.sharedConfig.phoneHearPlayersNearby === true && this.phoneModule.inCallWith.size) {
