@@ -89,6 +89,72 @@
     // The maximum distance between two players or to the tower to be able to hear each other.
     "maxDistance": 5000
   },
+  /* Visualization of the radio towers and the area they cover, to check how well the map is covered in the
+   * "Tower" radio mode. It can be toggled at any time with the `setTowerVisualization` export.
+   */
+  "towerVisualization": {
+    // Choose if the visualization should be shown right away, instead of only after enabling it via the export.
+    "enabled": false,
+    /* The coverage zones which are drawn around every tower. Each zone reaches up to the distance at which the
+     * signal of the tower drops to the given strength, calculated from the `maxDistance` of the radio settings,
+     * so the zones always show the signal the radio really has. A strength of 0 is the distance at which the
+     * radio stops working completely.
+     *
+     * Keep the zones tight: the zones of all towers stack on the map, so a zone which is big enough to overlap
+     * itself a few dozen times paints the whole map over, no matter how low its opacity is. Areas which are not
+     * covered by a zone are not out of range, they just have a worse signal than the outermost zone.
+     */
+    "zones": [
+      {
+        // The signal strength at the outer edge of the zone, from 0 (no signal) to 1 (perfect signal).
+        "signalStrength": 0.75,
+        // The color of the zone on the map, see https://docs.fivem.net/docs/game-references/blips/#blip-colors
+        "blipColor": 2,
+        // The opacity of the zone on the map, from 0 to 255.
+        "blipAlpha": 70,
+        // The color of the tower marker while standing inside the zone, r = red, g = green, b = blue
+        "r": 0,
+        "g": 255,
+        "b": 0
+      },
+      {
+        "signalStrength": 0.5,
+        "blipColor": 5,
+        "blipAlpha": 30,
+        "r": 255,
+        "g": 255,
+        "b": 0
+      }
+    ],
+    // The blips of the visualization. (FiveM only)
+    "blip": {
+      // Choose if a blip should be created at the position of every tower.
+      "enabled": true,
+      // Choose if the coverage zones should be drawn on the map.
+      "showZones": true,
+      // The sprite of the tower blip, see https://docs.fivem.net/docs/game-references/blips/
+      "sprite": 1,
+      // The color of the tower blip, see https://docs.fivem.net/docs/game-references/blips/#blip-colors
+      "color": 4,
+      // The scale of the tower blip.
+      "scale": 0.7
+    },
+    // The marker which is drawn in the world at the position of every tower.
+    "marker": {
+      // Choose if the marker should be enabled.
+      "enabled": true,
+      // The distance in which the towers are drawn.
+      "drawDistance": 500,
+      // The type of the marker, ignored in RedM.
+      "type": 1,
+      // The width of the marker.
+      "scale": 3.0,
+      // The height of the marker.
+      "height": 15.0,
+      // The opacity of the marker, from 0 to 255.
+      "alpha": 100
+    }
+  },
   /* The airborne filter, applied to the crew of a helicopter or aircraft while they talk to each other inside it.
    * The voice stays thin so it cuts through the rotor noise instead of sitting in it. It only applies between
    * players sitting in the same aircraft, someone standing outside hears the normal voice.

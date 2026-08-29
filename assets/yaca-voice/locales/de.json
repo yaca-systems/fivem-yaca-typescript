@@ -31,6 +31,7 @@
     "radio_not_activated": "Das Funkgerät ist nicht aktiviert!",
     "radio_secured_channel": "Der Funkkanal ist zu gut gesichert.",
     "radio_channel_invalid": "Ungültiger Funkkanal!",
+    "radio_tower": "Funkturm",
     "player_not_found": "Spieler mit der ID %s wurde nicht gefunden.",
     "ingamename_not_set": "Ingame-Name für Spieler %s ist nicht gesetzt."
 }

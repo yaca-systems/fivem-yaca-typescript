@@ -10,12 +10,14 @@ import {
 } from '@yaca-voice/types'
 import { cache, calculateDistanceVec3, createProp, registerRdrKeyBind, requestAnimDict } from '../utils'
 import type { YaCAClientModule } from './main'
+import { YaCAClientTowerVisualizationModule } from './towerVisualization'
 
 /**
  * The radio module for the client.
  */
 export class YaCAClientRadioModule {
     clientModule: YaCAClientModule
+    towerVisualizationModule: YaCAClientTowerVisualizationModule
 
     radioEnabled = false
     radioInitialized = false
@@ -62,6 +64,8 @@ export class YaCAClientRadioModule {
         } else {
             this.registerRdrKeybinds()
         }
+
+        this.towerVisualizationModule = new YaCAClientTowerVisualizationModule(this)
     }
 
     /**
@@ -670,6 +674,24 @@ export class YaCAClientRadioModule {
     }
 
     /**
+     * Calculate the distance at which the signal drops to the given signal strength.
+     *
+     * This is the inverse of {@link calculateSignalStrength}, so both always describe the same signal. The result
+     * is capped at the maximum distance, as the radio stops working completely beyond it.
+     *
+     * @param signalStrength - The signal strength, from 0 (no signal) to 1 (perfect signal).
+     * @param maxDistance - The maximum distance to the radio tower.
+     *
+     * @returns {number} The distance at which the signal has the given strength.
+     */
+    calculateDistanceForSignalStrength(signalStrength: number, maxDistance: number = this.clientModule.sharedConfig.radioSettings.maxDistance): number {
+        const errorLevel = clamp(1 - signalStrength, 0, 1)
+        const ratio = (10 ** errorLevel - 1) / 8.5
+
+        return Math.min(ratio * maxDistance, maxDistance)
+    }
+
+    /**
      * Get the current radio signal strength of the local player, including the global error level.
      *
      * In the `Tower` radio mode the distance to the nearest radio tower is used, in the `Direct` radio mode the
@@ -742,6 +764,7 @@ export class YaCAClientRadioModule {
         }
 
         this.clientModule.towerConfig.towerPositions = towers.map((tower) => [...tower] as [number, number, number])
+        this.towerVisualizationModule.refresh()
 
         return true
     }
@@ -751,6 +774,7 @@ export class YaCAClientRadioModule {
      */
     resetRadioTowers() {
         this.clientModule.towerConfig.towerPositions = [...this.defaultTowerPositions]
+        this.towerVisualizationModule.refresh()
     }
 
     /**

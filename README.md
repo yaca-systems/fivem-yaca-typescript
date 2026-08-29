@@ -351,6 +351,25 @@ Depending on the radio mode the value is calculated differently:
 |-----------|----------|-----------------------------------------------------------------------|
 | serverId  | `number` | the player to calculate the signal strength to, only used in `Direct` |
 
+#### `setTowerVisualization(state: boolean): boolean`
+
+Shows or hides the visualization of the radio towers, which draws every tower and the area it covers on the map and
+in the world. The coverage zones are calculated from the same signal strength the radio uses, so they show the real
+coverage of the `Tower` radio mode. It is configured in `towerVisualization` in `config/shared.json5`.
+Returns the new state.
+
+| Parameter | Type      | Description                       |
+|-----------|-----------|-----------------------------------|
+| state     | `boolean` | `true` to show, `false` to hide   |
+
+#### `toggleTowerVisualization(): boolean`
+
+Toggles the visualization of the radio towers and returns the new state.
+
+#### `isTowerVisualizationEnabled(): boolean`
+
+Returns whether the visualization of the radio towers is currently shown as a `boolean`.
+
 ### Phone
 
 #### `isInCall(): boolean`

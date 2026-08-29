@@ -42,6 +42,32 @@ export interface YacaSharedConfig {
         mode: radioMode
         maxDistance: number
     }
+    towerVisualization: {
+        enabled: boolean
+        zones: {
+            signalStrength: number
+            blipColor: number
+            blipAlpha: number
+            r: number
+            g: number
+            b: number
+        }[]
+        blip: {
+            enabled: boolean
+            showZones: boolean
+            sprite: number
+            color: number
+            scale: number
+        }
+        marker: {
+            enabled: boolean
+            drawDistance: number
+            type: number
+            scale: number
+            height: number
+            alpha: number
+        }
+    }
     airborne: {
         enabled: boolean
         vehicleClasses: number[]
@@ -130,6 +156,28 @@ export const defaultSharedConfig: YacaSharedConfig = {
         channelCount: 9,
         mode: 'None',
         maxDistance: 1000,
+    },
+    towerVisualization: {
+        enabled: false,
+        zones: [
+            { signalStrength: 0.75, blipColor: 2, blipAlpha: 70, r: 0, g: 255, b: 0 },
+            { signalStrength: 0.5, blipColor: 5, blipAlpha: 30, r: 255, g: 255, b: 0 },
+        ],
+        blip: {
+            enabled: true,
+            showZones: true,
+            sprite: 1,
+            color: 4,
+            scale: 0.7,
+        },
+        marker: {
+            enabled: true,
+            drawDistance: 500,
+            type: 1,
+            scale: 3.0,
+            height: 15.0,
+            alpha: 100,
+        },
     },
     airborne: {
         enabled: false,
