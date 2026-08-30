@@ -282,7 +282,8 @@ export class YaCAServerModule {
 
         // YaCA: connect to voice when NUI is ready
         onNet('server:yaca:nuiReady', () => {
-            if (!this.sharedConfig.autoConnectOnJoin) return
+            if (!this.sharedConfig.autoConnectOnJoin && !this.players.has(source)) return
+
             this.connectToVoice(source)
         })
 

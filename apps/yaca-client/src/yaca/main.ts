@@ -216,7 +216,9 @@ export class YaCAClientModule {
             this.websocket.initialized = false
             this.websocket.readyState = 0
 
-            if (this.sharedConfig.autoConnectOnJoin) {
+            if (!this.firstConnect) {
+                emitNet('server:yaca:nuiReady')
+            } else if (this.sharedConfig.autoConnectOnJoin) {
                 setTimeout(() => {
                     emitNet('server:yaca:nuiReady')
                 }, 5000)
@@ -708,6 +710,8 @@ export class YaCAClientModule {
 
             if (!this.websocket.initialized) {
                 this.websocket.initialized = true
+
+                this.websocket.removeAllListeners()
 
                 this.websocket.on('message', (msg: string) => {
                     this.handleResponse(msg)
