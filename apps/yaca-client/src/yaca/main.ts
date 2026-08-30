@@ -1085,6 +1085,9 @@ export class YaCAClientModule {
 
                     this.rangeInterval = setInterval(this.calcPlayers.bind(this), 250)
 
+                    this.currentlyPhoneSpeakerApplied.clear()
+                    this.currentlyAirborneApplied.clear()
+
                     // Set radio settings on reconnect only, else on first opening
                     if (this.radioModule.radioInitialized) {
                         this.radioModule.initRadioSettings()

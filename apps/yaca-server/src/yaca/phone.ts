@@ -237,6 +237,51 @@ export class YaCAServerPhoneModle {
     }
 
     /**
+     * Resends the phone hear around relays of a player who just (re)connected to the voice plugin.
+     *
+     * The emitting client only ever sends the changes of its bystanders, so a player who lost his devices on a
+     * plugin restart would stay deaf to them until the bystanders around the call happen to change.
+     *
+     * @param {number} src - The player who (re)connected.
+     */
+    reestablishPhoneHearAround(src: number) {
+        if (!this.serverModule.sharedConfig.phoneHearPlayersNearby) return
+
+        const player = this.serverModule.players.get(src)
+        if (!player?.voicePlugin) return
+
+        const bystanderClientIds = new Set<number>()
+        const memberClientIds = new Set<number>()
+
+        for (const emitter of this.serverModule.players.values()) {
+            for (const [bystanderId, members] of emitter.voiceSettings.emittedPhoneSpeaker) {
+                // the player hears the bystanders standing next to his call members
+                if (members.has(src)) {
+                    const bystander = this.serverModule.players.get(bystanderId)
+                    if (bystander?.voicePlugin) bystanderClientIds.add(bystander.voicePlugin.clientId)
+                    continue
+                }
+
+                // the player is the bystander himself and whispers into the calls he is relayed to
+                if (bystanderId === src && this.serverModule.serverConfig.useWhisper) {
+                    for (const member of members) {
+                        const memberPlayer = this.serverModule.players.get(member)
+                        if (memberPlayer?.voicePlugin) memberClientIds.add(memberPlayer.voicePlugin.clientId)
+                    }
+                }
+            }
+        }
+
+        if (bystanderClientIds.size) {
+            emitNet('client:yaca:phoneHearAround', src, [...bystanderClientIds], true)
+        }
+
+        if (memberClientIds.size) {
+            emitNet('client:yaca:phoneHearAroundWhisper', src, [...memberClientIds], true)
+        }
+    }
+
+    /**
      * Drops every phone hear around relay the given player takes part in, in any of the three roles.
      *
      * @param {number} playerId - The player leaving.

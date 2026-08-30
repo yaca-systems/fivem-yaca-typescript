@@ -128,6 +128,12 @@ export class YaCAServerModule {
      * @param {number} src - The source-id of the player to initialize.
      */
     connectToVoice(src: number) {
+        // Keep the already existing player data, e.g. if the nui crashed and the player reconnects to the voice plugin,
+        if (this.players.has(src)) {
+            this.connect(src)
+            return
+        }
+
         const name = generateRandomName(src, this.nameSet, this.serverConfig.userNamePattern)
         if (!name) {
             DropPlayer(src.toString(), '[YaCA] Failed to generate a random name.')
@@ -535,10 +541,16 @@ export class YaCAServerModule {
             }
         }
 
+        if (player.voiceSettings.microphone) {
+            activeMicrophones.push([src, player.voiceSettings.microphone])
+        }
+
         emitNet('client:yaca:addPlayers', src, allPlayersData)
 
         for (const [microphoneSource, microphone] of activeMicrophones) {
             emitNet('client:yaca:microphone', src, microphoneSource, true, microphone)
         }
+
+        this.phoneModule.reestablishPhoneHearAround(src)
     }
 }
