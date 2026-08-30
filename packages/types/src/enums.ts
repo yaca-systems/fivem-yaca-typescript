@@ -18,7 +18,6 @@ export enum YacaFilterEnum {
 export enum YacaEffectFilterEnum {
     MUFFLE = 'MUFFLE',
     WATER = 'WATER',
-    ECHO = 'ECHO',
     REVERB = 'REVERB',
     LOUDSPEAKER = 'LOUDSPEAKER',
 }

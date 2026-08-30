@@ -275,7 +275,7 @@
    * Following values are available:
    * - Communication devices: "RADIO", "PHONE", "PHONE_SPEAKER", "PHONE_HISTORICAL", "MEGAPHONE", "INTERCOM",
    *   "AIRBORNE", "MICROPHONE"
-   * - Effects without a device: "MUFFLE", "WATER", "REVERB", "ECHO", "LOUDSPEAKER"
+   * - Effects without a device: "MUFFLE", "WATER", "REVERB", "LOUDSPEAKER"
    *   ("LOUDSPEAKER" is the cabinet colouring of devices with speaker positions - disabling it keeps the PA
    *   positioned in the world, the signal is just no longer coloured by the box)
    *
