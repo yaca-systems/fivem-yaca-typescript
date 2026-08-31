@@ -408,6 +408,29 @@ Starts or stops using the megaphone.
 |-----------|-----------|----------------------------------------|
 | state     | `boolean` | `true` to start using, `false` to stop |
 
+### Intercom
+
+#### `addRemovePlayerIntercomFilter(playerIDs: number | number[], state: boolean, speakerSettings?: object)`
+
+Adds or removes players from the intercom of the local player. The intercom is bidirectional, has no range and is
+not positional, so it is only heard by the players it is set for. It has to be set on every client which should
+take part, so run it on both sides of the connection.
+
+| Parameter       | Type                   | Description                                                     |
+|-----------------|------------------------|-----------------------------------------------------------------|
+| playerIDs       | `number \| number[]`   | The remote IDs of the players to add to or remove from the intercom |
+| state           | `boolean`              | `true` to add the players, `false` to remove them                |
+| speakerSettings | `object`               | The loudspeaker settings below, optional                         |
+
+| Key           | Type          | Description                                                                                            |
+|---------------|---------------|--------------------------------------------------------------------------------------------------------|
+| `positions`   | `[x, y, z][]` | The loudspeakers the intercom is radiated from, e.g. an intercom with several horns. Omitted means the intercom is heard from its owner |
+| `interiorKey` | `number`      | The interior the loudspeakers stand in, optional                                                        |
+| `roomKey`     | `number`      | The room the loudspeakers stand in, optional                                                            |
+
+The same can be done from the server by triggering `client:yaca:addRemovePlayerIntercomFilter` on a client with the
+same parameters.
+
 </details>
 
 <details>
