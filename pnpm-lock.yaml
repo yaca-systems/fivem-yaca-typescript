@@ -16,7 +16,7 @@ importers:
         version: 0.25.6
       turbo:
         specifier: ^2.3.4
-        version: 2.5.4
+        version: 2.10.12
       typescript:
         specifier: ^5.7.3
         version: 5.8.3
@@ -29,7 +29,7 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.17591-1
+        version: 2.0.35805-1
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
@@ -54,7 +54,7 @@ importers:
     devDependencies:
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.14862-1
+        version: 2.0.35805-1
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
@@ -82,10 +82,10 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.17591-1
+        version: 2.0.35805-1
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.14862-1
+        version: 2.0.35805-1
       '@types/node':
         specifier: ^22.7.4
         version: 22.7.4
@@ -152,11 +152,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@citizenfx/client@2.0.17591-1':
-    resolution: {integrity: sha512-U7zljfzag8godKYBxQM4NKiXuXSkvyJgAz+IRGj/7jdfledJLu/1k1b9J+e3j8uYQtPpnDUSLzeZCND6OPb0Sw==}
+  '@citizenfx/client@2.0.35805-1':
+    resolution: {integrity: sha512-YV+o/liGLJ90KIBWqmvZH0rY13rz2l+mu84ssYz8zVcMwfswdOY3TTSmENsX+aR9kX9+4uH48sfWo09BzpGG4A==}
 
-  '@citizenfx/server@2.0.14862-1':
-    resolution: {integrity: sha512-I6XnxIGBhskPe9S+q1OQLDqs6TYw1RhX06K6jUg+n0hGITYools6VBIIhdPe2uUlHA+76qJajQlV9ONeR3mDig==}
+  '@citizenfx/server@2.0.35805-1':
+    resolution: {integrity: sha512-Sj0LBQ+0t92NkMc48oSvwNitMNkg+sXm0V8NFzaujGY0v0G+Wm2nKTLL24jDSOZM2aKjW5A0y7sExrMdbtpSXg==}
 
   '@esbuild/aix-ppc64@0.25.6':
     resolution: {integrity: sha512-ShbM/3XxwuxjFiuVBHA+d3j5dyac0aEVVq1oluIDf71hUw0aRF59dV/efUsIwFnR6m8JNM2FjZOzmaZ8yG61kw==}
@@ -314,6 +314,36 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@turbo/darwin-64@2.10.12':
+    resolution: {integrity: sha512-9nKgKoF6ZOUsM+or0OtNf+TTJSfGvDNP7ZFv/ZGWVwOSCkumyctQiTeHwB4UNljHTnC41AqylgbunLDHoccNrA==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@turbo/darwin-arm64@2.10.12':
+    resolution: {integrity: sha512-H4Elb1jqTZVeIC9bbcNwjSzemZ6RegoTOVHeuV5Osirt2Z8UguTyisMEkvZjPVZgMeN9J4ERZBFad40tFnkb7w==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@turbo/linux-64@2.10.12':
+    resolution: {integrity: sha512-lr7KIotukvjZwEXiFSYAeOH3BWzjFVBbSzTbv0fuGFsNukYyH0+g1hB5ecqnJkgkYU+KHEMG1edOhnjiKON1wQ==}
+    cpu: [x64]
+    os: [android, linux]
+
+  '@turbo/linux-arm64@2.10.12':
+    resolution: {integrity: sha512-f0pZDTtvzB5SuNwuXBaKbZHUCMCukgc8nMlHEuvLmj91Fzec+MEbr3cAvGNor5htEDqZnO6Lxt9N/GPI/77oGA==}
+    cpu: [arm64]
+    os: [android, linux]
+
+  '@turbo/windows-64@2.10.12':
+    resolution: {integrity: sha512-SDOueJRjS/QcykWf2KCRtTLmIl5YMKsLbXkXQGhDwcTXvKXZiS5ih5lBl/gkwZIpYFjqA/rAlfMzlAFcVHNe0g==}
+    cpu: [x64]
+    os: [win32]
+
+  '@turbo/windows-arm64@2.10.12':
+    resolution: {integrity: sha512-0i0mVUa4kKk+/B3RwEwPMf9CB+T7ul56hn5FFHNA4VUNTOoLBEd6aNf3FaKfCatDNZ6cicCEf6if9QUTVyzzcA==}
+    cpu: [arm64]
+    os: [win32]
+
   '@types/luxon@3.4.2':
     resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==}
 
@@ -365,38 +395,8 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  turbo-darwin-64@2.5.4:
-    resolution: {integrity: sha512-ah6YnH2dErojhFooxEzmvsoZQTMImaruZhFPfMKPBq8sb+hALRdvBNLqfc8NWlZq576FkfRZ/MSi4SHvVFT9PQ==}
-    cpu: [x64]
-    os: [darwin]
-
-  turbo-darwin-arm64@2.5.4:
-    resolution: {integrity: sha512-2+Nx6LAyuXw2MdXb7pxqle3MYignLvS7OwtsP9SgtSBaMlnNlxl9BovzqdYAgkUW3AsYiQMJ/wBRb7d+xemM5A==}
-    cpu: [arm64]
-    os: [darwin]
-
-  turbo-linux-64@2.5.4:
-    resolution: {integrity: sha512-5May2kjWbc8w4XxswGAl74GZ5eM4Gr6IiroqdLhXeXyfvWEdm2mFYCSWOzz0/z5cAgqyGidF1jt1qzUR8hTmOA==}
-    cpu: [x64]
-    os: [linux]
-
-  turbo-linux-arm64@2.5.4:
-    resolution: {integrity: sha512-/2yqFaS3TbfxV3P5yG2JUI79P7OUQKOUvAnx4MV9Bdz6jqHsHwc9WZPpO4QseQm+NvmgY6ICORnoVPODxGUiJg==}
-    cpu: [arm64]
-    os: [linux]
-
-  turbo-windows-64@2.5.4:
-    resolution: {integrity: sha512-EQUO4SmaCDhO6zYohxIjJpOKRN3wlfU7jMAj3CgcyTPvQR/UFLEKAYHqJOnJtymbQmiiM/ihX6c6W6Uq0yC7mA==}
-    cpu: [x64]
-    os: [win32]
-
-  turbo-windows-arm64@2.5.4:
-    resolution: {integrity: sha512-oQ8RrK1VS8lrxkLriotFq+PiF7iiGgkZtfLKF4DDKsmdbPo0O9R2mQxm7jHLuXraRCuIQDWMIw6dpcr7Iykf4A==}
-    cpu: [arm64]
-    os: [win32]
-
-  turbo@2.5.4:
-    resolution: {integrity: sha512-kc8ZibdRcuWUG1pbYSBFWqmIjynlD8Lp7IB6U3vIzvOv9VG+6Sp8bzyeBWE3Oi8XV5KsQrznyRTBPvrf99E4mA==}
+  turbo@2.10.12:
+    resolution: {integrity: sha512-AswgMPnpOoaVZHrrSBejETzEbuIA69OVGwfkHwfrY0A23VjWXBANzgq9+OymWOHAIArB7D1+1z498WY8fGg1Jw==}
     hasBin: true
 
   typescript@5.8.3:
@@ -448,9 +448,9 @@ snapshots:
   '@biomejs/cli-win32-x64@2.1.2':
     optional: true
 
-  '@citizenfx/client@2.0.17591-1': {}
+  '@citizenfx/client@2.0.35805-1': {}
 
-  '@citizenfx/server@2.0.14862-1': {}
+  '@citizenfx/server@2.0.35805-1': {}
 
   '@esbuild/aix-ppc64@0.25.6':
     optional: true
@@ -530,6 +530,24 @@ snapshots:
   '@esbuild/win32-x64@0.25.6':
     optional: true
 
+  '@turbo/darwin-64@2.10.12':
+    optional: true
+
+  '@turbo/darwin-arm64@2.10.12':
+    optional: true
+
+  '@turbo/linux-64@2.10.12':
+    optional: true
+
+  '@turbo/linux-arm64@2.10.12':
+    optional: true
+
+  '@turbo/windows-64@2.10.12':
+    optional: true
+
+  '@turbo/windows-arm64@2.10.12':
+    optional: true
+
   '@types/luxon@3.4.2': {}
 
   '@types/node@20.16.10':
@@ -598,32 +616,14 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  turbo-darwin-64@2.5.4:
-    optional: true
-
-  turbo-darwin-arm64@2.5.4:
-    optional: true
-
-  turbo-linux-64@2.5.4:
-    optional: true
-
-  turbo-linux-arm64@2.5.4:
-    optional: true
-
-  turbo-windows-64@2.5.4:
-    optional: true
-
-  turbo-windows-arm64@2.5.4:
-    optional: true
-
-  turbo@2.5.4:
+  turbo@2.10.12:
     optionalDependencies:
-      turbo-darwin-64: 2.5.4
-      turbo-darwin-arm64: 2.5.4
-      turbo-linux-64: 2.5.4
-      turbo-linux-arm64: 2.5.4
-      turbo-windows-64: 2.5.4
-      turbo-windows-arm64: 2.5.4
+      '@turbo/darwin-64': 2.10.12
+      '@turbo/darwin-arm64': 2.10.12
+      '@turbo/linux-64': 2.10.12
+      '@turbo/linux-arm64': 2.10.12
+      '@turbo/windows-64': 2.10.12
+      '@turbo/windows-arm64': 2.10.12
 
   typescript@5.8.3: {}
 
