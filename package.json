@@ -25,5 +25,5 @@
         "typescript": "^6.0.3",
         "@types/node": "^24.13.3"
     },
-    "packageManager": "pnpm@11.22.0"
+    "packageManager": "pnpm@12.4.2"
 }
