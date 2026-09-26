@@ -50,6 +50,7 @@ import {
     WebSocket,
 } from '../utils'
 import { localLipSyncAnimations } from './data'
+import { YaCAClientGhostingModule } from './ghosting'
 import { YaCAClientIntercomModule } from './intercom'
 import { YaCAClientMegaphoneModule } from './megaphone'
 import { YaCAClientMicrophoneModule } from './microphone'
@@ -81,6 +82,7 @@ export class YaCAClientModule {
     megaphoneModule: YaCAClientMegaphoneModule
     intercomModule: YaCAClientIntercomModule
     microphoneModule: YaCAClientMicrophoneModule
+    ghostingModule: YaCAClientGhostingModule
 
     saltyChatBridge?: YaCAClientSaltyChatBridge
 
@@ -237,6 +239,7 @@ export class YaCAClientModule {
         }
 
         this.intercomModule = new YaCAClientIntercomModule(this)
+        this.ghostingModule = new YaCAClientGhostingModule(this)
         this.microphoneModule = new YaCAClientMicrophoneModule(this)
         this.megaphoneModule = new YaCAClientMegaphoneModule(this)
         this.phoneModule = new YaCAClientPhoneModule(this)
@@ -757,6 +760,7 @@ export class YaCAClientModule {
 
             this.phoneModule.handleDisconnect(remoteId, clientId)
             this.radioModule.handleDisconnect(remoteId)
+            this.ghostingModule.handleDisconnect(remoteId)
             this.currentlyAirborneApplied.delete(remoteId)
             this.allPlayers.delete(remoteId)
         })
@@ -1955,6 +1959,7 @@ export class YaCAClientModule {
         const playersToPhoneSpeaker = new Set<number>()
         const phoneSpeakerHolders = new Map<number, number>()
         const playerToHearOnPhone = new Set<number>()
+        const playersToGhost = new Set<number>()
 
         let localPlayerPed = cache.ped
         let localPlayerVehicle = cache.vehicle
@@ -1996,19 +2001,8 @@ export class YaCAClientModule {
             const voiceSetting = this.getPlayerByID(remoteId)
             if (!voiceSetting?.clientId) continue
 
-            // Get the player state and the voice range of the player.
+            // Get the player state
             const playerState = Player(remoteId).state
-            const range = playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange
-
-            // Get the muffle intensity for the player.
-            const muffleIntensity = this.getMuffleIntensity(
-                localPlayerPed,
-                playerPed,
-                localPlayerVehicle,
-                currentRoom,
-                hasVehicleOpening,
-                playerState[MEGAPHONE_STATE_NAME] !== null,
-            )
 
             // Get the player position, the distance to the player, the player direction and if the player is underwater.
             const playerPos = GetEntityCoords(playerPed, false)
@@ -2024,6 +2018,26 @@ export class YaCAClientModule {
                 airborneCrewMembers.add(remoteId)
             }
 
+            // A ghosted player is heard as if he stood next to the ghost, so nothing in the world between the two
+            // attenuates him - no distance, no muffling and no room.
+            const isGhosted = this.ghostingModule.isPlayerGhosted(distanceToPlayer, voiceSetting.forceMuted)
+            if (isGhosted) {
+                playersToGhost.add(remoteId)
+            }
+
+            const muffleIntensity = isGhosted
+                ? 0
+                : this.getMuffleIntensity(
+                      localPlayerPed,
+                      playerPed,
+                      localPlayerVehicle,
+                      currentRoom,
+                      hasVehicleOpening,
+                      playerState[MEGAPHONE_STATE_NAME] !== null,
+                  )
+
+            const range = isGhosted ? this.ghostingModule.reach : (playerState[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange)
+
             const obj: YacaPluginPlayerData = {
                 client_id: voiceSetting.clientId,
                 position: convertNumberArrayToXYZ(playerPos),
@@ -2035,9 +2049,10 @@ export class YaCAClientModule {
                 volume_modifier: typeof voiceSetting.volumeModifier === 'number' ? voiceSetting.volumeModifier : undefined,
             }
 
-            if (playerRoomPair.interiorKey && playerRoomPair.roomKey) {
-                obj.interior_key = playerRoomPair.interiorKey
-                obj.room_key = playerRoomPair.roomKey
+            const roomPair = isGhosted ? localRoomPair : playerRoomPair
+            if (roomPair.interiorKey && roomPair.roomKey) {
+                obj.interior_key = roomPair.interiorKey
+                obj.room_key = roomPair.roomKey
             }
 
             players.set(remoteId, obj)
@@ -2080,13 +2095,17 @@ export class YaCAClientModule {
         this.handlePhoneSpeakerEmit(playersToPhoneSpeaker, phoneSpeakerHolders)
         this.handlePhoneEmit(playerToHearOnPhone)
         this.handleAirborneEmit(airborneCrewMembers)
+        this.ghostingModule.handleGhostingEmit(playersToGhost)
+
+        const localPosVector = convertNumberArrayToXYZ(localPos)
+        this.ghostingModule.addGhostsToPlayerList(players, localPosVector, localRoomPair)
 
         // Send the collected data to the voice plugin.
         this.sendWebsocket({
             base: { request_type: 'INGAME' },
             player: {
                 player_direction: getCamDirection(),
-                player_position: convertNumberArrayToXYZ(localPos),
+                player_position: localPosVector,
                 player_range: LocalPlayer.state[VOICE_RANGE_STATE_NAME] ?? this.defaultVoiceRange,
                 // @ts-expect-error Type error in the native
                 player_is_underwater: IsPedSwimmingUnderWater(localPlayerPed) === 1,

@@ -21,6 +21,7 @@ import {
 } from '@yaca-voice/types'
 import { YaCAServerSaltyChatBridge } from '../bridge/saltychat'
 import { checkVersion, generateRandomName } from '../utils'
+import { YaCAServerGhostingModule } from './ghosting'
 import { YaCAServerMegaphoneModule } from './megaphone'
 import { YaCAServerPhoneModle } from './phone'
 import { YaCAServerRadioModule } from './radio'
@@ -36,6 +37,8 @@ export type YaCAPlayer = {
         mutedOnPhone: boolean
         inCallWith: Set<number>
         emittedPhoneSpeaker: Map<number, Set<number>>
+        ghosting: boolean
+        ghostingRange?: number
         tsUniqueIdentifier?: string
         volumeModifier?: number
         microphone?: YacaMicrophoneSettings
@@ -73,6 +76,7 @@ export class YaCAServerModule {
     phoneModule: YaCAServerPhoneModle
     radioModule: YaCAServerRadioModule
     megaphoneModule: YaCAServerMegaphoneModule
+    ghostingModule: YaCAServerGhostingModule
 
     saltChatBridge?: YaCAServerSaltyChatBridge
 
@@ -100,6 +104,7 @@ export class YaCAServerModule {
         this.phoneModule = new YaCAServerPhoneModle(this)
         this.radioModule = new YaCAServerRadioModule(this)
         this.megaphoneModule = new YaCAServerMegaphoneModule(this)
+        this.ghostingModule = new YaCAServerGhostingModule(this)
 
         this.registerExports()
         this.registerEvents()
@@ -151,6 +156,7 @@ export class YaCAServerModule {
                 mutedOnPhone: false,
                 inCallWith: new Set<number>(),
                 emittedPhoneSpeaker: new Map<number, Set<number>>(),
+                ghosting: false,
             },
             radioSettings: {
                 activated: false,
@@ -331,6 +337,7 @@ export class YaCAServerModule {
         }
 
         this.phoneModule.dropAllPhoneHearAround(src)
+        this.ghostingModule.handlePlayerDisconnect(src)
 
         if (player.voiceSettings.microphone) {
             emitNet('client:yaca:microphone', -1, src, false)

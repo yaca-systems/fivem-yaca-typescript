@@ -118,7 +118,10 @@ Get the global error level as `number`.
 
 #### `setSpectatingPlayer(playerId: number | false)`
 
-Set the player to spectate.
+Set the player to spectate. The local player then hears from that player instead of from his own ped, which is parked
+elsewhere during a spectate. Being heard is separate, see Spectate Voice (Ghosting) below.
+
+txAdmin calls this through its own events, cycling targets included. Any other spectate system has to call it itself.
 
 | Parameter | Type              | Description       |
 |-----------|-------------------|-------------------|
@@ -431,6 +434,30 @@ take part, so run it on both sides of the connection.
 The same can be done from the server by triggering `client:yaca:addRemovePlayerIntercomFilter` on a client with the
 same parameters.
 
+### Spectate Voice (Ghosting)
+
+Voice for spectators and invisible admins, enabled from the server with `setPlayerGhosting`. Everyone within reach
+hears the ghost as if he stood next to them: no distance falloff, no direction, no muffling, no walls. He hears them
+back at the same reach. It runs over the server, so the two clients do not have to stream each other in.
+
+The reach counts from where the ghost hears, not from his ped. While spectating that is the spectated player, which
+matters because txAdmin parks the spectator ped 15 metres under its target. Use `setSpectatingPlayer` if you spectate
+without txAdmin.
+
+Force muted players are skipped in both directions.
+
+#### `isGhosting(): boolean`
+
+Get whether the local player is ghosting as `boolean`.
+
+#### `getGhostingRange(): number`
+
+Get the reach of the local player while ghosting as `number`. Falls back to his voice range if no fixed reach is set.
+
+#### `getGhostedPlayers(): number[]`
+
+Get the remote IDs of the players currently in reach of the ghost as `number[]`.
+
 </details>
 
 <details>
@@ -696,6 +723,63 @@ Returns the settings of the running microphone of a player, `false` if none is o
 |-----------|----------|--------------------|
 | playerId  | `number` | The player source  |
 
+### Spectate Voice (Ghosting)
+
+Voice for spectators and invisible admins. This side makes them audible; the client export `setSpectatingPlayer` sets
+where they hear from.
+
+#### `setPlayerGhosting(source: number, state: boolean, range?: number | false)`
+
+Put a player into ghosting or take him out again. Everyone within reach hears him as if he stood next to them, and he
+hears them back.
+
+Leave `range` out and the reach follows his voice range live, so he sets it himself with the voice range keys. Pass a
+number to pin it instead, capped at the largest configured voice range.
+
+Only the server can enable this. The client reports which players are in reach, but that report is dropped unless the
+server enabled ghosting for him first.
+
+| Parameter | Type      | Description                                        |
+|-----------|-----------|----------------------------------------------------|
+| source    | `number`  | the player source                                  |
+| state     | `boolean` | the new ghosting state                             |
+| range     | `number \| false` | a fixed reach, optional - follows his voice range when left out |
+
+#### `isPlayerGhosting(source: number): boolean`
+
+Get whether a player is ghosting as `boolean`.
+
+| Parameter | Type     | Description       |
+|-----------|----------|-------------------|
+| source    | `number` | the player source |
+
+#### `setPlayerGhostingRange(source: number, range: number | false)`
+
+Change the reach of a ghost without touching his ghosting state. `false` hands it back to his voice range.
+
+Does nothing for a player who is not ghosting. Enable ghosting first, or pass the reach to `setPlayerGhosting`.
+
+| Parameter | Type              | Description                                         |
+|-----------|-------------------|-----------------------------------------------------|
+| source    | `number`          | the player source                                   |
+| range     | `number \| false` | a fixed reach, `false` to follow his voice range     |
+
+#### `getPlayerGhostingRange(source: number): number | false`
+
+Get the pinned reach of a ghost as `number`, `false` if it follows his voice range.
+
+| Parameter | Type     | Description       |
+|-----------|----------|-------------------|
+| source    | `number` | the player source |
+
+#### `getGhostedPlayers(source: number): number[]`
+
+Get the sources of the players currently in reach of a ghost as `number[]`.
+
+| Parameter | Type     | Description       |
+|-----------|----------|-------------------|
+| source    | `number` | the player source |
+
 </details>
 
 # Events
@@ -802,6 +886,15 @@ The event is triggered when the microphone (PA) state of the local player change
 | Parameter | Type      | Description              |
 |-----------|-----------|--------------------------|
 | state     | `boolean` | the new microphone state |
+
+### yaca:external:ghostingState
+
+The event is triggered when the ghosting state of the local player changes.
+
+| Parameter | Type      | Description                            |
+|-----------|-----------|----------------------------------------|
+| state     | `boolean` | the new ghosting state                 |
+| range     | `number`  | how far the ghost reaches              |
 
 ### yaca:external:setRadioMuteState
 
@@ -973,6 +1066,16 @@ The event is triggered when the radio mute state of a player changes.
 | source    | `int`     | the player source                            |
 | channel   | `int`     | the channel where the mute state was changed |
 | state     | `boolean` | the new mute state                           |
+
+### yaca:external:ghostingState
+
+The event is triggered when the ghosting state of a player changes.
+
+| Parameter | Type                  | Description                                          |
+|-----------|-----------------------|------------------------------------------------------|
+| source    | `int`                 | the player source                                    |
+| state     | `boolean`             | the new ghosting state                               |
+| range     | `number \| undefined` | the ghosting range, undefined when it follows his voice range |
 
 </details>
 
