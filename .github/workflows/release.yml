@@ -54,7 +54,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          pnpm version ${{ inputs.version }} --git-tag-version false
+          pnpm version ${{ inputs.version }} --no-git-tag-version
 
       - name: Run build
         run: pnpm create-resource
