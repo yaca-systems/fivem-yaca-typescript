@@ -228,7 +228,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
                 'swinger',
                 'locust',
                 'hotring',
-                'draugur',
+                'tampa2',
             ],
         },
         intensities: {
