@@ -1663,7 +1663,7 @@ export class YaCAClientModule {
             return true
         }
 
-        if (this.mufflingVehicleWhitelistHash.has(GetEntityModel(vehicle))) {
+        if (this.mufflingVehicleWhitelistHash.has(toUInt32(GetEntityModel(vehicle)))) {
             return true
         }
 

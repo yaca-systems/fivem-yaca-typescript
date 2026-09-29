@@ -1,6 +1,6 @@
 import { locale, MEGAPHONE_STATE_NAME } from '@yaca-voice/common'
 import { CommDeviceMode, YacaFilterEnum } from '@yaca-voice/types'
-import { cache, joaat, onCache, registerRdrKeyBind } from '../utils'
+import { cache, joaat, onCache, registerRdrKeyBind, toUInt32 } from '../utils'
 import type { YaCAClientModule } from './main'
 
 /**
@@ -66,7 +66,7 @@ export class YaCAClientMegaphoneModule {
                 }
 
                 const vehicleClass = GetVehicleClass(cache.vehicle)
-                const vehicleModel = GetEntityModel(cache.vehicle)
+                const vehicleModel = toUInt32(GetEntityModel(cache.vehicle))
 
                 this.canUseMegaphone =
                     this.clientModule.sharedConfig.megaphone.allowedVehicleClasses.includes(vehicleClass) ||
