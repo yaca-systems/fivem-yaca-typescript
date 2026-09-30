@@ -352,6 +352,9 @@ export class YaCAClientRadioModule {
          * @param {boolean} state - The state of the radio talking.
          * @param {object[]} infos - The information about the radio.
          * @param {boolean} infos.shortRange - The state of the short range.
+         * @param {number} senderDistanceToTower - The distance of the sender to the nearest radio tower.
+         * @param {number[]} senderPosition - The position of the sender.
+         * @param {boolean} senderAirborne - Whether the sender transmits from inside an aircraft.
          */
         onNet(
             'client:yaca:radioTalking',
@@ -362,6 +365,7 @@ export class YaCAClientRadioModule {
                 infos: { shortRange: boolean }[],
                 senderDistanceToTower = -1,
                 senderPosition: [number, number, number] = [0, 0, 0],
+                senderAirborne = false,
             ) => {
                 const channel = this.findRadioChannelByFrequency(frequency)
                 if (!channel) {
@@ -394,6 +398,9 @@ export class YaCAClientRadioModule {
                         CommDeviceMode.RECEIVER,
                         CommDeviceMode.SENDER,
                         errorLevel,
+                        undefined,
+                        undefined,
+                        senderAirborne,
                     )
                 }
 
@@ -1343,7 +1350,8 @@ export class YaCAClientRadioModule {
      */
     sendRadioRequestToServer(channel: number) {
         const distanceToTower = this.getNearestRadioTower() ?? -1
-        emitNet('server:yaca:radioTalking', true, channel, distanceToTower)
+        const airborne = this.clientModule.airborneRadioEnabled && this.clientModule.isAirborneVehicle(cache.vehicle)
+        emitNet('server:yaca:radioTalking', true, channel, distanceToTower, airborne)
     }
 
     /**

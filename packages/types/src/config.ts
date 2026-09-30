@@ -70,6 +70,7 @@ export interface YacaSharedConfig {
     }
     airborne: {
         enabled: boolean
+        radio: boolean
         vehicleClasses: number[]
     }
     reverb: {
@@ -181,6 +182,7 @@ export const defaultSharedConfig: YacaSharedConfig = {
     },
     airborne: {
         enabled: false,
+        radio: true,
         vehicleClasses: [15, 16],
     },
     reverb: {

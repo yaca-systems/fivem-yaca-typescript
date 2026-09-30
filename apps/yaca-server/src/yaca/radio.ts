@@ -74,9 +74,10 @@ export class YaCAServerRadioModule {
          * @param {boolean} state - The state of the radio.
          * @param {number} channel - The channel to change the talking state for.
          * @param {number} distanceToTower - The distance to the tower.
+         * @param {boolean} airborne - Whether the sender transmits from inside an aircraft.
          */
-        onNet('server:yaca:radioTalking', (state: boolean, channel: number, distanceToTower = -1) => {
-            this.radioTalkingState(source, state, channel, distanceToTower)
+        onNet('server:yaca:radioTalking', (state: boolean, channel: number, distanceToTower = -1, airborne = false) => {
+            this.radioTalkingState(source, state, channel, distanceToTower, airborne === true)
         })
     }
 
@@ -440,8 +441,9 @@ export class YaCAServerRadioModule {
      * @param {boolean} state - The new talking state.
      * @param {number} channel - The channel to change the talking state for.
      * @param {number} distanceToTower - The distance to the tower.
+     * @param {boolean} airborne - Whether the sender transmits from inside an aircraft.
      */
-    radioTalkingState(src: number, state: boolean, channel: number, distanceToTower: number) {
+    radioTalkingState(src: number, state: boolean, channel: number, distanceToTower: number, airborne = false) {
         const player = this.serverModule.getPlayer(src)
         if (!player?.radioSettings.activated) {
             return
@@ -505,6 +507,7 @@ export class YaCAServerRadioModule {
             radioInfos,
             distanceToTower,
             GetEntityCoords(GetPlayerPed(src.toString())),
+            airborne,
         )
 
         if (this.serverConfig.useWhisper) {

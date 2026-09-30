@@ -1375,6 +1375,8 @@ export class YaCAClientModule {
      *                                 device stays carried and is emitted, muffled and ranged from that player, so
      *                                 this is not the field for a fixed array. Naming the speaker himself is the same
      *                                 as omitting it. Optional.
+     * @param {boolean} airborne - Radio only: the sender transmits from inside an aircraft and is heard with the
+     *                             airborne filter. Omitted on a running transmission means unchanged. Optional.
      */
     setPlayersCommType(
         players: { clientId: number } | { clientId: number }[],
@@ -1387,6 +1389,7 @@ export class YaCAClientModule {
         errorLevel?: number | null,
         speakerSettings?: YacaSpeakerSettings,
         speakerClient?: number | null,
+        airborne?: boolean,
     ) {
         if (!Array.isArray(players)) {
             players = [players]
@@ -1441,6 +1444,10 @@ export class YaCAClientModule {
 
         if (typeof speakerClient === 'number') {
             protocol.speaker_client_id = speakerClient
+        }
+
+        if (typeof airborne === 'boolean') {
+            protocol.airborne = airborne
         }
 
         this.sendWebsocket({
@@ -1833,6 +1840,13 @@ export class YaCAClientModule {
      */
     get airborneEnabled(): boolean {
         return this.sharedConfig.airborne.enabled && this.isFiveM
+    }
+
+    /**
+     * Whether the radio of a sender inside an aircraft is heard with the airborne filter by everyone on the frequency.
+     */
+    get airborneRadioEnabled(): boolean {
+        return this.airborneEnabled && this.sharedConfig.airborne.radio
     }
 
     /**

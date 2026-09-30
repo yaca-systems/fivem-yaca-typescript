@@ -161,6 +161,9 @@
    */
   "airborne": {
     "enabled": false,
+    // Whether the radio carries it too: everyone on the frequency hears a sender in an aircraft with the airborne
+    // filter, not only his crew. Follows him while he transmits, so landing mid transmission switches back.
+    "radio": true,
     // The vehicle classes that count as airborne. 15 = helicopters, 16 = planes. (FiveM only)
     "vehicleClasses": [
       15,
