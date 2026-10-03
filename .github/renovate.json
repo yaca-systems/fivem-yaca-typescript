@@ -1,5 +1,5 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:recommended", "customManagers:biomeVersions"],
+    "extends": ["config:recommended", "customManagers:biomeVersions", "security:minimumReleaseAgeNpm"],
     "baseBranches": ["develop"]
 }
