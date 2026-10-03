@@ -1768,19 +1768,17 @@ export class YaCAClientModule {
      *                              radiating them.
      */
     handlePhoneSpeakerEmit(playersToPhoneSpeaker: Set<number>, phoneSpeakerHolders: Map<number, number>): void {
-        if (this.useWhisper) {
-            if (
-                (this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) ||
-                ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCallWith.size) && this.currentlySendingPhoneSpeakerSender.size)
-            ) {
-                const playersToNotReceivePhoneSpeaker = [...this.currentlySendingPhoneSpeakerSender].filter((playerId) => !playersToPhoneSpeaker.has(playerId))
-                const playersNeedsReceivePhoneSpeaker = [...playersToPhoneSpeaker].filter((playerId) => !this.currentlySendingPhoneSpeakerSender.has(playerId))
+        if (
+            (this.phoneModule.phoneSpeakerActive && this.phoneModule.inCallWith.size) ||
+            ((!this.phoneModule.phoneSpeakerActive || !this.phoneModule.inCallWith.size) && this.currentlySendingPhoneSpeakerSender.size)
+        ) {
+            const playersToNotReceivePhoneSpeaker = [...this.currentlySendingPhoneSpeakerSender].filter((playerId) => !playersToPhoneSpeaker.has(playerId))
+            const playersNeedsReceivePhoneSpeaker = [...playersToPhoneSpeaker].filter((playerId) => !this.currentlySendingPhoneSpeakerSender.has(playerId))
 
-                this.currentlySendingPhoneSpeakerSender = new Set(playersToPhoneSpeaker)
+            this.currentlySendingPhoneSpeakerSender = new Set(playersToPhoneSpeaker)
 
-                if (playersNeedsReceivePhoneSpeaker.length || playersToNotReceivePhoneSpeaker.length) {
-                    emitNet('server:yaca:phoneSpeakerEmitWhisper', playersNeedsReceivePhoneSpeaker, playersToNotReceivePhoneSpeaker)
-                }
+            if (playersNeedsReceivePhoneSpeaker.length || playersToNotReceivePhoneSpeaker.length) {
+                emitNet('server:yaca:phoneSpeakerEmitWhisper', playersNeedsReceivePhoneSpeaker, playersToNotReceivePhoneSpeaker)
             }
         }
 
@@ -2090,7 +2088,7 @@ export class YaCAClientModule {
             if (distanceToPlayer > this.sharedConfig.maxPhoneSpeakerRange) continue
 
             // Phone speaker handling - user who enabled it.
-            if (this.useWhisper && phoneSpeakerActive) playersToPhoneSpeaker.add(remoteId)
+            if (phoneSpeakerActive) playersToPhoneSpeaker.add(remoteId)
 
             // If no phone speaker is active, skip the rest.
             if (!voiceSetting.phoneCallMemberIds) continue

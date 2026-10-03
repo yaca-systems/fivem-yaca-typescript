@@ -95,6 +95,26 @@ export class YaCAClientPhoneModule {
             this.clientModule.setPlayersCommType(commTargets, YacaFilterEnum.PHONE, state, undefined, undefined, ownMode, CommDeviceMode.RECEIVER)
         })
 
+        onNet('client:yaca:phoneSpeakerRelay', (bystanderClientIds: number[], holderClientId: number, state: boolean) => {
+            const ownClientId = this.clientModule.getPlayerByID(cache.serverId)?.clientId
+            const commTargets = bystanderClientIds.filter((clientId) => clientId !== ownClientId).map((clientId) => ({ clientId }))
+
+            if (!commTargets.length) return
+
+            this.clientModule.setPlayersCommType(
+                commTargets,
+                YacaFilterEnum.PHONE_SPEAKER,
+                state,
+                undefined,
+                this.clientModule.sharedConfig.maxPhoneSpeakerRange,
+                CommDeviceMode.RECEIVER,
+                CommDeviceMode.SENDER,
+                undefined,
+                undefined,
+                state ? holderClientId : undefined,
+            )
+        })
+
         /**
          * Handles the "client:yaca:phoneMute" server event.
          *

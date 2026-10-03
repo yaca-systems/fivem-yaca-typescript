@@ -1,7 +1,7 @@
 import { PHONE_SPEAKER_STATE_NAME } from '@yaca-voice/common'
 import { YacaFilterEnum } from '@yaca-voice/types'
 import { triggerClientEvent } from '../utils/events'
-import type { YaCAServerModule } from './main'
+import type { YaCAPlayer, YaCAServerModule } from './main'
 
 /**
  * The phone module for the server.
@@ -37,23 +37,35 @@ export class YaCAServerPhoneModle {
                 return
             }
 
-            for (const callTarget of player.voiceSettings.inCallWith) {
-                const target = this.serverModule.players.get(callTarget)
-                if (!target) {
-                    continue
-                }
+            const listeners = player.voiceSettings.phoneSpeakerListeners
+            for (const targetID of enableForTargets ?? []) {
+                if (this.serverModule.players.has(targetID)) listeners.add(targetID)
+            }
+            for (const targetID of disableForTargets ?? []) {
+                listeners.delete(targetID)
+            }
 
-                const enableFor = enableForTargets?.filter((targetID) => targetID !== callTarget)
-                const disableFor = disableForTargets?.filter((targetID) => targetID !== callTarget)
+            if (this.serverModule.serverConfig.useWhisper) {
+                for (const callTarget of player.voiceSettings.inCallWith) {
+                    const target = this.serverModule.players.get(callTarget)
+                    if (!target) {
+                        continue
+                    }
 
-                if (enableFor?.length) {
-                    emitNet('client:yaca:playersToPhoneSpeakerEmitWhisper', callTarget, enableFor, true)
-                }
+                    const enableFor = enableForTargets?.filter((targetID) => targetID !== callTarget)
+                    const disableFor = disableForTargets?.filter((targetID) => targetID !== callTarget)
 
-                if (disableFor?.length) {
-                    emitNet('client:yaca:playersToPhoneSpeakerEmitWhisper', callTarget, disableFor, false)
+                    if (enableFor?.length) {
+                        emitNet('client:yaca:playersToPhoneSpeakerEmitWhisper', callTarget, enableFor, true)
+                    }
+
+                    if (disableFor?.length) {
+                        emitNet('client:yaca:playersToPhoneSpeakerEmitWhisper', callTarget, disableFor, false)
+                    }
                 }
             }
+
+            this.syncPhoneSpeakerRelays(source)
         })
 
         /**
@@ -71,6 +83,8 @@ export class YaCAServerPhoneModle {
             }
 
             if (enableForTargets?.length) {
+                const relayedCallTargets: number[] = []
+
                 for (const callTarget of player.voiceSettings.inCallWith) {
                     const callTargetPlayer = this.serverModule.players.get(callTarget)
                     if (!callTargetPlayer) continue
@@ -102,6 +116,12 @@ export class YaCAServerPhoneModle {
                     if (this.serverModule.serverConfig.useWhisper && callTargetPlayer.voicePlugin) {
                         triggerClientEvent('client:yaca:phoneHearAroundWhisper', relayTargets, [callTargetPlayer.voicePlugin.clientId], true)
                     }
+
+                    relayedCallTargets.push(callTarget)
+                }
+
+                for (const callTarget of relayedCallTargets) {
+                    this.syncPhoneSpeakerRelays(callTarget)
                 }
             }
 
@@ -175,6 +195,88 @@ export class YaCAServerPhoneModle {
         return false
     }
 
+    private isPhoneSpeakerRelayHeld(bystanderId: number, listenerId: number, exceptHolderId: number): boolean {
+        for (const [holderId, holder] of this.serverModule.players) {
+            if (holderId !== exceptHolderId && holder.voiceSettings.phoneSpeakerRelays.get(bystanderId)?.has(listenerId)) return true
+        }
+
+        return false
+    }
+
+    private syncPhoneSpeakerRelays(holderId: number) {
+        const holder = this.serverModule.players.get(holderId)
+        if (!holder) return
+
+        const { inCallWith, phoneSpeakerListeners, phoneSpeakerRelays } = holder.voiceSettings
+        const wantedRelays = new Map<number, Set<number>>()
+
+        if (holder.voicePlugin) {
+            for (const emitter of this.serverModule.players.values()) {
+                for (const [bystanderId, members] of emitter.voiceSettings.emittedPhoneSpeaker) {
+                    if (!members.has(holderId) || wantedRelays.has(bystanderId)) continue
+
+                    const listeners = [...phoneSpeakerListeners].filter((listenerId) => listenerId !== bystanderId && !inCallWith.has(listenerId))
+                    if (listeners.length) wantedRelays.set(bystanderId, new Set(listeners))
+                }
+            }
+        }
+
+        const enabledLinks: [number, number][] = []
+        const disabledLinks: [number, number][] = []
+
+        for (const [bystanderId, listeners] of wantedRelays) {
+            for (const listenerId of listeners) {
+                if (!phoneSpeakerRelays.get(bystanderId)?.has(listenerId)) enabledLinks.push([bystanderId, listenerId])
+            }
+        }
+
+        for (const [bystanderId, listeners] of phoneSpeakerRelays) {
+            for (const listenerId of listeners) {
+                if (!wantedRelays.get(bystanderId)?.has(listenerId)) disabledLinks.push([bystanderId, listenerId])
+            }
+        }
+
+        holder.voiceSettings.phoneSpeakerRelays = wantedRelays
+
+        this.emitPhoneSpeakerRelays(holder, enabledLinks, true)
+        this.emitPhoneSpeakerRelays(
+            holder,
+            disabledLinks.filter(([bystanderId, listenerId]) => !this.isPhoneSpeakerRelayHeld(bystanderId, listenerId, holderId)),
+            false,
+        )
+    }
+
+    private emitPhoneSpeakerRelays(holder: YaCAPlayer, links: [number, number][], state: boolean) {
+        const holderClientId = holder.voicePlugin?.clientId
+        if (!links.length || (state && !holderClientId)) return
+
+        const bystandersByListener = new Map<number, number[]>()
+        const listenersByBystander = new Map<number, number[]>()
+
+        for (const [bystanderId, listenerId] of links) {
+            const bystanderClientId = this.serverModule.players.get(bystanderId)?.voicePlugin?.clientId
+            const listenerClientId = this.serverModule.players.get(listenerId)?.voicePlugin?.clientId
+            if (!bystanderClientId || !listenerClientId) continue
+
+            bystandersByListener.set(listenerId, [...(bystandersByListener.get(listenerId) ?? []), bystanderClientId])
+
+            if (state || !this.isPhoneHearAroundHeld(bystanderId, listenerId)) {
+                listenersByBystander.set(bystanderId, [...(listenersByBystander.get(bystanderId) ?? []), listenerClientId])
+            }
+        }
+
+        for (const [listenerId, bystanderClientIds] of bystandersByListener) {
+            emitNet('client:yaca:phoneSpeakerRelay', listenerId, bystanderClientIds, holderClientId, state)
+        }
+
+        if (!this.serverModule.serverConfig.useWhisper) return
+
+        // the bystander's whisper side reuses his hear around PHONE sender, the listener renders him as PHONE_SPEAKER
+        for (const [bystanderId, listenerClientIds] of listenersByBystander) {
+            emitNet('client:yaca:phoneHearAroundWhisper', bystanderId, listenerClientIds, state)
+        }
+    }
+
     /**
      * Drops the phone hear around relays of one emitter and tells both ends about it.
      *
@@ -234,6 +336,10 @@ export class YaCAServerPhoneModle {
                 triggerClientEvent('client:yaca:phoneHearAroundWhisper', disableForTargets, [memberPlayer.voicePlugin.clientId], false)
             }
         }
+
+        for (const member of droppedForMember.keys()) {
+            this.syncPhoneSpeakerRelays(member)
+        }
     }
 
     /**
@@ -272,8 +378,35 @@ export class YaCAServerPhoneModle {
             }
         }
 
+        const relayedBystandersByHolder = new Map<number, number[]>()
+
+        for (const holder of this.serverModule.players.values()) {
+            const holderClientId = holder.voicePlugin?.clientId
+            if (!holderClientId) continue
+
+            for (const [bystanderId, listeners] of holder.voiceSettings.phoneSpeakerRelays) {
+                if (listeners.has(src)) {
+                    const bystanderClientId = this.serverModule.players.get(bystanderId)?.voicePlugin?.clientId
+                    if (bystanderClientId) {
+                        relayedBystandersByHolder.set(holderClientId, [...(relayedBystandersByHolder.get(holderClientId) ?? []), bystanderClientId])
+                    }
+                }
+
+                if (bystanderId === src && this.serverModule.serverConfig.useWhisper) {
+                    for (const listenerId of listeners) {
+                        const listenerClientId = this.serverModule.players.get(listenerId)?.voicePlugin?.clientId
+                        if (listenerClientId) memberClientIds.add(listenerClientId)
+                    }
+                }
+            }
+        }
+
         if (bystanderClientIds.size) {
             emitNet('client:yaca:phoneHearAround', src, [...bystanderClientIds], true)
+        }
+
+        for (const [holderClientId, relayedClientIds] of relayedBystandersByHolder) {
+            emitNet('client:yaca:phoneSpeakerRelay', src, relayedClientIds, holderClientId, true)
         }
 
         if (memberClientIds.size) {
@@ -295,6 +428,14 @@ export class YaCAServerPhoneModle {
 
             this.dropPhoneHearAround(emitterId, [playerId])
             this.dropPhoneHearAround(emitterId, undefined, [playerId])
+        }
+
+        this.serverModule.players.get(playerId)?.voiceSettings.phoneSpeakerListeners.clear()
+
+        for (const [holderId, holder] of this.serverModule.players) {
+            if (holderId === playerId || holder.voiceSettings.phoneSpeakerListeners.delete(playerId)) {
+                this.syncPhoneSpeakerRelays(holderId)
+            }
         }
     }
 

@@ -37,6 +37,8 @@ export type YaCAPlayer = {
         mutedOnPhone: boolean
         inCallWith: Set<number>
         emittedPhoneSpeaker: Map<number, Set<number>>
+        phoneSpeakerListeners: Set<number>
+        phoneSpeakerRelays: Map<number, Set<number>>
         ghosting: boolean
         ghostingRange?: number
         tsUniqueIdentifier?: string
@@ -156,6 +158,8 @@ export class YaCAServerModule {
                 mutedOnPhone: false,
                 inCallWith: new Set<number>(),
                 emittedPhoneSpeaker: new Map<number, Set<number>>(),
+                phoneSpeakerListeners: new Set<number>(),
+                phoneSpeakerRelays: new Map<number, Set<number>>(),
                 ghosting: false,
             },
             radioSettings: {
