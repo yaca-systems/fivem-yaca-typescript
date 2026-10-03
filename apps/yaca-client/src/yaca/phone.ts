@@ -229,9 +229,11 @@ export class YaCAClientPhoneModule {
                 this.phoneSpeakerActive = value !== null
             }
 
-            this.removePhoneSpeakerFromEntity(playerSource)
+            const phoneCallMemberIds = value === null ? [] : Array.isArray(value) ? value : [value]
+
+            this.removePhoneSpeakerFromEntity(playerSource, new Set(phoneCallMemberIds))
             if (value !== null) {
-                this.clientModule.setPlayerVariable(playerSource, 'phoneCallMemberIds', Array.isArray(value) ? value : [value])
+                this.clientModule.setPlayerVariable(playerSource, 'phoneCallMemberIds', phoneCallMemberIds)
             }
         })
     }
@@ -258,31 +260,38 @@ export class YaCAClientPhoneModule {
      *
      * @param {number} player - The player entity from which the phone speaker effect is to be removed.
      */
-    removePhoneSpeakerFromEntity(player: number) {
+    removePhoneSpeakerFromEntity(player: number, keepMemberIds: ReadonlySet<number> = new Set()) {
         const entityData = this.clientModule.getPlayerByID(player)
         if (!entityData?.phoneCallMemberIds) {
             return
         }
 
+        const applied = this.clientModule.currentlyPhoneSpeakerApplied
         const playersToSet = []
         for (const phoneCallMemberId of entityData.phoneCallMemberIds) {
-            const phoneCallMember = this.clientModule.getPlayerByID(phoneCallMemberId)
-            if (!phoneCallMember) {
+            if (keepMemberIds.has(phoneCallMemberId) || applied.get(phoneCallMemberId) !== entityData.clientId) {
                 continue
             }
 
-            playersToSet.push(phoneCallMember)
+            applied.delete(phoneCallMemberId)
+
+            const phoneCallMember = this.clientModule.getPlayerByID(phoneCallMemberId)
+            if (phoneCallMember) {
+                playersToSet.push(phoneCallMember)
+            }
         }
 
-        this.clientModule.setPlayersCommType(
-            playersToSet,
-            YacaFilterEnum.PHONE_SPEAKER,
-            false,
-            undefined,
-            undefined,
-            CommDeviceMode.RECEIVER,
-            CommDeviceMode.SENDER,
-        )
+        if (playersToSet.length) {
+            this.clientModule.setPlayersCommType(
+                playersToSet,
+                YacaFilterEnum.PHONE_SPEAKER,
+                false,
+                undefined,
+                undefined,
+                CommDeviceMode.RECEIVER,
+                CommDeviceMode.SENDER,
+            )
+        }
 
         entityData.phoneCallMemberIds = undefined
     }
