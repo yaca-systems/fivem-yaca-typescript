@@ -5,6 +5,7 @@ import {
     initLocale,
     loadConfig,
     locale,
+    PHONE_SPEAKER_STATE_NAME,
     setGlobalErrorLevel,
     VOICE_RANGE_STATE_NAME,
 } from '@yaca-voice/common'
@@ -330,6 +331,8 @@ export class YaCAServerModule {
             return
         }
 
+        this.saltChatBridge?.handlePlayerDisconnect(src)
+
         this.nameSet.delete(player.voiceSettings?.ingameName)
 
         const allFrequencies = this.radioModule.radioFrequencyMap
@@ -350,6 +353,14 @@ export class YaCAServerModule {
         emitNet('client:yaca:disconnect', -1, src)
 
         this.players.delete(src)
+
+        for (const [callTargetId, callTarget] of this.players) {
+            if (!callTarget.voiceSettings.inCallWith.delete(src)) continue
+
+            if (Player(callTargetId).state[PHONE_SPEAKER_STATE_NAME]) {
+                this.phoneModule.enablePhoneSpeaker(callTargetId, true)
+            }
+        }
     }
 
     /**

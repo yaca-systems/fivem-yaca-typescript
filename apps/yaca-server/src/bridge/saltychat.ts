@@ -152,13 +152,25 @@ export class YaCAServerSaltyChatBridge {
             }
         }
 
-        this.callMap.set(callIdentifier, nowInCall)
+        if (nowInCall.size) {
+            this.callMap.set(callIdentifier, nowInCall)
+        } else {
+            this.callMap.delete(callIdentifier)
+        }
 
         for (const player of removedFromCall) {
             for (const otherPlayer of beforeInCall) {
                 if (player !== otherPlayer) {
                     this.serverModule.phoneModule.callPlayer(player, otherPlayer, false)
                 }
+            }
+        }
+    }
+
+    handlePlayerDisconnect(src: number) {
+        for (const [callIdentifier, playersInCall] of this.callMap) {
+            if (playersInCall.has(src)) {
+                this.removePlayerFromCall(callIdentifier, src)
             }
         }
     }
