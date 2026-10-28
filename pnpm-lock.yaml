@@ -170,8 +170,8 @@ importers:
         specifier: ^2.5.8
         version: 2.5.14
       '@types/node':
-        specifier: ^24.13.3
-        version: 24.13.3
+        specifier: ^26.0.0
+        version: 26.6.5
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
@@ -190,7 +190,7 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.35805-1
+        version: 2.0.37872-1
       '@yaca-voice/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -209,7 +209,7 @@ importers:
     devDependencies:
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.35805-1
+        version: 2.0.37872-1
       '@yaca-voice/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -231,10 +231,10 @@ importers:
     devDependencies:
       '@citizenfx/client':
         specifier: latest
-        version: 2.0.35805-1
+        version: 2.0.37872-1
       '@citizenfx/server':
         specifier: latest
-        version: 2.0.35805-1
+        version: 2.0.37872-1
       '@yaca-voice/typescript-config':
         specifier: workspace:*
         version: link:../tsconfig
@@ -302,11 +302,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@citizenfx/client@2.0.35805-1':
-    resolution: {integrity: sha512-YV+o/liGLJ90KIBWqmvZH0rY13rz2l+mu84ssYz8zVcMwfswdOY3TTSmENsX+aR9kX9+4uH48sfWo09BzpGG4A==}
+  '@citizenfx/client@2.0.37872-1':
+    resolution: {integrity: sha512-TywQeFauyc6ZgRfHRBztbWjXq9L4IiwI4zQzNQDYUK3DtO+KB6MXfNWo35iIRanN6mJmC6iH7VqL8/H0GcYWsw==}
 
-  '@citizenfx/server@2.0.35805-1':
-    resolution: {integrity: sha512-Sj0LBQ+0t92NkMc48oSvwNitMNkg+sXm0V8NFzaujGY0v0G+Wm2nKTLL24jDSOZM2aKjW5A0y7sExrMdbtpSXg==}
+  '@citizenfx/server@2.0.37872-1':
+    resolution: {integrity: sha512-13s0Ra8jN8gL/2wRtVeCM2Zugfn65GwRfpl36UK8GQNtGhjTeVXuaTLh2IIoqP9gqcQuiM+vnKjO3+Uik1Rsdw==}
 
   '@esbuild/aix-ppc64@0.28.2':
     resolution: {integrity: sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==}
@@ -494,8 +494,8 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@types/node@24.13.3':
-    resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
+  '@types/node@26.6.5':
+    resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
 
   data-uri-to-buffer@4.0.1:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
@@ -544,8 +544,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  undici-types@7.18.2:
-    resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
+  undici-types@8.9.0:
+    resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
@@ -588,9 +588,9 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.14':
     optional: true
 
-  '@citizenfx/client@2.0.35805-1': {}
+  '@citizenfx/client@2.0.37872-1': {}
 
-  '@citizenfx/server@2.0.35805-1': {}
+  '@citizenfx/server@2.0.37872-1': {}
 
   '@esbuild/aix-ppc64@0.28.2':
     optional: true
@@ -688,9 +688,9 @@ snapshots:
   '@turbo/windows-arm64@2.11.7':
     optional: true
 
-  '@types/node@24.13.3':
+  '@types/node@26.6.5':
     dependencies:
-      undici-types: 7.18.2
+      undici-types: 8.9.0
 
   data-uri-to-buffer@4.0.1: {}
 
@@ -757,6 +757,6 @@ snapshots:
 
   typescript@6.0.3: {}
 
-  undici-types@7.18.2: {}
+  undici-types@8.9.0: {}
 
   web-streams-polyfill@3.3.3: {}
