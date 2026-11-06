@@ -23,7 +23,7 @@
         "esbuild": "^0.28.2",
         "turbo": "^2.10.10",
         "typescript": "^6.0.3",
-        "@types/node": "^24.13.3"
+        "@types/node": "^26.0.0"
     },
     "packageManager": "pnpm@12.8.1"
 }
