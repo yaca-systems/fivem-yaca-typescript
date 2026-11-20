@@ -1305,6 +1305,16 @@ export class YaCAClientRadioModule {
                         true,
                     )
 
+                    // The talk key may have been released while the prop was loading.
+                    if (!this.talkingInChannels.has(channel)) {
+                        if (prop && DoesEntityExist(prop)) {
+                            DeleteEntity(prop)
+                        }
+
+                        SetModelAsNoLongerNeeded(this.clientModule.sharedConfig.radioSettings.propWhileTalking.prop as string)
+                        return
+                    }
+
                     this.currentRadioProp = prop ?? null
                     break
                 }
@@ -1312,6 +1322,12 @@ export class YaCAClientRadioModule {
         }
 
         const animDict = await requestAnimDict(this.clientModule.sharedConfig.radioSettings.animation.dictionary)
+
+        // The talk key may have been released while the animation dictionary was loading. The stop branch has
+        // already run in that case, continuing here would start the tower interval and leave the player transmitting.
+        if (!this.talkingInChannels.has(channel)) {
+            return
+        }
         if (animDict) {
             TaskPlayAnim(
                 cache.ped,
